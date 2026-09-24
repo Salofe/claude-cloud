@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Solar Prospector</title>
+<meta name="description" content="Mina asteroides, comercia entre planetas, sobrevive a los piratas y domina el Sistema Solar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>/*CSS*/</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="title" class="ui hidden">
+  <div class="tbox">
+    <h1><span>SOLAR</span>PROSPECTOR</h1>
+    <p class="tag">Mina · Comercia · Domina el Sistema Solar</p>
+    <div class="tbtns">
+      <button id="cont" class="btn primary big hidden">Continuar partida</button>
+      <button id="newg" class="btn primary big">Nueva partida</button>
+      <button id="howto" class="btn big">Cómo jugar</button>
+    </div>
+    <p class="foot">Ratón/teclado o pantalla táctil · Se guarda automáticamente</p>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div class="topbar ui">
+    <div class="stat cr"><span class="lbl">Créditos</span><b id="hCr"></b></div>
+    <div class="stat day"><span class="lbl">Día</span><b id="hDay"></b></div>
+    <div class="stat bar"><span class="lbl"><em class="lg">Combustible</em><em class="sh">⛽</em> <small id="hFuelT"></small></span><div class="meter fuel"><i id="hFuel"></i></div></div>
+    <div class="stat bar"><span class="lbl"><em class="lg">Casco</em><em class="sh">🛡</em> <small id="hHullT"></small></span><div class="meter hp"><i id="hHull"></i></div></div>
+    <div class="stat bar"><span class="lbl"><em class="lg">Bodega</em><em class="sh">📦</em> <small id="hCargoT"></small></span><div class="meter cargo"><i id="hCargo"></i></div></div>
+    <div class="stat infl"><span class="lbl">Influencia · <small id="hRank"></small></span><b id="hInfl"></b></div>
+    <div class="tbtns">
+      <button id="bShip" title="Nave">🚀<span>Nave</span></button>
+      <button id="bFac" title="Facciones">🏛<span>Facciones</span></button>
+      <button id="bNews" title="Noticias">📰<span>Noticias</span></button>
+      <button id="bSnd" title="Sonido">🔊</button>
+      <button id="bMenu" title="Menú">☰</button>
+    </div>
+  </div>
+  <div id="objective" class="ui"></div>
+  <div id="ticker" class="ui"><div id="tickerIn"></div></div>
+</div>
+
+<div id="mapTools" class="ui hidden">
+  <button id="zIn">＋</button><button id="zOut">－</button><button id="zHome" title="Mi nave">◎</button><button id="zAll" title="Todo el sistema">✺</button>
+</div>
+<div id="locPanel" class="ui panel hidden"></div>
+<div id="travelBanner" class="hidden"></div>
+
+<div id="mineUI" class="hidden">
+  <div class="minebox ui">
+    <div class="mname" id="mineName"></div>
+    <div id="mineInfo"></div>
+    <div id="mineCargo"></div>
+  </div>
+  <div class="minebottom ui">
+    <span class="hint desk">WASD mover · Clic sostenido: láser · Esc: salir</span>
+    <button id="btnLeave" class="btn primary">↩ Volver al mapa</button>
+  </div>
+</div>
+<div id="touchUI" class="hidden">
+  <div id="joyZone"></div>
+  <div id="joyBase"><div id="joyKnob"></div></div>
+  <div id="fireBtn">LÁSER</div>
+</div>
+
+<div id="battleUI" class="ui hidden">
+  <div class="bt-title">⚔ COMBATE AUTOMÁTICO</div>
+  <div class="bt-btns"><button id="btnSpeed" class="btn">Velocidad ×1</button><button id="btnRetreat" class="btn danger">Retirada</button></div>
+</div>
+
+<div id="sheet" class="sheet ui hidden"></div>
+<div id="modal" class="ui hidden"></div>
+<div id="eventBanner" class="ui"></div>
+<div id="toasts"></div>
+
+<script>/*JS*/</script>
+</body>
+</html>
