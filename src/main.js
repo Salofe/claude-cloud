@@ -34,16 +34,16 @@ window.addEventListener('keydown', e => {
   if (e.code === 'Space' && scene === MineScene) e.preventDefault();
   if (e.code === 'Escape') {
     if (!$('sheet').classList.contains('hidden')) closeSheet();
-    else if (scene === MineScene && !modalOpen) MineScene.leave();
+    else if (scene === MineScene && !isBlocking()) MineScene.leave();
   }
 });
 window.addEventListener('keyup', e => keys.delete(e.code));
 window.addEventListener('blur', () => { keys.clear(); mouse.down = false; });
 
-canvas.addEventListener('mousedown', e => { audioInit(); mouse.down = true; mouse.onUI = false; mouse.x = e.clientX; mouse.y = e.clientY; if (scene && scene.onDown && !modalOpen) scene.onDown(e.clientX, e.clientY); });
-window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.onUI = e.target !== canvas; if (scene && scene.onMove && !modalOpen) scene.onMove(e.clientX, e.clientY, mouse.down); });
-window.addEventListener('mouseup', e => { if (mouse.down && scene && scene.onUp && !modalOpen) scene.onUp(e.clientX, e.clientY); mouse.down = false; });
-canvas.addEventListener('wheel', e => { e.preventDefault(); if (scene && scene.onWheel && !modalOpen) scene.onWheel(e.deltaY, e.clientX, e.clientY); }, { passive: false });
+canvas.addEventListener('mousedown', e => { audioInit(); mouse.down = true; mouse.onUI = false; mouse.x = e.clientX; mouse.y = e.clientY; if (scene && scene.onDown && !isBlocking()) scene.onDown(e.clientX, e.clientY); });
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.onUI = e.target !== canvas; if (scene && scene.onMove && !isBlocking()) scene.onMove(e.clientX, e.clientY, mouse.down); });
+window.addEventListener('mouseup', e => { if (mouse.down && scene && scene.onUp && !isBlocking()) scene.onUp(e.clientX, e.clientY); mouse.down = false; });
+canvas.addEventListener('wheel', e => { e.preventDefault(); if (scene && scene.onWheel && !isBlocking()) scene.onWheel(e.deltaY, e.clientX, e.clientY); }, { passive: false });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 // táctil en canvas (mapa: arrastrar/pellizcar)
@@ -56,7 +56,7 @@ canvas.addEventListener('touchstart', e => {
     const [a, b] = e.touches;
     pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) };
     if (scene.drag) scene.drag.moved = true;
-  } else if (e.touches.length === 1 && scene && scene.onDown && !modalOpen) {
+  } else if (e.touches.length === 1 && scene && scene.onDown && !isBlocking()) {
     const t = e.touches[0]; mouse.down = true; scene.onDown(t.clientX, t.clientY);
   }
 }, { passive: false });
@@ -77,7 +77,7 @@ canvas.addEventListener('touchend', e => {
   e.preventDefault();
   if (e.touches.length === 0) {
     const t = e.changedTouches[0];
-    if (!pinch && scene && scene.onUp && !modalOpen) scene.onUp(t.clientX, t.clientY);
+    if (!pinch && scene && scene.onUp && !isBlocking()) scene.onUp(t.clientX, t.clientY);
     pinch = null; mouse.down = false;
   }
 }, { passive: false });
@@ -115,11 +115,10 @@ function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (scene) {
-    if (!modalOpen || scene === BattleScene || (scene === MapScene && !MapScene.travel)) {
-      if (!(modalOpen && scene === MineScene)) scene.update(dt);
-    } else if (scene === MapScene) MapScene.t += dt;
+    if (!isBlocking() || scene === BattleScene || scene === MapScene || scene === TitleScene) scene.update(dt);
     scene.draw(ctx);
   }
+  if (S && scene !== TitleScene) hudTick(dt);
   hudT += dt;
   if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); }
   requestAnimationFrame(frame);
@@ -128,7 +127,13 @@ function frame(now) {
 // ---------- pantalla de título ----------
 const TitleScene = {
   t: 0,
-  enter() { $('title').classList.remove('hidden'); $('hud').classList.add('hidden'); $('cont').classList.toggle('hidden', !hasSave()); },
+  enter() {
+    $('title').classList.remove('hidden'); $('hud').classList.add('hidden');
+    const sv = hasSave();
+    $('cont').classList.toggle('hidden', !sv);
+    $('newg').textContent = sv ? 'New game' : '▶ PLAY';
+    $('newg').classList.toggle('primary', !sv);
+  },
   exit() { $('title').classList.add('hidden'); $('hud').classList.remove('hidden'); },
   update(dt) { this.t += dt; },
   draw(ctx) {
@@ -148,7 +153,7 @@ const TitleScene = {
     }
     // nave que cruza
     const sx = ((t * 70) % (W + 400)) - 200, sy = H * 0.32 + Math.sin(t * 0.8) * 20;
-    drawPlayerShip(ctx, { hull: 3, engine: 4, weapons: 2, laser: 3 }, sx, sy, 0.05, 1.3, 1, t);
+    drawPlayerShip(ctx, { hull: 4, engine: 4, weapons: 3, laser: 3 }, sx, sy, 0.05, 1.1, 1, t);
   },
 };
 
@@ -156,12 +161,12 @@ function startGame(cont) {
   audioInit();
   if (cont) S = loadSave();
   if (!S) { newGame(); save(); }
-  setScene(MapScene);
+  shownCredits = S.credits;
+  pendingUnlocks = [];
+  if (cont && has(U.MAP)) setScene(MapScene);
+  else setScene(MineScene, cont ? (LOC[S.loc].field ? S.loc : 'luna') : 'luna');
+  if (!cont) S.loc = 'luna';
   updateHUD(); updateTicker();
-  if (!cont) setTimeout(() => showModal({ icon: '🚀', title: 'A bordo', html: `La <b>${S.shipName}</b> es tuya: una nave minera modesta con 600 créditos y un sueño.<br><br>
-    <b>Mina</b> asteroides, <b>comercia</b> entre planetas, <b>sobrevive</b> a los piratas y aprovecha las crisis del sistema para <b>ganar influencia</b>.<br><br>Sigue los objetivos de la esquina superior izquierda.`,
-    buttons: [{ label: '¡Vamos!', cls: 'primary', fn: () => selectLoc('luna') }, { label: 'Cómo jugar', fn: openHelp }] }), 300);
-  checkTut();
 }
 
 // ---------- inicio ----------
@@ -175,10 +180,11 @@ function init() {
   $('zOut').onclick = () => MapScene.onWheel(300, W / 2, H / 2);
   $('zHome').onclick = () => MapScene.focus(S.loc);
   $('zAll').onclick = () => MapScene.zoomAll();
-  $('btnLeave').onclick = () => MineScene.leave();
-  $('btnSpeed').onclick = () => { BattleScene.speed = BattleScene.speed === 1 ? 2 : BattleScene.speed === 2 ? 4 : 1; $('btnSpeed').textContent = 'Velocidad ×' + BattleScene.speed; };
+  $('btnDock').onclick = () => MineScene.leave();
+  $('btnMap').onclick = () => MineScene.leave(true);
+  $('btnSpeed').onclick = () => { BattleScene.speed = BattleScene.speed === 1 ? 2 : BattleScene.speed === 2 ? 4 : 1; $('btnSpeed').textContent = 'Speed ×' + BattleScene.speed; };
   $('btnRetreat').onclick = () => BattleScene.retreat();
-  $('newg').onclick = () => { if (hasSave()) { showModal({ icon: '⚠️', title: '¿Nueva partida?', html: 'Se sobrescribirá tu partida guardada.', buttons: [{ label: 'Empezar de nuevo', cls: 'danger', fn: () => { S = null; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startGame(false); } }, { label: 'Cancelar', fn: () => {} }] }); } else startGame(false); };
+  $('newg').onclick = () => { if (hasSave()) { showModal({ icon: '⚠️', title: 'Start a new game?', html: 'Your saved game will be overwritten.', buttons: [{ label: 'Start over', cls: 'danger', fn: () => { S = null; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startGame(false); } }, { label: 'Cancel', fn: () => {} }] }); } else startGame(false); };
   $('cont').onclick = () => startGame(true);
   $('howto').onclick = () => { openHelp(); };
   for (const el of document.querySelectorAll('.ui')) {
@@ -242,7 +248,7 @@ function thumbMode(kind) {
     ctx.shadowBlur = 0;
     ctx.font = `600 ${Math.round(30 * s)}px Rajdhani, sans-serif`;
     ctx.fillStyle = '#ffd24a';
-    ctx.fillText('MINA · COMERCIA · DOMINA EL SISTEMA SOLAR', 64 * s, 275 * s);
+    ctx.fillText('MINE · TRADE · RULE THE SOLAR SYSTEM', 64 * s, 275 * s);
   }
   document.body.dataset.ready = '1';
 }

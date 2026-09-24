@@ -1,4 +1,4 @@
-// Genera las miniaturas del juego (requiere Playwright): node tools/thumbnail.js
+// Generates the game thumbnails (requires Playwright): node tools/thumbnail.js
 const path = require('path');
 let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { ({ chromium } = require('/opt/node22/lib/node_modules/playwright')); }
@@ -14,5 +14,5 @@ const dist = path.resolve(__dirname, '..', 'dist');
     await p.close();
   }
   await b.close();
-  console.log('Miniaturas generadas en dist/');
+  console.log('Thumbnails written to dist/');
 })();

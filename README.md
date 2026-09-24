@@ -1,37 +1,34 @@
 # Solar Prospector
 
-Juego 2D de minería espacial, comercio y construcción de imperio en el Sistema Solar. Todo cabe en un solo archivo HTML, sin dependencias.
+A 2D space mining game that starts simple and slowly opens up into trading, pirates, system-wide events and a race for influence across the Solar System. Everything fits in a single HTML file with no dependencies.
 
-**Jugar:** abre `dist/index.html` en el navegador. Funciona con ratón y teclado o con pantalla táctil.
+**Play:** https://play.clawcade.gg/g/LHgYcmEt, or open `dist/index.html` in a browser. Works with mouse and keyboard or touch.
 
-## El ciclo de juego
+## How it plays
 
-1. **Mina.** Vuela entre asteroides (WASD) y rómpelos con el láser (clic sostenido). Los grandes se parten en pedazos y sueltan mineral. Las vetas brillantes dan el doble.
-2. **Viaja.** Los planetas orbitan, así que las distancias cambian cada día. Viajar gasta combustible según la distancia y el tamaño de tu nave.
-3. **Vende y comercia.** Cada estación paga distinto (Tierra, Luna, Venus, Marte, Ceres, Europa, Titán y el mercado negro de Plutón). Si vendes mucho de golpe, el precio baja.
-4. **Mejora.** Hay 8 sistemas con 5 niveles cada uno: casco, láser, propulsores, tanque, escudos, armas, drones y escáner. La nave se ve más grande con cada mejora.
-5. **Sobrevive.** Los piratas te emboscan en las rutas y en los campos peligrosos. El combate es automático y depende de tu equipo. Puedes pelear, huir o sobornar.
-6. **Aprovecha las crisis.** Guerras, pandemias, hambrunas, booms de construcción, tormentas solares y huelgas cambian los precios y el nivel de peligro.
-7. **Crece.** Cumple contratos, gana reputación con 5 facciones e invierte en estaciones para tener ingresos pasivos e influencia. Llega a 100 de influencia para dominar el sistema.
+1. **Mine.** You start inside the Moon's asteroid field. Fly with WASD and hold the mouse button to fire the laser. Big rocks split apart and drop glowing ore.
+2. **Dock.** Docking sells your ore, refuels and repairs automatically. Spend your credits on upgrade cards. A new hull gives you a whole new ship (5 designs).
+3. **Unlock.** Your lifetime earnings open up the game one layer at a time:
 
-## Zonas
+| Earned | Unlock |
+|---|---|
+| 600 | Star Map, travel and fuel, Earth |
+| 3,000 | Mars, Mercury, shields |
+| 8,000 | Asteroid Belt, pirates and auto-battles, weapons |
+| 18,000 | Trading, contracts, system events (wars, plagues, booms), Venus |
+| 40,000 | Jupiter system, scanner |
+| 90,000 | Saturn system, station investments and influence |
+| 180,000 | Pluto's black market and the Kuiper Belt |
 
-| Zona | Minerales | Riesgo |
-|---|---|---|
-| Luna | Hierro, Hielo, Titanio, Helio-3 | Muy bajo |
-| Mercurio | Platino, Iridio (calor extremo) | Bajo |
-| Cinturón (Ceres) | Níquel, Platino, Titanio | Medio |
-| Anillos de Saturno | Hielo, Helio-3, Iridio | Medio |
-| Troyanos de Júpiter | Titanio, Platino, Iridio | Alto |
-| Cinturón de Kuiper | Cristal Exótico, Iridio | Muy alto |
+4. **Win** by reaching 100 influence.
 
-## Desarrollo
+## Development
 
-El código fuente está en `src/`. Para compilar el archivo único:
+Source is in `src/`.
 
 ```
-node build.js              # genera dist/index.html
-node tools/thumbnail.js    # genera dist/thumbnail.png y dist/thumbnail-square.png
+node build.js              # builds dist/index.html
+node tools/thumbnail.js    # generates dist/thumbnail.png and dist/thumbnail-square.png
 ```
 
-El arte es 100 % procedural (canvas 2D) y el sonido se sintetiza con WebAudio. La partida se guarda en `localStorage`.
+All art is procedural (canvas 2D, including noise-generated planet textures) and all sound is synthesized with WebAudio. Progress is saved to `localStorage`.

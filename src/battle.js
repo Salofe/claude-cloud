@@ -33,7 +33,7 @@ const BattleScene = {
   },
   applyHit(target, dmg, isPl) {
     if (target.dead) return;
-    if (Math.random() < target.evade) { this.floatTxt(target.x, target.y - 30, 'ESQUIVA', '#9fb6ff'); return; }
+    if (Math.random() < target.evade) { this.floatTxt(target.x, target.y - 30, 'MISS', '#9fb6ff'); return; }
     target.shT = 2.5;
     if (target.sp > 0) {
       const a = Math.min(target.sp, dmg); target.sp -= a; dmg -= a;
@@ -45,7 +45,7 @@ const BattleScene = {
       this.parts.burst(target.x + rand(-10, 10), target.y + rand(-8, 8), 8, isPl ? '#ffb347' : '#ff934a', 110, 0.5, 2.5);
       sfx('hit');
     }
-    this.floatTxt(target.x, target.y - 30, Math.round(dmg > 0 ? dmg : 0) || 'escudo', dmg > 0 ? '#ffffff' : '#3de8ff');
+    this.floatTxt(target.x, target.y - 30, Math.round(dmg > 0 ? dmg : 0) || 'shield', dmg > 0 ? '#ffffff' : '#3de8ff');
     if (target.hp <= 0) {
       target.dead = true; target.hp = 0;
       this.parts.burst(target.x, target.y, 50, '#ffb347', 260, 1.1, 4);
@@ -103,8 +103,8 @@ const BattleScene = {
   retreat() {
     if (this.ended) return;
     const chance = clamp(ship.flee * 0.8, 0.1, 0.8);
-    if (Math.random() < chance) { toast('¡Retirada exitosa!', 'good'); sfx('warp'); this.finish(null); }
-    else { toast('Retirada fallida', 'bad'); this.pl.cd += 1; document.getElementById('btnRetreat').disabled = true; setTimeout(() => { const b = document.getElementById('btnRetreat'); if (b) b.disabled = false; }, 2500); }
+    if (Math.random() < chance) { toast('Retreat successful!', 'good'); sfx('warp'); this.finish(null); }
+    else { toast('Retreat failed', 'bad'); this.pl.cd += 1; document.getElementById('btnRetreat').disabled = true; setTimeout(() => { const b = document.getElementById('btnRetreat'); if (b) b.disabled = false; }, 2500); }
   },
   finish(win) {
     this.ended = true;
@@ -117,13 +117,12 @@ const BattleScene = {
     if (win === true) {
       S.stats.won++;
       const loot = Math.round(this.fleetKeys.reduce((a, k) => a + ENEMIES[k].loot, 0) * rand(0.8, 1.2) * (1 + S.day / 300));
-      S.credits += loot; S.stats.earned += loot;
       const military = this.fleetKeys.includes('patrol');
       let salv = '';
       if (!military) {
         const it = pick(['arms', 'tech', 'meds', 'luxury', 'platinum', 'he3']);
         const n = Math.min(cargoFree(), randi(1, 2 + this.fleetKeys.length * 2));
-        if (n > 0) { addCargo(it, n); salv = `<br>Rescatas <b>${n} ${ITEMS[it].n}</b> de los restos.`; }
+        if (n > 0) { addCargo(it, n); salv = `<br>You salvage <b>${n} ${ITEMS[it].n}</b> from the wreckage.`; }
         repChange('piratas', -3, true);
         const near = LOC[S.loc].faction && LOC[S.loc].faction !== 'piratas' ? LOC[S.loc].faction : 'cinturon';
         repChange(near, 1 + this.fleetKeys.length, true);
@@ -131,16 +130,17 @@ const BattleScene = {
         for (const c of [...S.active]) if (c.type === 'bounty' && c.progress >= c.kills) completeContract(c);
       }
       sfx('win');
-      addNews('🏆', `Victoria contra ${this.fleetKeys.length} nave${this.fleetKeys.length > 1 ? 's' : ''} ${military ? 'militar' : 'pirata'}${this.fleetKeys.length > 1 ? 'es' : ''}. Botín: ${fmt(loot)} ₵`, '#6dffb0');
-      showModal({ icon: '🏆', title: '¡Victoria!', html: `Destruiste la flota enemiga.<br>Botín: <b class="cr">${fmt(loot)} ₵</b>${salv}<br>Casco: ${S.hull}/${ship.hpMax}`,
-        buttons: [{ label: 'Continuar', cls: 'primary', fn: () => { back(); updateHUD(); done && done(); } }] });
+      addNews('🏆', `Defeated ${this.fleetKeys.length} ${military ? 'military' : 'pirate'} ship${this.fleetKeys.length > 1 ? 's' : ''}. Loot: ${fmt(loot)} cr`, '#6dffb0');
+      earn(loot);
+      showModal({ icon: '🏆', title: 'Victory!', html: `You destroyed the enemy fleet.<br>Loot: <b class="cr">${fmt(loot)} cr</b>${salv}<br>Hull: ${S.hull}/${ship.hpMax}`,
+        buttons: [{ label: 'Continue', cls: 'primary', fn: () => { back(); updateHUD(); done && done(); } }] });
     } else if (win === null) {
       back(); done && done();
     } else {
       S.stats.lost++;
       if (MapScene.travel) { MapScene.travel = null; document.getElementById('travelBanner').classList.add('hidden'); }
       setScene(MapScene);
-      towShip('Tu nave quedó inutilizada en combate.');
+      towShip('Your ship was disabled in battle.');
     }
     save();
   },

@@ -1,6 +1,8 @@
 'use strict';
 // ============ ESCENA: MINERÍA ============
 const MW = 2100, MH = 2100;
+const mineScale = () => 1.35 - (S.lv.hull - 1) * 0.08;
+const shipR = () => shipLen(S.lv) * mineScale();
 const MineScene = {
   t: 0, loc: null, rocks: [], chunks: [], drones: [], parts: new Particles(), cam: { x: 0, y: 0 }, shake: 0,
   p: null, dayTimer: 0, ambush: null, laserOn: false, laserHit: null, fullWarn: 0, broken: 0, collected: {}, heatWarn: 0, floaters: [],
@@ -68,6 +70,7 @@ const MineScene = {
       const n = randi(1, 2) + (r.rich ? 2 : 0);
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.ore);
     }
+    S.hints.laser = 1;
     if (r.tier === 3) { this.broken++; S.depl[this.loc.id] = Math.min(1, (S.depl[this.loc.id] || 0) + 0.02); }
   },
   dropChunk(x, y, ore) {
@@ -80,7 +83,6 @@ const MineScene = {
     this.collected[c.ore] = (this.collected[c.ore] || 0) + 1;
     this.floaters.push({ x: this.p.x, y: this.p.y - 20, txt: '+1 ' + ITEMS[c.ore].n, col: ITEMS[c.ore].c, life: 1.1 });
     sfx('pickup');
-    checkTut();
     return true;
   },
   update(dt) {
@@ -148,7 +150,7 @@ const MineScene = {
       if (r.y < r.r || r.y > MH - r.r) r.vy *= -1;
       r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, MH - r.r);
       // colisión con nave
-      const dx = p.x - r.x, dy = p.y - r.y, d = Math.hypot(dx, dy), md = r.r + 12;
+      const dx = p.x - r.x, dy = p.y - r.y, d = Math.hypot(dx, dy), md = r.r + shipR() * 0.4;
       if (d < md && d > 0) {
         const nx = dx / d, ny = dy / d;
         p.x = r.x + nx * md; p.y = r.y + ny * md;
@@ -166,7 +168,7 @@ const MineScene = {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
       if (d < ship.magnet && cfree > 0) { const f = 600 * (1 - d / ship.magnet) + 120; c.vx += dx / d * f * dt; c.vy += dy / d * f * dt; }
-      if (d < 22) { if (this.collect(c)) c.dead = true; else if (this.fullWarn <= 0) { this.fullWarn = 3; toast('¡Bodega llena! Vuelve a una estación a vender.', 'bad'); sfx('full'); } }
+      if (d < 22) { if (this.collect(c)) c.dead = true; else if (this.fullWarn <= 0) { this.fullWarn = 3; sfx('full'); } }
       if (c.life <= 0) c.dead = true;
     }
     this.fullWarn -= dt;
@@ -200,7 +202,7 @@ const MineScene = {
     // --- emboscada ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 4) { this.ambush.warned = true; toast('⚠ ¡Firmas hostiles acercándose!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 4) { this.ambush.warned = true; toast('⚠ Hostile ships incoming!', 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
         this.ambush = null; laserSound(false); this.laserOn = false; mouse.down = false; touchFire = false;
         pirateEncounter(locDanger(this.loc.id), () => {});
@@ -223,10 +225,21 @@ const MineScene = {
     this.shake = Math.max(0, this.shake - dt * 20);
     // estela
     if (this.thrusting > 0.1 && Math.random() < dt * 40) {
-      const bx = p.x - Math.cos(p.a) * shipLen(S.lv) * 0.75, by = p.y - Math.sin(p.a) * shipLen(S.lv) * 0.75;
+      const bx = p.x - Math.cos(p.a) * shipR() * 0.75, by = p.y - Math.sin(p.a) * shipR() * 0.75;
       this.parts.add(bx, by, -Math.cos(p.a) * 60 + rand(-15, 15), -Math.sin(p.a) * 60 + rand(-15, 15), 0.45, '#ff9b4a', 2.5);
     }
+    this.coach();
     updateMineHUD();
+  },
+  coach() {
+    const h = S.hints;
+    if (!h.move) { this.moved = (this.moved || 0) + Math.hypot(this.p.vx, this.p.vy) * 0.016; if (this.moved > 120) h.move = 1; }
+    let msg = '';
+    if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
+    else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
+    else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
+    if (cargoFree() <= 0) msg = '';
+    coach(msg);
   },
   damage(n, heat) {
     const p = this.p;
@@ -235,7 +248,7 @@ const MineScene = {
       S.hull -= n;
       if (S.hull <= 0) {
         S.hull = 0; laserSound(false); this.laserOn = false;
-        towShip('Tu casco colapsó en el campo minero.');
+        towShip('Your hull collapsed in the mining field.');
       }
     }
   },
@@ -245,7 +258,7 @@ const MineScene = {
     const cx = this.cam.x - W / 2 + sx, cy = this.cam.y - H / 2 + sy;
     drawSpaceBg(ctx, W, H, cx, cy, t, this.loc.cold ? '#0c1838' : this.loc.field.hazard === 'heat' ? '#2a1408' : null);
     // cuerpo celeste de fondo
-    const bgLoc = this.loc.parent ? LOC[this.loc.parent] : this.loc.follow ? LOC[this.loc.follow] : this.loc;
+    const bgLoc = this.loc.id === 'kuiper' ? LOC.pluton : this.loc.parent ? LOC[this.loc.parent] : this.loc.follow ? LOC[this.loc.follow] : this.loc;
     const bx = W * 0.78 - cx * 0.04, by = H * 0.3 - cy * 0.04;
     ctx.globalAlpha = 0.8; drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.26 : 0.15), bgLoc, Math.atan2(-by, -bx - W), t); ctx.globalAlpha = 1;
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - cy * 0.02, 120, t);
@@ -265,7 +278,7 @@ const MineScene = {
     // láser
     if (this.laserHit) {
       const L = this.laserHit, col = laserColor(S.lv.laser);
-      const nx = p.x + Math.cos(L.dir) * shipLen(S.lv) * 0.9, ny = p.y + Math.sin(L.dir) * shipLen(S.lv) * 0.9;
+      const nx = p.x + Math.cos(L.dir) * shipR() * 0.9, ny = p.y + Math.sin(L.dir) * shipR() * 0.9;
       ctx.globalCompositeOperation = 'lighter';
       ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = 7 + S.lv.laser + Math.sin(t * 50) * 2;
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
@@ -282,10 +295,10 @@ const MineScene = {
       if (dr.carry) { ctx.fillStyle = ITEMS[dr.carry.ore].c; ctx.fillRect(dr.x - 2, dr.y + 4, 4, 4); }
     }
     this.parts.draw(ctx);
-    drawPlayerShip(ctx, S.lv, p.x, p.y, p.a, 1, this.thrusting, t);
+    drawPlayerShip(ctx, S.lv, p.x, p.y, p.a, mineScale(), this.thrusting, t);
     if (ship.shieldMax > 0 && p.shT > 1.5) {
       ctx.strokeStyle = `rgba(61,232,255,${(p.shT - 1.5) * 1.5})`; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(p.x, p.y, shipLen(S.lv) + 8, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.arc(p.x, p.y, shipR() + 8, 0, TAU); ctx.stroke();
     }
     // textos flotantes
     ctx.font = '600 13px Rajdhani, sans-serif'; ctx.textAlign = 'center';
@@ -310,19 +323,21 @@ const MineScene = {
       ctx.fillStyle = `rgba(255,120,40,${0.08 + 0.05 * Math.sin(t * 4)})`; ctx.fillRect(0, 0, W, H);
     }
   },
-  leave() {
+  leave(toMap) {
     laserSound(false);
     const got = Object.entries(this.collected);
-    if (got.length) addNews('⛏️', `Extraído en ${this.loc.field.n}: ${got.map(([k, n]) => `${n} ${ITEMS[k].n}`).join(', ')}`, '#ffd24a');
+    if (got.length) addNews('⛏️', `Mined at ${this.loc.field.n}: ${got.map(([k, n]) => `${n} ${ITEMS[k].n}`).join(', ')}`, '#ffd24a');
+    this.collected = {};
     save();
-    setScene(MapScene);
+    if (!toMap && LOC[S.loc].station) openDock();
+    else setScene(MapScene);
   },
 };
 
 function towShip(reason) {
   const lost = {};
   for (const k in S.cargo) { const n = Math.ceil(S.cargo[k] * 0.6); lost[k] = n; addCargo(k, -n); }
-  const markets = NODES.filter(l => l.station && !l.black);
+  const markets = NODES.filter(l => l.station && !l.black && locOpen(l.id));
   let best = markets[0], bd = 1e9;
   for (const l of markets) { const d = locDist(S.loc, l.id, S.day); if (d < bd) { bd = d; best = l; } }
   const fee = Math.round(Math.min(S.credits, 200 + S.credits * 0.1));
@@ -330,6 +345,6 @@ function towShip(reason) {
   S.fuel = Math.max(S.fuel, 10);
   for (let i = 0; i < 3; i++) tickDay();
   sfx('lose');
-  showModal({ icon: '🚨', title: 'Remolcada', danger: true, html: `${reason}<br>Un remolcador te lleva a <b>${best.station}</b>. Perdiste parte de la carga y pagaste <b>${fmt(fee)} ₵</b> de rescate. Pasaron 3 días.`,
-    buttons: [{ label: 'Continuar', cls: 'primary', fn: () => { save(); setScene(MapScene); } }] });
+  showModal({ icon: '🚨', title: 'Towed to safety', danger: true, html: `${reason}<br>A tug brings you to <b>${best.station}</b>. You lost part of your cargo and paid a <b>${fmt(fee)} cr</b> rescue fee.`,
+    buttons: [{ label: 'Continue', cls: 'primary', fn: () => { save(); openDock(); } }] });
 }

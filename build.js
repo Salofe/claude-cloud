@@ -1,4 +1,4 @@
-// Empaqueta src/ en un solo archivo: dist/index.html
+// Bundles src/ into a single file: dist/index.html
 const fs = require('fs');
 const order = ['data', 'art', 'audio', 'state', 'map', 'mining', 'battle', 'ui', 'main'];
 const js = order.map(f => `// ---- ${f}.js ----\n` + fs.readFileSync(`src/${f}.js`, 'utf8')).join('\n');
