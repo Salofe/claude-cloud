@@ -6,17 +6,27 @@ const randi = (a, b) => Math.floor(rand(a, b + 1));
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
-const fmt = n => Math.round(n).toLocaleString('en-US');
+const SUFFIX = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx'];
+function fmt(n) {
+  if (Math.abs(n) < 10 && n % 1) return (Math.floor(n * 10) / 10).toString();
+  n = Math.floor(n);
+  const a = Math.abs(n);
+  if (a < 10000) return n.toLocaleString('en-US');
+  const e = Math.min(SUFFIX.length - 1, Math.floor(Math.log10(a) / 3));
+  const v = n / Math.pow(1000, e);
+  return (Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2)) + SUFFIX[e];
+}
 
+// Ore values climb steeply from zone to zone.
 const ITEMS = {
-  iron:      { n: 'Iron',           b: 14,  c: '#d7a98a', ore: 1, h: 1.0 },
-  nickel:    { n: 'Nickel',         b: 22,  c: '#9fe0b8', ore: 1, h: 1.2 },
-  ice:       { n: 'Ice',            b: 16,  c: '#a6ecff', ore: 1, h: 0.7 },
-  titanium:  { n: 'Titanium',       b: 45,  c: '#dfe6ff', ore: 1, h: 1.6 },
-  platinum:  { n: 'Platinum',       b: 85,  c: '#fff1b8', ore: 1, h: 2.0 },
-  he3:       { n: 'Helium-3',       b: 120, c: '#ffd24a', ore: 1, h: 1.5 },
-  iridium:   { n: 'Iridium',        b: 170, c: '#c38bff', ore: 1, h: 2.6 },
-  exotic:    { n: 'Exotic Crystal', b: 360, c: '#ff5fd7', ore: 1, h: 3.2 },
+  iron:      { n: 'Iron',           b: 4,    c: '#d7a98a', ore: 1, h: 1.0 },
+  ice:       { n: 'Ice',            b: 6,    c: '#a6ecff', ore: 1, h: 0.7 },
+  titanium:  { n: 'Titanium',       b: 30,   c: '#dfe6ff', ore: 1, h: 1.4 },
+  nickel:    { n: 'Nickel',         b: 50,   c: '#9fe0b8', ore: 1, h: 1.2 },
+  he3:       { n: 'Helium-3',       b: 120,  c: '#ffd24a', ore: 1, h: 1.3 },
+  platinum:  { n: 'Platinum',       b: 250,  c: '#fff1b8', ore: 1, h: 1.7 },
+  iridium:   { n: 'Iridium',        b: 1200, c: '#c38bff', ore: 1, h: 2.2 },
+  exotic:    { n: 'Exotic Crystal', b: 9000, c: '#ff5fd7', ore: 1, h: 2.8 },
   food:      { n: 'Food',           b: 24,  c: '#96e072' },
   meds:      { n: 'Medicine',       b: 70,  c: '#ff6b7d' },
   machinery: { n: 'Machinery',      b: 58,  c: '#e0b35e' },
@@ -29,131 +39,134 @@ const ORES = ITEM_KEYS.filter(k => ITEMS[k].ore);
 const GOODS = ITEM_KEYS.filter(k => !ITEMS[k].ore);
 
 const FACTIONS = {
-  tierra:   { n: 'Earth Union',        c: '#5fb4ff', locs: ['tierra', 'luna', 'venus'] },
-  marte:    { n: 'Mars Republic',      c: '#ff7a50', locs: ['marte'] },
-  cinturon: { n: 'Belt Coalition',     c: '#ffc857', locs: ['ceres'] },
-  exterior: { n: 'Outer League',       c: '#6dffb0', locs: ['europa', 'titan'] },
-  piratas:  { n: 'Black Syndicate',    c: '#ff4d6d', locs: ['pluton'] },
+  tierra:   { n: 'Earth Union',     c: '#5fb4ff', locs: ['tierra', 'luna', 'venus'] },
+  marte:    { n: 'Mars Republic',   c: '#ff7a50', locs: ['marte'] },
+  cinturon: { n: 'Belt Coalition',  c: '#ffc857', locs: ['ceres'] },
+  exterior: { n: 'Outer League',    c: '#6dffb0', locs: ['europa', 'titan'] },
+  piratas:  { n: 'Black Syndicate', c: '#ff4d6d', locs: ['pluton'] },
 };
 
-// r = orbit radius (map units), period = days per orbit, tier = unlock stage required
+// field.z = zone tier: drives rock toughness, enemy strength, loot and outposts
+const DEPOT = { iron: 0.9, ice: 0.9, titanium: 0.9, nickel: 0.9, he3: 0.9, platinum: 0.9, iridium: 0.9, exotic: 0.9 };
 const LOCS = [
-  { id: 'mercurio', n: 'Mercury', r: 62, period: 70, a0: 1.2, size: 5, tex: 'rock', col: ['#d8c3a5', '#6b5a48'], danger: 0.06, tier: 2,
-    field: { n: 'Caloris Plains', ores: { iron: 4, platinum: 3, iridium: 1.2, titanium: 1 }, count: 16, hazard: 'heat' },
-    desc: 'Scorched rock next to the Sun. Precious metals — but the heat burns unshielded hulls.' },
-  { id: 'venus', n: 'Venus', r: 98, period: 120, a0: 2.7, size: 8, tex: 'venus', col: ['#f3d9a0', '#a8793b'], faction: 'tierra', danger: 0.04, tier: 4,
+  { id: 'mercurio', n: 'Mercury', r: 62, period: 70, a0: 1.2, size: 5, tex: 'rock', col: ['#d8c3a5', '#6b5a48'], danger: 0.06, tier: 3,
+    station: 'Caloris Depot', depot: 1, fuel: 5, repair: 3, market: { ...DEPOT },
+    field: { n: 'Caloris Plains', z: 1, ores: { platinum: 3, titanium: 2, iron: 2, iridium: 0.25 }, count: 26, hazard: 'heat' },
+    desc: 'Scorched rock next to the Sun. Platinum everywhere — but the heat burns unshielded hulls.' },
+  { id: 'venus', n: 'Venus', r: 98, period: 120, a0: 2.7, size: 8, tex: 'venus', col: ['#f3d9a0', '#a8793b'], faction: 'tierra', danger: 0.04, tier: 5,
     station: 'Aphrodite Cloud City', fuel: 6, repair: 3,
-    market: { ice: 1.9, titanium: 1.3, platinum: 1.25, food: 1.3, machinery: 1.45, tech: 0.9, meds: 0.85, luxury: 0.6 },
+    market: { ice: 2.2, titanium: 1.3, platinum: 1.25, food: 1.3, machinery: 1.45, tech: 0.9, meds: 0.85, luxury: 0.6 },
     desc: 'Floating cities above acid clouds. They make luxuries and medicine, and crave water.' },
-  { id: 'tierra', n: 'Earth', r: 142, period: 190, a0: 0.2, size: 9, tex: 'earth', col: ['#5fb4ff', '#15407e'], faction: 'tierra', danger: 0.03, tier: 1,
+  { id: 'tierra', n: 'Earth', r: 142, period: 190, a0: 0.2, size: 9, tex: 'earth', col: ['#5fb4ff', '#15407e'], faction: 'tierra', danger: 0.03, tier: 2,
     station: 'Gateway Port', fuel: 5, repair: 3,
-    market: { iron: 1.3, nickel: 1.3, ice: 1.0, titanium: 1.4, platinum: 1.55, he3: 1.7, iridium: 1.45, exotic: 1.5, food: 0.6, meds: 0.65, machinery: 0.9, tech: 0.6, arms: 1.15, luxury: 0.8 },
-    desc: 'The cradle of humanity. Pays more for every metal you bring.' },
+    market: { iron: 1.6, nickel: 1.4, ice: 1.2, titanium: 1.5, platinum: 1.5, he3: 1.7, iridium: 1.45, exotic: 1.5, food: 0.6, meds: 0.65, machinery: 0.9, tech: 0.6, arms: 1.15, luxury: 0.8 },
+    desc: 'The cradle of humanity. Pays 50–70% more for every metal you bring.' },
   { id: 'luna', n: 'Moon', parent: 'tierra', r: 17, period: 27, a0: 0, size: 4, tex: 'moon', col: ['#e3e3e3', '#6a6a72'], faction: 'tierra', danger: 0.02, tier: 0,
     station: 'Tranquility Base', fuel: 4, repair: 2.5,
-    market: { iron: 1.0, nickel: 1.0, ice: 1.15, titanium: 1.0, he3: 1.0, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
-    field: { n: 'Lunar Maria', ores: { iron: 5, ice: 2.5, titanium: 1, he3: 0.5 }, count: 18 },
-    desc: 'Your home base. A calm mining field and a small station.' },
-  { id: 'marte', n: 'Mars', r: 196, period: 330, a0: 4.1, size: 7, tex: 'mars', col: ['#ff8a5c', '#7a2a14'], faction: 'marte', danger: 0.05, tier: 2,
+    market: { iron: 1.0, nickel: 1.0, ice: 1.1, titanium: 1.0, he3: 1.0, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
+    field: { n: 'Lunar Maria', z: 0, ores: { iron: 5, ice: 3, titanium: 1.2, he3: 0.3 }, count: 24 },
+    desc: 'Your home base. A calm mining field with a station at the bottom.' },
+  { id: 'marte', n: 'Mars', r: 196, period: 330, a0: 4.1, size: 7, tex: 'mars', col: ['#ff8a5c', '#7a2a14'], faction: 'marte', danger: 0.05, tier: 3,
     station: 'Olympus City', fuel: 5, repair: 3,
-    market: { iron: 0.9, nickel: 1.1, ice: 2.0, titanium: 1.2, platinum: 1.2, he3: 1.3, food: 1.6, meds: 1.35, machinery: 0.65, tech: 1.3, arms: 0.6, luxury: 1.3 },
-    desc: 'A militarized republic. Pays double for ice — water is life on Mars.' },
-  { id: 'ceres', n: 'Ceres', r: 262, period: 560, a0: 5.4, size: 5, tex: 'rock', col: ['#b7b0a4', '#4c463e'], faction: 'cinturon', danger: 0.22, tier: 3,
+    market: { iron: 1.2, nickel: 1.2, ice: 2.5, titanium: 1.3, platinum: 1.3, he3: 1.4, iridium: 1.3, food: 1.6, meds: 1.35, machinery: 0.65, tech: 1.3, arms: 0.6, luxury: 1.3 },
+    desc: 'A militarized republic. Pays a fortune for ice — water is life on Mars.' },
+  { id: 'ceres', n: 'Ceres', r: 262, period: 560, a0: 5.4, size: 5, tex: 'rock', col: ['#b7b0a4', '#4c463e'], faction: 'cinturon', danger: 0.22, tier: 4,
     station: 'Ceres Station', fuel: 5, repair: 3.5,
-    market: { iron: 0.8, nickel: 0.8, ice: 1.3, titanium: 1.0, platinum: 1.1, he3: 1.2, iridium: 1.1, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
-    field: { n: 'Main Belt', ores: { iron: 3, nickel: 4, titanium: 2.2, platinum: 1.5, ice: 1 }, count: 24 },
-    desc: 'Capital of the Asteroid Belt. Rich in nickel and platinum. Pirates prowl here.' },
-  { id: 'jupiter', n: 'Jupiter', r: 345, period: 1000, a0: 1.0, size: 19, tex: 'jupiter', col: ['#e8c49a', '#8a5a36'], body: 1, tier: 5 },
-  { id: 'europa', n: 'Europa', parent: 'jupiter', r: 30, period: 11, a0: 0, size: 4, tex: 'europa', col: ['#f2eadb', '#8f7a60'], faction: 'exterior', danger: 0.12, tier: 5,
+    market: { iron: 0.8, nickel: 1.0, ice: 1.3, titanium: 1.0, platinum: 1.1, he3: 1.2, iridium: 1.15, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
+    field: { n: 'Main Belt', z: 2, ores: { nickel: 3, platinum: 3, titanium: 1, iridium: 1.5 }, count: 30 },
+    desc: 'Capital of the Asteroid Belt. Nickel, platinum, iridium… and pirates.' },
+  { id: 'jupiter', n: 'Jupiter', r: 345, period: 1000, a0: 1.0, size: 19, tex: 'jupiter', col: ['#e8c49a', '#8a5a36'], body: 1, tier: 6 },
+  { id: 'europa', n: 'Europa', parent: 'jupiter', r: 30, period: 11, a0: 0, size: 4, tex: 'europa', col: ['#f2eadb', '#8f7a60'], faction: 'exterior', danger: 0.12, tier: 6,
     station: 'Europa Colony', fuel: 4, repair: 3.5,
-    market: { iron: 1.5, nickel: 1.4, ice: 0.6, titanium: 1.2, platinum: 1.15, he3: 0.9, iridium: 1.3, exotic: 1.2, food: 2.0, meds: 1.6, machinery: 1.5, tech: 1.5, arms: 1.2, luxury: 1.5 },
-    desc: 'A colony beneath the ice. Desperate for food and technology.' },
-  { id: 'troyanos', n: 'Trojans', follow: 'jupiter', offset: 1.05, size: 5, col: ['#a49a8e', '#3e3831'], danger: 0.35, tier: 5,
-    field: { n: 'Jupiter Trojans', ores: { titanium: 3, platinum: 2.5, nickel: 2, iridium: 1.2, he3: 0.5 }, count: 22 },
-    desc: 'An asteroid swarm at Jupiter\'s L4 point. Platinum and iridium. Pirate territory.' },
-  { id: 'saturno', n: 'Saturn', r: 430, period: 1700, a0: 3.4, size: 16, tex: 'saturn', col: ['#f0dca4', '#8e7440'], ring: 1, danger: 0.2, tier: 6,
-    field: { n: 'Rings of Saturn', ores: { ice: 5, he3: 2.5, iridium: 1.2, platinum: 0.6 }, count: 26 },
-    desc: 'The rings: endless ice and pockets of Helium-3.' },
-  { id: 'titan', n: 'Titan', parent: 'saturno', r: 32, period: 16, a0: 2, size: 5, tex: 'titan', col: ['#f0a95c', '#7a4a1c'], faction: 'exterior', danger: 0.12, tier: 6,
+    market: { iron: 1.5, nickel: 1.4, ice: 0.6, titanium: 1.2, platinum: 1.25, he3: 0.9, iridium: 1.5, exotic: 1.3, food: 2.0, meds: 1.6, machinery: 1.5, tech: 1.5, arms: 1.2, luxury: 1.5 },
+    desc: 'A colony beneath the ice. Desperate for food and technology; pays well for iridium.' },
+  { id: 'troyanos', n: 'Trojans', follow: 'jupiter', offset: 1.05, size: 5, col: ['#a49a8e', '#3e3831'], danger: 0.35, tier: 6,
+    station: 'L4 Depot', depot: 1, fuel: 6, repair: 4, market: { ...DEPOT },
+    field: { n: 'Jupiter Trojans', z: 3, ores: { iridium: 4, platinum: 2, he3: 1 }, count: 30 },
+    desc: 'An asteroid swarm at Jupiter\'s L4 point. Iridium everywhere. Pirate territory.' },
+  { id: 'saturno', n: 'Saturn', r: 430, period: 1700, a0: 3.4, size: 16, tex: 'saturn', col: ['#f0dca4', '#8e7440'], ring: 1, danger: 0.25, tier: 7,
+    station: 'Ring Depot', depot: 1, fuel: 5, repair: 4, market: { ...DEPOT },
+    field: { n: 'Rings of Saturn', z: 4, ores: { he3: 4, iridium: 3, ice: 2, exotic: 1 }, count: 32 },
+    desc: 'The rings: Helium-3, iridium, and the first exotic crystals.' },
+  { id: 'titan', n: 'Titan', parent: 'saturno', r: 32, period: 16, a0: 2, size: 5, tex: 'titan', col: ['#f0a95c', '#7a4a1c'], faction: 'exterior', danger: 0.12, tier: 7,
     station: 'Titan Refinery', fuel: 3, repair: 3,
-    market: { iron: 1.6, nickel: 1.5, ice: 0.7, titanium: 1.35, platinum: 1.35, he3: 0.8, iridium: 1.3, exotic: 1.35, food: 1.9, meds: 1.7, machinery: 1.4, tech: 1.6, arms: 1.4, luxury: 0.9 },
-    desc: 'Methane refineries. The cheapest fuel in the system.' },
-  { id: 'pluton', n: 'Pluto', r: 540, period: 2800, a0: 5.9, size: 5, tex: 'pluto', col: ['#e6d2bf', '#5a463c'], faction: 'piratas', danger: 0.3, tier: 7, black: 1,
+    market: { iron: 1.6, nickel: 1.5, ice: 0.7, titanium: 1.35, platinum: 1.35, he3: 1.6, iridium: 1.3, exotic: 1.35, food: 1.9, meds: 1.7, machinery: 1.4, tech: 1.6, arms: 1.4, luxury: 0.9 },
+    desc: 'Methane refineries. Pays top price for Helium-3.' },
+  { id: 'pluton', n: 'Pluto', r: 540, period: 2800, a0: 5.9, size: 5, tex: 'pluto', col: ['#e6d2bf', '#5a463c'], faction: 'piratas', danger: 0.3, tier: 8, black: 1,
     station: 'Charon Haven', fuel: 9, repair: 5,
-    market: { iron: 1.2, nickel: 1.2, ice: 1.0, titanium: 1.2, platinum: 1.3, he3: 1.2, iridium: 1.5, exotic: 1.8, food: 1.8, meds: 2.0, tech: 1.5, arms: 0.55, luxury: 1.6, machinery: 1.3 },
-    desc: 'A black market at the edge of the system. No questions asked. Best prices for exotics.' },
-  { id: 'kuiper', n: 'Kuiper Belt', r: 600, period: 3300, a0: 5.45, size: 6, col: ['#9fb6ff', '#2a3566'], danger: 0.55, tier: 7,
-    field: { n: 'Kuiper Belt', ores: { ice: 3, he3: 2, iridium: 2, exotic: 1.4 }, count: 24, cold: 1 },
-    desc: 'The frozen frontier. Exotic crystals glow here… and so do the biggest pirate ships.' },
+    market: { iron: 1.2, nickel: 1.2, ice: 1.0, titanium: 1.2, platinum: 1.3, he3: 1.2, iridium: 1.5, exotic: 1.9, food: 1.8, meds: 2.0, tech: 1.5, arms: 0.55, luxury: 1.6, machinery: 1.3 },
+    desc: 'A black market at the edge of the system. Best prices for exotics. No questions asked.' },
+  { id: 'kuiper', n: 'Kuiper Belt', r: 600, period: 3300, a0: 5.45, size: 6, col: ['#9fb6ff', '#2a3566'], danger: 0.55, tier: 8,
+    station: 'Frontier Depot', depot: 1, fuel: 8, repair: 5, market: { ...DEPOT },
+    field: { n: 'Kuiper Belt', z: 5, ores: { iridium: 3, exotic: 2, he3: 1 }, count: 32, cold: 1 },
+    desc: 'The frozen frontier. Exotic crystals glow everywhere… guarded by pirate carriers.' },
 ];
 const LOC = Object.fromEntries(LOCS.map(l => [l.id, l]));
 const NODES = LOCS.filter(l => !l.body);
-// every station buys every ore (auto-sell on docking)
+const FIELDS = NODES.filter(l => l.field);
 for (const l of LOCS) if (l.market) for (const o of ORES) if (l.market[o] == null) l.market[o] = 0.95;
 
-// ============ PROGRESSION ============
-// Unlocks happen by lifetime earnings. Each adds a new layer of the game.
+// ============ PROGRESSION (lifetime earnings) ============
 const UNLOCKS = [
   { at: 0 },
-  { at: 600, icon: '🗺️', title: 'Star Map unlocked', text: 'You can now fly to <b>Earth</b>. It pays <b>30–70% more</b> for metals. Travel uses fuel — your tank refills when you dock.', upg: ['engine', 'tank'] },
-  { at: 3000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mars</b> pays double for Ice. <b>Mercury</b> is full of Platinum, but the heat burns your hull — <b>Shields</b> are now for sale.', upg: ['shield'] },
-  { at: 8000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt are open: nickel, platinum… and <b>pirates</b>. Battles are automatic — buy <b>Weapons</b> to win them.', upg: ['weapons'] },
-  { at: 18000, icon: '📈', title: 'Trade & Contracts', text: 'Stations now let you <b>buy and sell goods</b>, offer <b>contracts</b>, and the system has <b>events</b> — wars, plagues, booms — that swing prices. <b>Venus</b> is open.', upg: [] },
-  { at: 40000, icon: '🪐', title: 'Jupiter System', text: '<b>Europa</b> colony and the <b>Trojan</b> asteroids are open. Iridium! The <b>Scanner</b> reveals rich veins and avoids ambushes.', upg: ['scanner'] },
-  { at: 90000, icon: '👑', title: 'Saturn & Influence', text: '<b>Titan</b> and the <b>Rings</b> are open. You can now <b>invest</b> in stations for daily income and <b>influence</b>. Reach <b>100 influence</b> to rule the system.', upg: [] },
-  { at: 180000, icon: '💎', title: 'The Frontier', text: '<b>Pluto</b>\'s black market and the <b>Kuiper Belt</b> are open. Exotic crystals are worth a fortune — and guarded by pirate carriers.', upg: [] },
+  { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and fill it with <b>drones</b>. They mine for you <b>all the time</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
+  { at: 1500, icon: '🗺️', title: 'Star Map', text: 'Fly to <b>Earth</b> — it pays <b>50–70% more</b> for metals. Travel uses fuel; your tank refills when you dock. <b>Refinery</b> upgrades now boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
+  { at: 10000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mercury</b> is covered in <b>Platinum</b> (worth 60× iron) but the heat burns your hull — buy <b>Shields</b>. <b>Mars</b> pays a fortune for ice.', upg: ['shield'] },
+  { at: 60000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt: nickel, platinum, iridium… and <b>pirates</b>. You fly and shoot in battle — buy <b>Weapons</b>!', upg: ['weapons'] },
+  { at: 400000, icon: '📈', title: 'Trade & Events', text: 'Stations let you <b>buy and sell goods</b> and offer <b>contracts</b>. System <b>events</b> — wars, plagues, booms — swing prices. <b>Venus</b> is open.', upg: [] },
+  { at: 3e6, icon: '🪐', title: 'Jupiter System', text: '<b>Europa</b> and the <b>Trojan</b> asteroids: iridium worth <b>300× iron</b>. The <b>Scanner</b> reveals rich veins.', upg: ['scanner'] },
+  { at: 25e6, icon: '👑', title: 'Saturn & Influence', text: '<b>Titan</b> and the <b>Rings</b>. <b>Invest</b> in stations: each level adds <b>+10% to ALL income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the system.', upg: [] },
+  { at: 200e6, icon: '💎', title: 'The Frontier', text: '<b>Pluto</b>\'s black market and the <b>Kuiper Belt</b>. Exotic crystals are worth <b>2,000× iron</b>.', upg: [] },
 ];
-const U = { MAP: 1, MARS: 2, BELT: 3, TRADE: 4, JUPITER: 5, SATURN: 6, FRONTIER: 7 };
+const U = { OUTPOST: 1, MAP: 2, MARS: 3, BELT: 4, TRADE: 5, JUPITER: 6, SATURN: 7, FRONTIER: 8 };
 
-// ============ UPGRADES ============
+// ============ UPGRADES (exponential) ============
+// cost(lv) = price to go from lv to lv+1
 const UPG = {
-  hull:    { n: 'Hull', icon: '⬢', d: 'Cargo space & armor. A new hull is a whole new ship!', stage: 0,
-             names: ['Sparrow', 'Mule', 'Albatross', 'Leviathan', 'Colossus'],
-             cost: [0, 450, 2500, 12000, 50000],
-             cargo: [20, 45, 90, 160, 280], hp: [60, 110, 180, 280, 420], mass: [1, 1.25, 1.6, 2.0, 2.5] },
-  laser:   { n: 'Mining Laser', icon: '✦', d: 'Cut rocks faster, from farther away.', stage: 0,
-             names: ['Cutter', 'Driller', 'Fissure', 'Sunlance', 'Annihilator'],
-             cost: [0, 300, 1500, 7000, 28000], dps: [12, 20, 32, 50, 78], range: [190, 230, 270, 310, 360] },
-  drones:  { n: 'Magnet & Drones', icon: '⌬', d: 'Pull ore from farther. Drones collect it for you and help in fights.', stage: 0,
-             names: ['Magnet', 'Swarm I', 'Swarm II', 'Swarm III', 'Hive'],
-             cost: [0, 250, 1400, 6500, 25000], magnet: [130, 180, 230, 290, 360], count: [0, 1, 2, 3, 4] },
-  engine:  { n: 'Engines', icon: '▲', d: 'Fly faster, use less fuel, escape pirates.', stage: 1,
-             names: ['Chemical', 'Ion', 'Plasma', 'Fusion', 'Torch'],
-             cost: [0, 600, 3000, 11000, 36000], thrust: [1, 1.15, 1.3, 1.5, 1.75], speed: [1, 1.25, 1.55, 1.9, 2.4], eff: [1, 1.15, 1.35, 1.6, 1.9], flee: [0.3, 0.4, 0.5, 0.62, 0.75] },
-  tank:    { n: 'Fuel Tank', icon: '◍', d: 'Reach farther destinations.', stage: 1,
-             names: ['Basic', 'Extended', 'Double', 'Cryo', 'Deep Space'],
-             cost: [0, 400, 2000, 8000, 24000], fuel: [60, 100, 150, 215, 300] },
-  shield:  { n: 'Shields', icon: '◎', d: 'Absorb damage and heat. Regenerate over time.', stage: 2,
-             names: ['None', 'Deflector', 'Barrier', 'Aegis', 'Bastion'],
-             cost: [0, 1200, 4500, 14000, 40000], sp: [0, 30, 65, 110, 170] },
-  weapons: { n: 'Weapons', icon: '✚', d: 'Auto-turrets that fight pirates for you.', stage: 3,
-             names: ['Light Cannon', 'Autocannon', 'Railgun', 'Plasma Battery', 'Storm'],
-             cost: [0, 1200, 4500, 14000, 40000], dps: [6, 12, 22, 36, 56] },
-  scanner: { n: 'Scanner', icon: '◈', d: 'Reveals rich veins and helps avoid ambushes.', stage: 5,
-             names: ['Passive', 'Active', 'Deep', 'Quantum', 'Omniscient'],
-             cost: [0, 2500, 7000, 18000, 45000], avoid: [0, 0.12, 0.22, 0.32, 0.42] },
+  hull:     { n: 'Ship Class', icon: '⬢', stage: 0, max: 5, d: 'A new hull is a whole new ship: bigger base cargo and armor.',
+              names: ['Sparrow', 'Mule', 'Albatross', 'Leviathan', 'Colossus'],
+              costs: [400, 12000, 400000, 15e6], cargo: [20, 50, 120, 300, 800], hp: [60, 160, 450, 1300, 4000], mass: [1, 1.2, 1.45, 1.75, 2.1] },
+  laser:    { n: 'Mining Laser', icon: '✦', stage: 0, max: 60, c0: 40, g: 1.33, d: 'Cut rocks faster. Farther zones have much tougher rock.' },
+  magnet:   { n: 'Magnet', icon: '⌬', stage: 0, max: 25, c0: 30, g: 1.5, d: 'Pull ore from farther away. Every 3 levels adds a collector drone.' },
+  cargo:    { n: 'Cargo Bay', icon: '▣', stage: 1, max: 40, c0: 60, g: 1.42, d: '+25% cargo space per level.' },
+  refinery: { n: 'Refinery', icon: '⚗', stage: 2, max: 60, c0: 400, g: 1.5, d: '+10% value on ALL ore — including your drones.' },
+  engine:   { n: 'Engines', icon: '▲', stage: 2, max: 20, c0: 300, g: 1.7, d: 'Fly faster, use less fuel, warp out of fights sooner.' },
+  tank:     { n: 'Fuel Tank', icon: '◍', stage: 2, max: 15, c0: 200, g: 1.7, d: 'Reach farther destinations.' },
+  shield:   { n: 'Shields', icon: '◎', stage: 3, max: 50, c0: 1500, g: 1.4, d: 'Absorb damage and heat. Regenerate over time.' },
+  weapons:  { n: 'Guns', icon: '✚', stage: 4, max: 60, c0: 5000, g: 1.33, d: 'Twin cannons for fighting pirates. Hold fire to shoot.' },
+  scanner:  { n: 'Scanner', icon: '◈', stage: 6, max: 5, c0: 2e6, g: 4, d: 'Reveals rich veins and helps avoid ambushes.' },
 };
 const UPG_KEYS = Object.keys(UPG);
+function upgCost(k, lv) { const u = UPG[k]; return u.costs ? u.costs[lv - 1] : Math.round(u.c0 * Math.pow(u.g, lv - 1)); }
+
+// ============ DRONE OUTPOSTS ============
+// per field zone: build cost, drone base cost, drone income per second
+const OUTPOST = {
+  build: [60, 6000, 80000, 2.5e6, 30e6, 400e6],
+  drone: [15, 1200, 16000, 450000, 6e6, 80e6],
+  rate:  [0.5, 30, 300, 7000, 80000, 900000],
+  growth: 1.14,          // each drone costs 14% more than the last
+  lvCost: [8, 60, 400, 3000, 20000, 150000, 1e6, 8e6, 6e7], // × build cost, to reach level 2..10
+  maxLv: 10,
+};
+const outpostRate = (z, lv, n) => OUTPOST.rate[z] * n * Math.pow(2, lv - 1);
 
 // ============ INVESTMENTS ============
-const INVEST = {
-  names: ['Warehouse', 'Refinery', 'Consortium'],
-  cost: [6000, 22000, 70000],
-  income: [60, 220, 650],
-  infl: [3, 6, 10],
-  rep: [0, 15, 35],
-};
+const STATION_TIER = { luna: 1, tierra: 2, venus: 4, marte: 4, ceres: 10, europa: 40, titan: 150, pluton: 400 };
+const INVEST = { names: ['Warehouse', 'Refinery', 'Consortium'], cost: [2e6, 20e6, 200e6], infl: [3, 6, 10], bonus: 0.10, rep: [0, 15, 35] };
 
-// ============ ENEMIES ============
+// ============ ENEMIES (real-time combat) ============
 const ENEMIES = {
-  raider:   { n: 'Raider',          hp: 36,  sp: 0,   dps: 4.5, pow: 1,   loot: 120, size: 0.8 },
-  corsair:  { n: 'Corsair',         hp: 85,  sp: 20,  dps: 9,   pow: 2.5, loot: 320, size: 1.05 },
-  frigate:  { n: 'Pirate Frigate',  hp: 180, sp: 55,  dps: 16,  pow: 5.1, loot: 800, size: 1.4 },
-  carrier:  { n: 'Pirate Carrier',  hp: 420, sp: 120, dps: 30,  pow: 10.5, loot: 2200, size: 2.0 },
-  patrol:   { n: 'Military Patrol', hp: 140, sp: 60,  dps: 14,  pow: 4.5, loot: 500, size: 1.25, military: 1 },
+  raider:  { n: 'Raider',          hp: 30,  sp: 0,   dmg: 4,  rate: 1.2, spd: 210, size: 0.8,  loot: 40,  pow: 1 },
+  corsair: { n: 'Corsair',         hp: 80,  sp: 25,  dmg: 6,  rate: 1.3, spd: 180, size: 1.05, loot: 110, pow: 2.5 },
+  frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
+  carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
+  patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };
+const Z_ENEMY = [0.5, 0.7, 1, 3, 8, 22];   // enemy stat multiplier by zone
+const Z_LOOT = [1, 5, 30, 250, 2500, 25000];
 
 const RANKS = [
-  [0, 'Rookie'], [8, 'Pilot'], [20, 'Contractor'], [35, 'Trader'],
+  [0, 'Rookie'], [8, 'Pilot'], [20, 'Contractor'], [35, 'Tycoon'],
   [55, 'Magnate'], [75, 'Belt Legend'], [100, 'Solar Sovereign'],
 ];

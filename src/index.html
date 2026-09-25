@@ -27,7 +27,7 @@
 
 <div id="hud" class="hidden">
   <div class="topbar ui">
-    <div class="stat cr"><span class="lbl">Credits</span><b id="hCr"></b></div>
+    <div class="stat cr"><span class="lbl">Credits <small id="hRate" class="rate"></small></span><b id="hCr"></b></div>
     <div class="stat day" data-need="1"><span class="lbl">Day</span><b id="hDay"></b></div>
     <div class="stat bar"><span class="lbl"><em class="lg">Cargo</em><em class="sh">📦</em> <small id="hCargoT"></small></span><div class="meter cargo"><i id="hCargo"></i></div></div>
     <div class="stat bar"><span class="lbl"><em class="lg">Hull</em><em class="sh">🛡</em> <small id="hHullT"></small></span><div class="meter hp"><i id="hHull"></i></div></div>
@@ -36,7 +36,7 @@
     <div class="tbtns">
       <button id="bShip" title="Ship">🚀<span>Ship</span></button>
       <button id="bNews" title="News" data-need="4">📰<span>News</span></button>
-      <button id="bFac" title="Factions" data-need="6">🏛<span>Factions</span></button>
+      <button id="bFac" title="Empire" data-need="1">🤖<span>Empire</span></button>
       <button id="bSnd" title="Sound">🔊</button>
       <button id="bMenu" title="Menu">☰</button>
     </div>
@@ -57,22 +57,17 @@
     <div id="mineInfo"></div>
     <div id="mineCargo"></div>
   </div>
-  <div class="minebtns ui">
-    <button id="btnDock" class="btn primary">🛰 Dock</button>
-    <button id="btnMap" class="btn">🗺 Map</button>
-  </div>
-  <div id="fullPrompt" class="ui hidden"></div>
 </div>
 <div id="coach"></div>
 <div id="touchUI" class="hidden">
   <div id="joyZone"></div>
   <div id="joyBase"><div id="joyKnob"></div></div>
-  <div id="fireBtn">LASER</div>
+  <div id="fireBtn">FIRE</div>
 </div>
 
 <div id="battleUI" class="ui hidden">
-  <div class="bt-title">⚔ AUTO BATTLE</div>
-  <div class="bt-btns"><button id="btnSpeed" class="btn">Speed ×1</button><button id="btnRetreat" class="btn danger">Retreat</button></div>
+  <div class="bt-title" id="btTitle">⚔ PIRATES</div>
+  <div class="bt-btns"><button id="btnWarp" class="btn">⚡ Warp out</button><button id="btnContinue" class="btn primary hidden">Continue ▶</button></div>
 </div>
 
 <div id="sheet" class="sheet ui hidden"></div>

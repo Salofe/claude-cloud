@@ -263,7 +263,7 @@ button { font-family: var(--ft); cursor: pointer; }
   .minebtns .btn { padding: 7px 10px; font-size: 14px; }
   .desk { display: none; }
   #travelBanner { top: 104px; }
-  .bt-title { top: 104px; font-size: 14px; letter-spacing: 2px; }
+  .bt-title { top: 196px; font-size: 14px; letter-spacing: 2px; }
   .panel { bottom: 76px; max-height: 52%; }
   #eventBanner { top: 98px; }
   .sheet { inset: 8px 0 8px 0; }
@@ -322,5 +322,33 @@ body.mining #objective, body.battle #objective { display: none; }
   #fullPrompt .btn { min-width: 0; font-size: 16px; }
   .rc-main > b { font-size: 22px; }
 }
+/* ---------- v3: income, outposts, combat ---------- */
+.stat .lbl .rate { color: var(--good) !important; font-weight: 700; margin-left: 6px; }
+.big-num { font-family: var(--fh); font-size: 30px; display: inline-block; margin-top: 8px; }
+.depth { color: var(--gold); display: block; }
+.lvl { margin-left: auto; font-weight: 800; color: var(--cyan); font-size: 14px; }
+.lvl small { font-weight: 500; }
+.lvbar { height: 4px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+.lvbar i { display: block; height: 100%; background: linear-gradient(90deg, #1c9fd6, #3de8ff); }
+.ubtns { display: flex; gap: 6px; margin-top: 4px; }
+.ubtns .btn { flex: 1; margin-top: 0 !important; }
+.ubtns .maxb { flex: 0 0 auto; min-width: 58px; background: linear-gradient(180deg, #ffd24a, #c98a10); color: #231500; border-color: #ffe79a; }
+.op-empty { text-align: center; padding: 10px 6px; }
+.op-art { font-size: 54px; }
+.op-empty h3 { font-family: var(--fh); margin: 6px 0; }
+.op-empty p { color: #c4d0ee; }
+.op-top { display: flex; gap: 14px; align-items: center; background: rgba(109,255,176,.07); border: 1px solid rgba(109,255,176,.35); border-radius: 12px; padding: 12px 14px; }
+.op-top > div:first-child { display: flex; flex-direction: column; min-width: 150px; }
+.op-top small { color: var(--good); letter-spacing: 2px; font-size: 11px; }
+.op-top b { font-family: var(--fh); font-size: 26px; }
+.op-top span { color: var(--dim); font-size: 13px; }
+.op-drones { display: flex; flex-wrap: wrap; gap: 3px; flex: 1; align-items: center; }
+.op-drones i { width: 9px; height: 9px; border-radius: 2px; background: #6dffb0; box-shadow: 0 0 6px #6dffb0; animation: pulse 2s infinite; }
+.op-drones i:nth-child(3n) { animation-delay: .4s; } .op-drones i:nth-child(3n+1) { animation-delay: .9s; }
+.op-drones em { font-style: normal; color: var(--good); font-weight: 700; margin-left: 4px; }
+.op-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.op-row .btn { flex: 1; min-width: 120px; }
+.srow.dim { opacity: .5; }
+#battleUI .bt-btns .btn { min-width: 150px; }
 body.thumb * { display: none; }
 body.thumb canvas#c { display: block; }

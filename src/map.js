@@ -11,6 +11,7 @@ const BELT = []; const KUIPER = [];
 const MapScene = {
   cam: { x: 0, y: 0, z: 1 }, camT: null, sel: null, travel: null, t: 0, hover: null, drag: null, trail: new Particles(),
   enter() {
+    if (this.travel) { $('travelBanner').classList.remove('hidden'); return; }
     this.focus(S.loc, true);
     showMapUI(true);
     selectLoc(this.sel || S.loc);
@@ -112,9 +113,7 @@ const MapScene = {
     save();
     this.focus(S.loc);
     updateHUD();
-    const l = LOC[S.loc];
-    if (l.station) openDock();
-    else { toast(`Arrived at ${l.field.n}`, 'good'); setScene(MineScene, S.loc); }
+    openDock();
   },
   draw(ctx) {
     const t = this.t;
@@ -182,7 +181,7 @@ const MapScene = {
       if (open && l.station) {
         const a = t * 0.6 + l.r;
         const sx = p.x + Math.cos(a) * (r + 8), sy = p.y + Math.sin(a) * (r + 8) * 0.6;
-        drawStationIcon(ctx, sx, sy, 2.6, l.faction ? FACTIONS[l.faction].c : '#fff', t);
+        drawStationIcon(ctx, sx, sy, 2.6, l.faction ? FACTIONS[l.faction].c : '#6dffb0', t);
       }
       if (isHere) {
         const pr = r + 10 + (t * 16 % 16);
@@ -226,16 +225,16 @@ const MapScene = {
       tr.shipPos = sp;
       ctx.strokeStyle = 'rgba(61,232,255,0.25)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 6]);
       ctx.beginPath(); ctx.moveTo(q.a.x, q.a.y); ctx.quadraticCurveTo(q.c.x, q.c.y, q.b.x, q.b.y); ctx.stroke(); ctx.setLineDash([]);
-      const ec = ENGINE_COL[S.lv.engine - 1];
+      const ec = ENGINE_COL[shipLv().engine - 1];
       if (!tr.paused) for (let i = 0; i < 2; i++) this.trail.add(sp.x - Math.cos(ang) * 10 + rand(-2, 2), sp.y - Math.sin(ang) * 10 + rand(-2, 2), -Math.cos(ang) * 20 + rand(-8, 8), -Math.sin(ang) * 20 + rand(-8, 8), 0.8, ec, 2.2);
       this.trail.draw(ctx);
-      drawPlayerShip(ctx, S.lv, sp.x, sp.y, ang, 0.55, 1, t);
+      drawPlayerShip(ctx, shipLv(), sp.x, sp.y, ang, 0.55, 1, t);
     } else {
       this.trail.draw(ctx);
       const p = this.spos(S.loc);
       const r = this.pr(LOC[S.loc]) + 16;
       const a = t * 0.7;
-      drawPlayerShip(ctx, S.lv, p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, a + Math.PI / 2, 0.42, 0.5, t);
+      drawPlayerShip(ctx, shipLv(), p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, a + Math.PI / 2, 0.42, 0.5, t);
     }
   },
   pick(x, y) {
@@ -276,22 +275,6 @@ const MapScene = {
 };
 
 // ============ TRAVEL ENCOUNTERS ============
-function buildFleet(danger, bias) {
-  let budget = 0.5 + danger * 3.5 + S.day / 120 + ship.power * 0.45 + (bias || 0);
-  budget *= rand(0.75, 1.2);
-  const fleet = [];
-  const order = ['carrier', 'frigate', 'corsair', 'raider'];
-  while (budget > 0.6 && fleet.length < 5) {
-    const opts = order.filter(k => ENEMIES[k].pow <= budget);
-    if (!opts.length) break;
-    const k = Math.random() < 0.6 ? opts[0] : pick(opts);
-    fleet.push(k); budget -= ENEMIES[k].pow;
-  }
-  if (!fleet.length) fleet.push('raider');
-  return fleet;
-}
-function fleetPower(f) { return f.reduce((a, k) => a + ENEMIES[k].pow, 0) * (1 + S.day / 400); }
-
 function runEncounter(enc, done) {
   if (enc.kind === 'hostile') return pirateEncounter(enc.danger, done);
   if (enc.kind === 'patrol') return patrolEncounter(enc.war, done);
@@ -349,27 +332,36 @@ function runEncounter(enc, done) {
   }
 }
 
+function travelZone() {
+  const tr = MapScene.travel;
+  const a = tr ? tr.from : S.loc, b = tr ? tr.to : S.loc;
+  return clamp(Math.max(locZone(a), locZone(b)), 2, 5);
+}
+function startBattle(fleet, enemyFirst, done) {
+  setScene(MineScene, { fleet, z: travelZone(), done });
+  if (enemyFirst) MineScene.p.shield = 0;
+}
 function pirateEncounter(danger, done) {
   const fleet = buildFleet(danger);
-  const fp = fleetPower(fleet);
-  const bribe = Math.round((120 * fp + S.credits * 0.06) / 10) * 10;
+  const z = travelZone();
+  const bribe = Math.round(Math.max(50, fleet.reduce((a, k) => a + ENEMIES[k].loot, 0) * Z_LOOT[z] * 0.8 + S.credits * 0.03));
   const friendly = S.rep.piratas >= 35;
-  const flee = clamp(ship.flee - fp * 0.02, 0.1, 0.85);
-  const threat = fp / Math.max(0.5, ship.power);
-  const tl = threat < 0.6 ? ['Low', '#6dffb0', 'You should win easily.'] : threat < 1.2 ? ['Medium', '#ffc857', 'A fair fight.'] : threat < 2 ? ['High', '#ff934a', 'You will probably lose.'] : ['Extreme', '#ff4d6d', 'Run or pay!'];
+  const flee = clamp(0.25 + S.lv.engine * 0.03 - fleet.length * 0.04, 0.1, 0.85);
+  const threat = fleetThreat(fleet, z);
+  const tl = threat < 0.6 ? ['Low', '#6dffb0', 'Easy pickings — and nice loot.'] : threat < 1.2 ? ['Medium', '#ffc857', 'A fair fight. Keep moving!'] : threat < 2 ? ['High', '#ff934a', 'Dangerous. Upgrade guns & shields.'] : ['Extreme', '#ff4d6d', 'Run or pay!'];
   sfx('alarm');
   const btns = [];
   if (friendly) btns.push({ label: 'Hail the Syndicate', cls: 'primary', fn: () => { toast('They recognize you and let you pass', 'good'); done(); } });
-  btns.push({ label: '⚔ Fight', cls: friendly ? '' : 'danger', fn: () => startBattle(fleet, false, done) });
+  btns.push({ label: '⚔ Fight!', cls: friendly ? '' : 'danger', fn: () => startBattle(fleet, false, done) });
   btns.push({ label: `Run (${Math.round(flee * 100)}%)`, fn: () => {
     if (Math.random() < flee) { toast('You escaped!', 'good'); sfx('warp'); done(); }
-    else { toast('Escape failed', 'bad'); startBattle(fleet, true, done); }
+    else { toast('Escape failed — they caught you!', 'bad'); startBattle(fleet, true, done); }
   } });
   btns.push({ label: `Pay them off (${fmt(bribe)} cr)`, disabled: S.credits < bribe, fn: () => { S.credits -= bribe; repChange('piratas', 2, true); toast('The pirates take your money', 'good'); done(); } });
   showModal({ icon: '☠️', title: 'Pirate ambush!', danger: true,
     html: `<div class="fleet">${fleet.map(k => `<span class="chip bad">${ENEMIES[k].n}</span>`).join('')}</div>
     <div class="threat">Threat: <b style="color:${tl[1]}">${tl[0]}</b> — ${tl[2]}</div>
-    <small>Battles are automatic. Hull, shields, weapons and drones decide the fight.</small>`,
+    <small>You fly and shoot: <b>hold the mouse</b> (or FIRE) to fire your guns. Destroyed ships drop credits.</small>`,
     buttons: btns });
 }
 
@@ -384,6 +376,6 @@ function patrolEncounter(war, done) {
   showModal({ icon: '🛡️', title: 'Military patrol', danger: true, html: `The <b style="color:${FACTIONS[fac].c}">${FACTIONS[fac].n}</b> finds <b>${arms} Weapons</b> in your hold and demands you hand them over.`,
     buttons: [
       { label: 'Hand them over', cls: 'primary', fn: () => { addCargo('arms', -arms); toast('Weapons confiscated', 'bad'); done(); } },
-      { label: '⚔ Resist', cls: 'danger', fn: () => { repChange(fac, -12); startBattle(['patrol', ...(S.day > 60 ? ['patrol'] : [])], false, done); } },
+      { label: '⚔ Resist', cls: 'danger', fn: () => { repChange(fac, -12); startBattle(['patrol', 'patrol'], false, done); } },
     ] });
 }

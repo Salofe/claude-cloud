@@ -138,21 +138,21 @@ function planetTex(loc) {
     let col;
     switch (loc.tex) {
       case 'earth': {
-        const land = fbm(u * 0.8, v * 0.8, seed + 5, P * 0.8, 5);
+        const land = fbm(u * 4 / 6, v * 4 / 6, seed + 5, 4, 5);
         if (land > 0.575) col = ramp([[0, [78, 150, 70]], [0.5, [120, 150, 70]], [1, [170, 140, 95]]], (land - 0.575) * 4 + (n - 0.5));
         else col = ramp([[0, [10, 40, 110]], [1, [40, 120, 200]]], land * 1.8);
         if (lat > 0.82 + n * 0.1) col = [235, 242, 250];
         break;
       }
       case 'moon': {
-        const maria = fbm(u * 0.6, v * 0.6, seed + 9, P * 0.6, 4);
+        const maria = fbm(u * 4 / 6, v * 4 / 6, seed + 9, 4, 4);
         col = ramp([[0, [70, 70, 78]], [1, [215, 215, 220]]], n * 0.9 + 0.15);
         if (maria < 0.42) col = mixc(col, [70, 72, 82], 0.6);
         break;
       }
       case 'rock': col = mixc(D, L, clamp((n - 0.3) * 1.6, 0, 1)); break;
       case 'mars': {
-        const dark = fbm(u * 0.7, v * 0.7, seed + 3, P * 0.7, 4);
+        const dark = fbm(u * 4 / 6, v * 4 / 6, seed + 3, 4, 4);
         col = ramp([[0, [120, 40, 20]], [0.5, [205, 95, 55]], [1, [240, 150, 100]]], n);
         if (dark < 0.4) col = mixc(col, [90, 35, 25], 0.55);
         if (lat > 0.88) col = [245, 235, 230];
@@ -173,14 +173,14 @@ function planetTex(loc) {
         break;
       }
       case 'europa': {
-        const ridge = Math.abs(fbm(u * 1.3, v * 1.3, seed + 4, P * 1.3, 5) - 0.5);
+        const ridge = Math.abs(fbm(u * 8 / 6, v * 8 / 6, seed + 4, 8, 5) - 0.5);
         col = ramp([[0, [200, 185, 160]], [1, [250, 245, 235]]], n);
         if (ridge < 0.025) col = [150, 95, 60];
         break;
       }
       case 'titan': col = ramp([[0, [170, 95, 30]], [1, [245, 180, 90]]], 0.35 + Math.sin(j / TH * 8 + n * 3) * 0.12 + n * 0.4); break;
       case 'pluto': {
-        const heart = fbm(u * 0.7, v * 0.7, seed + 8, P * 0.7, 4);
+        const heart = fbm(u * 4 / 6, v * 4 / 6, seed + 8, 4, 4);
         col = ramp([[0, [110, 70, 55]], [1, [220, 195, 170]]], n);
         if (heart > 0.58) col = mixc(col, [250, 240, 230], 0.75);
         break;
@@ -207,7 +207,7 @@ function planetTex(loc) {
     clouds = document.createElement('canvas'); clouds.width = TW; clouds.height = TH;
     const cx = clouds.getContext('2d'); const ci = cx.createImageData(TW, TH);
     for (let j = 0; j < TH; j++) for (let i = 0; i < TW; i++) {
-      const n = fbm(i / TW * P * 1.4, j / TH * P * 0.9, seed + 77, P * 1.4, 5);
+      const n = fbm(i / TW * 8, j / TH * P * 0.9, seed + 77, 8, 5);
       const a = clamp((n - 0.52) * 4, 0, 1);
       const k = (j * TW + i) * 4;
       ci.data[k] = ci.data[k + 1] = ci.data[k + 2] = 255; ci.data[k + 3] = a * 220;

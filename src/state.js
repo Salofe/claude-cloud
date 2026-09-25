@@ -1,55 +1,63 @@
 'use strict';
 // ============ STATE, ECONOMY & WORLD ============
-const SAVE_KEY = 'solar_prospector_v2';
+const SAVE_KEY = 'solar_prospector_v3';
 let S = null;
 
 function newGame() {
   S = {
-    v: 2, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: 'Pioneer',
-    lv: { hull: 1, laser: 1, engine: 1, tank: 1, shield: 1, weapons: 1, drones: 1, scanner: 1 },
+    v: 3, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: 'Pioneer',
+    lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, sat: {}, drift: {}, depl: {},
+    invest: {}, outposts: {}, sat: {}, drift: {}, depl: {},
     events: [], news: [], contracts: {}, active: [],
-    stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0 },
-    unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {},
+    stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
+    unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
   };
-  for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.08, 0.08); } }
+  for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.06, 0.06); } }
   addNews('📡', 'Your old mining ship is ready at Tranquility Base. Time to get rich.', '#3de8ff');
   return S;
 }
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+function save() { if (!S) return; S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
-  try { const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s); return d && d.v === 2 ? d : null; } catch (e) { return null; }
+  try { const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s); return d && d.v === 3 ? d : null; } catch (e) { return null; }
 }
 function hasSave() { return !!loadSave(); }
 const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0);
 const upgOpen = k => has(UPG[k].stage);
+const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
+const econScale = () => Math.pow(4, Math.max(0, S.unlock - 5));
+const itemBase = k => ITEMS[k].ore ? ITEMS[k].b : ITEMS[k].b * econScale();
 
 // ---------- derived stats ----------
 const ship = {
-  get cargoMax() { return UPG.hull.cargo[S.lv.hull - 1]; },
+  get cargoMax() { return Math.floor(UPG.hull.cargo[S.lv.hull - 1] * (1 + 0.25 * (S.lv.cargo - 1))); },
   get hpMax() { return UPG.hull.hp[S.lv.hull - 1]; },
   get mass() { return UPG.hull.mass[S.lv.hull - 1]; },
-  get fuelMax() { return UPG.tank.fuel[S.lv.tank - 1]; },
-  get laserDps() { return UPG.laser.dps[S.lv.laser - 1]; },
-  get laserRange() { return UPG.laser.range[S.lv.laser - 1]; },
-  get thrust() { return UPG.engine.thrust[S.lv.engine - 1]; },
-  get speed() { return UPG.engine.speed[S.lv.engine - 1]; },
-  get eff() { return UPG.engine.eff[S.lv.engine - 1]; },
-  get flee() { return UPG.engine.flee[S.lv.engine - 1]; },
-  get shieldMax() { return UPG.shield.sp[S.lv.shield - 1]; },
-  get weaponDps() { return UPG.weapons.dps[S.lv.weapons - 1] + UPG.drones.count[S.lv.drones - 1] * 2.5; },
-  get magnet() { return UPG.drones.magnet[S.lv.drones - 1]; },
-  get drones() { return UPG.drones.count[S.lv.drones - 1]; },
-  get avoid() { return UPG.scanner.avoid[S.lv.scanner - 1]; },
-  get power() { return Math.sqrt(Math.max(1, S.hull + this.shieldMax * 1.5) * this.weaponDps) / 12.7; },
+  get fuelMax() { return Math.round(60 * Math.pow(1.22, S.lv.tank - 1)); },
+  get laserDps() { return 12 * Math.pow(1.19, S.lv.laser - 1); },
+  get laserRange() { return 190 + Math.min(190, (S.lv.laser - 1) * 6); },
+  get thrust() { return Math.min(2.2, 1 + 0.06 * (S.lv.engine - 1)); },
+  get speed() { return 1 + 0.12 * (S.lv.engine - 1); },
+  get eff() { return 1 + 0.07 * (S.lv.engine - 1); },
+  get warpTime() { return Math.max(1.5, 5 - 0.2 * (S.lv.engine - 1)); },
+  get shieldMax() { return S.lv.shield > 1 ? Math.round(30 * Math.pow(1.24, S.lv.shield - 2)) : 0; },
+  get weaponDps() { return 15 * Math.pow(1.19, S.lv.weapons - 1); },
+  get magnet() { return 130 + Math.min(370, (S.lv.magnet - 1) * 16); },
+  get drones() { return Math.min(6, Math.floor((S.lv.magnet - 1) / 3)); },
+  get avoid() { return [0, 0.12, 0.22, 0.32, 0.42][S.lv.scanner - 1]; },
+  get refinery() { return Math.pow(1.1, S.lv.refinery - 1); },
 };
+function incomeMult() {
+  let inv = 0; for (const id in S.invest) inv += S.invest[id];
+  return ship.refinery * (1 + INVEST.bonus * inv);
+}
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
 function addCargo(k, n) { S.cargo[k] = (S.cargo[k] || 0) + n; if (S.cargo[k] <= 0) delete S.cargo[k]; }
 function oreValueAt(locId) { let v = 0; for (const k of ORES) if (S.cargo[k]) v += (sellPrice(locId, k) || 0) * S.cargo[k]; return v; }
+function oreValueBase(k) { return ITEMS[k].b * incomeMult(); }
 
 // ---------- orbital positions ----------
 function locPos(loc, day) {
@@ -66,10 +74,7 @@ function locPos(loc, day) {
   }
   return { x: Math.cos(a) * loc.r, y: Math.sin(a) * loc.r };
 }
-function locDist(a, b, day) {
-  const p = locPos(a, day), q = locPos(b, day);
-  return Math.hypot(p.x - q.x, p.y - q.y);
-}
+function locDist(a, b, day) { const p = locPos(a, day), q = locPos(b, day); return Math.hypot(p.x - q.x, p.y - q.y); }
 function travelInfo(to, from) {
   from = from || S.loc;
   const d = Math.max(8, locDist(from, to, S.day));
@@ -79,7 +84,6 @@ function travelInfo(to, from) {
   return { d, fuel, days, danger };
 }
 function fuelEventMult() { let m = 1; for (const e of S.events) if (e.fuelCost) m *= e.fuelCost; return m; }
-
 function locDanger(id) {
   if (!has(U.BELT)) return 0;
   let d = LOC[id].danger || 0;
@@ -101,16 +105,17 @@ function basePrice(locId, item) {
   const l = LOC[locId];
   const mult = l.market && l.market[item];
   if (mult == null) return null;
-  return ITEMS[item].b * mult * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
+  const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() : itemBase(item);
+  return b * mult * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
 }
-function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.93)); }
+function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.95)); }
 function buyPrice(locId, item) {
   const l = LOC[locId]; const mult = l.market && l.market[item];
   if (mult == null || mult > 1.0 || ITEMS[item].ore) return null;
   return Math.max(2, Math.round(basePrice(locId, item) * 1.07));
 }
 function fuelPrice(locId) {
-  let p = LOC[locId].fuel || 6; for (const e of S.events) if (e.fuelPrice) p *= e.fuelPrice; return Math.max(1, Math.round(p * 10) / 10);
+  let p = (LOC[locId].fuel || 6) * (1 + S.unlock * 0.5); for (const e of S.events) if (e.fuelPrice) p *= e.fuelPrice; return Math.max(1, Math.round(p * 10) / 10);
 }
 function marketClosed(locId) { return S.events.some(e => e.closed && e.closed.includes(locId)); }
 
@@ -123,20 +128,18 @@ function doSell(locId, item, n) {
   let total = 0;
   for (let i = 0; i < n; i++) {
     total += sellPrice(locId, item);
-    S.sat[locId][item] = Math.max(0.4, S.sat[locId][item] * (ITEMS[item].ore ? 0.992 : 0.982));
+    S.sat[locId][item] = Math.max(0.55, S.sat[locId][item] * (ITEMS[item].ore ? 0.9985 : 0.982));
   }
   addCargo(item, -n);
   S.stats.traded += n;
   const l = LOC[locId];
-  if (n > 0) {
-    if (l.faction) {
-      let gain = total / 3000;
-      for (const e of S.events) if (e.relief && e.relief.loc === locId && e.relief.item === item) gain += n * 0.35;
-      if (item === 'arms') for (const e of S.events) if (e.war && e.war.includes(l.faction)) {
-        const other = e.war.find(f => f !== l.faction); repChange(other, -n * 0.15, true); gain += n * 0.2;
-      }
-      repChange(l.faction, gain, true);
+  if (n > 0 && l.faction) {
+    let gain = Math.min(3, n / 60);
+    for (const e of S.events) if (e.relief && e.relief.loc === locId && e.relief.item === item) gain += n * 0.35;
+    if (item === 'arms') for (const e of S.events) if (e.war && e.war.includes(l.faction)) {
+      const other = e.war.find(f => f !== l.faction); repChange(other, -n * 0.15, true); gain += n * 0.2;
     }
+    repChange(l.faction, gain, true);
     if (l.black) for (const f in FACTIONS) if (f !== 'piratas') repChange(f, -n * 0.02, true);
   }
   earn(total);
@@ -175,18 +178,79 @@ function dockAtStation() {
     const fp = fuelPrice(id);
     const need = Math.floor(ship.fuelMax - S.fuel);
     const can = Math.min(need, Math.floor(S.credits / fp));
-    if (can > 0) { S.fuel += can; S.credits -= Math.ceil(can * fp); r.fuel = can; r.fuelCost = Math.ceil(can * fp); }
+    if (can > 0) { S.fuel += can; S.credits -= can * fp; r.fuel = can; r.fuelCost = can * fp; }
   }
   const hneed = Math.ceil(ship.hpMax - S.hull);
   if (hneed > 0) {
-    const rp = l.repair || 3;
+    const rp = (l.repair || 3) * (1 + S.unlock);
     const can = Math.min(hneed, Math.floor(S.credits / rp));
-    if (can > 0) { S.hull = Math.min(ship.hpMax, S.hull + can); S.credits -= Math.ceil(can * rp); r.repair = can; r.repairCost = Math.ceil(can * rp); }
+    if (can > 0) { S.hull = Math.min(ship.hpMax, S.hull + can); S.credits -= can * rp; r.repair = can; r.repairCost = can * rp; }
   }
   S.stats.docks++;
-  if (has(U.TRADE) && (!S.contracts[id] || !S.nextContracts[id])) genContracts(id);
+  if (has(U.TRADE) && l.market && !l.depot && (!S.contracts[id] || !S.nextContracts[id])) genContracts(id);
   save();
   return r;
+}
+
+// ---------- drone outposts ----------
+function outpostOf(id) { return S.outposts[id]; }
+function outpostIncome(id) {
+  const o = S.outposts[id]; if (!o) return 0;
+  return outpostRate(LOC[id].field.z, o.lv, o.n) * incomeMult();
+}
+function totalIncome() { let v = 0; for (const id in S.outposts) v += outpostIncome(id); return v; }
+function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
+function droneCost(id, k) {
+  const o = S.outposts[id]; const n = o ? o.n : 0; const z = LOC[id].field.z;
+  let c = 0; for (let i = 0; i < (k || 1); i++) c += OUTPOST.drone[z] * Math.pow(OUTPOST.growth, n + i);
+  return Math.ceil(c);
+}
+function outpostLvCost(id) { const o = S.outposts[id]; if (!o || o.lv >= OUTPOST.maxLv) return null; return OUTPOST.build[LOC[id].field.z] * OUTPOST.lvCost[o.lv - 1]; }
+function buildOutpost(id) {
+  const c = buildCost(id); if (S.credits < c || S.outposts[id]) return false;
+  S.credits -= c; S.outposts[id] = { lv: 1, n: 1 };
+  addNews('🤖', `Drone outpost built at ${LOC[id].field.n}`, '#6dffb0');
+  return true;
+}
+function maxAffordableDrones(id) {
+  const o = S.outposts[id]; if (!o) return 0;
+  let n = 0, c = 0; const z = LOC[id].field.z;
+  while (n < 500) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n); if (c + nc > S.credits) break; c += nc; n++; }
+  return n;
+}
+function buyDrones(id, k) {
+  const o = S.outposts[id]; if (!o) return 0;
+  if (k === 'max') k = maxAffordableDrones(id);
+  if (!k) return 0;
+  const c = droneCost(id, k); if (S.credits < c) return 0;
+  S.credits -= c; o.n += k; return k;
+}
+function upgradeOutpost(id) {
+  const c = outpostLvCost(id); if (c == null || S.credits < c) return false;
+  S.credits -= c; S.outposts[id].lv++;
+  addNews('🏭', `${LOC[id].field.n} outpost upgraded to level ${S.outposts[id].lv} (×2 output)`, '#6dffb0');
+  return true;
+}
+// real-time drone income
+let incomeAcc = 0;
+function incomeTick(dt) {
+  const inc = totalIncome();
+  if (!inc) return;
+  const g = inc * dt;
+  S.credits += g; S.stats.earned += g; S.stats.droneEarned += g;
+  incomeAcc += dt;
+  if (incomeAcc > 0.5) { incomeAcc = 0; checkUnlocks(); }
+}
+function offlineGains() {
+  const now = Date.now();
+  const secs = clamp((now - (S.lastSeen || now)) / 1000, 0, 8 * 3600);
+  S.lastSeen = now;
+  if (secs < 30) return null;
+  const g = totalIncome() * secs * 0.6;
+  if (g < 1) return null;
+  S.credits += g; S.stats.earned += g; S.stats.droneEarned += g;
+  checkUnlocks();
+  return { secs, g };
 }
 
 // ---------- progression ----------
@@ -197,7 +261,7 @@ function checkUnlocks() {
     const u = UNLOCKS[S.unlock];
     pendingUnlocks.push(S.unlock);
     addNews(u.icon, `<b>${u.title}</b>`, '#ffd24a');
-    if (S.unlock === U.TRADE) { S.nextEvent = S.day + 3; for (const l of NODES) if (l.market && locOpen(l.id)) genContracts(l.id); }
+    if (S.unlock === U.TRADE) { S.nextEvent = S.day + 3; for (const l of NODES) if (l.market && !l.depot && locOpen(l.id)) genContracts(l.id); }
   }
 }
 function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock + 1] : null; }
@@ -206,40 +270,40 @@ function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock 
 function influence() {
   let v = 0;
   for (const id in S.invest) for (let i = 0; i < S.invest[id]; i++) v += INVEST.infl[i];
+  for (const id in S.outposts) v += S.outposts[id].lv - 1;
   for (const f in S.rep) if (f !== 'piratas') v += Math.max(0, S.rep[f]) / 8;
   v += Math.max(0, S.rep.piratas) / 16;
-  v += Math.min(10, S.stats.won * 0.25);
+  v += Math.min(10, S.stats.kills * 0.05);
   return Math.floor(v);
 }
 function rankName(inf) { let r = RANKS[0][1]; for (const [n, t] of RANKS) if (inf >= n) r = t; return r; }
-function dailyIncome() { let v = 0; for (const id in S.invest) for (let i = 0; i < S.invest[id]; i++) v += INVEST.income[i]; return v; }
-function investCost(locId) { const lv = S.invest[locId] || 0; const f = LOC[locId].black ? 1.3 : 1; return lv >= 3 ? null : Math.round(INVEST.cost[lv] * f); }
+function investCost(locId) { const lv = S.invest[locId] || 0; return lv >= 3 ? null : Math.round(INVEST.cost[lv] * (STATION_TIER[locId] || 5)); }
 
 // ---------- contracts ----------
 function uid() { return Math.random().toString(36).slice(2, 8); }
 function genContracts(locId) {
   const l = LOC[locId];
   const list = [];
-  const openMarkets = NODES.filter(x => x.market && x.id !== locId && locOpen(x.id));
+  const openMarkets = NODES.filter(x => x.market && !x.depot && x.id !== locId && locOpen(x.id));
   for (let i = 0; i < 3; i++) {
     const r = Math.random();
     if (r < 0.55 || !openMarkets.length) {
       const wanted = Object.keys(l.market).filter(k => l.market[k] >= 1.1);
       const item = pick(wanted.length ? wanted : ORES.slice(0, 3));
-      const scale = clamp(1 + S.day / 60, 1, 8) * (0.6 + 0.4 * S.lv.hull);
-      const qty = Math.max(4, Math.round(rand(6, 14) * scale * (ITEMS[item].b > 100 ? 0.4 : 1)));
-      const reward = Math.round(qty * ITEMS[item].b * rand(1.8, 2.4) / 10) * 10;
+      const scale = ship.cargoMax / 25;
+      const qty = Math.max(4, Math.round(rand(6, 14) * scale * (ITEMS[item].ore ? 1 : 1)));
+      const reward = Math.round(qty * itemBase(item) * rand(1.8, 2.4) / 10) * 10;
       list.push({ type: 'deliver', id: uid(), from: locId, to: locId, item, qty, reward, rep: 4 + Math.round(qty / 8), days: randi(18, 35), faction: l.faction });
     } else if (r < 0.8 || !has(U.BELT)) {
       const dest = pick(openMarkets);
       const buyables = GOODS.filter(k => l.market[k] != null && l.market[k] <= 1.0);
       const item = buyables.length ? pick(buyables) : 'food';
-      const qty = Math.max(4, Math.round(rand(5, 12) * clamp(1 + S.day / 80, 1, 6)));
-      const reward = Math.round((qty * ITEMS[item].b * 1.5 + locDist(locId, dest.id, S.day) * 6) / 10) * 10;
+      const qty = Math.max(4, Math.round(rand(0.3, 0.6) * ship.cargoMax));
+      const reward = Math.round((qty * itemBase(item) * 1.5 + locDist(locId, dest.id, S.day) * 6 * econScale()) / 10) * 10;
       list.push({ type: 'deliver', id: uid(), from: locId, to: dest.id, item, qty, reward, rep: 5 + Math.round(qty / 6), days: randi(25, 45), faction: dest.faction || l.faction });
     } else {
       const kills = randi(1, 3);
-      const reward = Math.round(kills * (350 + S.day * 8) / 10) * 10;
+      const reward = Math.round(kills * 300 * Z_LOOT[locZone(locId)]);
       list.push({ type: 'bounty', id: uid(), from: locId, kills, reward, rep: 6 * kills, days: randi(25, 50), faction: l.faction });
     }
   }
@@ -274,7 +338,7 @@ function completeContract(c) {
 
 // ---------- system events ----------
 const WAR_PAIRS = [['tierra', 'marte'], ['marte', 'cinturon'], ['tierra', 'exterior'], ['cinturon', 'exterior'], ['marte', 'exterior']];
-const openMarkets = () => NODES.filter(x => x.market && locOpen(x.id));
+const openMarkets = () => NODES.filter(x => x.market && !x.depot && locOpen(x.id));
 const EVENT_GEN = [
   { w: 1.1, make() {
       if (S.events.some(e => e.war)) return null;
@@ -349,12 +413,13 @@ function spawnEvent() {
   showEventBanner(ev);
   if (ev.relief) {
     const l = LOC[ev.relief.loc];
-    const qty = randi(8, 16) * Math.min(4, S.lv.hull);
+    const qty = Math.max(6, Math.round(ship.cargoMax * rand(0.3, 0.6)));
     (S.contracts[l.id] = S.contracts[l.id] || []).unshift({ type: 'deliver', id: uid(), from: l.id, to: l.id, item: ev.relief.item, qty,
-      reward: Math.round(qty * ITEMS[ev.relief.item].b * 3.2 / 10) * 10, rep: 15, days: ev.dur, faction: l.faction, urgent: 1 });
+      reward: Math.round(qty * itemBase(ev.relief.item) * 3.2 / 10) * 10, rep: 15, days: ev.dur, faction: l.faction, urgent: 1 });
   }
 }
 
+// ---------- one day passes ----------
 // ---------- one day passes ----------
 function tickDay() {
   S.day++;
@@ -363,8 +428,6 @@ function tickDay() {
     S.drift[id][k] = clamp(S.drift[id][k] * 0.96 + rand(-0.035, 0.035), -0.25, 0.25);
   }
   for (const id in S.depl) S.depl[id] = Math.max(0, S.depl[id] - 0.06);
-  const inc = dailyIncome();
-  if (inc) earn(inc);
   if (has(U.TRADE)) {
     const ended = S.events.filter(e => e.end <= S.day);
     for (const e of ended) addNews('🕊️', `Over: ${e.title}`, '#8fa3c7');

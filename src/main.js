@@ -110,17 +110,17 @@ function setupTouchControls() {
 }
 
 // ---------- bucle ----------
-let last = performance.now(), hudT = 0;
+let last = performance.now(), hudT = 0, saveT = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (scene) {
-    if (!isBlocking() || scene === BattleScene || scene === MapScene || scene === TitleScene) scene.update(dt);
+    if (!isBlocking() || scene === MapScene || scene === TitleScene) scene.update(dt);
     scene.draw(ctx);
   }
-  if (S && scene !== TitleScene) hudTick(dt);
+  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); }
   hudT += dt;
-  if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); }
+  if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); } }
   requestAnimationFrame(frame);
 }
 
@@ -167,6 +167,10 @@ function startGame(cont) {
   else setScene(MineScene, cont ? (LOC[S.loc].field ? S.loc : 'luna') : 'luna');
   if (!cont) S.loc = 'luna';
   updateHUD(); updateTicker();
+  if (cont) {
+    const off = offlineGains();
+    if (off) setTimeout(() => showModal({ icon: '🤖', title: 'Welcome back!', html: `While you were away (${fmtTime(off.secs)}) your drones earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>`, buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] }), 300);
+  }
 }
 
 // ---------- inicio ----------
@@ -180,17 +184,11 @@ function init() {
   $('zOut').onclick = () => MapScene.onWheel(300, W / 2, H / 2);
   $('zHome').onclick = () => MapScene.focus(S.loc);
   $('zAll').onclick = () => MapScene.zoomAll();
-  $('btnDock').onclick = () => MineScene.leave();
-  $('btnMap').onclick = () => MineScene.leave(true);
-  $('btnSpeed').onclick = () => { BattleScene.speed = BattleScene.speed === 1 ? 2 : BattleScene.speed === 2 ? 4 : 1; $('btnSpeed').textContent = 'Speed ×' + BattleScene.speed; };
-  $('btnRetreat').onclick = () => BattleScene.retreat();
+  $('btnWarp').onclick = () => { if (MineScene.space && !MineScene.warp) { MineScene.warp = { t: 0 }; sfx('warp'); } };
+  $('btnContinue').onclick = () => MineScene.finishSpace(true);
   $('newg').onclick = () => { if (hasSave()) { showModal({ icon: '⚠️', title: 'Start a new game?', html: 'Your saved game will be overwritten.', buttons: [{ label: 'Start over', cls: 'danger', fn: () => { S = null; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startGame(false); } }, { label: 'Cancel', fn: () => {} }] }); } else startGame(false); };
   $('cont').onclick = () => startGame(true);
   $('howto').onclick = () => { openHelp(); };
-  for (const el of document.querySelectorAll('.ui')) {
-    el.addEventListener('mouseenter', () => mouse.onUI = true);
-    el.addEventListener('mouseleave', () => mouse.onUI = false);
-  }
   const params = new URLSearchParams(location.search);
   if (params.has('thumb')) return thumbMode(params.get('thumb'));
   setScene(TitleScene);
@@ -201,7 +199,7 @@ function init() {
 function thumbMode(kind) {
   document.body.classList.add('thumb');
   newGame();
-  S.lv = { hull: 4, laser: 4, engine: 4, tank: 3, shield: 3, weapons: 3, drones: 3, scanner: 3 };
+  S.lv = { hull: 4, laser: 26, magnet: 10, cargo: 5, refinery: 5, engine: 14, tank: 3, shield: 10, weapons: 18, scanner: 3 };
   $('title').classList.add('hidden'); $('hud').classList.add('hidden');
   const t = 12.3;
   drawSpaceBg(ctx, W, H, 120, 80, t, '#141a44');
@@ -234,7 +232,7 @@ function thumbMode(kind) {
   // piratas a lo lejos
   drawEnemyShip(ctx, 'corsair', W * 0.95, H * 0.93, Math.PI * 1.1, 1.3, t);
   drawEnemyShip(ctx, 'raider', W * 0.88, H * 0.97, Math.PI * 1.05, 1.1, t);
-  drawPlayerShip(ctx, S.lv, sx, sy, ang, 3.0 * Math.min(1, W / 1280 * 1.25), 1, t);
+  drawPlayerShip(ctx, shipLv(), sx, sy, ang, 3.0 * Math.min(1, W / 1280 * 1.25), 1, t);
   // título
   if (kind !== 'clean') {
     const s = Math.min(W / 1280, H / 720);
@@ -253,4 +251,6 @@ function thumbMode(kind) {
   document.body.dataset.ready = '1';
 }
 
+function fmtTime(s) { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m` : `${s}s`; }
+document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) save(); else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
 window.addEventListener('load', init);

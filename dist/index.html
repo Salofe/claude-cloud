@@ -272,7 +272,7 @@ button { font-family: var(--ft); cursor: pointer; }
   .minebtns .btn { padding: 7px 10px; font-size: 14px; }
   .desk { display: none; }
   #travelBanner { top: 104px; }
-  .bt-title { top: 104px; font-size: 14px; letter-spacing: 2px; }
+  .bt-title { top: 196px; font-size: 14px; letter-spacing: 2px; }
   .panel { bottom: 76px; max-height: 52%; }
   #eventBanner { top: 98px; }
   .sheet { inset: 8px 0 8px 0; }
@@ -331,6 +331,34 @@ body.mining #objective, body.battle #objective { display: none; }
   #fullPrompt .btn { min-width: 0; font-size: 16px; }
   .rc-main > b { font-size: 22px; }
 }
+/* ---------- v3: income, outposts, combat ---------- */
+.stat .lbl .rate { color: var(--good) !important; font-weight: 700; margin-left: 6px; }
+.big-num { font-family: var(--fh); font-size: 30px; display: inline-block; margin-top: 8px; }
+.depth { color: var(--gold); display: block; }
+.lvl { margin-left: auto; font-weight: 800; color: var(--cyan); font-size: 14px; }
+.lvl small { font-weight: 500; }
+.lvbar { height: 4px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+.lvbar i { display: block; height: 100%; background: linear-gradient(90deg, #1c9fd6, #3de8ff); }
+.ubtns { display: flex; gap: 6px; margin-top: 4px; }
+.ubtns .btn { flex: 1; margin-top: 0 !important; }
+.ubtns .maxb { flex: 0 0 auto; min-width: 58px; background: linear-gradient(180deg, #ffd24a, #c98a10); color: #231500; border-color: #ffe79a; }
+.op-empty { text-align: center; padding: 10px 6px; }
+.op-art { font-size: 54px; }
+.op-empty h3 { font-family: var(--fh); margin: 6px 0; }
+.op-empty p { color: #c4d0ee; }
+.op-top { display: flex; gap: 14px; align-items: center; background: rgba(109,255,176,.07); border: 1px solid rgba(109,255,176,.35); border-radius: 12px; padding: 12px 14px; }
+.op-top > div:first-child { display: flex; flex-direction: column; min-width: 150px; }
+.op-top small { color: var(--good); letter-spacing: 2px; font-size: 11px; }
+.op-top b { font-family: var(--fh); font-size: 26px; }
+.op-top span { color: var(--dim); font-size: 13px; }
+.op-drones { display: flex; flex-wrap: wrap; gap: 3px; flex: 1; align-items: center; }
+.op-drones i { width: 9px; height: 9px; border-radius: 2px; background: #6dffb0; box-shadow: 0 0 6px #6dffb0; animation: pulse 2s infinite; }
+.op-drones i:nth-child(3n) { animation-delay: .4s; } .op-drones i:nth-child(3n+1) { animation-delay: .9s; }
+.op-drones em { font-style: normal; color: var(--good); font-weight: 700; margin-left: 4px; }
+.op-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.op-row .btn { flex: 1; min-width: 120px; }
+.srow.dim { opacity: .5; }
+#battleUI .bt-btns .btn { min-width: 150px; }
 body.thumb * { display: none; }
 body.thumb canvas#c { display: block; }
 </style>
@@ -353,7 +381,7 @@ body.thumb canvas#c { display: block; }
 
 <div id="hud" class="hidden">
   <div class="topbar ui">
-    <div class="stat cr"><span class="lbl">Credits</span><b id="hCr"></b></div>
+    <div class="stat cr"><span class="lbl">Credits <small id="hRate" class="rate"></small></span><b id="hCr"></b></div>
     <div class="stat day" data-need="1"><span class="lbl">Day</span><b id="hDay"></b></div>
     <div class="stat bar"><span class="lbl"><em class="lg">Cargo</em><em class="sh">📦</em> <small id="hCargoT"></small></span><div class="meter cargo"><i id="hCargo"></i></div></div>
     <div class="stat bar"><span class="lbl"><em class="lg">Hull</em><em class="sh">🛡</em> <small id="hHullT"></small></span><div class="meter hp"><i id="hHull"></i></div></div>
@@ -362,7 +390,7 @@ body.thumb canvas#c { display: block; }
     <div class="tbtns">
       <button id="bShip" title="Ship">🚀<span>Ship</span></button>
       <button id="bNews" title="News" data-need="4">📰<span>News</span></button>
-      <button id="bFac" title="Factions" data-need="6">🏛<span>Factions</span></button>
+      <button id="bFac" title="Empire" data-need="1">🤖<span>Empire</span></button>
       <button id="bSnd" title="Sound">🔊</button>
       <button id="bMenu" title="Menu">☰</button>
     </div>
@@ -383,22 +411,17 @@ body.thumb canvas#c { display: block; }
     <div id="mineInfo"></div>
     <div id="mineCargo"></div>
   </div>
-  <div class="minebtns ui">
-    <button id="btnDock" class="btn primary">🛰 Dock</button>
-    <button id="btnMap" class="btn">🗺 Map</button>
-  </div>
-  <div id="fullPrompt" class="ui hidden"></div>
 </div>
 <div id="coach"></div>
 <div id="touchUI" class="hidden">
   <div id="joyZone"></div>
   <div id="joyBase"><div id="joyKnob"></div></div>
-  <div id="fireBtn">LASER</div>
+  <div id="fireBtn">FIRE</div>
 </div>
 
 <div id="battleUI" class="ui hidden">
-  <div class="bt-title">⚔ AUTO BATTLE</div>
-  <div class="bt-btns"><button id="btnSpeed" class="btn">Speed ×1</button><button id="btnRetreat" class="btn danger">Retreat</button></div>
+  <div class="bt-title" id="btTitle">⚔ PIRATES</div>
+  <div class="bt-btns"><button id="btnWarp" class="btn">⚡ Warp out</button><button id="btnContinue" class="btn primary hidden">Continue ▶</button></div>
 </div>
 
 <div id="sheet" class="sheet ui hidden"></div>
@@ -415,17 +438,27 @@ const randi = (a, b) => Math.floor(rand(a, b + 1));
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
-const fmt = n => Math.round(n).toLocaleString('en-US');
+const SUFFIX = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx'];
+function fmt(n) {
+  if (Math.abs(n) < 10 && n % 1) return (Math.floor(n * 10) / 10).toString();
+  n = Math.floor(n);
+  const a = Math.abs(n);
+  if (a < 10000) return n.toLocaleString('en-US');
+  const e = Math.min(SUFFIX.length - 1, Math.floor(Math.log10(a) / 3));
+  const v = n / Math.pow(1000, e);
+  return (Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2)) + SUFFIX[e];
+}
 
+// Ore values climb steeply from zone to zone.
 const ITEMS = {
-  iron:      { n: 'Iron',           b: 14,  c: '#d7a98a', ore: 1, h: 1.0 },
-  nickel:    { n: 'Nickel',         b: 22,  c: '#9fe0b8', ore: 1, h: 1.2 },
-  ice:       { n: 'Ice',            b: 16,  c: '#a6ecff', ore: 1, h: 0.7 },
-  titanium:  { n: 'Titanium',       b: 45,  c: '#dfe6ff', ore: 1, h: 1.6 },
-  platinum:  { n: 'Platinum',       b: 85,  c: '#fff1b8', ore: 1, h: 2.0 },
-  he3:       { n: 'Helium-3',       b: 120, c: '#ffd24a', ore: 1, h: 1.5 },
-  iridium:   { n: 'Iridium',        b: 170, c: '#c38bff', ore: 1, h: 2.6 },
-  exotic:    { n: 'Exotic Crystal', b: 360, c: '#ff5fd7', ore: 1, h: 3.2 },
+  iron:      { n: 'Iron',           b: 4,    c: '#d7a98a', ore: 1, h: 1.0 },
+  ice:       { n: 'Ice',            b: 6,    c: '#a6ecff', ore: 1, h: 0.7 },
+  titanium:  { n: 'Titanium',       b: 30,   c: '#dfe6ff', ore: 1, h: 1.4 },
+  nickel:    { n: 'Nickel',         b: 50,   c: '#9fe0b8', ore: 1, h: 1.2 },
+  he3:       { n: 'Helium-3',       b: 120,  c: '#ffd24a', ore: 1, h: 1.3 },
+  platinum:  { n: 'Platinum',       b: 250,  c: '#fff1b8', ore: 1, h: 1.7 },
+  iridium:   { n: 'Iridium',        b: 1200, c: '#c38bff', ore: 1, h: 2.2 },
+  exotic:    { n: 'Exotic Crystal', b: 9000, c: '#ff5fd7', ore: 1, h: 2.8 },
   food:      { n: 'Food',           b: 24,  c: '#96e072' },
   meds:      { n: 'Medicine',       b: 70,  c: '#ff6b7d' },
   machinery: { n: 'Machinery',      b: 58,  c: '#e0b35e' },
@@ -438,132 +471,135 @@ const ORES = ITEM_KEYS.filter(k => ITEMS[k].ore);
 const GOODS = ITEM_KEYS.filter(k => !ITEMS[k].ore);
 
 const FACTIONS = {
-  tierra:   { n: 'Earth Union',        c: '#5fb4ff', locs: ['tierra', 'luna', 'venus'] },
-  marte:    { n: 'Mars Republic',      c: '#ff7a50', locs: ['marte'] },
-  cinturon: { n: 'Belt Coalition',     c: '#ffc857', locs: ['ceres'] },
-  exterior: { n: 'Outer League',       c: '#6dffb0', locs: ['europa', 'titan'] },
-  piratas:  { n: 'Black Syndicate',    c: '#ff4d6d', locs: ['pluton'] },
+  tierra:   { n: 'Earth Union',     c: '#5fb4ff', locs: ['tierra', 'luna', 'venus'] },
+  marte:    { n: 'Mars Republic',   c: '#ff7a50', locs: ['marte'] },
+  cinturon: { n: 'Belt Coalition',  c: '#ffc857', locs: ['ceres'] },
+  exterior: { n: 'Outer League',    c: '#6dffb0', locs: ['europa', 'titan'] },
+  piratas:  { n: 'Black Syndicate', c: '#ff4d6d', locs: ['pluton'] },
 };
 
-// r = orbit radius (map units), period = days per orbit, tier = unlock stage required
+// field.z = zone tier: drives rock toughness, enemy strength, loot and outposts
+const DEPOT = { iron: 0.9, ice: 0.9, titanium: 0.9, nickel: 0.9, he3: 0.9, platinum: 0.9, iridium: 0.9, exotic: 0.9 };
 const LOCS = [
-  { id: 'mercurio', n: 'Mercury', r: 62, period: 70, a0: 1.2, size: 5, tex: 'rock', col: ['#d8c3a5', '#6b5a48'], danger: 0.06, tier: 2,
-    field: { n: 'Caloris Plains', ores: { iron: 4, platinum: 3, iridium: 1.2, titanium: 1 }, count: 16, hazard: 'heat' },
-    desc: 'Scorched rock next to the Sun. Precious metals — but the heat burns unshielded hulls.' },
-  { id: 'venus', n: 'Venus', r: 98, period: 120, a0: 2.7, size: 8, tex: 'venus', col: ['#f3d9a0', '#a8793b'], faction: 'tierra', danger: 0.04, tier: 4,
+  { id: 'mercurio', n: 'Mercury', r: 62, period: 70, a0: 1.2, size: 5, tex: 'rock', col: ['#d8c3a5', '#6b5a48'], danger: 0.06, tier: 3,
+    station: 'Caloris Depot', depot: 1, fuel: 5, repair: 3, market: { ...DEPOT },
+    field: { n: 'Caloris Plains', z: 1, ores: { platinum: 3, titanium: 2, iron: 2, iridium: 0.25 }, count: 26, hazard: 'heat' },
+    desc: 'Scorched rock next to the Sun. Platinum everywhere — but the heat burns unshielded hulls.' },
+  { id: 'venus', n: 'Venus', r: 98, period: 120, a0: 2.7, size: 8, tex: 'venus', col: ['#f3d9a0', '#a8793b'], faction: 'tierra', danger: 0.04, tier: 5,
     station: 'Aphrodite Cloud City', fuel: 6, repair: 3,
-    market: { ice: 1.9, titanium: 1.3, platinum: 1.25, food: 1.3, machinery: 1.45, tech: 0.9, meds: 0.85, luxury: 0.6 },
+    market: { ice: 2.2, titanium: 1.3, platinum: 1.25, food: 1.3, machinery: 1.45, tech: 0.9, meds: 0.85, luxury: 0.6 },
     desc: 'Floating cities above acid clouds. They make luxuries and medicine, and crave water.' },
-  { id: 'tierra', n: 'Earth', r: 142, period: 190, a0: 0.2, size: 9, tex: 'earth', col: ['#5fb4ff', '#15407e'], faction: 'tierra', danger: 0.03, tier: 1,
+  { id: 'tierra', n: 'Earth', r: 142, period: 190, a0: 0.2, size: 9, tex: 'earth', col: ['#5fb4ff', '#15407e'], faction: 'tierra', danger: 0.03, tier: 2,
     station: 'Gateway Port', fuel: 5, repair: 3,
-    market: { iron: 1.3, nickel: 1.3, ice: 1.0, titanium: 1.4, platinum: 1.55, he3: 1.7, iridium: 1.45, exotic: 1.5, food: 0.6, meds: 0.65, machinery: 0.9, tech: 0.6, arms: 1.15, luxury: 0.8 },
-    desc: 'The cradle of humanity. Pays more for every metal you bring.' },
+    market: { iron: 1.6, nickel: 1.4, ice: 1.2, titanium: 1.5, platinum: 1.5, he3: 1.7, iridium: 1.45, exotic: 1.5, food: 0.6, meds: 0.65, machinery: 0.9, tech: 0.6, arms: 1.15, luxury: 0.8 },
+    desc: 'The cradle of humanity. Pays 50–70% more for every metal you bring.' },
   { id: 'luna', n: 'Moon', parent: 'tierra', r: 17, period: 27, a0: 0, size: 4, tex: 'moon', col: ['#e3e3e3', '#6a6a72'], faction: 'tierra', danger: 0.02, tier: 0,
     station: 'Tranquility Base', fuel: 4, repair: 2.5,
-    market: { iron: 1.0, nickel: 1.0, ice: 1.15, titanium: 1.0, he3: 1.0, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
-    field: { n: 'Lunar Maria', ores: { iron: 5, ice: 2.5, titanium: 1, he3: 0.5 }, count: 18 },
-    desc: 'Your home base. A calm mining field and a small station.' },
-  { id: 'marte', n: 'Mars', r: 196, period: 330, a0: 4.1, size: 7, tex: 'mars', col: ['#ff8a5c', '#7a2a14'], faction: 'marte', danger: 0.05, tier: 2,
+    market: { iron: 1.0, nickel: 1.0, ice: 1.1, titanium: 1.0, he3: 1.0, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
+    field: { n: 'Lunar Maria', z: 0, ores: { iron: 5, ice: 3, titanium: 1.2, he3: 0.3 }, count: 24 },
+    desc: 'Your home base. A calm mining field with a station at the bottom.' },
+  { id: 'marte', n: 'Mars', r: 196, period: 330, a0: 4.1, size: 7, tex: 'mars', col: ['#ff8a5c', '#7a2a14'], faction: 'marte', danger: 0.05, tier: 3,
     station: 'Olympus City', fuel: 5, repair: 3,
-    market: { iron: 0.9, nickel: 1.1, ice: 2.0, titanium: 1.2, platinum: 1.2, he3: 1.3, food: 1.6, meds: 1.35, machinery: 0.65, tech: 1.3, arms: 0.6, luxury: 1.3 },
-    desc: 'A militarized republic. Pays double for ice — water is life on Mars.' },
-  { id: 'ceres', n: 'Ceres', r: 262, period: 560, a0: 5.4, size: 5, tex: 'rock', col: ['#b7b0a4', '#4c463e'], faction: 'cinturon', danger: 0.22, tier: 3,
+    market: { iron: 1.2, nickel: 1.2, ice: 2.5, titanium: 1.3, platinum: 1.3, he3: 1.4, iridium: 1.3, food: 1.6, meds: 1.35, machinery: 0.65, tech: 1.3, arms: 0.6, luxury: 1.3 },
+    desc: 'A militarized republic. Pays a fortune for ice — water is life on Mars.' },
+  { id: 'ceres', n: 'Ceres', r: 262, period: 560, a0: 5.4, size: 5, tex: 'rock', col: ['#b7b0a4', '#4c463e'], faction: 'cinturon', danger: 0.22, tier: 4,
     station: 'Ceres Station', fuel: 5, repair: 3.5,
-    market: { iron: 0.8, nickel: 0.8, ice: 1.3, titanium: 1.0, platinum: 1.1, he3: 1.2, iridium: 1.1, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
-    field: { n: 'Main Belt', ores: { iron: 3, nickel: 4, titanium: 2.2, platinum: 1.5, ice: 1 }, count: 24 },
-    desc: 'Capital of the Asteroid Belt. Rich in nickel and platinum. Pirates prowl here.' },
-  { id: 'jupiter', n: 'Jupiter', r: 345, period: 1000, a0: 1.0, size: 19, tex: 'jupiter', col: ['#e8c49a', '#8a5a36'], body: 1, tier: 5 },
-  { id: 'europa', n: 'Europa', parent: 'jupiter', r: 30, period: 11, a0: 0, size: 4, tex: 'europa', col: ['#f2eadb', '#8f7a60'], faction: 'exterior', danger: 0.12, tier: 5,
+    market: { iron: 0.8, nickel: 1.0, ice: 1.3, titanium: 1.0, platinum: 1.1, he3: 1.2, iridium: 1.15, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
+    field: { n: 'Main Belt', z: 2, ores: { nickel: 3, platinum: 3, titanium: 1, iridium: 1.5 }, count: 30 },
+    desc: 'Capital of the Asteroid Belt. Nickel, platinum, iridium… and pirates.' },
+  { id: 'jupiter', n: 'Jupiter', r: 345, period: 1000, a0: 1.0, size: 19, tex: 'jupiter', col: ['#e8c49a', '#8a5a36'], body: 1, tier: 6 },
+  { id: 'europa', n: 'Europa', parent: 'jupiter', r: 30, period: 11, a0: 0, size: 4, tex: 'europa', col: ['#f2eadb', '#8f7a60'], faction: 'exterior', danger: 0.12, tier: 6,
     station: 'Europa Colony', fuel: 4, repair: 3.5,
-    market: { iron: 1.5, nickel: 1.4, ice: 0.6, titanium: 1.2, platinum: 1.15, he3: 0.9, iridium: 1.3, exotic: 1.2, food: 2.0, meds: 1.6, machinery: 1.5, tech: 1.5, arms: 1.2, luxury: 1.5 },
-    desc: 'A colony beneath the ice. Desperate for food and technology.' },
-  { id: 'troyanos', n: 'Trojans', follow: 'jupiter', offset: 1.05, size: 5, col: ['#a49a8e', '#3e3831'], danger: 0.35, tier: 5,
-    field: { n: 'Jupiter Trojans', ores: { titanium: 3, platinum: 2.5, nickel: 2, iridium: 1.2, he3: 0.5 }, count: 22 },
-    desc: 'An asteroid swarm at Jupiter\'s L4 point. Platinum and iridium. Pirate territory.' },
-  { id: 'saturno', n: 'Saturn', r: 430, period: 1700, a0: 3.4, size: 16, tex: 'saturn', col: ['#f0dca4', '#8e7440'], ring: 1, danger: 0.2, tier: 6,
-    field: { n: 'Rings of Saturn', ores: { ice: 5, he3: 2.5, iridium: 1.2, platinum: 0.6 }, count: 26 },
-    desc: 'The rings: endless ice and pockets of Helium-3.' },
-  { id: 'titan', n: 'Titan', parent: 'saturno', r: 32, period: 16, a0: 2, size: 5, tex: 'titan', col: ['#f0a95c', '#7a4a1c'], faction: 'exterior', danger: 0.12, tier: 6,
+    market: { iron: 1.5, nickel: 1.4, ice: 0.6, titanium: 1.2, platinum: 1.25, he3: 0.9, iridium: 1.5, exotic: 1.3, food: 2.0, meds: 1.6, machinery: 1.5, tech: 1.5, arms: 1.2, luxury: 1.5 },
+    desc: 'A colony beneath the ice. Desperate for food and technology; pays well for iridium.' },
+  { id: 'troyanos', n: 'Trojans', follow: 'jupiter', offset: 1.05, size: 5, col: ['#a49a8e', '#3e3831'], danger: 0.35, tier: 6,
+    station: 'L4 Depot', depot: 1, fuel: 6, repair: 4, market: { ...DEPOT },
+    field: { n: 'Jupiter Trojans', z: 3, ores: { iridium: 4, platinum: 2, he3: 1 }, count: 30 },
+    desc: 'An asteroid swarm at Jupiter\'s L4 point. Iridium everywhere. Pirate territory.' },
+  { id: 'saturno', n: 'Saturn', r: 430, period: 1700, a0: 3.4, size: 16, tex: 'saturn', col: ['#f0dca4', '#8e7440'], ring: 1, danger: 0.25, tier: 7,
+    station: 'Ring Depot', depot: 1, fuel: 5, repair: 4, market: { ...DEPOT },
+    field: { n: 'Rings of Saturn', z: 4, ores: { he3: 4, iridium: 3, ice: 2, exotic: 1 }, count: 32 },
+    desc: 'The rings: Helium-3, iridium, and the first exotic crystals.' },
+  { id: 'titan', n: 'Titan', parent: 'saturno', r: 32, period: 16, a0: 2, size: 5, tex: 'titan', col: ['#f0a95c', '#7a4a1c'], faction: 'exterior', danger: 0.12, tier: 7,
     station: 'Titan Refinery', fuel: 3, repair: 3,
-    market: { iron: 1.6, nickel: 1.5, ice: 0.7, titanium: 1.35, platinum: 1.35, he3: 0.8, iridium: 1.3, exotic: 1.35, food: 1.9, meds: 1.7, machinery: 1.4, tech: 1.6, arms: 1.4, luxury: 0.9 },
-    desc: 'Methane refineries. The cheapest fuel in the system.' },
-  { id: 'pluton', n: 'Pluto', r: 540, period: 2800, a0: 5.9, size: 5, tex: 'pluto', col: ['#e6d2bf', '#5a463c'], faction: 'piratas', danger: 0.3, tier: 7, black: 1,
+    market: { iron: 1.6, nickel: 1.5, ice: 0.7, titanium: 1.35, platinum: 1.35, he3: 1.6, iridium: 1.3, exotic: 1.35, food: 1.9, meds: 1.7, machinery: 1.4, tech: 1.6, arms: 1.4, luxury: 0.9 },
+    desc: 'Methane refineries. Pays top price for Helium-3.' },
+  { id: 'pluton', n: 'Pluto', r: 540, period: 2800, a0: 5.9, size: 5, tex: 'pluto', col: ['#e6d2bf', '#5a463c'], faction: 'piratas', danger: 0.3, tier: 8, black: 1,
     station: 'Charon Haven', fuel: 9, repair: 5,
-    market: { iron: 1.2, nickel: 1.2, ice: 1.0, titanium: 1.2, platinum: 1.3, he3: 1.2, iridium: 1.5, exotic: 1.8, food: 1.8, meds: 2.0, tech: 1.5, arms: 0.55, luxury: 1.6, machinery: 1.3 },
-    desc: 'A black market at the edge of the system. No questions asked. Best prices for exotics.' },
-  { id: 'kuiper', n: 'Kuiper Belt', r: 600, period: 3300, a0: 5.45, size: 6, col: ['#9fb6ff', '#2a3566'], danger: 0.55, tier: 7,
-    field: { n: 'Kuiper Belt', ores: { ice: 3, he3: 2, iridium: 2, exotic: 1.4 }, count: 24, cold: 1 },
-    desc: 'The frozen frontier. Exotic crystals glow here… and so do the biggest pirate ships.' },
+    market: { iron: 1.2, nickel: 1.2, ice: 1.0, titanium: 1.2, platinum: 1.3, he3: 1.2, iridium: 1.5, exotic: 1.9, food: 1.8, meds: 2.0, tech: 1.5, arms: 0.55, luxury: 1.6, machinery: 1.3 },
+    desc: 'A black market at the edge of the system. Best prices for exotics. No questions asked.' },
+  { id: 'kuiper', n: 'Kuiper Belt', r: 600, period: 3300, a0: 5.45, size: 6, col: ['#9fb6ff', '#2a3566'], danger: 0.55, tier: 8,
+    station: 'Frontier Depot', depot: 1, fuel: 8, repair: 5, market: { ...DEPOT },
+    field: { n: 'Kuiper Belt', z: 5, ores: { iridium: 3, exotic: 2, he3: 1 }, count: 32, cold: 1 },
+    desc: 'The frozen frontier. Exotic crystals glow everywhere… guarded by pirate carriers.' },
 ];
 const LOC = Object.fromEntries(LOCS.map(l => [l.id, l]));
 const NODES = LOCS.filter(l => !l.body);
-// every station buys every ore (auto-sell on docking)
+const FIELDS = NODES.filter(l => l.field);
 for (const l of LOCS) if (l.market) for (const o of ORES) if (l.market[o] == null) l.market[o] = 0.95;
 
-// ============ PROGRESSION ============
-// Unlocks happen by lifetime earnings. Each adds a new layer of the game.
+// ============ PROGRESSION (lifetime earnings) ============
 const UNLOCKS = [
   { at: 0 },
-  { at: 600, icon: '🗺️', title: 'Star Map unlocked', text: 'You can now fly to <b>Earth</b>. It pays <b>30–70% more</b> for metals. Travel uses fuel — your tank refills when you dock.', upg: ['engine', 'tank'] },
-  { at: 3000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mars</b> pays double for Ice. <b>Mercury</b> is full of Platinum, but the heat burns your hull — <b>Shields</b> are now for sale.', upg: ['shield'] },
-  { at: 8000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt are open: nickel, platinum… and <b>pirates</b>. Battles are automatic — buy <b>Weapons</b> to win them.', upg: ['weapons'] },
-  { at: 18000, icon: '📈', title: 'Trade & Contracts', text: 'Stations now let you <b>buy and sell goods</b>, offer <b>contracts</b>, and the system has <b>events</b> — wars, plagues, booms — that swing prices. <b>Venus</b> is open.', upg: [] },
-  { at: 40000, icon: '🪐', title: 'Jupiter System', text: '<b>Europa</b> colony and the <b>Trojan</b> asteroids are open. Iridium! The <b>Scanner</b> reveals rich veins and avoids ambushes.', upg: ['scanner'] },
-  { at: 90000, icon: '👑', title: 'Saturn & Influence', text: '<b>Titan</b> and the <b>Rings</b> are open. You can now <b>invest</b> in stations for daily income and <b>influence</b>. Reach <b>100 influence</b> to rule the system.', upg: [] },
-  { at: 180000, icon: '💎', title: 'The Frontier', text: '<b>Pluto</b>\'s black market and the <b>Kuiper Belt</b> are open. Exotic crystals are worth a fortune — and guarded by pirate carriers.', upg: [] },
+  { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and fill it with <b>drones</b>. They mine for you <b>all the time</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
+  { at: 1500, icon: '🗺️', title: 'Star Map', text: 'Fly to <b>Earth</b> — it pays <b>50–70% more</b> for metals. Travel uses fuel; your tank refills when you dock. <b>Refinery</b> upgrades now boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
+  { at: 10000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mercury</b> is covered in <b>Platinum</b> (worth 60× iron) but the heat burns your hull — buy <b>Shields</b>. <b>Mars</b> pays a fortune for ice.', upg: ['shield'] },
+  { at: 60000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt: nickel, platinum, iridium… and <b>pirates</b>. You fly and shoot in battle — buy <b>Weapons</b>!', upg: ['weapons'] },
+  { at: 400000, icon: '📈', title: 'Trade & Events', text: 'Stations let you <b>buy and sell goods</b> and offer <b>contracts</b>. System <b>events</b> — wars, plagues, booms — swing prices. <b>Venus</b> is open.', upg: [] },
+  { at: 3e6, icon: '🪐', title: 'Jupiter System', text: '<b>Europa</b> and the <b>Trojan</b> asteroids: iridium worth <b>300× iron</b>. The <b>Scanner</b> reveals rich veins.', upg: ['scanner'] },
+  { at: 25e6, icon: '👑', title: 'Saturn & Influence', text: '<b>Titan</b> and the <b>Rings</b>. <b>Invest</b> in stations: each level adds <b>+10% to ALL income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the system.', upg: [] },
+  { at: 200e6, icon: '💎', title: 'The Frontier', text: '<b>Pluto</b>\'s black market and the <b>Kuiper Belt</b>. Exotic crystals are worth <b>2,000× iron</b>.', upg: [] },
 ];
-const U = { MAP: 1, MARS: 2, BELT: 3, TRADE: 4, JUPITER: 5, SATURN: 6, FRONTIER: 7 };
+const U = { OUTPOST: 1, MAP: 2, MARS: 3, BELT: 4, TRADE: 5, JUPITER: 6, SATURN: 7, FRONTIER: 8 };
 
-// ============ UPGRADES ============
+// ============ UPGRADES (exponential) ============
+// cost(lv) = price to go from lv to lv+1
 const UPG = {
-  hull:    { n: 'Hull', icon: '⬢', d: 'Cargo space & armor. A new hull is a whole new ship!', stage: 0,
-             names: ['Sparrow', 'Mule', 'Albatross', 'Leviathan', 'Colossus'],
-             cost: [0, 450, 2500, 12000, 50000],
-             cargo: [20, 45, 90, 160, 280], hp: [60, 110, 180, 280, 420], mass: [1, 1.25, 1.6, 2.0, 2.5] },
-  laser:   { n: 'Mining Laser', icon: '✦', d: 'Cut rocks faster, from farther away.', stage: 0,
-             names: ['Cutter', 'Driller', 'Fissure', 'Sunlance', 'Annihilator'],
-             cost: [0, 300, 1500, 7000, 28000], dps: [12, 20, 32, 50, 78], range: [190, 230, 270, 310, 360] },
-  drones:  { n: 'Magnet & Drones', icon: '⌬', d: 'Pull ore from farther. Drones collect it for you and help in fights.', stage: 0,
-             names: ['Magnet', 'Swarm I', 'Swarm II', 'Swarm III', 'Hive'],
-             cost: [0, 250, 1400, 6500, 25000], magnet: [130, 180, 230, 290, 360], count: [0, 1, 2, 3, 4] },
-  engine:  { n: 'Engines', icon: '▲', d: 'Fly faster, use less fuel, escape pirates.', stage: 1,
-             names: ['Chemical', 'Ion', 'Plasma', 'Fusion', 'Torch'],
-             cost: [0, 600, 3000, 11000, 36000], thrust: [1, 1.15, 1.3, 1.5, 1.75], speed: [1, 1.25, 1.55, 1.9, 2.4], eff: [1, 1.15, 1.35, 1.6, 1.9], flee: [0.3, 0.4, 0.5, 0.62, 0.75] },
-  tank:    { n: 'Fuel Tank', icon: '◍', d: 'Reach farther destinations.', stage: 1,
-             names: ['Basic', 'Extended', 'Double', 'Cryo', 'Deep Space'],
-             cost: [0, 400, 2000, 8000, 24000], fuel: [60, 100, 150, 215, 300] },
-  shield:  { n: 'Shields', icon: '◎', d: 'Absorb damage and heat. Regenerate over time.', stage: 2,
-             names: ['None', 'Deflector', 'Barrier', 'Aegis', 'Bastion'],
-             cost: [0, 1200, 4500, 14000, 40000], sp: [0, 30, 65, 110, 170] },
-  weapons: { n: 'Weapons', icon: '✚', d: 'Auto-turrets that fight pirates for you.', stage: 3,
-             names: ['Light Cannon', 'Autocannon', 'Railgun', 'Plasma Battery', 'Storm'],
-             cost: [0, 1200, 4500, 14000, 40000], dps: [6, 12, 22, 36, 56] },
-  scanner: { n: 'Scanner', icon: '◈', d: 'Reveals rich veins and helps avoid ambushes.', stage: 5,
-             names: ['Passive', 'Active', 'Deep', 'Quantum', 'Omniscient'],
-             cost: [0, 2500, 7000, 18000, 45000], avoid: [0, 0.12, 0.22, 0.32, 0.42] },
+  hull:     { n: 'Ship Class', icon: '⬢', stage: 0, max: 5, d: 'A new hull is a whole new ship: bigger base cargo and armor.',
+              names: ['Sparrow', 'Mule', 'Albatross', 'Leviathan', 'Colossus'],
+              costs: [400, 12000, 400000, 15e6], cargo: [20, 50, 120, 300, 800], hp: [60, 160, 450, 1300, 4000], mass: [1, 1.2, 1.45, 1.75, 2.1] },
+  laser:    { n: 'Mining Laser', icon: '✦', stage: 0, max: 60, c0: 40, g: 1.33, d: 'Cut rocks faster. Farther zones have much tougher rock.' },
+  magnet:   { n: 'Magnet', icon: '⌬', stage: 0, max: 25, c0: 30, g: 1.5, d: 'Pull ore from farther away. Every 3 levels adds a collector drone.' },
+  cargo:    { n: 'Cargo Bay', icon: '▣', stage: 1, max: 40, c0: 60, g: 1.42, d: '+25% cargo space per level.' },
+  refinery: { n: 'Refinery', icon: '⚗', stage: 2, max: 60, c0: 400, g: 1.5, d: '+10% value on ALL ore — including your drones.' },
+  engine:   { n: 'Engines', icon: '▲', stage: 2, max: 20, c0: 300, g: 1.7, d: 'Fly faster, use less fuel, warp out of fights sooner.' },
+  tank:     { n: 'Fuel Tank', icon: '◍', stage: 2, max: 15, c0: 200, g: 1.7, d: 'Reach farther destinations.' },
+  shield:   { n: 'Shields', icon: '◎', stage: 3, max: 50, c0: 1500, g: 1.4, d: 'Absorb damage and heat. Regenerate over time.' },
+  weapons:  { n: 'Guns', icon: '✚', stage: 4, max: 60, c0: 5000, g: 1.33, d: 'Twin cannons for fighting pirates. Hold fire to shoot.' },
+  scanner:  { n: 'Scanner', icon: '◈', stage: 6, max: 5, c0: 2e6, g: 4, d: 'Reveals rich veins and helps avoid ambushes.' },
 };
 const UPG_KEYS = Object.keys(UPG);
+function upgCost(k, lv) { const u = UPG[k]; return u.costs ? u.costs[lv - 1] : Math.round(u.c0 * Math.pow(u.g, lv - 1)); }
+
+// ============ DRONE OUTPOSTS ============
+// per field zone: build cost, drone base cost, drone income per second
+const OUTPOST = {
+  build: [60, 6000, 80000, 2.5e6, 30e6, 400e6],
+  drone: [15, 1200, 16000, 450000, 6e6, 80e6],
+  rate:  [0.5, 30, 300, 7000, 80000, 900000],
+  growth: 1.14,          // each drone costs 14% more than the last
+  lvCost: [8, 60, 400, 3000, 20000, 150000, 1e6, 8e6, 6e7], // × build cost, to reach level 2..10
+  maxLv: 10,
+};
+const outpostRate = (z, lv, n) => OUTPOST.rate[z] * n * Math.pow(2, lv - 1);
 
 // ============ INVESTMENTS ============
-const INVEST = {
-  names: ['Warehouse', 'Refinery', 'Consortium'],
-  cost: [6000, 22000, 70000],
-  income: [60, 220, 650],
-  infl: [3, 6, 10],
-  rep: [0, 15, 35],
-};
+const STATION_TIER = { luna: 1, tierra: 2, venus: 4, marte: 4, ceres: 10, europa: 40, titan: 150, pluton: 400 };
+const INVEST = { names: ['Warehouse', 'Refinery', 'Consortium'], cost: [2e6, 20e6, 200e6], infl: [3, 6, 10], bonus: 0.10, rep: [0, 15, 35] };
 
-// ============ ENEMIES ============
+// ============ ENEMIES (real-time combat) ============
 const ENEMIES = {
-  raider:   { n: 'Raider',          hp: 36,  sp: 0,   dps: 4.5, pow: 1,   loot: 120, size: 0.8 },
-  corsair:  { n: 'Corsair',         hp: 85,  sp: 20,  dps: 9,   pow: 2.5, loot: 320, size: 1.05 },
-  frigate:  { n: 'Pirate Frigate',  hp: 180, sp: 55,  dps: 16,  pow: 5.1, loot: 800, size: 1.4 },
-  carrier:  { n: 'Pirate Carrier',  hp: 420, sp: 120, dps: 30,  pow: 10.5, loot: 2200, size: 2.0 },
-  patrol:   { n: 'Military Patrol', hp: 140, sp: 60,  dps: 14,  pow: 4.5, loot: 500, size: 1.25, military: 1 },
+  raider:  { n: 'Raider',          hp: 30,  sp: 0,   dmg: 4,  rate: 1.2, spd: 210, size: 0.8,  loot: 40,  pow: 1 },
+  corsair: { n: 'Corsair',         hp: 80,  sp: 25,  dmg: 6,  rate: 1.3, spd: 180, size: 1.05, loot: 110, pow: 2.5 },
+  frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
+  carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
+  patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };
+const Z_ENEMY = [0.5, 0.7, 1, 3, 8, 22];   // enemy stat multiplier by zone
+const Z_LOOT = [1, 5, 30, 250, 2500, 25000];
 
 const RANKS = [
-  [0, 'Rookie'], [8, 'Pilot'], [20, 'Contractor'], [35, 'Trader'],
+  [0, 'Rookie'], [8, 'Pilot'], [20, 'Contractor'], [35, 'Tycoon'],
   [55, 'Magnate'], [75, 'Belt Legend'], [100, 'Solar Sovereign'],
 ];
 
@@ -708,21 +744,21 @@ function planetTex(loc) {
     let col;
     switch (loc.tex) {
       case 'earth': {
-        const land = fbm(u * 0.8, v * 0.8, seed + 5, P * 0.8, 5);
+        const land = fbm(u * 4 / 6, v * 4 / 6, seed + 5, 4, 5);
         if (land > 0.575) col = ramp([[0, [78, 150, 70]], [0.5, [120, 150, 70]], [1, [170, 140, 95]]], (land - 0.575) * 4 + (n - 0.5));
         else col = ramp([[0, [10, 40, 110]], [1, [40, 120, 200]]], land * 1.8);
         if (lat > 0.82 + n * 0.1) col = [235, 242, 250];
         break;
       }
       case 'moon': {
-        const maria = fbm(u * 0.6, v * 0.6, seed + 9, P * 0.6, 4);
+        const maria = fbm(u * 4 / 6, v * 4 / 6, seed + 9, 4, 4);
         col = ramp([[0, [70, 70, 78]], [1, [215, 215, 220]]], n * 0.9 + 0.15);
         if (maria < 0.42) col = mixc(col, [70, 72, 82], 0.6);
         break;
       }
       case 'rock': col = mixc(D, L, clamp((n - 0.3) * 1.6, 0, 1)); break;
       case 'mars': {
-        const dark = fbm(u * 0.7, v * 0.7, seed + 3, P * 0.7, 4);
+        const dark = fbm(u * 4 / 6, v * 4 / 6, seed + 3, 4, 4);
         col = ramp([[0, [120, 40, 20]], [0.5, [205, 95, 55]], [1, [240, 150, 100]]], n);
         if (dark < 0.4) col = mixc(col, [90, 35, 25], 0.55);
         if (lat > 0.88) col = [245, 235, 230];
@@ -743,14 +779,14 @@ function planetTex(loc) {
         break;
       }
       case 'europa': {
-        const ridge = Math.abs(fbm(u * 1.3, v * 1.3, seed + 4, P * 1.3, 5) - 0.5);
+        const ridge = Math.abs(fbm(u * 8 / 6, v * 8 / 6, seed + 4, 8, 5) - 0.5);
         col = ramp([[0, [200, 185, 160]], [1, [250, 245, 235]]], n);
         if (ridge < 0.025) col = [150, 95, 60];
         break;
       }
       case 'titan': col = ramp([[0, [170, 95, 30]], [1, [245, 180, 90]]], 0.35 + Math.sin(j / TH * 8 + n * 3) * 0.12 + n * 0.4); break;
       case 'pluto': {
-        const heart = fbm(u * 0.7, v * 0.7, seed + 8, P * 0.7, 4);
+        const heart = fbm(u * 4 / 6, v * 4 / 6, seed + 8, 4, 4);
         col = ramp([[0, [110, 70, 55]], [1, [220, 195, 170]]], n);
         if (heart > 0.58) col = mixc(col, [250, 240, 230], 0.75);
         break;
@@ -777,7 +813,7 @@ function planetTex(loc) {
     clouds = document.createElement('canvas'); clouds.width = TW; clouds.height = TH;
     const cx = clouds.getContext('2d'); const ci = cx.createImageData(TW, TH);
     for (let j = 0; j < TH; j++) for (let i = 0; i < TW; i++) {
-      const n = fbm(i / TW * P * 1.4, j / TH * P * 0.9, seed + 77, P * 1.4, 5);
+      const n = fbm(i / TW * 8, j / TH * P * 0.9, seed + 77, 8, 5);
       const a = clamp((n - 0.52) * 4, 0, 1);
       const k = (j * TW + i) * 4;
       ci.data[k] = ci.data[k + 1] = ci.data[k + 2] = 255; ci.data[k + 3] = a * 220;
@@ -1257,56 +1293,64 @@ function startAmbient() {
 // ---- state.js ----
 'use strict';
 // ============ STATE, ECONOMY & WORLD ============
-const SAVE_KEY = 'solar_prospector_v2';
+const SAVE_KEY = 'solar_prospector_v3';
 let S = null;
 
 function newGame() {
   S = {
-    v: 2, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: 'Pioneer',
-    lv: { hull: 1, laser: 1, engine: 1, tank: 1, shield: 1, weapons: 1, drones: 1, scanner: 1 },
+    v: 3, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: 'Pioneer',
+    lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, sat: {}, drift: {}, depl: {},
+    invest: {}, outposts: {}, sat: {}, drift: {}, depl: {},
     events: [], news: [], contracts: {}, active: [],
-    stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0 },
-    unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {},
+    stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
+    unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
   };
-  for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.08, 0.08); } }
+  for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.06, 0.06); } }
   addNews('📡', 'Your old mining ship is ready at Tranquility Base. Time to get rich.', '#3de8ff');
   return S;
 }
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+function save() { if (!S) return; S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
-  try { const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s); return d && d.v === 2 ? d : null; } catch (e) { return null; }
+  try { const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s); return d && d.v === 3 ? d : null; } catch (e) { return null; }
 }
 function hasSave() { return !!loadSave(); }
 const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0);
 const upgOpen = k => has(UPG[k].stage);
+const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
+const econScale = () => Math.pow(4, Math.max(0, S.unlock - 5));
+const itemBase = k => ITEMS[k].ore ? ITEMS[k].b : ITEMS[k].b * econScale();
 
 // ---------- derived stats ----------
 const ship = {
-  get cargoMax() { return UPG.hull.cargo[S.lv.hull - 1]; },
+  get cargoMax() { return Math.floor(UPG.hull.cargo[S.lv.hull - 1] * (1 + 0.25 * (S.lv.cargo - 1))); },
   get hpMax() { return UPG.hull.hp[S.lv.hull - 1]; },
   get mass() { return UPG.hull.mass[S.lv.hull - 1]; },
-  get fuelMax() { return UPG.tank.fuel[S.lv.tank - 1]; },
-  get laserDps() { return UPG.laser.dps[S.lv.laser - 1]; },
-  get laserRange() { return UPG.laser.range[S.lv.laser - 1]; },
-  get thrust() { return UPG.engine.thrust[S.lv.engine - 1]; },
-  get speed() { return UPG.engine.speed[S.lv.engine - 1]; },
-  get eff() { return UPG.engine.eff[S.lv.engine - 1]; },
-  get flee() { return UPG.engine.flee[S.lv.engine - 1]; },
-  get shieldMax() { return UPG.shield.sp[S.lv.shield - 1]; },
-  get weaponDps() { return UPG.weapons.dps[S.lv.weapons - 1] + UPG.drones.count[S.lv.drones - 1] * 2.5; },
-  get magnet() { return UPG.drones.magnet[S.lv.drones - 1]; },
-  get drones() { return UPG.drones.count[S.lv.drones - 1]; },
-  get avoid() { return UPG.scanner.avoid[S.lv.scanner - 1]; },
-  get power() { return Math.sqrt(Math.max(1, S.hull + this.shieldMax * 1.5) * this.weaponDps) / 12.7; },
+  get fuelMax() { return Math.round(60 * Math.pow(1.22, S.lv.tank - 1)); },
+  get laserDps() { return 12 * Math.pow(1.19, S.lv.laser - 1); },
+  get laserRange() { return 190 + Math.min(190, (S.lv.laser - 1) * 6); },
+  get thrust() { return Math.min(2.2, 1 + 0.06 * (S.lv.engine - 1)); },
+  get speed() { return 1 + 0.12 * (S.lv.engine - 1); },
+  get eff() { return 1 + 0.07 * (S.lv.engine - 1); },
+  get warpTime() { return Math.max(1.5, 5 - 0.2 * (S.lv.engine - 1)); },
+  get shieldMax() { return S.lv.shield > 1 ? Math.round(30 * Math.pow(1.24, S.lv.shield - 2)) : 0; },
+  get weaponDps() { return 15 * Math.pow(1.19, S.lv.weapons - 1); },
+  get magnet() { return 130 + Math.min(370, (S.lv.magnet - 1) * 16); },
+  get drones() { return Math.min(6, Math.floor((S.lv.magnet - 1) / 3)); },
+  get avoid() { return [0, 0.12, 0.22, 0.32, 0.42][S.lv.scanner - 1]; },
+  get refinery() { return Math.pow(1.1, S.lv.refinery - 1); },
 };
+function incomeMult() {
+  let inv = 0; for (const id in S.invest) inv += S.invest[id];
+  return ship.refinery * (1 + INVEST.bonus * inv);
+}
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
 function addCargo(k, n) { S.cargo[k] = (S.cargo[k] || 0) + n; if (S.cargo[k] <= 0) delete S.cargo[k]; }
 function oreValueAt(locId) { let v = 0; for (const k of ORES) if (S.cargo[k]) v += (sellPrice(locId, k) || 0) * S.cargo[k]; return v; }
+function oreValueBase(k) { return ITEMS[k].b * incomeMult(); }
 
 // ---------- orbital positions ----------
 function locPos(loc, day) {
@@ -1323,10 +1367,7 @@ function locPos(loc, day) {
   }
   return { x: Math.cos(a) * loc.r, y: Math.sin(a) * loc.r };
 }
-function locDist(a, b, day) {
-  const p = locPos(a, day), q = locPos(b, day);
-  return Math.hypot(p.x - q.x, p.y - q.y);
-}
+function locDist(a, b, day) { const p = locPos(a, day), q = locPos(b, day); return Math.hypot(p.x - q.x, p.y - q.y); }
 function travelInfo(to, from) {
   from = from || S.loc;
   const d = Math.max(8, locDist(from, to, S.day));
@@ -1336,7 +1377,6 @@ function travelInfo(to, from) {
   return { d, fuel, days, danger };
 }
 function fuelEventMult() { let m = 1; for (const e of S.events) if (e.fuelCost) m *= e.fuelCost; return m; }
-
 function locDanger(id) {
   if (!has(U.BELT)) return 0;
   let d = LOC[id].danger || 0;
@@ -1358,16 +1398,17 @@ function basePrice(locId, item) {
   const l = LOC[locId];
   const mult = l.market && l.market[item];
   if (mult == null) return null;
-  return ITEMS[item].b * mult * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
+  const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() : itemBase(item);
+  return b * mult * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
 }
-function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.93)); }
+function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.95)); }
 function buyPrice(locId, item) {
   const l = LOC[locId]; const mult = l.market && l.market[item];
   if (mult == null || mult > 1.0 || ITEMS[item].ore) return null;
   return Math.max(2, Math.round(basePrice(locId, item) * 1.07));
 }
 function fuelPrice(locId) {
-  let p = LOC[locId].fuel || 6; for (const e of S.events) if (e.fuelPrice) p *= e.fuelPrice; return Math.max(1, Math.round(p * 10) / 10);
+  let p = (LOC[locId].fuel || 6) * (1 + S.unlock * 0.5); for (const e of S.events) if (e.fuelPrice) p *= e.fuelPrice; return Math.max(1, Math.round(p * 10) / 10);
 }
 function marketClosed(locId) { return S.events.some(e => e.closed && e.closed.includes(locId)); }
 
@@ -1380,20 +1421,18 @@ function doSell(locId, item, n) {
   let total = 0;
   for (let i = 0; i < n; i++) {
     total += sellPrice(locId, item);
-    S.sat[locId][item] = Math.max(0.4, S.sat[locId][item] * (ITEMS[item].ore ? 0.992 : 0.982));
+    S.sat[locId][item] = Math.max(0.55, S.sat[locId][item] * (ITEMS[item].ore ? 0.9985 : 0.982));
   }
   addCargo(item, -n);
   S.stats.traded += n;
   const l = LOC[locId];
-  if (n > 0) {
-    if (l.faction) {
-      let gain = total / 3000;
-      for (const e of S.events) if (e.relief && e.relief.loc === locId && e.relief.item === item) gain += n * 0.35;
-      if (item === 'arms') for (const e of S.events) if (e.war && e.war.includes(l.faction)) {
-        const other = e.war.find(f => f !== l.faction); repChange(other, -n * 0.15, true); gain += n * 0.2;
-      }
-      repChange(l.faction, gain, true);
+  if (n > 0 && l.faction) {
+    let gain = Math.min(3, n / 60);
+    for (const e of S.events) if (e.relief && e.relief.loc === locId && e.relief.item === item) gain += n * 0.35;
+    if (item === 'arms') for (const e of S.events) if (e.war && e.war.includes(l.faction)) {
+      const other = e.war.find(f => f !== l.faction); repChange(other, -n * 0.15, true); gain += n * 0.2;
     }
+    repChange(l.faction, gain, true);
     if (l.black) for (const f in FACTIONS) if (f !== 'piratas') repChange(f, -n * 0.02, true);
   }
   earn(total);
@@ -1432,18 +1471,79 @@ function dockAtStation() {
     const fp = fuelPrice(id);
     const need = Math.floor(ship.fuelMax - S.fuel);
     const can = Math.min(need, Math.floor(S.credits / fp));
-    if (can > 0) { S.fuel += can; S.credits -= Math.ceil(can * fp); r.fuel = can; r.fuelCost = Math.ceil(can * fp); }
+    if (can > 0) { S.fuel += can; S.credits -= can * fp; r.fuel = can; r.fuelCost = can * fp; }
   }
   const hneed = Math.ceil(ship.hpMax - S.hull);
   if (hneed > 0) {
-    const rp = l.repair || 3;
+    const rp = (l.repair || 3) * (1 + S.unlock);
     const can = Math.min(hneed, Math.floor(S.credits / rp));
-    if (can > 0) { S.hull = Math.min(ship.hpMax, S.hull + can); S.credits -= Math.ceil(can * rp); r.repair = can; r.repairCost = Math.ceil(can * rp); }
+    if (can > 0) { S.hull = Math.min(ship.hpMax, S.hull + can); S.credits -= can * rp; r.repair = can; r.repairCost = can * rp; }
   }
   S.stats.docks++;
-  if (has(U.TRADE) && (!S.contracts[id] || !S.nextContracts[id])) genContracts(id);
+  if (has(U.TRADE) && l.market && !l.depot && (!S.contracts[id] || !S.nextContracts[id])) genContracts(id);
   save();
   return r;
+}
+
+// ---------- drone outposts ----------
+function outpostOf(id) { return S.outposts[id]; }
+function outpostIncome(id) {
+  const o = S.outposts[id]; if (!o) return 0;
+  return outpostRate(LOC[id].field.z, o.lv, o.n) * incomeMult();
+}
+function totalIncome() { let v = 0; for (const id in S.outposts) v += outpostIncome(id); return v; }
+function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
+function droneCost(id, k) {
+  const o = S.outposts[id]; const n = o ? o.n : 0; const z = LOC[id].field.z;
+  let c = 0; for (let i = 0; i < (k || 1); i++) c += OUTPOST.drone[z] * Math.pow(OUTPOST.growth, n + i);
+  return Math.ceil(c);
+}
+function outpostLvCost(id) { const o = S.outposts[id]; if (!o || o.lv >= OUTPOST.maxLv) return null; return OUTPOST.build[LOC[id].field.z] * OUTPOST.lvCost[o.lv - 1]; }
+function buildOutpost(id) {
+  const c = buildCost(id); if (S.credits < c || S.outposts[id]) return false;
+  S.credits -= c; S.outposts[id] = { lv: 1, n: 1 };
+  addNews('🤖', `Drone outpost built at ${LOC[id].field.n}`, '#6dffb0');
+  return true;
+}
+function maxAffordableDrones(id) {
+  const o = S.outposts[id]; if (!o) return 0;
+  let n = 0, c = 0; const z = LOC[id].field.z;
+  while (n < 500) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n); if (c + nc > S.credits) break; c += nc; n++; }
+  return n;
+}
+function buyDrones(id, k) {
+  const o = S.outposts[id]; if (!o) return 0;
+  if (k === 'max') k = maxAffordableDrones(id);
+  if (!k) return 0;
+  const c = droneCost(id, k); if (S.credits < c) return 0;
+  S.credits -= c; o.n += k; return k;
+}
+function upgradeOutpost(id) {
+  const c = outpostLvCost(id); if (c == null || S.credits < c) return false;
+  S.credits -= c; S.outposts[id].lv++;
+  addNews('🏭', `${LOC[id].field.n} outpost upgraded to level ${S.outposts[id].lv} (×2 output)`, '#6dffb0');
+  return true;
+}
+// real-time drone income
+let incomeAcc = 0;
+function incomeTick(dt) {
+  const inc = totalIncome();
+  if (!inc) return;
+  const g = inc * dt;
+  S.credits += g; S.stats.earned += g; S.stats.droneEarned += g;
+  incomeAcc += dt;
+  if (incomeAcc > 0.5) { incomeAcc = 0; checkUnlocks(); }
+}
+function offlineGains() {
+  const now = Date.now();
+  const secs = clamp((now - (S.lastSeen || now)) / 1000, 0, 8 * 3600);
+  S.lastSeen = now;
+  if (secs < 30) return null;
+  const g = totalIncome() * secs * 0.6;
+  if (g < 1) return null;
+  S.credits += g; S.stats.earned += g; S.stats.droneEarned += g;
+  checkUnlocks();
+  return { secs, g };
 }
 
 // ---------- progression ----------
@@ -1454,7 +1554,7 @@ function checkUnlocks() {
     const u = UNLOCKS[S.unlock];
     pendingUnlocks.push(S.unlock);
     addNews(u.icon, `<b>${u.title}</b>`, '#ffd24a');
-    if (S.unlock === U.TRADE) { S.nextEvent = S.day + 3; for (const l of NODES) if (l.market && locOpen(l.id)) genContracts(l.id); }
+    if (S.unlock === U.TRADE) { S.nextEvent = S.day + 3; for (const l of NODES) if (l.market && !l.depot && locOpen(l.id)) genContracts(l.id); }
   }
 }
 function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock + 1] : null; }
@@ -1463,40 +1563,40 @@ function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock 
 function influence() {
   let v = 0;
   for (const id in S.invest) for (let i = 0; i < S.invest[id]; i++) v += INVEST.infl[i];
+  for (const id in S.outposts) v += S.outposts[id].lv - 1;
   for (const f in S.rep) if (f !== 'piratas') v += Math.max(0, S.rep[f]) / 8;
   v += Math.max(0, S.rep.piratas) / 16;
-  v += Math.min(10, S.stats.won * 0.25);
+  v += Math.min(10, S.stats.kills * 0.05);
   return Math.floor(v);
 }
 function rankName(inf) { let r = RANKS[0][1]; for (const [n, t] of RANKS) if (inf >= n) r = t; return r; }
-function dailyIncome() { let v = 0; for (const id in S.invest) for (let i = 0; i < S.invest[id]; i++) v += INVEST.income[i]; return v; }
-function investCost(locId) { const lv = S.invest[locId] || 0; const f = LOC[locId].black ? 1.3 : 1; return lv >= 3 ? null : Math.round(INVEST.cost[lv] * f); }
+function investCost(locId) { const lv = S.invest[locId] || 0; return lv >= 3 ? null : Math.round(INVEST.cost[lv] * (STATION_TIER[locId] || 5)); }
 
 // ---------- contracts ----------
 function uid() { return Math.random().toString(36).slice(2, 8); }
 function genContracts(locId) {
   const l = LOC[locId];
   const list = [];
-  const openMarkets = NODES.filter(x => x.market && x.id !== locId && locOpen(x.id));
+  const openMarkets = NODES.filter(x => x.market && !x.depot && x.id !== locId && locOpen(x.id));
   for (let i = 0; i < 3; i++) {
     const r = Math.random();
     if (r < 0.55 || !openMarkets.length) {
       const wanted = Object.keys(l.market).filter(k => l.market[k] >= 1.1);
       const item = pick(wanted.length ? wanted : ORES.slice(0, 3));
-      const scale = clamp(1 + S.day / 60, 1, 8) * (0.6 + 0.4 * S.lv.hull);
-      const qty = Math.max(4, Math.round(rand(6, 14) * scale * (ITEMS[item].b > 100 ? 0.4 : 1)));
-      const reward = Math.round(qty * ITEMS[item].b * rand(1.8, 2.4) / 10) * 10;
+      const scale = ship.cargoMax / 25;
+      const qty = Math.max(4, Math.round(rand(6, 14) * scale * (ITEMS[item].ore ? 1 : 1)));
+      const reward = Math.round(qty * itemBase(item) * rand(1.8, 2.4) / 10) * 10;
       list.push({ type: 'deliver', id: uid(), from: locId, to: locId, item, qty, reward, rep: 4 + Math.round(qty / 8), days: randi(18, 35), faction: l.faction });
     } else if (r < 0.8 || !has(U.BELT)) {
       const dest = pick(openMarkets);
       const buyables = GOODS.filter(k => l.market[k] != null && l.market[k] <= 1.0);
       const item = buyables.length ? pick(buyables) : 'food';
-      const qty = Math.max(4, Math.round(rand(5, 12) * clamp(1 + S.day / 80, 1, 6)));
-      const reward = Math.round((qty * ITEMS[item].b * 1.5 + locDist(locId, dest.id, S.day) * 6) / 10) * 10;
+      const qty = Math.max(4, Math.round(rand(0.3, 0.6) * ship.cargoMax));
+      const reward = Math.round((qty * itemBase(item) * 1.5 + locDist(locId, dest.id, S.day) * 6 * econScale()) / 10) * 10;
       list.push({ type: 'deliver', id: uid(), from: locId, to: dest.id, item, qty, reward, rep: 5 + Math.round(qty / 6), days: randi(25, 45), faction: dest.faction || l.faction });
     } else {
       const kills = randi(1, 3);
-      const reward = Math.round(kills * (350 + S.day * 8) / 10) * 10;
+      const reward = Math.round(kills * 300 * Z_LOOT[locZone(locId)]);
       list.push({ type: 'bounty', id: uid(), from: locId, kills, reward, rep: 6 * kills, days: randi(25, 50), faction: l.faction });
     }
   }
@@ -1531,7 +1631,7 @@ function completeContract(c) {
 
 // ---------- system events ----------
 const WAR_PAIRS = [['tierra', 'marte'], ['marte', 'cinturon'], ['tierra', 'exterior'], ['cinturon', 'exterior'], ['marte', 'exterior']];
-const openMarkets = () => NODES.filter(x => x.market && locOpen(x.id));
+const openMarkets = () => NODES.filter(x => x.market && !x.depot && locOpen(x.id));
 const EVENT_GEN = [
   { w: 1.1, make() {
       if (S.events.some(e => e.war)) return null;
@@ -1606,12 +1706,13 @@ function spawnEvent() {
   showEventBanner(ev);
   if (ev.relief) {
     const l = LOC[ev.relief.loc];
-    const qty = randi(8, 16) * Math.min(4, S.lv.hull);
+    const qty = Math.max(6, Math.round(ship.cargoMax * rand(0.3, 0.6)));
     (S.contracts[l.id] = S.contracts[l.id] || []).unshift({ type: 'deliver', id: uid(), from: l.id, to: l.id, item: ev.relief.item, qty,
-      reward: Math.round(qty * ITEMS[ev.relief.item].b * 3.2 / 10) * 10, rep: 15, days: ev.dur, faction: l.faction, urgent: 1 });
+      reward: Math.round(qty * itemBase(ev.relief.item) * 3.2 / 10) * 10, rep: 15, days: ev.dur, faction: l.faction, urgent: 1 });
   }
 }
 
+// ---------- one day passes ----------
 // ---------- one day passes ----------
 function tickDay() {
   S.day++;
@@ -1620,8 +1721,6 @@ function tickDay() {
     S.drift[id][k] = clamp(S.drift[id][k] * 0.96 + rand(-0.035, 0.035), -0.25, 0.25);
   }
   for (const id in S.depl) S.depl[id] = Math.max(0, S.depl[id] - 0.06);
-  const inc = dailyIncome();
-  if (inc) earn(inc);
   if (has(U.TRADE)) {
     const ended = S.events.filter(e => e.end <= S.day);
     for (const e of ended) addNews('🕊️', `Over: ${e.title}`, '#8fa3c7');
@@ -1661,6 +1760,7 @@ const BELT = []; const KUIPER = [];
 const MapScene = {
   cam: { x: 0, y: 0, z: 1 }, camT: null, sel: null, travel: null, t: 0, hover: null, drag: null, trail: new Particles(),
   enter() {
+    if (this.travel) { $('travelBanner').classList.remove('hidden'); return; }
     this.focus(S.loc, true);
     showMapUI(true);
     selectLoc(this.sel || S.loc);
@@ -1762,9 +1862,7 @@ const MapScene = {
     save();
     this.focus(S.loc);
     updateHUD();
-    const l = LOC[S.loc];
-    if (l.station) openDock();
-    else { toast(`Arrived at ${l.field.n}`, 'good'); setScene(MineScene, S.loc); }
+    openDock();
   },
   draw(ctx) {
     const t = this.t;
@@ -1832,7 +1930,7 @@ const MapScene = {
       if (open && l.station) {
         const a = t * 0.6 + l.r;
         const sx = p.x + Math.cos(a) * (r + 8), sy = p.y + Math.sin(a) * (r + 8) * 0.6;
-        drawStationIcon(ctx, sx, sy, 2.6, l.faction ? FACTIONS[l.faction].c : '#fff', t);
+        drawStationIcon(ctx, sx, sy, 2.6, l.faction ? FACTIONS[l.faction].c : '#6dffb0', t);
       }
       if (isHere) {
         const pr = r + 10 + (t * 16 % 16);
@@ -1876,16 +1974,16 @@ const MapScene = {
       tr.shipPos = sp;
       ctx.strokeStyle = 'rgba(61,232,255,0.25)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 6]);
       ctx.beginPath(); ctx.moveTo(q.a.x, q.a.y); ctx.quadraticCurveTo(q.c.x, q.c.y, q.b.x, q.b.y); ctx.stroke(); ctx.setLineDash([]);
-      const ec = ENGINE_COL[S.lv.engine - 1];
+      const ec = ENGINE_COL[shipLv().engine - 1];
       if (!tr.paused) for (let i = 0; i < 2; i++) this.trail.add(sp.x - Math.cos(ang) * 10 + rand(-2, 2), sp.y - Math.sin(ang) * 10 + rand(-2, 2), -Math.cos(ang) * 20 + rand(-8, 8), -Math.sin(ang) * 20 + rand(-8, 8), 0.8, ec, 2.2);
       this.trail.draw(ctx);
-      drawPlayerShip(ctx, S.lv, sp.x, sp.y, ang, 0.55, 1, t);
+      drawPlayerShip(ctx, shipLv(), sp.x, sp.y, ang, 0.55, 1, t);
     } else {
       this.trail.draw(ctx);
       const p = this.spos(S.loc);
       const r = this.pr(LOC[S.loc]) + 16;
       const a = t * 0.7;
-      drawPlayerShip(ctx, S.lv, p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, a + Math.PI / 2, 0.42, 0.5, t);
+      drawPlayerShip(ctx, shipLv(), p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, a + Math.PI / 2, 0.42, 0.5, t);
     }
   },
   pick(x, y) {
@@ -1926,22 +2024,6 @@ const MapScene = {
 };
 
 // ============ TRAVEL ENCOUNTERS ============
-function buildFleet(danger, bias) {
-  let budget = 0.5 + danger * 3.5 + S.day / 120 + ship.power * 0.45 + (bias || 0);
-  budget *= rand(0.75, 1.2);
-  const fleet = [];
-  const order = ['carrier', 'frigate', 'corsair', 'raider'];
-  while (budget > 0.6 && fleet.length < 5) {
-    const opts = order.filter(k => ENEMIES[k].pow <= budget);
-    if (!opts.length) break;
-    const k = Math.random() < 0.6 ? opts[0] : pick(opts);
-    fleet.push(k); budget -= ENEMIES[k].pow;
-  }
-  if (!fleet.length) fleet.push('raider');
-  return fleet;
-}
-function fleetPower(f) { return f.reduce((a, k) => a + ENEMIES[k].pow, 0) * (1 + S.day / 400); }
-
 function runEncounter(enc, done) {
   if (enc.kind === 'hostile') return pirateEncounter(enc.danger, done);
   if (enc.kind === 'patrol') return patrolEncounter(enc.war, done);
@@ -1999,27 +2081,36 @@ function runEncounter(enc, done) {
   }
 }
 
+function travelZone() {
+  const tr = MapScene.travel;
+  const a = tr ? tr.from : S.loc, b = tr ? tr.to : S.loc;
+  return clamp(Math.max(locZone(a), locZone(b)), 2, 5);
+}
+function startBattle(fleet, enemyFirst, done) {
+  setScene(MineScene, { fleet, z: travelZone(), done });
+  if (enemyFirst) MineScene.p.shield = 0;
+}
 function pirateEncounter(danger, done) {
   const fleet = buildFleet(danger);
-  const fp = fleetPower(fleet);
-  const bribe = Math.round((120 * fp + S.credits * 0.06) / 10) * 10;
+  const z = travelZone();
+  const bribe = Math.round(Math.max(50, fleet.reduce((a, k) => a + ENEMIES[k].loot, 0) * Z_LOOT[z] * 0.8 + S.credits * 0.03));
   const friendly = S.rep.piratas >= 35;
-  const flee = clamp(ship.flee - fp * 0.02, 0.1, 0.85);
-  const threat = fp / Math.max(0.5, ship.power);
-  const tl = threat < 0.6 ? ['Low', '#6dffb0', 'You should win easily.'] : threat < 1.2 ? ['Medium', '#ffc857', 'A fair fight.'] : threat < 2 ? ['High', '#ff934a', 'You will probably lose.'] : ['Extreme', '#ff4d6d', 'Run or pay!'];
+  const flee = clamp(0.25 + S.lv.engine * 0.03 - fleet.length * 0.04, 0.1, 0.85);
+  const threat = fleetThreat(fleet, z);
+  const tl = threat < 0.6 ? ['Low', '#6dffb0', 'Easy pickings — and nice loot.'] : threat < 1.2 ? ['Medium', '#ffc857', 'A fair fight. Keep moving!'] : threat < 2 ? ['High', '#ff934a', 'Dangerous. Upgrade guns & shields.'] : ['Extreme', '#ff4d6d', 'Run or pay!'];
   sfx('alarm');
   const btns = [];
   if (friendly) btns.push({ label: 'Hail the Syndicate', cls: 'primary', fn: () => { toast('They recognize you and let you pass', 'good'); done(); } });
-  btns.push({ label: '⚔ Fight', cls: friendly ? '' : 'danger', fn: () => startBattle(fleet, false, done) });
+  btns.push({ label: '⚔ Fight!', cls: friendly ? '' : 'danger', fn: () => startBattle(fleet, false, done) });
   btns.push({ label: `Run (${Math.round(flee * 100)}%)`, fn: () => {
     if (Math.random() < flee) { toast('You escaped!', 'good'); sfx('warp'); done(); }
-    else { toast('Escape failed', 'bad'); startBattle(fleet, true, done); }
+    else { toast('Escape failed — they caught you!', 'bad'); startBattle(fleet, true, done); }
   } });
   btns.push({ label: `Pay them off (${fmt(bribe)} cr)`, disabled: S.credits < bribe, fn: () => { S.credits -= bribe; repChange('piratas', 2, true); toast('The pirates take your money', 'good'); done(); } });
   showModal({ icon: '☠️', title: 'Pirate ambush!', danger: true,
     html: `<div class="fleet">${fleet.map(k => `<span class="chip bad">${ENEMIES[k].n}</span>`).join('')}</div>
     <div class="threat">Threat: <b style="color:${tl[1]}">${tl[0]}</b> — ${tl[2]}</div>
-    <small>Battles are automatic. Hull, shields, weapons and drones decide the fight.</small>`,
+    <small>You fly and shoot: <b>hold the mouse</b> (or FIRE) to fire your guns. Destroyed ships drop credits.</small>`,
     buttons: btns });
 }
 
@@ -2034,61 +2125,84 @@ function patrolEncounter(war, done) {
   showModal({ icon: '🛡️', title: 'Military patrol', danger: true, html: `The <b style="color:${FACTIONS[fac].c}">${FACTIONS[fac].n}</b> finds <b>${arms} Weapons</b> in your hold and demands you hand them over.`,
     buttons: [
       { label: 'Hand them over', cls: 'primary', fn: () => { addCargo('arms', -arms); toast('Weapons confiscated', 'bad'); done(); } },
-      { label: '⚔ Resist', cls: 'danger', fn: () => { repChange(fac, -12); startBattle(['patrol', ...(S.day > 60 ? ['patrol'] : [])], false, done); } },
+      { label: '⚔ Resist', cls: 'danger', fn: () => { repChange(fac, -12); startBattle(['patrol', 'patrol'], false, done); } },
     ] });
 }
 
 // ---- mining.js ----
 'use strict';
-// ============ ESCENA: MINERÍA ============
-const MW = 2100, MH = 2100;
+// ============ SCENE: MINING FIELD / SPACE ARENA ============
+// The station sits at the bottom. Fly back down into the docking zone to sell.
+// The higher up (farther from the station) you go, the richer the rocks.
+const MW = 1800, MH = 3400, DOCK_Y = MH - 240;
+const Z_HP = [1, 5, 16, 60, 220, 800];
 const mineScale = () => 1.35 - (S.lv.hull - 1) * 0.08;
 const shipR = () => shipLen(S.lv) * mineScale();
+const SPACE = { id: 'space', n: 'Deep Space', col: ['#6a7fb0', '#1b2340'], field: { n: 'Deep Space', z: 2, ores: { iron: 3, nickel: 1 }, count: 10 } };
+
 const MineScene = {
-  t: 0, loc: null, rocks: [], chunks: [], drones: [], parts: new Particles(), cam: { x: 0, y: 0 }, shake: 0,
-  p: null, dayTimer: 0, ambush: null, laserOn: false, laserHit: null, fullWarn: 0, broken: 0, collected: {}, heatWarn: 0, floaters: [],
-  enter(locId) {
-    this.loc = LOC[locId || this.loc.id];
-    if (locId) this.setup();
+  t: 0, loc: null, rocks: [], chunks: [], drones: [], odrones: [], enemies: [], bolts: [], parts: new Particles(), cam: { x: 0, y: 0 }, shake: 0,
+  p: null, dayTimer: 0, ambush: null, laserOn: false, laserHit: null, collected: {}, floaters: [], space: null,
+  enter(arg) {
+    if (arg && typeof arg === 'object') { this.space = arg; this.loc = { ...SPACE, field: { ...SPACE.field, z: arg.z } }; this.setup(); }
+    else if (arg) { this.space = null; this.loc = LOC[arg]; this.setup(); }
     showMineUI(true);
+    $('travelBanner').classList.add('hidden');
   },
-  exit() { showMineUI(false); laserSound(false); },
+  exit() { showMineUI(false); laserSound(false); this.laserOn = false; },
+  get z() { return this.loc.field.z; },
   setup() {
     const f = this.loc.field;
-    this.rocks = []; this.chunks = []; this.parts = new Particles(); this.floaters = [];
-    this.p = { x: MW / 2, y: MH - 300, vx: 0, vy: -40, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0 };
-    this.cam = { x: this.p.x, y: this.p.y };
-    this.dayTimer = 0; this.broken = 0; this.collected = {};
-    const depl = S.depl[this.loc.id] || 0;
+    this.rocks = []; this.chunks = []; this.parts = new Particles(); this.floaters = []; this.enemies = []; this.bolts = [];
+    this.hadCombat = false; this.clearT = 0; this.warp = null; this.armed = false;
+    if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
+    else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
+    this.cam = { x: this.p.x, y: this.p.y - 120 };
+    this.dayTimer = 0; this.collected = {};
     const rich = S.events.some(e => e.rich === this.loc.id);
-    const n = Math.round(f.count * (1 - depl * 0.55) * (rich ? 1.2 : 1));
-    for (let i = 0; i < n; i++) {
-      let x, y;
-      if (i < 3) { const a = -Math.PI / 2 + (i - 1) * 0.7; x = this.p.x + Math.cos(a) * rand(260, 380); y = this.p.y + Math.sin(a) * rand(260, 380); }
-      else do { x = rand(150, MW - 150); y = rand(150, MH - 150); } while (Math.hypot(x - this.p.x, y - this.p.y) < 300);
-      this.spawnRock(x, y, pick([3, 3, 2, 2, 1]) === 1 ? 2 : 3, null, rich);
+    this.target = Math.round(f.count * (rich ? 1.25 : 1));
+    if (this.space) {
+      for (let i = 0; i < f.count; i++) { let x, y; do { x = rand(100, MW - 100); y = rand(100, MH - 100); } while (Math.hypot(x - this.p.x, y - this.p.y) < 300); this.spawnRock(x, y, pick([1, 2, 2, 3])); }
+      Combat.spawn(this, this.space.fleet, this.space.z, false);
+    } else {
+      for (let i = 0; i < this.target; i++) {
+        let x, y;
+        if (i < 3) { x = MW / 2 + (i - 1) * 260 + rand(-40, 40); y = DOCK_Y - rand(380, 520); }
+        else { x = rand(120, MW - 120); y = rand(120, DOCK_Y - 380); }
+        this.spawnRock(x, y, i < 3 ? 3 : pick([3, 3, 2, 2, 1]), null, rich);
+      }
     }
     this.drones = [];
     for (let i = 0; i < ship.drones; i++) this.drones.push({ x: this.p.x, y: this.p.y, vx: 0, vy: 0, tgt: null, carry: null, a: i });
-    // emboscada
+    this.odrones = [];
+    const o = !this.space && S.outposts[this.loc.id];
+    if (o) for (let i = 0; i < Math.min(16, o.n); i++) this.odrones.push({ x: 220 + rand(-30, 30), y: MH - 140, st: 'out', tgt: null, t: rand(0, 3) });
     this.ambush = null;
-    const dg = locDanger(this.loc.id) * (1 - ship.avoid);
-    if (Math.random() < dg * 0.7) this.ambush = { at: rand(22, 55), warned: false };
-    this.heatWarn = 0;
+    if (!this.space) {
+      const dg = locDanger(this.loc.id) * (1 - ship.avoid);
+      if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
+    }
+  },
+  depthOf(y) { return clamp(1 - y / (DOCK_Y - 300), 0, 1); },
+  pickOre(depth) {
+    const f = this.loc.field;
+    const keys = Object.keys(f.ores).sort((a, b) => ITEMS[a].b - ITEMS[b].b);
+    const ws = keys.map((k, i) => f.ores[k] * (1 + depth * 4 * (i / Math.max(1, keys.length - 1))));
+    let r = Math.random() * ws.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < keys.length; i++) { r -= ws[i]; if (r <= 0) return keys[i]; }
+    return keys[0];
   },
   spawnRock(x, y, tier, ore, rich) {
-    const f = this.loc.field;
-    if (!ore) {
-      const tot = Object.values(f.ores).reduce((a, b) => a + b, 0);
-      let r = Math.random() * tot; ore = Object.keys(f.ores)[0];
-      for (const k in f.ores) { r -= f.ores[k]; if (r <= 0) { ore = k; break; } }
-    }
+    const depth = this.space ? 0.3 : this.depthOf(y);
+    if (!ore) ore = this.pickOre(depth);
     const R = [0, 20, 34, 56][tier] * rand(0.9, 1.15);
-    const isRich = Math.random() < (rich ? 0.3 : 0.1);
+    const isRich = Math.random() < (rich ? 0.3 : 0.06) + depth * 0.2;
+    const gold = !this.space && Math.random() < 0.006 + depth * 0.02;
     const nv = 2 + Math.floor(tier * 1.5);
+    const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * (gold ? 2 : 1);
     const rock = {
-      x, y, vx: rand(-18, 18), vy: rand(-18, 18), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich,
-      hp: R * 0.7 * ITEMS[ore].h, maxhp: R * 0.7 * ITEMS[ore].h, hit: 0, cold: f.cold,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold,
+      hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
       craters: Array.from({ length: tier }, () => { const a = rand(0, TAU), d = rand(0, 0.5); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.1, 0.2)]; }),
@@ -2098,38 +2212,50 @@ const MineScene = {
   },
   breakRock(r) {
     this.rocks = this.rocks.filter(x => x !== r);
-    this.parts.burst(r.x, r.y, 14 + r.tier * 8, '#c9b8a6', 120 + r.tier * 40, 0.8, 2.5);
+    this.parts.burst(r.x, r.y, 14 + r.tier * 8, r.gold ? '#ffd24a' : '#c9b8a6', 120 + r.tier * 40, 0.8, 2.5);
     this.parts.burst(r.x, r.y, 6 + r.tier * 3, ITEMS[r.ore].c, 90, 1, 2.5);
     sfx('break'); this.shake = Math.max(this.shake, r.tier * 3);
+    S.hints.laser = 1;
+    if (r.gold) {
+      const v = ITEMS[r.ore].b * incomeMult() * 30 * r.tier;
+      for (let i = 0; i < 6; i++) { const a = rand(0, TAU), s = rand(40, 120); this.chunks.push({ x: r.x, y: r.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, cr: v / 6, gold: 1, rot: rand(0, TAU), life: 60 }); }
+      this.floaters.push({ x: r.x, y: r.y - 30, txt: 'JACKPOT!', col: '#ffd24a', life: 2, big: 1 });
+      S.stats.jackpots++; sfx('win');
+    }
     if (r.tier > 1) {
       for (let i = 0; i < 2; i++) {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
-        const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich;
+        const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
       }
       if (Math.random() < 0.5) this.dropChunk(r.x, r.y, r.ore);
     } else {
       const n = randi(1, 2) + (r.rich ? 2 : 0);
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.ore);
     }
-    S.hints.laser = 1;
-    if (r.tier === 3) { this.broken++; S.depl[this.loc.id] = Math.min(1, (S.depl[this.loc.id] || 0) + 0.02); }
   },
   dropChunk(x, y, ore) {
     const a = rand(0, TAU), v = rand(20, 60);
     this.chunks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, ore, rot: rand(0, TAU), life: 45 });
   },
   collect(c) {
+    if (c.cr) {
+      earn(c.cr);
+      this.floaters.push({ x: this.p.x + rand(-20, 20), y: this.p.y - 26, txt: '+' + fmt(c.cr) + ' cr', col: '#ffd24a', life: 1.2 });
+      sfx('cash');
+      return true;
+    }
     if (cargoFree() <= 0) return false;
     addCargo(c.ore, 1); S.stats.mined++;
     this.collected[c.ore] = (this.collected[c.ore] || 0) + 1;
-    this.floaters.push({ x: this.p.x, y: this.p.y - 20, txt: '+1 ' + ITEMS[c.ore].n, col: ITEMS[c.ore].c, life: 1.1 });
+    this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: '+1 ' + ITEMS[c.ore].n, col: ITEMS[c.ore].c, life: 1.1 });
     sfx('pickup');
     return true;
   },
+  get inCombat() { return this.enemies.length > 0; },
   update(dt) {
     this.t += dt;
     const p = this.p;
-    // --- entrada ---
+    // --- movement ---
     let ax = 0, ay = 0;
     if (keys.has('KeyW') || keys.has('ArrowUp')) ay -= 1;
     if (keys.has('KeyS') || keys.has('ArrowDown')) ay += 1;
@@ -2138,30 +2264,36 @@ const MineScene = {
     if (joy.active) { ax = joy.dx; ay = joy.dy; }
     const al = Math.hypot(ax, ay);
     if (al > 1) { ax /= al; ay /= al; }
-    const acc = 520 * ship.thrust / Math.pow(ship.mass, 0.35);
+    const acc = 560 * ship.thrust / Math.pow(ship.mass, 0.3);
     p.vx += ax * acc * dt; p.vy += ay * acc * dt;
     const drag = Math.pow(0.4, dt);
     p.vx *= drag; p.vy *= drag;
-    const maxV = 340 * ship.thrust;
+    const maxV = 360 * ship.thrust;
     const v = Math.hypot(p.vx, p.vy);
     if (v > maxV) { p.vx *= maxV / v; p.vy *= maxV / v; }
     p.x = clamp(p.x + p.vx * dt, 40, MW - 40); p.y = clamp(p.y + p.vy * dt, 40, MH - 40);
     this.thrusting = Math.hypot(ax, ay);
-    // --- apuntar / láser ---
-    let aim = null;
+    if (!S.hints.move) { this.moved = (this.moved || 0) + v * dt; if (this.moved > 160) S.hints.move = 1; }
+    // --- aim & fire ---
+    let aim = null, firing = false;
     const wm = { x: mouse.x - W / 2 + this.cam.x, y: mouse.y - H / 2 + this.cam.y };
-    let firing = false;
+    const combat = this.inCombat;
     if (touchFire) {
-      let best = null, bd = ship.laserRange + 40;
-      for (const r of this.rocks) { const d = Math.hypot(r.x - p.x, r.y - p.y) - r.r; if (d < bd) { bd = d; best = r; } }
-      if (best) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
+      let best = null, bd = 1e9;
+      const list = combat ? this.enemies : this.rocks;
+      for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
+      if (best && (combat || bd < ship.laserRange + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
     } else if (mouse.down && !mouse.onUI) { aim = Math.atan2(wm.y - p.y, wm.x - p.x); firing = true; }
     if (keys.has('Space')) { firing = true; if (aim == null) aim = p.a; }
     const targetA = aim != null ? aim : (al > 0.1 ? Math.atan2(ay, ax) : p.a);
-    let da = ((targetA - p.a + Math.PI) % TAU + TAU) % TAU - Math.PI;
+    const da = ((targetA - p.a + Math.PI) % TAU + TAU) % TAU - Math.PI;
     p.a += da * Math.min(1, dt * 10);
     this.laserHit = null;
-    if (firing) {
+    p.fireCd -= dt;
+    if (firing && combat) {
+      S.hints.guns = 1;
+      if (p.fireCd <= 0) { Combat.firePlayer(this, aim != null ? aim : p.a); p.fireCd = 0.25; }
+    } else if (firing) {
       const dir = aim != null ? aim : p.a;
       const dx = Math.cos(dir), dy = Math.sin(dir);
       let best = null, bt = ship.laserRange;
@@ -2179,18 +2311,19 @@ const MineScene = {
       this.laserHit = { x: hx, y: hy, dir, rock: best };
       if (best) {
         best.hp -= ship.laserDps * dt; best.hit = 0.05;
-        if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(S.lv.laser), 2, true);
+        if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
         if (best.hp <= 0) this.breakRock(best);
       }
     }
-    if (firing !== this.laserOn) { this.laserOn = firing; laserSound(firing, S.lv.laser); }
-    // --- rocas ---
+    const lOn = firing && !combat;
+    if (lOn !== this.laserOn) { this.laserOn = lOn; laserSound(lOn, laserTier()); }
+    // --- rocks ---
     for (const r of this.rocks) {
       r.x += r.vx * dt; r.y += r.vy * dt; r.rot += r.vr * dt; r.hit = Math.max(0, r.hit - dt);
+      const maxY = this.space ? MH - r.r : DOCK_Y - 120;
       if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
-      if (r.y < r.r || r.y > MH - r.r) r.vy *= -1;
-      r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, MH - r.r);
-      // colisión con nave
+      if (r.y < r.r || r.y > maxY) r.vy *= -1;
+      r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, maxY);
       const dx = p.x - r.x, dy = p.y - r.y, d = Math.hypot(dx, dy), md = r.r + shipR() * 0.4;
       if (d < md && d > 0) {
         const nx = dx / d, ny = dy / d;
@@ -2199,22 +2332,22 @@ const MineScene = {
         if (rel < 0) {
           p.vx -= 1.6 * rel * nx; p.vy -= 1.6 * rel * ny;
           r.vx += rel * nx * 0.2 / r.tier; r.vy += rel * ny * 0.2 / r.tier;
-          if (-rel > 140) { this.damage((-rel - 120) * 0.05); sfx('bump'); this.shake = 6; }
+          if (-rel > 150) { this.damage((-rel - 130) * 0.04 * (1 + this.z)); sfx('bump'); this.shake = 6; }
         }
       }
     }
-    // --- fragmentos ---
+    // --- chunks & loot ---
     const cfree = cargoFree();
     for (const c of this.chunks) {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
-      if (d < ship.magnet && cfree > 0) { const f = 600 * (1 - d / ship.magnet) + 120; c.vx += dx / d * f * dt; c.vy += dy / d * f * dt; }
-      if (d < 22) { if (this.collect(c)) c.dead = true; else if (this.fullWarn <= 0) { this.fullWarn = 3; sfx('full'); } }
+      const mag = c.cr ? ship.magnet * 1.5 : ship.magnet;
+      if (d < mag && (cfree > 0 || c.cr)) { const f = 650 * (1 - d / mag) + 140; c.vx += dx / d * f * dt; c.vy += dy / d * f * dt; }
+      if (d < 24 && this.collect(c)) c.dead = true;
       if (c.life <= 0) c.dead = true;
     }
-    this.fullWarn -= dt;
     this.chunks = this.chunks.filter(c => !c.dead);
-    // --- drones recolectores ---
+    // --- collector drones ---
     for (const dr of this.drones) {
       if (dr.tgt && (dr.tgt.dead || !this.chunks.includes(dr.tgt))) dr.tgt = null;
       if (!dr.tgt && !dr.carry && cargoFree() > 0) {
@@ -2225,143 +2358,282 @@ const MineScene = {
       let tx, ty;
       if (dr.carry) { tx = p.x; ty = p.y; }
       else if (dr.tgt) { tx = dr.tgt.x; ty = dr.tgt.y; }
-      else { const a = this.t * 1.5 + dr.a * TAU / Math.max(1, this.drones.length); tx = p.x + Math.cos(a) * 45; ty = p.y + Math.sin(a) * 45; }
+      else { const a = this.t * 1.5 + dr.a * TAU / Math.max(1, this.drones.length); tx = p.x + Math.cos(a) * 50; ty = p.y + Math.sin(a) * 50; }
       const dx = tx - dr.x, dy = ty - dr.y, d = Math.hypot(dx, dy) || 1;
-      const sp = 380;
-      dr.vx = lerp(dr.vx, dx / d * Math.min(sp, d * 6), dt * 6); dr.vy = lerp(dr.vy, dy / d * Math.min(sp, d * 6), dt * 6);
+      dr.vx = lerp(dr.vx, dx / d * Math.min(420, d * 6), dt * 6); dr.vy = lerp(dr.vy, dy / d * Math.min(420, d * 6), dt * 6);
       dr.x += dr.vx * dt; dr.y += dr.vy * dt;
       if (dr.tgt && d < 12) { dr.carry = dr.tgt; dr.tgt.dead = true; this.chunks = this.chunks.filter(c => c !== dr.carry); dr.tgt = null; }
       if (dr.carry && d < 20) { if (!this.collect(dr.carry)) this.chunks.push(Object.assign(dr.carry, { dead: false, x: dr.x, y: dr.y, vx: 0, vy: 0 })); dr.carry = null; }
     }
-    // --- escudo + peligros ---
-    p.shT -= dt;
-    if (p.shT <= 0) p.shield = Math.min(ship.shieldMax, p.shield + (4 + S.lv.shield * 2) * dt);
-    if (this.loc.field.hazard === 'heat') {
-      this.damage(1.1 * dt, true);
-      this.heatWarn += dt;
-    }
-    // --- emboscada ---
-    if (this.ambush) {
-      this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 4) { this.ambush.warned = true; toast('⚠ Hostile ships incoming!', 'bad'); sfx('alarm'); }
-      if (this.ambush.at <= 0) {
-        this.ambush = null; laserSound(false); this.laserOn = false; mouse.down = false; touchFire = false;
-        pirateEncounter(locDanger(this.loc.id), () => {});
-        return;
+    // --- outpost drones (cosmetic) ---
+    for (const od of this.odrones) {
+      od.t -= dt;
+      if (od.st === 'out') {
+        if (!od.tgt || !this.rocks.includes(od.tgt)) od.tgt = pick(this.rocks.filter(r => r.y < DOCK_Y - 150)) || null;
+        if (od.tgt) {
+          const tx = od.tgt.x + Math.cos(od.t) * (od.tgt.r + 16), ty = od.tgt.y + Math.sin(od.t) * (od.tgt.r + 16);
+          od.x = lerp(od.x, tx, dt * 1.8); od.y = lerp(od.y, ty, dt * 1.8);
+          if (Math.hypot(tx - od.x, ty - od.y) < 30 && od.t < -2) { od.st = 'home'; }
+        }
+      } else {
+        od.x = lerp(od.x, 220, dt * 1.2); od.y = lerp(od.y, MH - 150, dt * 1.2);
+        if (Math.hypot(220 - od.x, MH - 150 - od.y) < 20) { od.st = 'out'; od.t = rand(2, 4); od.tgt = null; }
       }
     }
-    // --- tiempo ---
+    // --- combat ---
+    Combat.update(this, dt);
+    if (this.clearT > 0) { this.clearT -= dt; if (this.clearT <= 0) this.finishSpace(true); }
+    if (this.warp) {
+      this.warp.t += dt;
+      if (this.warp.t >= ship.warpTime) { sfx('warp'); toast('Warped out!', 'good'); this.finishSpace(false); return; }
+    }
+    // --- shields & hazards ---
+    p.shT -= dt;
+    if (p.shT <= 0) p.shield = Math.min(ship.shieldMax, p.shield + (4 + ship.shieldMax * 0.08) * dt);
+    if (this.loc.field.hazard === 'heat') this.damage(1.2 * dt * (1 + this.z), true);
+    // --- ambush ---
+    if (this.ambush) {
+      this.ambush.at -= dt;
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast('⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (this.ambush.at <= 0) {
+        const fleet = buildFleet(locDanger(this.loc.id));
+        this.ambush = null;
+        if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
+        else Combat.spawn(this, fleet, this.z, true);
+      }
+    }
+    // --- docking zone ---
+    if (!this.space) {
+      if (p.y < DOCK_Y - 250) this.armed = true;
+      if (this.armed && p.y > DOCK_Y) { this.leave(); return; }
+    }
+    // --- time ---
     this.dayTimer += dt;
-    if (this.dayTimer > 40) { this.dayTimer = 0; tickDay(); updateHUD(); }
-    // respawn lento de rocas si quedan pocas
-    if (this.rocks.length < 4 && Math.random() < dt * 0.1) {
-      const a = rand(0, TAU); this.spawnRock(clamp(p.x + Math.cos(a) * 900, 150, MW - 150), clamp(p.y + Math.sin(a) * 900, 150, MH - 150), 3);
+    if (this.dayTimer > 40 && has(U.MAP)) { this.dayTimer = 0; tickDay(); }
+    if (!this.space && this.rocks.length < this.target * 0.5 && Math.random() < dt * 0.4) {
+      const x = rand(120, MW - 120), y = rand(120, Math.min(DOCK_Y - 400, p.y - 500));
+      if (y > 100) this.spawnRock(x, y, 3);
     }
     this.parts.update(dt);
     for (const f of this.floaters) { f.y -= 30 * dt; f.life -= dt; }
     this.floaters = this.floaters.filter(f => f.life > 0);
-    // cámara
     const k = 1 - Math.pow(0.001, dt);
-    this.cam.x = lerp(this.cam.x, p.x + p.vx * 0.3, k); this.cam.y = lerp(this.cam.y, p.y + p.vy * 0.3, k);
+    this.cam.x = lerp(this.cam.x, p.x + p.vx * 0.3, k); this.cam.y = lerp(this.cam.y, p.y + p.vy * 0.3 - 60, k);
     this.shake = Math.max(0, this.shake - dt * 20);
-    // estela
     if (this.thrusting > 0.1 && Math.random() < dt * 40) {
       const bx = p.x - Math.cos(p.a) * shipR() * 0.75, by = p.y - Math.sin(p.a) * shipR() * 0.75;
-      this.parts.add(bx, by, -Math.cos(p.a) * 60 + rand(-15, 15), -Math.sin(p.a) * 60 + rand(-15, 15), 0.45, '#ff9b4a', 2.5);
+      this.parts.add(bx, by, -Math.cos(p.a) * 60 + rand(-15, 15), -Math.sin(p.a) * 60 + rand(-15, 15), 0.45, ENGINE_COL[Math.min(4, Math.floor((S.lv.engine - 1) / 4))], 2.5);
     }
     this.coach();
     updateMineHUD();
   },
   coach() {
     const h = S.hints;
-    if (!h.move) { this.moved = (this.moved || 0) + Math.hypot(this.p.vx, this.p.vy) * 0.016; if (this.moved > 120) h.move = 1; }
     let msg = '';
-    if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
+    if (this.inCombat && !h.guns) msg = isTouch ? 'Hold <b>FIRE</b> to shoot the pirates!' : 'Pirates! <b>Hold the mouse</b> to shoot your guns';
+    else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
-    if (cargoFree() <= 0) msg = '';
+    else if (!this.space && cargoFree() <= 0) msg = '📦 Cargo full! Fly back <b>down</b> to the station to sell ⬇';
+    else if (!this.space && !h.deep && S.stats.docks >= 2 && this.p.y > DOCK_Y - 900) { msg = 'Tip: rocks get <b>richer</b> the farther up you fly ⬆'; }
+    if (this.p.y < DOCK_Y - 1400) h.deep = 1;
     coach(msg);
   },
   damage(n, heat) {
     const p = this.p;
-    if (p.shield > 0) { const a = Math.min(p.shield, n); p.shield -= a; n -= a; if (!heat) p.shT = 2; }
+    if (p.shield > 0) { const a = Math.min(p.shield, n); p.shield -= a; n -= a; if (!heat) p.shT = 2.5; }
     if (n > 0) {
       S.hull -= n;
       if (S.hull <= 0) {
         S.hull = 0; laserSound(false); this.laserOn = false;
-        towShip('Your hull collapsed in the mining field.');
+        S.stats.lost++;
+        if (this.space && MapScene.travel) { MapScene.travel = null; $('travelBanner').classList.add('hidden'); }
+        setScene(MapScene);
+        towShip(this.inCombat ? 'Your ship was shot down.' : 'Your hull collapsed.');
       }
     }
+  },
+  onVictory() {
+    sfx('win');
+    const n = S.stats.kills;
+    toast('☠ Pirates destroyed! Grab the loot.', 'good');
+    for (const c of [...S.active]) if (c.type === 'bounty') { c.progress++; if (c.progress >= c.kills) completeContract(c); }
+    repChange('piratas', -3, true);
+    const near = LOC[S.loc].faction && LOC[S.loc].faction !== 'piratas' ? LOC[S.loc].faction : 'cinturon';
+    repChange(near, 2, true);
+    S.stats.won++;
+    addNews('🏆', `Pirate fleet destroyed`, '#6dffb0');
+    if (this.space) this.clearT = 4;
+  },
+  finishSpace(won) {
+    if (!this.space) return;
+    const done = this.space.done;
+    // collect remaining loot automatically
+    for (const c of this.chunks) if (c.cr) earn(c.cr);
+    this.space = null; this.warp = null;
+    save();
+    setScene(MapScene);
+    done && done();
   },
   draw(ctx) {
     const t = this.t;
     const sx = (Math.random() - 0.5) * this.shake, sy = (Math.random() - 0.5) * this.shake;
     const cx = this.cam.x - W / 2 + sx, cy = this.cam.y - H / 2 + sy;
-    drawSpaceBg(ctx, W, H, cx, cy, t, this.loc.cold ? '#0c1838' : this.loc.field.hazard === 'heat' ? '#2a1408' : null);
-    // cuerpo celeste de fondo
-    const bgLoc = this.loc.id === 'kuiper' ? LOC.pluton : this.loc.parent ? LOC[this.loc.parent] : this.loc.follow ? LOC[this.loc.follow] : this.loc;
-    const bx = W * 0.78 - cx * 0.04, by = H * 0.3 - cy * 0.04;
-    ctx.globalAlpha = 0.8; drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.26 : 0.15), bgLoc, Math.atan2(-by, -bx - W), t); ctx.globalAlpha = 1;
-    if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - cy * 0.02, 120, t);
+    drawSpaceBg(ctx, W, H, cx, cy, t, this.loc.field.cold ? '#0c1838' : this.loc.field.hazard === 'heat' ? '#2a1408' : this.space ? '#1c0b1e' : null);
+    const bgLoc = this.space ? LOC[S.loc] : this.loc.id === 'kuiper' ? LOC.pluton : this.loc.parent ? LOC[this.loc.parent] : this.loc.follow ? LOC[this.loc.follow] : this.loc;
+    if (bgLoc && bgLoc.col) {
+      const bx = W * 0.8 - cx * 0.03, by = H * 0.25 - (cy - MH) * 0.03;
+      drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
+    }
+    if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t);
     ctx.save();
     ctx.translate(-cx, -cy);
-    // bordes del campo
-    ctx.strokeStyle = 'rgba(61,232,255,0.15)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(61,232,255,0.12)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
     ctx.strokeRect(20, 20, MW - 40, MH - 40); ctx.setLineDash([]);
-    // imán
+    if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
-    if (cargoFree() > 0) {
-      ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke();
+    if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
+    for (const r of this.rocks) if (r.x > cx - 100 && r.x < cx + W + 100 && r.y > cy - 100 && r.y < cy + H + 100) {
+      drawRock(ctx, r, t, S.lv.scanner);
+      if (r.gold) { glow(ctx, r.x, r.y, r.r * 2.4, '#ffd24a', 0.35 + 0.2 * Math.sin(t * 5)); if (Math.random() < 0.1) this.parts.add(r.x + rand(-r.r, r.r), r.y + rand(-r.r, r.r), 0, -20, 0.8, '#fff3b0', 2); }
     }
-    for (const r of this.rocks) if (r.x > cx - 100 && r.x < cx + W + 100 && r.y > cy - 100 && r.y < cy + H + 100) drawRock(ctx, r, t, S.lv.scanner);
-    for (const c of this.chunks) drawOreChunk(ctx, c, t);
-    // láser
+    for (const c of this.chunks) {
+      if (c.cr) {
+        glow(ctx, c.x, c.y, 16, '#ffd24aaa', 0.8);
+        ctx.fillStyle = c.gold ? '#fff3b0' : '#ffd24a'; ctx.beginPath(); ctx.arc(c.x, c.y, 5.5, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#9a6a00'; ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('¢', c.x, c.y + 0.5); ctx.textBaseline = 'alphabetic';
+      } else drawOreChunk(ctx, c, t);
+    }
+    // outpost drones
+    for (const od of this.odrones) {
+      if (od.st === 'out' && od.tgt && Math.hypot(od.tgt.x - od.x, od.tgt.y - od.y) < od.tgt.r + 30) {
+        ctx.strokeStyle = 'rgba(109,255,176,0.6)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(od.x, od.y); ctx.lineTo(od.tgt.x, od.tgt.y); ctx.stroke();
+      }
+      glow(ctx, od.x, od.y, 9, '#6dffb0aa', 0.7);
+      ctx.fillStyle = '#c9f7de'; ctx.fillRect(od.x - 3, od.y - 3, 6, 6);
+    }
     if (this.laserHit) {
-      const L = this.laserHit, col = laserColor(S.lv.laser);
+      const L = this.laserHit, col = laserColor(laserTier());
       const nx = p.x + Math.cos(L.dir) * shipR() * 0.9, ny = p.y + Math.sin(L.dir) * shipR() * 0.9;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = 7 + S.lv.laser + Math.sin(t * 50) * 2;
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = 7 + laserTier() + Math.sin(t * 50) * 2;
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
       ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
       ctx.globalCompositeOperation = 'source-over';
       glow(ctx, L.x, L.y, L.rock ? 26 : 10, col, 0.9);
     }
-    // drones
     for (const dr of this.drones) {
       glow(ctx, dr.x, dr.y, 10, '#3de8ff88', 0.8);
       ctx.fillStyle = '#d4dcea'; ctx.beginPath(); ctx.arc(dr.x, dr.y, 4, 0, TAU); ctx.fill();
       ctx.fillStyle = '#3de8ff'; ctx.beginPath(); ctx.arc(dr.x, dr.y, 1.8, 0, TAU); ctx.fill();
-      if (dr.carry) { ctx.fillStyle = ITEMS[dr.carry.ore].c; ctx.fillRect(dr.x - 2, dr.y + 4, 4, 4); }
+      if (dr.carry && dr.carry.ore) { ctx.fillStyle = ITEMS[dr.carry.ore].c; ctx.fillRect(dr.x - 2, dr.y + 4, 4, 4); }
     }
+    Combat.draw(this, ctx, t);
     this.parts.draw(ctx);
-    drawPlayerShip(ctx, S.lv, p.x, p.y, p.a, mineScale(), this.thrusting, t);
-    if (ship.shieldMax > 0 && p.shT > 1.5) {
-      ctx.strokeStyle = `rgba(61,232,255,${(p.shT - 1.5) * 1.5})`; ctx.lineWidth = 2;
+    const lv = shipLv();
+    drawPlayerShip(ctx, lv, p.x, p.y, p.a, mineScale(), this.thrusting, t);
+    if (ship.shieldMax > 0 && p.shT > 1.8) {
+      ctx.strokeStyle = `rgba(61,232,255,${(p.shT - 1.8) * 1.3})`; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(p.x, p.y, shipR() + 8, 0, TAU); ctx.stroke();
     }
-    // textos flotantes
-    ctx.font = '600 13px Rajdhani, sans-serif'; ctx.textAlign = 'center';
-    for (const f of this.floaters) { ctx.globalAlpha = Math.min(1, f.life * 2); ctx.fillStyle = f.col; ctx.fillText(f.txt, f.x, f.y); }
+    if (this.warp) {
+      const k = this.warp.t / ship.warpTime;
+      ctx.strokeStyle = `rgba(160,120,255,${0.4 + k * 0.6})`; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(p.x, p.y, shipR() + 14, -Math.PI / 2, -Math.PI / 2 + TAU * k); ctx.stroke();
+      glow(ctx, p.x, p.y, shipR() * 2 * k + 10, '#a07cff', 0.5 * k);
+    }
+    ctx.textAlign = 'center';
+    for (const f of this.floaters) {
+      ctx.font = f.big ? '900 26px Orbitron, sans-serif' : '700 14px Rajdhani, sans-serif';
+      ctx.globalAlpha = Math.min(1, f.life * 2); ctx.fillStyle = f.col; ctx.fillText(f.txt, f.x, f.y);
+    }
     ctx.globalAlpha = 1;
     ctx.restore();
-    // miras
+    // crosshair
     if (!isTouch && !mouse.onUI) {
-      ctx.strokeStyle = 'rgba(61,232,255,0.8)'; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = this.inCombat ? 'rgba(255,90,120,0.9)' : 'rgba(61,232,255,0.8)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 9, 0, TAU);
       ctx.moveTo(mouse.x - 14, mouse.y); ctx.lineTo(mouse.x - 5, mouse.y); ctx.moveTo(mouse.x + 5, mouse.y); ctx.lineTo(mouse.x + 14, mouse.y);
       ctx.moveTo(mouse.x, mouse.y - 14); ctx.lineTo(mouse.x, mouse.y - 5); ctx.moveTo(mouse.x, mouse.y + 5); ctx.lineTo(mouse.x, mouse.y + 14);
       ctx.stroke();
     }
-    // minimapa
-    const mm = 110, mx = W - mm - 14, my = H - mm - (isTouch ? 205 : 40);
+    // off-screen indicators: station & enemies
+    if (!this.space && p.y < DOCK_Y - H * 0.45) {
+      const full = cargoFree() <= 0;
+      const dist = Math.round((DOCK_Y - p.y) / 10) * 10;
+      const bx = W / 2, by = H - (isTouch ? 44 : 64);
+      ctx.globalAlpha = full ? 0.8 + 0.2 * Math.sin(t * 6) : 0.6;
+      ctx.fillStyle = full ? '#ffd24a' : '#3de8ff';
+      ctx.font = '700 15px Rajdhani, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(`▼ STATION ${dist} m ▼`, bx, by);
+      ctx.globalAlpha = 1;
+    }
+    for (const e of this.enemies) {
+      const ex = e.x - cx, ey = e.y - cy;
+      if (ex > 0 && ex < W && ey > 0 && ey < H) continue;
+      const a = Math.atan2(ey - H / 2, ex - W / 2);
+      const ix = W / 2 + Math.cos(a) * (Math.min(W, H) / 2 - 30), iy = H / 2 + Math.sin(a) * (Math.min(W, H) / 2 - 30);
+      ctx.fillStyle = '#ff4d6d';
+      ctx.save(); ctx.translate(ix, iy); ctx.rotate(a);
+      ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-6, -7); ctx.lineTo(-6, 7); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    // minimap
+    const mh = 150, mw = mh * MW / MH, mx = W - mw - 14, my = H - mh - (isTouch ? 210 : 40);
     ctx.fillStyle = 'rgba(8,14,34,0.75)'; ctx.strokeStyle = 'rgba(61,232,255,0.35)'; ctx.lineWidth = 1;
-    ctx.fillRect(mx, my, mm, mm); ctx.strokeRect(mx, my, mm, mm);
-    for (const r of this.rocks) { ctx.fillStyle = r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mm - 1, my + r.y / MH * mm - 1, r.tier + 0.5, r.tier + 0.5); }
-    ctx.fillStyle = '#3de8ff'; ctx.fillRect(mx + p.x / MW * mm - 2, my + p.y / MH * mm - 2, 4, 4);
-    if (this.loc.field.hazard === 'heat' && ship.shieldMax <= 0) {
-      ctx.fillStyle = `rgba(255,120,40,${0.08 + 0.05 * Math.sin(t * 4)})`; ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh);
+    if (!this.space) { ctx.fillStyle = 'rgba(61,232,255,0.35)'; ctx.fillRect(mx, my + DOCK_Y / MH * mh, mw, mh - DOCK_Y / MH * mh); }
+    for (const r of this.rocks) { ctx.fillStyle = r.gold ? '#ffd24a' : r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mw - 1, my + r.y / MH * mh - 1, r.tier * 0.8 + 0.6, r.tier * 0.8 + 0.6); }
+    ctx.fillStyle = '#ff4d6d'; for (const e of this.enemies) ctx.fillRect(mx + e.x / MW * mw - 1.5, my + e.y / MH * mh - 1.5, 3, 3);
+    ctx.fillStyle = '#3de8ff'; ctx.fillRect(mx + p.x / MW * mw - 2, my + p.y / MH * mh - 2, 4, 4);
+    if (this.loc.field.hazard === 'heat' && ship.shieldMax <= 0) { ctx.fillStyle = `rgba(255,120,40,${0.08 + 0.05 * Math.sin(t * 4)})`; ctx.fillRect(0, 0, W, H); }
+  },
+  drawStation(ctx, t) {
+    const l = this.loc;
+    const col = l.faction ? FACTIONS[l.faction].c : '#6dffb0';
+    // dock zone
+    const g = ctx.createLinearGradient(0, DOCK_Y - 40, 0, MH);
+    g.addColorStop(0, 'rgba(61,232,255,0)'); g.addColorStop(0.3, 'rgba(61,232,255,0.10)'); g.addColorStop(1, 'rgba(61,232,255,0.22)');
+    ctx.fillStyle = g; ctx.fillRect(0, DOCK_Y - 40, MW, MH - DOCK_Y + 40);
+    ctx.strokeStyle = `rgba(61,232,255,${0.5 + 0.3 * Math.sin(t * 3)})`; ctx.lineWidth = 3; ctx.setLineDash([18, 12]); ctx.lineDashOffset = -t * 30;
+    ctx.beginPath(); ctx.moveTo(0, DOCK_Y); ctx.lineTo(MW, DOCK_Y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(61,232,255,0.8)'; ctx.font = '700 16px Rajdhani, sans-serif'; ctx.textAlign = 'center';
+    for (let x = 150; x < MW; x += 300) ctx.fillText('▼ DOCK ▼', x, DOCK_Y - 12);
+    // station body
+    const sx = MW / 2, sy = MH - 70;
+    glow(ctx, sx, sy, 380, col + '44', 0.8);
+    ctx.fillStyle = '#39445e';
+    roundRect(ctx, sx - 420, sy - 20, 840, 40, 12); ctx.fill();
+    for (let i = -3; i <= 3; i++) {
+      ctx.fillStyle = '#2d6fc4'; ctx.fillRect(sx + i * 120 - 40, sy - 60, 80, 34);
+      ctx.strokeStyle = 'rgba(160,200,255,0.4)'; ctx.lineWidth = 1;
+      for (let k = 1; k < 4; k++) { ctx.beginPath(); ctx.moveTo(sx + i * 120 - 40 + k * 20, sy - 60); ctx.lineTo(sx + i * 120 - 40 + k * 20, sy - 26); ctx.stroke(); }
+    }
+    const bg = ctx.createLinearGradient(0, sy - 110, 0, sy + 40);
+    bg.addColorStop(0, '#dfe6f3'); bg.addColorStop(1, '#6f7c97');
+    ctx.fillStyle = bg;
+    roundRect(ctx, sx - 170, sy - 110, 340, 150, 24); ctx.fill();
+    ctx.strokeStyle = '#1b2235'; ctx.lineWidth = 2; ctx.stroke();
+    // hangar mouth
+    ctx.fillStyle = '#0b1226'; roundRect(ctx, sx - 90, sy - 110, 180, 40, 10); ctx.fill();
+    glow(ctx, sx, sy - 90, 90, '#3de8ff', 0.5 + 0.2 * Math.sin(t * 4));
+    for (let i = 0; i < 8; i++) {
+      const on = (Math.floor(t * 6) + i) % 8 < 2;
+      ctx.fillStyle = on ? '#ffd24a' : '#5a4a20';
+      ctx.fillRect(sx - 160 + i * 42, sy + 20, 16, 5);
+    }
+    ctx.fillStyle = col; ctx.font = '900 18px Orbitron, sans-serif'; ctx.fillText(l.station.toUpperCase(), sx, sy - 22);
+    // drone outpost
+    const o = S.outposts[l.id];
+    if (o) {
+      const ox = 220, oy = MH - 150;
+      glow(ctx, ox, oy, 120, '#6dffb055', 0.8);
+      ctx.fillStyle = '#4a5a74'; roundRect(ctx, ox - 70, oy - 30, 140, 60, 14); ctx.fill();
+      ctx.strokeStyle = '#6dffb0'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#6dffb0'; ctx.font = '700 13px Rajdhani, sans-serif';
+      ctx.fillText(`🤖 OUTPOST LV${o.lv}`, ox, oy - 4);
+      ctx.fillStyle = '#ffd24a'; ctx.fillText(`+${fmt(outpostIncome(l.id))}/s`, ox, oy + 14);
     }
   },
   leave(toMap) {
@@ -2369,228 +2641,188 @@ const MineScene = {
     const got = Object.entries(this.collected);
     if (got.length) addNews('⛏️', `Mined at ${this.loc.field.n}: ${got.map(([k, n]) => `${n} ${ITEMS[k].n}`).join(', ')}`, '#ffd24a');
     this.collected = {};
+    for (const c of this.chunks) if (c.cr) earn(c.cr);
     save();
     if (!toMap && LOC[S.loc].station) openDock();
     else setScene(MapScene);
   },
 };
+function laserTier() { return clamp(1 + Math.floor((S.lv.laser - 1) / 8), 1, 5); }
+function shipLv() {
+  return { hull: S.lv.hull, laser: laserTier(), engine: clamp(1 + Math.floor((S.lv.engine - 1) / 4), 1, 5), weapons: S.lv.weapons > 1 ? clamp(1 + Math.ceil((S.lv.weapons - 1) / 8), 1, 5) : 1 };
+}
 
 function towShip(reason) {
-  const lost = {};
-  for (const k in S.cargo) { const n = Math.ceil(S.cargo[k] * 0.6); lost[k] = n; addCargo(k, -n); }
+  for (const k in S.cargo) { const n = Math.ceil(S.cargo[k] * 0.6); addCargo(k, -n); }
   const markets = NODES.filter(l => l.station && !l.black && locOpen(l.id));
   let best = markets[0], bd = 1e9;
   for (const l of markets) { const d = locDist(S.loc, l.id, S.day); if (d < bd) { bd = d; best = l; } }
-  const fee = Math.round(Math.min(S.credits, 200 + S.credits * 0.1));
+  const fee = Math.round(Math.min(S.credits, S.credits * 0.08));
   S.credits -= fee; S.loc = best.id; S.hull = Math.max(S.hull, Math.round(ship.hpMax * 0.25));
   S.fuel = Math.max(S.fuel, 10);
-  for (let i = 0; i < 3; i++) tickDay();
   sfx('lose');
-  showModal({ icon: '🚨', title: 'Towed to safety', danger: true, html: `${reason}<br>A tug brings you to <b>${best.station}</b>. You lost part of your cargo and paid a <b>${fmt(fee)} cr</b> rescue fee.`,
+  showModal({ icon: '🚨', title: 'Towed to safety', danger: true, html: `${reason}<br>A tug brings you to <b>${best.station}</b>. You lost part of your cargo${fee ? ` and paid a <b>${fmt(fee)} cr</b> rescue fee` : ''}.`,
     buttons: [{ label: 'Continue', cls: 'primary', fn: () => { save(); openDock(); } }] });
 }
 
 // ---- battle.js ----
 'use strict';
-// ============ ESCENA: COMBATE AUTOMÁTICO ============
-const BattleScene = {
-  t: 0, parts: new Particles(), shots: [], ended: false, speed: 1, prev: null, done: null, log: [],
-  start(fleet, enemyFirst, done) {
-    this.prev = scene; this.done = done; this.t = 0; this.ended = false; this.speed = 1; this.shots = []; this.parts = new Particles(); this.log = [];
-    this.fleetKeys = fleet;
-    this.pl = { hp: S.hull, max: ship.hpMax, sp: ship.shieldMax, spMax: ship.shieldMax, dps: ship.weaponDps, cd: enemyFirst ? 1.2 : 0.4, shT: 0, x: 0, y: 0, hitT: 0, dead: false,
-      guns: Math.max(1, S.lv.weapons), evade: 0.04 + S.lv.engine * 0.03, retreatT: 0 };
-    this.en = fleet.map((k, i) => {
-      const e = ENEMIES[k]; const sc = 1 + S.day / 400;
-      return { k, n: e.n, hp: e.hp * sc, max: e.hp * sc, sp: e.sp * sc, spMax: e.sp * sc, dps: e.dps * sc, cd: enemyFirst ? rand(0.1, 0.5) : rand(0.6, 1.4), shT: 0, idx: i, hitT: 0, dead: false, bob: rand(0, TAU), evade: 0.06 };
+// ============ REAL-TIME COMBAT (used inside the mining / space arena) ============
+function buildFleet(danger) {
+  let budget = (1 + danger * 7) * rand(0.7, 1.25);
+  const fleet = [];
+  const order = ['carrier', 'frigate', 'corsair', 'raider'];
+  while (budget > 0.8 && fleet.length < 6) {
+    const opts = order.filter(k => ENEMIES[k].pow <= budget);
+    if (!opts.length) break;
+    const k = Math.random() < 0.5 ? opts[0] : pick(opts);
+    fleet.push(k); budget -= ENEMIES[k].pow;
+  }
+  if (!fleet.length) fleet.push('raider');
+  return fleet;
+}
+function fleetThreat(fleet, z) {
+  const m = Z_ENEMY[z];
+  let ehp = 0, dps = 0;
+  for (const k of fleet) { const e = ENEMIES[k]; ehp += (e.hp + e.sp) * m; dps += e.dmg * m * (e.burst || 1) / e.rate; }
+  const mine = Math.sqrt(Math.max(1, S.hull + ship.shieldMax) * ship.weaponDps * 1.6);
+  return Math.sqrt(ehp * dps) / mine;
+}
+
+const Combat = {
+  spawn(sc, fleet, z, fromTop) {
+    const m = Z_ENEMY[z];
+    fleet.forEach((k, i) => {
+      const e = ENEMIES[k];
+      let x, y;
+      if (fromTop) { x = clamp(sc.p.x + rand(-500, 500), 120, MW - 120); y = Math.max(80, sc.p.y - rand(650, 900)); }
+      else { const a = rand(0, TAU); x = clamp(sc.p.x + Math.cos(a) * rand(520, 700), 80, MW - 80); y = clamp(sc.p.y + Math.sin(a) * rand(520, 700), 80, MH - 80); }
+      sc.enemies.push({ k, x, y, vx: 0, vy: 0, a: 0, hp: e.hp * m, max: e.hp * m, sp: e.sp * m, spMax: e.sp * m, dmg: e.dmg * m,
+        rate: e.rate, spd: e.spd, size: e.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1,
+        prefer: rand(200, 330) * (0.8 + e.size * 0.3), shT: 0, hitT: 0, loot: e.loot * Z_LOOT[z], military: e.military });
     });
-    this.drones = Array.from({ length: ship.drones }, (_, i) => ({ a: i * TAU / Math.max(1, ship.drones), cd: rand(0.3, 1) }));
-    setScene(this);
+    sc.combatZ = z;
+    sc.hadCombat = true;
   },
-  enter() { showBattleUI(true); sfx('alarm'); },
-  exit() { showBattleUI(false); },
-  layout() {
-    const pl = this.pl;
-    pl.x = W * (W < 700 ? 0.22 : 0.26); pl.y = H * 0.52;
-    const alive = this.en;
-    alive.forEach((e, i) => {
-      const n = alive.length;
-      e.x = W * (W < 700 ? 0.75 : 0.72) + (i % 2) * 50 * (W < 700 ? 0.6 : 1);
-      e.y = H * 0.52 + (i - (n - 1) / 2) * Math.min(95, H * 0.6 / n);
-    });
+  fireEnemy(sc, e) {
+    const p = sc.p;
+    const dist = Math.hypot(p.x - e.x, p.y - e.y);
+    const lead = dist / 460 * 0.6;
+    const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
+    const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
+    sc.bolts.push({ x: e.x + Math.cos(a) * 18 * e.size, y: e.y + Math.sin(a) * 18 * e.size, vx: Math.cos(a) * 460, vy: Math.sin(a) * 460, life: 2, dmg: e.dmg, foe: 1, col: e.military ? '#b6ff7a' : '#ff4d6d' });
+    sfx('eshoot');
   },
-  fire(from, to, dmg, col, isPl) {
-    const sx = from.x + (isPl ? 30 : -25), sy = from.y + rand(-6, 6);
-    this.shots.push({ x: sx, y: sy, sx, sy, tx: to.x + rand(-8, 8), ty: to.y + rand(-8, 8), t: 0, dur: 0.35, dmg, col, to, isPl });
-    sfx(isPl ? 'shoot' : 'eshoot');
+  firePlayer(sc, aim) {
+    const p = sc.p, r = shipR();
+    const per = ship.weaponDps * 0.25 / 2;
+    for (const side of [-1, 1]) {
+      const ox = Math.cos(p.a) * r * 0.2 - Math.sin(p.a) * side * r * 0.35, oy = Math.sin(p.a) * r * 0.2 + Math.cos(p.a) * side * r * 0.35;
+      const a = aim + rand(-0.03, 0.03);
+      sc.bolts.push({ x: p.x + ox, y: p.y + oy, vx: Math.cos(a) * 880 + p.vx * 0.5, vy: Math.sin(a) * 880 + p.vy * 0.5, life: 1.1, dmg: per, foe: 0, col: '#3de8ff' });
+    }
+    sfx('shoot');
   },
-  applyHit(target, dmg, isPl) {
-    if (target.dead) return;
-    if (Math.random() < target.evade) { this.floatTxt(target.x, target.y - 30, 'MISS', '#9fb6ff'); return; }
-    target.shT = 2.5;
-    if (target.sp > 0) {
-      const a = Math.min(target.sp, dmg); target.sp -= a; dmg -= a;
-      this.parts.burst(target.x, target.y, 6, '#3de8ff', 80, 0.4, 2);
-      target.shieldFlash = 0.3; sfx('shield');
-    }
-    if (dmg > 0) {
-      target.hp -= dmg; target.hitT = 0.12;
-      this.parts.burst(target.x + rand(-10, 10), target.y + rand(-8, 8), 8, isPl ? '#ffb347' : '#ff934a', 110, 0.5, 2.5);
-      sfx('hit');
-    }
-    this.floatTxt(target.x, target.y - 30, Math.round(dmg > 0 ? dmg : 0) || 'shield', dmg > 0 ? '#ffffff' : '#3de8ff');
-    if (target.hp <= 0) {
-      target.dead = true; target.hp = 0;
-      this.parts.burst(target.x, target.y, 50, '#ffb347', 260, 1.1, 4);
-      this.parts.burst(target.x, target.y, 25, '#ffffff', 180, 0.6, 3);
-      sfx('boom'); this.shake = 10;
-    }
+  hitEnemy(sc, e, dmg) {
+    e.shT = 2.2;
+    if (e.sp > 0) { const a = Math.min(e.sp, dmg); e.sp -= a; dmg -= a; e.shieldFlash = 0.25; }
+    if (dmg > 0) { e.hp -= dmg; e.hitT = 0.08; }
+    if (e.hp <= 0 && !e.dead) this.kill(sc, e);
   },
-  floats: [],
-  floatTxt(x, y, txt, col) { this.floats.push({ x: x + rand(-15, 15), y, txt, col, life: 0.9 }); },
-  update(dt) {
-    this.layout();
-    this.t += dt;
-    const sdt = dt * this.speed;
-    this.parts.update(sdt);
-    for (const f of this.floats) { f.y -= 40 * sdt; f.life -= sdt; }
-    this.floats = this.floats.filter(f => f.life > 0);
-    this.shake = Math.max(0, (this.shake || 0) - dt * 25);
-    for (const s of this.shots) {
-      s.t += sdt;
-      const k = Math.min(1, s.t / s.dur);
-      s.x = lerp(s.sx, s.tx, k); s.y = lerp(s.sy, s.ty, k);
-      if (k >= 1 && !s.done) { s.done = true; this.applyHit(s.to, s.dmg, !s.isPl); }
+  kill(sc, e) {
+    e.dead = true;
+    sc.parts.burst(e.x, e.y, 50, '#ffb347', 280, 1.1, 4);
+    sc.parts.burst(e.x, e.y, 25, '#ffffff', 190, 0.6, 3);
+    sfx('boom'); sc.shake = Math.max(sc.shake, 10);
+    S.stats.kills++;
+    // loot: credit orbs + some ore
+    const orbs = randi(3, 6);
+    for (let i = 0; i < orbs; i++) {
+      const a = rand(0, TAU), v = rand(40, 140);
+      sc.chunks.push({ x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, cr: e.loot * incomeMult() / orbs, rot: rand(0, TAU), life: 40 });
     }
-    this.shots = this.shots.filter(s => !s.done);
-    if (this.ended) return;
-    const pl = this.pl, alive = this.en.filter(e => !e.dead);
-    if (!alive.length) return this.finish(true);
-    if (pl.hp <= 0) { pl.dead = true; return this.finish(false); }
-    // escudos
-    for (const u of [pl, ...alive]) {
-      u.shT -= sdt; u.hitT -= sdt; if (u.shieldFlash) u.shieldFlash -= sdt;
-      if (u.shT <= 0 && u.spMax > 0) u.sp = Math.min(u.spMax, u.sp + u.spMax * 0.12 * sdt);
-    }
-    // jugador dispara al más débil
-    pl.cd -= sdt;
-    if (pl.cd <= 0) {
-      const tgt = alive.reduce((a, b) => (b.hp + b.sp < a.hp + a.sp ? b : a));
-      const period = 0.7;
-      const per = UPG.weapons.dps[S.lv.weapons - 1] * period / pl.guns;
-      for (let g = 0; g < pl.guns; g++) setTimeout(() => { if (!this.ended && !tgt.dead) this.fire(pl, tgt, per * rand(0.85, 1.15), '#3de8ff', true); }, g * 90 / this.speed);
-      pl.cd = period;
-    }
-    // drones
-    for (const d of this.drones) {
-      d.a += sdt * 2; d.cd -= sdt;
-      d.x = pl.x + Math.cos(d.a) * 48; d.y = pl.y + Math.sin(d.a) * 30;
-      if (d.cd <= 0) { d.cd = 0.8; const tgt = pick(alive); this.fire(d, tgt, 2.5 * 0.8, '#6dffb0', true); }
-    }
-    // enemigos
-    for (const e of alive) {
-      e.cd -= sdt;
-      if (e.cd <= 0) { const period = rand(0.8, 1.2); this.fire(e, pl, e.dps * period * rand(0.85, 1.15), '#ff4d6d', false); e.cd = period; }
-    }
+    if (!e.military && sc.loc && sc.loc.field) for (let i = 0; i < randi(1, 4); i++) sc.dropChunk(e.x, e.y, sc.pickOre(0.8));
   },
-  retreat() {
-    if (this.ended) return;
-    const chance = clamp(ship.flee * 0.8, 0.1, 0.8);
-    if (Math.random() < chance) { toast('Retreat successful!', 'good'); sfx('warp'); this.finish(null); }
-    else { toast('Retreat failed', 'bad'); this.pl.cd += 1; document.getElementById('btnRetreat').disabled = true; setTimeout(() => { const b = document.getElementById('btnRetreat'); if (b) b.disabled = false; }, 2500); }
-  },
-  finish(win) {
-    this.ended = true;
-    S.hull = Math.max(0, Math.round(this.pl.hp));
-    setTimeout(() => this.result(win), win === null ? 300 : 1200);
-  },
-  result(win) {
-    const done = this.done;
-    const back = () => { setScene(this.prev || MapScene); };
-    if (win === true) {
-      S.stats.won++;
-      const loot = Math.round(this.fleetKeys.reduce((a, k) => a + ENEMIES[k].loot, 0) * rand(0.8, 1.2) * (1 + S.day / 300));
-      const military = this.fleetKeys.includes('patrol');
-      let salv = '';
-      if (!military) {
-        const it = pick(['arms', 'tech', 'meds', 'luxury', 'platinum', 'he3']);
-        const n = Math.min(cargoFree(), randi(1, 2 + this.fleetKeys.length * 2));
-        if (n > 0) { addCargo(it, n); salv = `<br>You salvage <b>${n} ${ITEMS[it].n}</b> from the wreckage.`; }
-        repChange('piratas', -3, true);
-        const near = LOC[S.loc].faction && LOC[S.loc].faction !== 'piratas' ? LOC[S.loc].faction : 'cinturon';
-        repChange(near, 1 + this.fleetKeys.length, true);
-        for (const c of S.active) if (c.type === 'bounty') { c.progress++; }
-        for (const c of [...S.active]) if (c.type === 'bounty' && c.progress >= c.kills) completeContract(c);
-      }
-      sfx('win');
-      addNews('🏆', `Defeated ${this.fleetKeys.length} ${military ? 'military' : 'pirate'} ship${this.fleetKeys.length > 1 ? 's' : ''}. Loot: ${fmt(loot)} cr`, '#6dffb0');
-      earn(loot);
-      showModal({ icon: '🏆', title: 'Victory!', html: `You destroyed the enemy fleet.<br>Loot: <b class="cr">${fmt(loot)} cr</b>${salv}<br>Hull: ${S.hull}/${ship.hpMax}`,
-        buttons: [{ label: 'Continue', cls: 'primary', fn: () => { back(); updateHUD(); done && done(); } }] });
-    } else if (win === null) {
-      back(); done && done();
-    } else {
-      S.stats.lost++;
-      if (MapScene.travel) { MapScene.travel = null; document.getElementById('travelBanner').classList.add('hidden'); }
-      setScene(MapScene);
-      towShip('Your ship was disabled in battle.');
-    }
-    save();
-  },
-  draw(ctx) {
-    this.layout();
-    const t = this.t;
-    ctx.save();
-    if (this.shake) ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
-    drawSpaceBg(ctx, W, H, t * 40, 0, t, '#1c0b1e');
-    const bl = LOC[(this.prev === MineScene && MineScene.loc) ? MineScene.loc.id : S.loc];
-    const bgl = bl.parent ? LOC[bl.parent] : bl.follow ? LOC[bl.follow] : bl;
-    if (bgl.id !== 'kuiper') { const pr = Math.min(W, H) * 0.55; drawPlanet(ctx, W * 0.5, H + pr * 0.55, pr, bgl, -Math.PI / 2, t); }
-    // líneas de velocidad
-    ctx.strokeStyle = 'rgba(160,190,255,0.15)'; ctx.lineWidth = 1;
-    for (let i = 0; i < 30; i++) {
-      const y = (i * 97.3) % H, x = W - ((t * 400 + i * 173) % (W + 200));
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 60, y); ctx.stroke();
-    }
-    const pl = this.pl;
-    const sc = W < 700 ? 1 : 1.7;
-    if (!pl.dead) {
-      drawPlayerShip(ctx, S.lv, pl.x, pl.y + Math.sin(t * 2) * 4, 0, sc * (1.4 - S.lv.hull * 0.08), 0.7, t);
-      if (pl.shieldFlash > 0) { ctx.strokeStyle = `rgba(61,232,255,${pl.shieldFlash * 3})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(pl.x, pl.y, 50 * sc, 0, TAU); ctx.stroke(); }
-      this.bars(ctx, pl.x, pl.y - 62 * sc, pl);
-    }
-    for (const d of this.drones) if (d.x) { glow(ctx, d.x, d.y, 9, '#6dffb088', 0.8); ctx.fillStyle = '#d4dcea'; ctx.beginPath(); ctx.arc(d.x, d.y, 3.5, 0, TAU); ctx.fill(); }
-    for (const e of this.en) {
+  update(sc, dt) {
+    const p = sc.p;
+    for (const e of sc.enemies) {
       if (e.dead) continue;
-      const y = e.y + Math.sin(t * 2 + e.bob) * 5;
-      drawEnemyShip(ctx, e.k, e.x, y, Math.PI, sc, t);
-      if (e.hitT > 0) glow(ctx, e.x, y, 30, '#ffffff', 0.4);
-      if (e.shieldFlash > 0) { ctx.strokeStyle = `rgba(255,120,150,${e.shieldFlash * 3})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, y, 30 * sc * ENEMIES[e.k].size, 0, TAU); ctx.stroke(); }
-      this.bars(ctx, e.x, y - 34 * sc * ENEMIES[e.k].size, e);
+      const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy) || 1;
+      const nx = dx / d, ny = dy / d;
+      const radial = clamp((d - e.prefer) / 150, -1, 1);
+      const tvx = (nx * radial + -ny * e.strafe * 0.8) * e.spd, tvy = (ny * radial + nx * e.strafe * 0.8) * e.spd;
+      e.vx = lerp(e.vx, tvx, dt * 2); e.vy = lerp(e.vy, tvy, dt * 2);
+      e.x = clamp(e.x + e.vx * dt, 40, MW - 40); e.y = clamp(e.y + e.vy * dt, 40, MH - 40);
+      if (Math.random() < dt * 0.3) e.strafe *= -1;
+      e.a = Math.atan2(dy, dx);
+      e.shT -= dt; e.hitT -= dt; if (e.shieldFlash) e.shieldFlash -= dt;
+      if (e.shT <= 0 && e.spMax) e.sp = Math.min(e.spMax, e.sp + e.spMax * 0.15 * dt);
+      if (d < 750) {
+        e.cd -= dt;
+        if (e.cd <= 0) { e.burstLeft = ENEMIES[e.k].burst || 1; e.cd = e.rate * rand(0.85, 1.2); }
+        if (e.burstLeft > 0) { e.burstT -= dt; if (e.burstT <= 0) { this.fireEnemy(sc, e); e.burstLeft--; e.burstT = 0.12; } }
+      }
+      if (Math.random() < dt * 20) sc.parts.add(e.x - Math.cos(e.a) * 16 * e.size, e.y - Math.sin(e.a) * 16 * e.size, rand(-20, 20), rand(-20, 20), 0.3, e.military ? '#9fe0ff' : '#ff6a3a', 2);
     }
+    // ship drones shoot too
+    if (sc.enemies.some(e => !e.dead)) for (const dr of sc.drones) {
+      dr.gcd = (dr.gcd || rand(0, 0.8)) - dt;
+      if (dr.gcd <= 0) {
+        dr.gcd = 0.8;
+        const tgt = sc.enemies.filter(e => !e.dead).sort((a, b) => Math.hypot(a.x - dr.x, a.y - dr.y) - Math.hypot(b.x - dr.x, b.y - dr.y))[0];
+        if (tgt && Math.hypot(tgt.x - dr.x, tgt.y - dr.y) < 550) {
+          const a = Math.atan2(tgt.y - dr.y, tgt.x - dr.x);
+          sc.bolts.push({ x: dr.x, y: dr.y, vx: Math.cos(a) * 700, vy: Math.sin(a) * 700, life: 1, dmg: ship.weaponDps * 0.12, foe: 0, col: '#6dffb0' });
+        }
+      }
+    }
+    // bolts
+    const pr = shipR() * 0.55;
+    for (const b of sc.bolts) {
+      b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
+      if (b.life <= 0) { b.dead = true; continue; }
+      if (b.foe) {
+        if (Math.hypot(b.x - p.x, b.y - p.y) < pr + 4) { b.dead = true; sc.damage(b.dmg); sc.parts.burst(b.x, b.y, 8, p.shield > 0 ? '#3de8ff' : '#ffb347', 90, 0.35, 2); sfx(p.shield > 0 ? 'shield' : 'hit'); sc.shake = Math.max(sc.shake, 4); continue; }
+      } else {
+        for (const e of sc.enemies) if (!e.dead && Math.hypot(b.x - e.x, b.y - e.y) < 18 * e.size + 3) {
+          b.dead = true; this.hitEnemy(sc, e, b.dmg);
+          sc.parts.burst(b.x, b.y, 5, e.sp > 0 ? '#ff8fb0' : '#ffd24a', 80, 0.3, 2);
+          break;
+        }
+        if (b.dead) continue;
+      }
+      for (const r of sc.rocks) if (Math.hypot(b.x - r.x, b.y - r.y) < r.r * 0.85) {
+        b.dead = true;
+        sc.parts.burst(b.x, b.y, 4, '#c9b8a6', 60, 0.3, 2);
+        if (!b.foe) { r.hp -= b.dmg * 0.5; r.hit = 0.05; if (r.hp <= 0) sc.breakRock(r); }
+        break;
+      }
+    }
+    sc.bolts = sc.bolts.filter(b => !b.dead);
+    const before = sc.enemies.length;
+    sc.enemies = sc.enemies.filter(e => !e.dead);
+    if (before && !sc.enemies.length && sc.hadCombat) sc.onVictory();
+  },
+  draw(sc, ctx, t) {
     ctx.globalCompositeOperation = 'lighter';
-    for (const s of this.shots) {
-      const a = Math.atan2(s.ty - s.sy, s.tx - s.sx);
-      ctx.strokeStyle = s.col; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x - Math.cos(a) * 16, s.y - Math.sin(a) * 16); ctx.stroke();
-      glow(ctx, s.x, s.y, 8, s.col, 0.8);
+    for (const b of sc.bolts) {
+      const a = Math.atan2(b.vy, b.vx);
+      ctx.strokeStyle = b.col; ctx.lineWidth = b.foe ? 3.5 : 3;
+      ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - Math.cos(a) * 16, b.y - Math.sin(a) * 16); ctx.stroke();
+      glow(ctx, b.x, b.y, b.foe ? 10 : 8, b.col, 0.8);
     }
     ctx.globalCompositeOperation = 'source-over';
-    this.parts.draw(ctx);
-    ctx.font = '700 15px Rajdhani, sans-serif'; ctx.textAlign = 'center';
-    for (const f of this.floats) { ctx.globalAlpha = Math.min(1, f.life * 2); ctx.fillStyle = f.col; ctx.fillText(f.txt, f.x, f.y); }
-    ctx.globalAlpha = 1;
-    ctx.restore();
-  },
-  bars(ctx, x, y, u) {
-    const w = 60;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x - w / 2 - 1, y - 1, w + 2, 10);
-    ctx.fillStyle = u === this.pl ? '#6dffb0' : '#ff4d6d'; ctx.fillRect(x - w / 2, y, w * clamp(u.hp / u.max, 0, 1), 4);
-    if (u.spMax > 0) { ctx.fillStyle = '#3de8ff'; ctx.fillRect(x - w / 2, y + 5, w * clamp(u.sp / u.spMax, 0, 1), 3); }
-    if (u.n) { ctx.font = '600 11px Rajdhani, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,200,210,0.85)'; ctx.fillText(u.n, x, y - 4); }
+    for (const e of sc.enemies) {
+      drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t);
+      if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);
+      if (e.shieldFlash > 0) { ctx.strokeStyle = `rgba(255,120,160,${e.shieldFlash * 3})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, 30 * e.size, 0, TAU); ctx.stroke(); }
+      const w = 50 * e.size, y = e.y - 32 * e.size - 8;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(e.x - w / 2 - 1, y - 1, w + 2, e.spMax ? 9 : 6);
+      ctx.fillStyle = '#ff4d6d'; ctx.fillRect(e.x - w / 2, y, w * clamp(e.hp / e.max, 0, 1), 4);
+      if (e.spMax) { ctx.fillStyle = '#ff9ec0'; ctx.fillRect(e.x - w / 2, y + 5, w * clamp(e.sp / e.spMax, 0, 1), 3); }
+    }
   },
 };
-function startBattle(fleet, enemyFirst, done) { BattleScene.start(fleet, enemyFirst, done); }
 
 // ---- ui.js ----
 'use strict';
@@ -2653,6 +2885,8 @@ function hudTick(dt) {
   else shownCredits += d * Math.min(1, dt * 6) + Math.sign(d) * Math.min(Math.abs(d), dt * 40);
   $('hCr').textContent = fmt(shownCredits);
   $('hCr').parentElement.classList.toggle('up', d > 1);
+  const inc = totalIncome();
+  $('hRate').textContent = inc > 0 ? `+${fmt(inc)}/s` : '';
 }
 function updateHUD() {
   if (!S) return;
@@ -2661,9 +2895,9 @@ function updateHUD() {
   $('hFuel').style.width = (S.fuel / ship.fuelMax * 100) + '%';
   $('hFuelT').textContent = `${Math.floor(S.fuel)}/${ship.fuelMax}`;
   $('hHull').style.width = (S.hull / ship.hpMax * 100) + '%';
-  $('hHullT').textContent = `${Math.ceil(S.hull)}/${ship.hpMax}`;
+  $('hHullT').textContent = `${fmt(Math.ceil(S.hull))}/${fmt(ship.hpMax)}`;
   $('hCargo').style.width = (cargoUsed() / ship.cargoMax * 100) + '%';
-  $('hCargoT').textContent = `${cargoUsed()}/${ship.cargoMax}`;
+  $('hCargoT').textContent = `${fmt(cargoUsed())}/${fmt(ship.cargoMax)}`;
   const inf = influence();
   $('hInfl').textContent = inf;
   $('hRank').textContent = rankName(inf);
@@ -2676,10 +2910,10 @@ function updateHUD() {
     const prev = UNLOCKS[S.unlock].at, pct = clamp((S.stats.earned - prev) / (nu.at - prev), 0, 1);
     o.innerHTML = `<small>NEXT UNLOCK</small><b>${nu.icon} ${nu.title}</b><div class="meter gold"><i style="width:${pct * 100}%"></i></div><span>${fmt(S.stats.earned)} / ${fmt(nu.at)} cr earned</span>`;
   } else if (!S.won) {
-    o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest in stations</span>`;
+    o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest & upgrade outposts</span>`;
   } else o.innerHTML = `<small>SOLAR SOVEREIGN</small><b>👑 You rule the system</b><span>Keep growing your empire.</span>`;
   if (!S.won && has(U.SATURN) && inf >= 100 && !isBlocking()) victory();
-  if (pendingUnlocks.length && $('modal').classList.contains('hidden') && scene !== BattleScene && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
+  if (pendingUnlocks.length && $('modal').classList.contains('hidden') && !(scene === MineScene && (MineScene.inCombat || MineScene.space)) && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
 }
 function showUnlock(i) {
   const u = UNLOCKS[i];
@@ -2763,37 +2997,35 @@ function showMineUI(on) {
   document.body.classList.toggle('mining', on);
   $('mineUI').classList.toggle('hidden', !on);
   $('touchUI').classList.toggle('hidden', !on || !isTouch);
-  if (!on) { coach(''); $('fullPrompt').classList.add('hidden'); }
-  if (on) {
-    const l = MineScene.loc;
-    $('mineName').textContent = l.field.n;
-    $('btnDock').classList.toggle('hidden', !l.station);
-    $('btnDock').innerHTML = `🛰 Dock${l.station ? ' & sell' : ''}`;
-    $('btnMap').classList.toggle('hidden', !has(U.MAP));
-  }
+  if (!on) { coach(''); $('battleUI').classList.add('hidden'); document.body.classList.remove('battle'); }
+  if (on) $('mineName').textContent = MineScene.space ? '☠ Pirate ambush' : MineScene.loc.field.n;
 }
+
 function updateMineHUD() {
   const now = performance.now();
-  if (updateMineHUD.t && now - updateMineHUD.t < 200) return;
+  if (updateMineHUD.t && now - updateMineHUD.t < 150) return;
   updateMineHUD.t = now;
-  const rows = Object.keys(S.cargo).map(k => `<div class="crow"><i style="background:${ITEMS[k].c}"></i>${ITEMS[k].n}<b>${S.cargo[k]}</b></div>`).join('');
+  const sc = MineScene;
+  const rows = Object.keys(S.cargo).map(k => `<div class="crow"><i style="background:${ITEMS[k].c}"></i>${ITEMS[k].n}<b>${fmt(S.cargo[k])}</b></div>`).join('');
   const val = LOC[S.loc].market ? oreValueAt(S.loc) : 0;
   $('mineCargo').innerHTML = (rows || '<div class="crow dim">Cargo hold empty</div>') + (val ? `<div class="crow val">Worth<b class="cr">${fmt(val)} cr</b></div>` : '');
-  $('mineInfo').innerHTML = (ship.shieldMax ? `Shield ${Math.round(MineScene.p.shield)}/${ship.shieldMax}` : '') + (MineScene.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
-  const full = cargoFree() <= 0;
-  const fp = $('fullPrompt');
-  if (full && fp.classList.contains('hidden')) {
-    const st = LOC[S.loc].station;
-    fp.innerHTML = `<b>CARGO FULL!</b><button class="btn primary big" onclick="MineScene.leave()">${st ? `🛰 Dock & sell <span class="cr2">+${fmt(val)} cr</span>` : '🗺 Open map'}</button>`;
+  const depth = sc.space ? '' : `<span class="depth">Depth ${Math.round(sc.depthOf(sc.p.y) * 100)}% · richness ×${(1 + sc.depthOf(sc.p.y) * 4).toFixed(1)}</span>`;
+  $('mineInfo').innerHTML = depth + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
+  const combat = sc.inCombat || sc.clearT > 0;
+  $('fireBtn').textContent = sc.inCombat ? 'FIRE' : 'LASER';
+  document.body.classList.toggle('battle', combat);
+  $('battleUI').classList.toggle('hidden', !combat);
+  if (combat) {
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} PIRATE${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
+    $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
+    $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
   }
-  fp.classList.toggle('hidden', !full);
-  $('btnDock').style.visibility = full ? 'hidden' : '';
-  if (full) coach('');
   updateHUD();
 }
-function showBattleUI(on) { document.body.classList.toggle('battle', on); $('battleUI').classList.toggle('hidden', !on); if (on) { $('btnSpeed').textContent = 'Speed ×1'; $('btnRetreat').disabled = false; } }
 
-// ---------- sheet (big panel) ----------
+function showBattleUI(on) {}
+
 function openSheet(title, html, cls) {
   const s = $('sheet');
   s.className = 'sheet ' + (cls || '');
@@ -2822,8 +3054,9 @@ function openDock() {
 function renderDock(fresh) {
   const l = LOC[S.loc];
   const tabs = [['upg', '🔧 Upgrades']];
-  if (has(U.TRADE)) tabs.push(['trade', '📦 Trade'], ['contracts', '📜 Contracts' + (S.active.some(canDeliver) ? ' <i class="dot"></i>' : '')]);
-  if (has(U.SATURN)) tabs.push(['invest', '🏛 Invest']);
+  if (has(U.OUTPOST) && l.field) tabs.push(['outpost', '🤖 Outpost' + (!S.outposts[l.id] && S.credits >= buildCost(l.id) ? ' <i class="dot"></i>' : '')]);
+  if (has(U.TRADE) && !l.depot) tabs.push(['trade', '📦 Trade'], ['contracts', '📜 Contracts' + (S.active.some(canDeliver) ? ' <i class="dot"></i>' : '')]);
+  if (has(U.SATURN) && STATION_TIER[l.id]) tabs.push(['invest', '🏛 Invest']);
   let receipt = '';
   const r = lastDock;
   if (fresh && r && (r.sold.length || r.fuel || r.repair)) {
@@ -2861,14 +3094,16 @@ function dockBody(tab) {
     for (const k of UPG_KEYS) {
       if (!upgOpen(k)) continue;
       const u = UPG[k], lv = S.lv[k];
-      const next = lv < 5 ? lv + 1 : null;
-      const cost = next ? u.cost[next - 1] : 0;
-      const can = next && S.credits >= cost;
-      h += `<div class="upg ${lv >= 5 ? 'maxed' : ''} ${can ? 'can' : ''}">
+      const maxed = lv >= u.max;
+      const cost = maxed ? 0 : upgCost(k, lv);
+      const can = !maxed && S.credits >= cost;
+      const nMax = maxed ? 0 : affordableLevels(k);
+      h += `<div class="upg ${maxed ? 'maxed' : ''} ${can ? 'can' : ''}">
         ${!S.seenUpg[k] ? '<span class="newb">NEW</span>' : ''}
-        <div class="uh"><span class="uicon">${u.icon}</span><b>${u.n}</b><span class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= lv ? 'on' : ''}"></i>`).join('')}</span></div>
-        <div class="ud">${next ? upgDelta(k, lv, next) : `<b>${u.names[lv - 1]}</b> · MAXED`}</div>
-        ${next ? `<button class="btn ${can ? 'primary' : ''}" ${can ? '' : 'disabled'} onclick="buyUpg('${k}')">${can ? 'Buy' : 'Need'} · ${fmt(cost)} cr</button>` : ''}
+        <div class="uh"><span class="uicon">${u.icon}</span><b>${u.n}</b><span class="lvl">${k === 'hull' ? u.names[lv - 1] : 'Lv ' + lv + `<small>/${u.max}</small>`}</span></div>
+        <div class="lvbar"><i style="width:${lv / u.max * 100}%"></i></div>
+        <div class="ud">${maxed ? '<b>MAXED</b>' : upgDelta(k, lv, lv + 1)}</div>
+        ${maxed ? '' : `<div class="ubtns"><button class="btn ${can ? 'primary' : ''}" ${can ? '' : 'disabled'} onclick="buyUpg('${k}')">${can ? 'Buy' : 'Need'} · ${fmt(cost)}</button>${nMax > 1 && k !== 'hull' ? `<button class="btn primary maxb" onclick="buyUpg('${k}', ${nMax})">×${nMax}</button>` : ''}</div>`}
       </div>`;
     }
     h += '</div>';
@@ -2876,6 +3111,7 @@ function dockBody(tab) {
     if (locked.length) h += `<p class="hint center">🔒 ${locked.length} more upgrade${locked.length > 1 ? 's' : ''} unlock as you progress.</p>`;
     return h;
   }
+  if (tab === 'outpost') return outpostBody(id);
   if (tab === 'trade') {
     if (marketClosed(id)) return `<div class="empty">✊ Market closed by a strike. Come back in a few days.</div>`;
     const keys = ITEM_KEYS.filter(k => (!ITEMS[k].ore && l.market[k] != null) || S.cargo[k]);
@@ -2919,32 +3155,40 @@ function dockBody(tab) {
     const needRep = lv < 3 ? INVEST.rep[lv] : 0;
     const rep = l.faction ? S.rep[l.faction] : 0;
     const okRep = rep >= needRep;
-    let h = `<div class="inv"><p>Invest in <b>${l.station}</b>. Each level pays <b>daily income</b> and adds permanent <b>influence</b>.</p><div class="invlv">`;
+    let h = `<div class="inv"><p>Invest in <b>${l.station}</b>. Every level adds <b>+10% to ALL your income</b> (mining, drones, everything) and permanent <b>influence</b>.</p><div class="invlv">`;
     for (let i = 0; i < 3; i++) {
-      h += `<div class="ivc ${i < lv ? 'own' : i === lv ? 'next' : ''}"><b>${INVEST.names[i]}</b><small>+${INVEST.income[i]} cr/day</small><small>+${INVEST.infl[i]} influence</small>${INVEST.rep[i] ? `<small>Needs rep ${INVEST.rep[i]}</small>` : ''}<em>${i < lv ? '✔ OWNED' : fmt(Math.round(INVEST.cost[i] * (l.black ? 1.3 : 1))) + ' cr'}</em></div>`;
+      h += `<div class="ivc ${i < lv ? 'own' : i === lv ? 'next' : ''}"><b>${INVEST.names[i]}</b><small>+10% income</small><small>+${INVEST.infl[i]} influence</small>${INVEST.rep[i] ? `<small>Needs rep ${INVEST.rep[i]}</small>` : ''}<em>${i < lv ? '✔ OWNED' : fmt(INVEST.cost[i] * (STATION_TIER[id] || 5)) + ' cr'}</em></div>`;
     }
     h += '</div>';
     if (cost != null) h += `<button class="btn primary big" ${S.credits >= cost && okRep ? '' : 'disabled'} onclick="buyInvest()">${okRep ? `Invest · ${fmt(cost)} cr` : `Needs ${needRep} reputation with ${FACTIONS[l.faction].n} (you have ${Math.round(rep)})`}</button>`;
     else h += '<div class="empty small">You control this station\'s consortium. 👑</div>';
-    h += `<p class="hint">Total income: <b>${fmt(dailyIncome())} cr/day</b>. Raise reputation with contracts, crisis relief and fighting pirates.</p></div>`;
+    h += `<p class="hint">Income multiplier: <b>×${incomeMult().toFixed(2)}</b>. Raise reputation with contracts, crisis relief and fighting pirates.</p></div>`;
     return h;
   }
   return '';
 }
 function upgDelta(k, a, b) {
-  const u = UPG[k], i = a - 1, j = b - 1;
-  const ar = (x, y, unit) => `${x}${unit || ''} → <b>${y}${unit || ''}</b>`;
+  const ar = (x, y) => `${x} → <b>${y}</b>`;
+  const at = (lv, f) => { const o = S.lv[k]; S.lv[k] = lv; const v = f(); S.lv[k] = o; return v; };
   switch (k) {
-    case 'hull': return `New ship: <b>${u.names[j]}</b><br>Cargo ${ar(u.cargo[i], u.cargo[j])} · Armor ${ar(u.hp[i], u.hp[j])}`;
-    case 'laser': return `Mining power ${ar(u.dps[i], u.dps[j])} · Range ${ar(u.range[i], u.range[j])}`;
-    case 'engine': return `Speed ${ar('×' + u.speed[i], '×' + u.speed[j])} · Fuel use ${ar(Math.round(100 / u.eff[i]) + '%', Math.round(100 / u.eff[j]) + '%')}`;
-    case 'tank': return `Fuel ${ar(u.fuel[i], u.fuel[j])}`;
-    case 'shield': return `Shield ${ar(u.sp[i], u.sp[j])}`;
-    case 'weapons': return `Firepower ${ar(u.dps[i], u.dps[j])}`;
-    case 'drones': return `Magnet ${ar(u.magnet[i], u.magnet[j])} · Drones ${ar(u.count[i], u.count[j])}`;
-    case 'scanner': return `Ambush avoidance ${ar(Math.round(u.avoid[i] * 100), Math.round(u.avoid[j] * 100), '%')}`;
+    case 'hull': return `New ship: <b>${UPG.hull.names[b - 1]}</b><br>Base cargo ${ar(UPG.hull.cargo[a - 1], UPG.hull.cargo[b - 1])} · Armor ${ar(UPG.hull.hp[a - 1], UPG.hull.hp[b - 1])}`;
+    case 'laser': return `Mining power ${ar(fmt(at(a, () => ship.laserDps)), fmt(at(b, () => ship.laserDps)))}`;
+    case 'magnet': return `Range ${ar(at(a, () => ship.magnet), at(b, () => ship.magnet))}${at(b, () => ship.drones) > at(a, () => ship.drones) ? ' · <b>+1 drone</b>' : ` · drones ${at(a, () => ship.drones)}`}`;
+    case 'cargo': return `Cargo ${ar(at(a, () => ship.cargoMax), at(b, () => ship.cargoMax))}`;
+    case 'refinery': return `All ore value ${ar('×' + at(a, () => ship.refinery).toFixed(2), '×' + at(b, () => ship.refinery).toFixed(2))}`;
+    case 'engine': return `Speed ${ar('×' + at(a, () => ship.speed).toFixed(2), '×' + at(b, () => ship.speed).toFixed(2))} · Warp ${at(b, () => ship.warpTime).toFixed(1)}s`;
+    case 'tank': return `Fuel ${ar(at(a, () => ship.fuelMax), at(b, () => ship.fuelMax))}`;
+    case 'shield': return `Shield ${ar(fmt(at(a, () => ship.shieldMax)), fmt(at(b, () => ship.shieldMax)))}`;
+    case 'weapons': return `Firepower ${ar(fmt(at(a, () => ship.weaponDps)), fmt(at(b, () => ship.weaponDps)))}`;
+    case 'scanner': return `Ambush avoidance ${ar(Math.round(at(a, () => ship.avoid) * 100) + '%', Math.round(at(b, () => ship.avoid) * 100) + '%')}`;
   }
 }
+function affordableLevels(k) {
+  let n = 0, c = 0, lv = S.lv[k];
+  while (lv + n < UPG[k].max && n < 100) { const nc = upgCost(k, lv + n); if (c + nc > S.credits) break; c += nc; n++; }
+  return n;
+}
+
 function drawShipPreview(id, lv, t) {
   const c = $(id); if (!c) return;
   const x = c.getContext('2d');
@@ -2964,21 +3208,57 @@ function drawShipPreview(id, lv, t) {
 }
 function mktSell(k, n) { if (marketClosed(S.loc)) return; const before = S.credits; doSell(S.loc, k, n); const got = S.credits - before; if (got) { sfx('cash'); toast(`+${fmt(got)} cr`, 'good'); } renderDock(); }
 function mktBuy(k, n) { if (marketClosed(S.loc)) return; if (cargoFree() <= 0) { toast('Cargo hold full', 'bad'); return; } const b = doBuy(S.loc, k, n); if (b) sfx('click'); else toast('Not enough credits', 'bad'); renderDock(); }
-function buyUpg(k) {
-  const lv = S.lv[k]; const cost = UPG[k].cost[lv];
-  if (S.credits < cost) return;
-  S.credits -= cost; S.lv[k]++;
+function buyUpg(k, n) {
+  n = n || 1;
+  let bought = 0;
+  for (let i = 0; i < n; i++) {
+    const lv = S.lv[k]; if (lv >= UPG[k].max) break;
+    const cost = upgCost(k, lv); if (S.credits < cost) break;
+    S.credits -= cost; S.lv[k]++; bought++;
+  }
+  if (!bought) return;
   if (k === 'hull') S.hull = ship.hpMax;
-  if (k === 'tank' && has(U.MAP)) { S.fuel = ship.fuelMax; }
+  if (k === 'tank' && has(U.MAP)) S.fuel = ship.fuelMax;
   sfx('upgrade');
-  addNews('🔧', `Upgrade installed: ${UPG[k].n} (${UPG[k].names[S.lv[k] - 1]})`, '#3de8ff');
   renderDock();
   if (k === 'hull') {
-    showModal({ icon: '', title: `New ship: ${UPG.hull.names[S.lv.hull - 1]}!`, cls: 'unlock', html: `<canvas id="newShip" width="420" height="200"></canvas><p>Cargo <b>${ship.cargoMax}</b> · Armor <b>${ship.hpMax}</b></p>`,
+    addNews('🚀', `New ship: ${UPG.hull.names[S.lv.hull - 1]}`, '#3de8ff');
+    showModal({ icon: '', title: `New ship: ${UPG.hull.names[S.lv.hull - 1]}!`, cls: 'unlock', html: `<canvas id="newShip" width="420" height="200"></canvas><p>Cargo <b>${fmt(ship.cargoMax)}</b> · Armor <b>${fmt(ship.hpMax)}</b></p>`,
       buttons: [{ label: 'Nice!', cls: 'primary', fn: () => {} }],
-      after: () => { const t0 = performance.now(); const anim = () => { if ($('newShip')) { drawShipPreview('newShip', S.lv, (performance.now() - t0) / 1000); requestAnimationFrame(anim); } }; anim(); } });
-  } else toast(`${UPG[k].n} → ${UPG[k].names[S.lv[k] - 1]}`, 'good');
+      after: () => { const t0 = performance.now(); const anim = () => { if ($('newShip')) { drawShipPreview('newShip', shipLv(), (performance.now() - t0) / 1000); requestAnimationFrame(anim); } }; anim(); } });
+  } else toast(`${UPG[k].n} → Lv ${S.lv[k]}${bought > 1 ? ` (+${bought})` : ''}`, 'good');
 }
+function outpostBody(id) {
+  const l = LOC[id], o = S.outposts[id], z = l.field.z;
+  if (!o) {
+    const c = buildCost(id);
+    return `<div class="op-empty"><div class="op-art">🤖</div><h3>Build a Drone Outpost</h3>
+      <p>Drones mine <b>${l.field.n}</b> for you <b>24/7</b> — even when you're somewhere else or offline.</p>
+      <p>Each drone earns <b class="cr">${fmt(OUTPOST.rate[z] * incomeMult())} cr/s</b> here.</p>
+      <button class="btn primary big" ${S.credits >= c ? '' : 'disabled'} onclick="doBuild('${id}')">Build outpost · ${fmt(c)} cr</button></div>`;
+  }
+  const inc = outpostIncome(id), per = OUTPOST.rate[z] * Math.pow(2, o.lv - 1) * incomeMult();
+  const d1 = droneCost(id, 1), d10 = droneCost(id, 10), nm = maxAffordableDrones(id);
+  const lc = outpostLvCost(id);
+  let drones = '';
+  for (let i = 0; i < Math.min(o.n, 60); i++) drones += '<i></i>';
+  return `<div class="op">
+    <div class="op-top"><div><small>OUTPOST · LEVEL ${o.lv}</small><b class="cr">+${fmt(inc)} cr/s</b><span>${o.n} drones × ${fmt(per)} cr/s</span></div><div class="op-drones">${drones}${o.n > 60 ? `<em>+${o.n - 60}</em>` : ''}</div></div>
+    <div class="sub">Drones</div>
+    <div class="op-row">
+      <button class="btn ${S.credits >= d1 ? 'primary' : ''}" ${S.credits >= d1 ? '' : 'disabled'} onclick="doDrones('${id}',1)">+1 drone · ${fmt(d1)}</button>
+      <button class="btn ${S.credits >= d10 ? 'primary' : ''}" ${S.credits >= d10 ? '' : 'disabled'} onclick="doDrones('${id}',10)">+10 · ${fmt(d10)}</button>
+      <button class="btn ${nm ? 'primary' : ''}" ${nm ? '' : 'disabled'} onclick="doDrones('${id}','max')">MAX${nm ? ` (+${nm})` : ''}</button>
+    </div>
+    <div class="sub">Outpost level</div>
+    ${lc != null ? `<button class="btn ${S.credits >= lc ? 'primary' : ''} big" ${S.credits >= lc ? '' : 'disabled'} onclick="doOutLv('${id}')">Upgrade to level ${o.lv + 1} — <b>×2 output</b> · ${fmt(lc)} cr</button>` : '<div class="empty small">Max level reached 👑</div>'}
+    <p class="hint">Drones cost 14% more each. Upgrading the outpost doubles every drone's output. Refinery upgrades and investments multiply all drone income.</p>
+  </div>`;
+}
+function doBuild(id) { if (buildOutpost(id)) { sfx('win'); toast('Outpost online! Your drones are mining.', 'good'); renderDock(); } }
+function doDrones(id, k) { const n = buyDrones(id, k); if (n) { sfx('upgrade'); toast(`+${n} drone${n > 1 ? 's' : ''}`, 'good'); renderDock(); } }
+function doOutLv(id) { if (upgradeOutpost(id)) { sfx('win'); toast('Outpost upgraded: ×2 output!', 'good'); renderDock(); } }
+
 function deliver(cid) { const c = S.active.find(x => x.id === cid); if (c && canDeliver(c)) completeContract(c); renderDock(); }
 function buyInvest() {
   const id = S.loc, cost = investCost(id);
@@ -2987,7 +3267,7 @@ function buyInvest() {
   const l = LOC[id]; if (l.faction) repChange(l.faction, 5);
   sfx('win');
   addNews('🏛️', `You bought a ${INVEST.names[S.invest[id] - 1]} on ${l.station}. Your influence grows.`, '#ffc857');
-  toast(`Investment complete: +${INVEST.infl[S.invest[id] - 1]} influence`, 'good');
+  toast(`Investment complete: +10% all income, +${INVEST.infl[S.invest[id] - 1]} influence`, 'good');
   renderDock();
 }
 
@@ -2996,13 +3276,13 @@ function openShip() {
   sfx('click');
   const rows = Object.keys(S.cargo).map(k => `<div class="srow"><span><i class="sw" style="background:${ITEMS[k].c}"></i> ${ITEMS[k].n}</span><b>${S.cargo[k]}</b><button class="mini" onclick="jettison('${k}')">Dump</button></div>`).join('');
   let upg = '';
-  for (const k of UPG_KEYS) if (upgOpen(k)) upg += `<div class="srow"><span>${UPG[k].icon} ${UPG[k].n}</span><b>${UPG[k].names[S.lv[k] - 1]}</b><span class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= S.lv[k] ? 'on' : ''}"></i>`).join('')}</span></div>`;
+  for (const k of UPG_KEYS) if (upgOpen(k)) upg += `<div class="srow"><span>${UPG[k].icon} ${UPG[k].n}</span><b>${k === 'hull' ? UPG.hull.names[S.lv.hull - 1] : 'Lv ' + S.lv[k] + ' / ' + UPG[k].max}</b></div>`;
   openSheet(`🚀 ${S.shipName} <small>${UPG.hull.names[S.lv.hull - 1]} class</small>`, `<div class="yard-top"><canvas id="shipView" width="420" height="190"></canvas></div>
     <div class="cols"><div><div class="sub">Systems</div>${upg}</div><div><div class="sub">Cargo hold ${cargoUsed()}/${ship.cargoMax}</div>${rows || '<div class="empty small">Empty</div>'}
     <div class="sub">Stats</div><div class="srow"><span>Ore mined</span><b>${fmt(S.stats.mined)}</b></div><div class="srow"><span>Lifetime earnings</span><b>${fmt(S.stats.earned)} cr</b></div>
     ${has(U.BELT) ? `<div class="srow"><span>Battles won / lost</span><b>${S.stats.won} / ${S.stats.lost}</b></div>` : ''}${has(U.TRADE) ? `<div class="srow"><span>Contracts</span><b>${S.stats.contracts}</b></div>` : ''}</div></div>`);
   const t0 = performance.now();
-  const anim = () => { if (!$('sheet').classList.contains('hidden') && $('shipView')) { drawShipPreview('shipView', S.lv, (performance.now() - t0) / 1000); requestAnimationFrame(anim); } };
+  const anim = () => { if (!$('sheet').classList.contains('hidden') && $('shipView')) { drawShipPreview('shipView', shipLv(), (performance.now() - t0) / 1000); requestAnimationFrame(anim); } };
   anim();
 }
 function jettison(k) { addCargo(k, -S.cargo[k]); sfx('click'); openShip(); }
@@ -3010,20 +3290,30 @@ function jettison(k) { addCargo(k, -S.cargo[k]); sfx('click'); openShip(); }
 function openFactions() {
   sfx('click');
   const inf = influence();
-  let h = `<div class="inf-big"><div><small>INFLUENCE</small><b>${inf}</b><span>/ 100</span></div><div class="meter big gold"><i style="width:${Math.min(100, inf)}%"></i></div><div class="rank">${rankName(inf)}</div></div>`;
-  h += '<div class="sub">Faction reputation</div>';
-  for (const f in FACTIONS) {
-    const r = S.rep[f];
-    h += `<div class="fac"><span style="color:${FACTIONS[f].c}">${FACTIONS[f].n}</span><div class="repbar"><i style="left:50%;width:${Math.abs(r) / 2}%;${r < 0 ? `left:${50 - Math.abs(r) / 2}%;background:#ff4d6d` : `background:${FACTIONS[f].c}`}"></i><em></em></div><b>${Math.round(r)}</b></div>`;
+  let h = '';
+  const tot = totalIncome();
+  h += `<div class="inf-big"><div><small>DRONE INCOME</small><b class="cr">${fmt(tot)}</b><span>cr/s</span></div><div class="hint center">Income multiplier ×${incomeMult().toFixed(2)} · Drones earned ${fmt(S.stats.droneEarned)} cr total</div></div>`;
+  h += '<div class="sub">Outposts</div>';
+  for (const l of FIELDS) {
+    const o = S.outposts[l.id];
+    if (!locOpen(l.id)) { h += `<div class="srow dim"><span>🔒 ${l.field.n}</span><b>locked</b></div>`; continue; }
+    h += `<div class="srow"><span>${o ? '🤖' : '⬜'} ${l.field.n}</span>${o ? `<span class="dim">Lv ${o.lv} · ${o.n} drones</span><b class="cr">+${fmt(outpostIncome(l.id))}/s</b>` : `<b class="dim">Build for ${fmt(buildCost(l.id))}</b>`}</div>`;
   }
-  h += '<div class="sub">Your investments</div>';
-  const inv = Object.keys(S.invest);
-  if (!inv.length) h += '<div class="empty small">No investments yet — use the Invest tab when docked.</div>';
-  for (const id of inv) h += `<div class="srow"><span>${LOC[id].station}</span><b>${INVEST.names[S.invest[id] - 1]}</b><span class="pips">${[1, 2, 3].map(i => `<i class="${i <= S.invest[id] ? 'on' : ''}"></i>`).join('')}</span></div>`;
-  h += `<p class="hint">Passive income: <b>${fmt(dailyIncome())} cr/day</b>. Influence comes from investments, good reputation and battle victories.</p>`;
-  h += '<div class="sub">Active events</div>' + (S.events.length ? S.events.map(e => `<div class="ev">${e.icon} <b>${e.title}</b> <small>— ${e.text} (${e.end - S.day}d)</small></div>`).join('') : '<div class="empty small">The system is calm… for now.</div>');
-  openSheet('🏛 Factions & Influence', h);
+  if (has(U.SATURN)) {
+    h += `<div class="inf-big" style="margin-top:14px"><div><small>INFLUENCE</small><b>${inf}</b><span>/ 100</span></div><div class="meter big gold"><i style="width:${Math.min(100, inf)}%"></i></div><div class="rank">${rankName(inf)}</div></div>`;
+    h += '<p class="hint">Influence comes from station investments, outpost levels, good reputation and pirate kills.</p>';
+  }
+  if (has(U.TRADE)) {
+    h += '<div class="sub">Faction reputation</div>';
+    for (const f in FACTIONS) {
+      const r = S.rep[f];
+      h += `<div class="fac"><span style="color:${FACTIONS[f].c}">${FACTIONS[f].n}</span><div class="repbar"><i style="left:50%;width:${Math.abs(r) / 2}%;${r < 0 ? `left:${50 - Math.abs(r) / 2}%;background:#ff4d6d` : `background:${FACTIONS[f].c}`}"></i><em></em></div><b>${Math.round(r)}</b></div>`;
+    }
+    h += '<div class="sub">Active events</div>' + (S.events.length ? S.events.map(e => `<div class="ev">${e.icon} <b>${e.title}</b> <small>— ${e.text} (${e.end - S.day}d)</small></div>`).join('') : '<div class="empty small">The system is calm… for now.</div>');
+  }
+  openSheet('🤖 Your Empire', h);
 }
+
 function openNews() {
   sfx('click');
   openSheet('📰 System News', S.news.map(n => `<div class="news"><i>DAY ${n.day}</i><span>${n.icon}</span><div>${n.html}</div></div>`).join(''));
@@ -3044,7 +3334,9 @@ function confirmNew() {
 function openHelp() {
   openSheet('📖 How to play', `<div class="help">
     <h4>⛏ Mine</h4><p>Fly with <b>WASD</b> or arrows, <b>hold the mouse</b> to fire your laser (or Space). Big rocks break into smaller ones and drop glowing ore. On mobile: drag on the left, hold LASER. Glowing veins give double ore.</p>
-    <h4>🛰 Dock</h4><p>Docking sells your ore, refuels and repairs automatically. Spend your credits on upgrades — a new hull is a whole new ship.</p>
+    <h4>🛰 Dock</h4><p>The station is at the <b>bottom</b> of every field. Fly back down into the docking zone to sell your ore, refuel and repair. Rocks get richer the <b>higher</b> you fly.</p>
+    <h4>🤖 Drones</h4><p>Build an outpost in each field and buy drones. They earn credits every second — even while you're offline.</p>
+    <h4>⚔ Pirates</h4><p>In dangerous zones pirates attack. <b>Hold the mouse</b> to fire your guns. Destroyed ships drop credits.</p>
     <h4>🔓 Unlock</h4><p>The more you earn, the more of the Solar System opens up: the star map, new planets, pirates, trading, events and finally influence.</p>
     <h4>🗺 Travel</h4><p>Planets orbit the Sun, so distances change every day. Farther places pay more and are more dangerous.</p>
     <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the Solar System.</p></div>`);
@@ -3163,17 +3455,17 @@ function setupTouchControls() {
 }
 
 // ---------- bucle ----------
-let last = performance.now(), hudT = 0;
+let last = performance.now(), hudT = 0, saveT = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (scene) {
-    if (!isBlocking() || scene === BattleScene || scene === MapScene || scene === TitleScene) scene.update(dt);
+    if (!isBlocking() || scene === MapScene || scene === TitleScene) scene.update(dt);
     scene.draw(ctx);
   }
-  if (S && scene !== TitleScene) hudTick(dt);
+  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); }
   hudT += dt;
-  if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); }
+  if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); } }
   requestAnimationFrame(frame);
 }
 
@@ -3220,6 +3512,10 @@ function startGame(cont) {
   else setScene(MineScene, cont ? (LOC[S.loc].field ? S.loc : 'luna') : 'luna');
   if (!cont) S.loc = 'luna';
   updateHUD(); updateTicker();
+  if (cont) {
+    const off = offlineGains();
+    if (off) setTimeout(() => showModal({ icon: '🤖', title: 'Welcome back!', html: `While you were away (${fmtTime(off.secs)}) your drones earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>`, buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] }), 300);
+  }
 }
 
 // ---------- inicio ----------
@@ -3233,17 +3529,11 @@ function init() {
   $('zOut').onclick = () => MapScene.onWheel(300, W / 2, H / 2);
   $('zHome').onclick = () => MapScene.focus(S.loc);
   $('zAll').onclick = () => MapScene.zoomAll();
-  $('btnDock').onclick = () => MineScene.leave();
-  $('btnMap').onclick = () => MineScene.leave(true);
-  $('btnSpeed').onclick = () => { BattleScene.speed = BattleScene.speed === 1 ? 2 : BattleScene.speed === 2 ? 4 : 1; $('btnSpeed').textContent = 'Speed ×' + BattleScene.speed; };
-  $('btnRetreat').onclick = () => BattleScene.retreat();
+  $('btnWarp').onclick = () => { if (MineScene.space && !MineScene.warp) { MineScene.warp = { t: 0 }; sfx('warp'); } };
+  $('btnContinue').onclick = () => MineScene.finishSpace(true);
   $('newg').onclick = () => { if (hasSave()) { showModal({ icon: '⚠️', title: 'Start a new game?', html: 'Your saved game will be overwritten.', buttons: [{ label: 'Start over', cls: 'danger', fn: () => { S = null; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startGame(false); } }, { label: 'Cancel', fn: () => {} }] }); } else startGame(false); };
   $('cont').onclick = () => startGame(true);
   $('howto').onclick = () => { openHelp(); };
-  for (const el of document.querySelectorAll('.ui')) {
-    el.addEventListener('mouseenter', () => mouse.onUI = true);
-    el.addEventListener('mouseleave', () => mouse.onUI = false);
-  }
   const params = new URLSearchParams(location.search);
   if (params.has('thumb')) return thumbMode(params.get('thumb'));
   setScene(TitleScene);
@@ -3254,7 +3544,7 @@ function init() {
 function thumbMode(kind) {
   document.body.classList.add('thumb');
   newGame();
-  S.lv = { hull: 4, laser: 4, engine: 4, tank: 3, shield: 3, weapons: 3, drones: 3, scanner: 3 };
+  S.lv = { hull: 4, laser: 26, magnet: 10, cargo: 5, refinery: 5, engine: 14, tank: 3, shield: 10, weapons: 18, scanner: 3 };
   $('title').classList.add('hidden'); $('hud').classList.add('hidden');
   const t = 12.3;
   drawSpaceBg(ctx, W, H, 120, 80, t, '#141a44');
@@ -3287,7 +3577,7 @@ function thumbMode(kind) {
   // piratas a lo lejos
   drawEnemyShip(ctx, 'corsair', W * 0.95, H * 0.93, Math.PI * 1.1, 1.3, t);
   drawEnemyShip(ctx, 'raider', W * 0.88, H * 0.97, Math.PI * 1.05, 1.1, t);
-  drawPlayerShip(ctx, S.lv, sx, sy, ang, 3.0 * Math.min(1, W / 1280 * 1.25), 1, t);
+  drawPlayerShip(ctx, shipLv(), sx, sy, ang, 3.0 * Math.min(1, W / 1280 * 1.25), 1, t);
   // título
   if (kind !== 'clean') {
     const s = Math.min(W / 1280, H / 720);
@@ -3306,6 +3596,8 @@ function thumbMode(kind) {
   document.body.dataset.ready = '1';
 }
 
+function fmtTime(s) { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m` : `${s}s`; }
+document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) save(); else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
 window.addEventListener('load', init);
 </script>
 </body>

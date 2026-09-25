@@ -6,21 +6,25 @@ A 2D space mining game that starts simple and slowly opens up into trading, pira
 
 ## How it plays
 
-1. **Mine.** You start inside the Moon's asteroid field. Fly with WASD and hold the mouse button to fire the laser. Big rocks split apart and drop glowing ore.
-2. **Dock.** Docking sells your ore, refuels and repairs automatically. Spend your credits on upgrade cards. A new hull gives you a whole new ship (5 designs).
-3. **Unlock.** Your lifetime earnings open up the game one layer at a time:
+1. **Mine.** You start inside the Moon's asteroid field. Fly with WASD and hold the mouse button to fire the laser. The farther up you fly, the richer the rocks get, and rare golden asteroids pay a jackpot.
+2. **Dock.** The station sits at the bottom of every field. Fly back down into the docking zone to sell your ore, refuel and repair.
+3. **Automate.** Build a drone outpost in each field. Drones earn credits every second, even while you're offline. Buy more drones (each costs 14% more than the last) and upgrade the outpost to double its output.
+4. **Upgrade.** There are 10 upgrade lines with up to 60 levels each and exponential costs and effects. Each of the 5 ship classes is a new ship design.
+5. **Fight.** Pirates attack in the dangerous zones. You fly and shoot in real time, and destroyed ships drop credits. During travel you can fight, run, pay them off, or warp out.
+6. **Unlock.** Your lifetime earnings open up the Solar System one layer at a time:
 
 | Earned | Unlock |
 |---|---|
-| 600 | Star Map, travel and fuel, Earth |
-| 3,000 | Mars, Mercury, shields |
-| 8,000 | Asteroid Belt, pirates and auto-battles, weapons |
-| 18,000 | Trading, contracts, system events (wars, plagues, booms), Venus |
-| 40,000 | Jupiter system, scanner |
-| 90,000 | Saturn system, station investments and influence |
-| 180,000 | Pluto's black market and the Kuiper Belt |
+| 250 | Drone outposts |
+| 1.5K | Star Map, Earth, Refinery |
+| 10K | Mars, Mercury, shields |
+| 60K | Asteroid Belt, pirates, guns |
+| 400K | Trading, contracts, system events, Venus |
+| 3M | Jupiter system, scanner |
+| 25M | Saturn system, station investments and influence |
+| 200M | Pluto's black market and the Kuiper Belt |
 
-4. **Win** by reaching 100 influence.
+7. **Win** by reaching 100 influence.
 
 ## Development
 
