@@ -504,7 +504,8 @@ const MineScene = {
       ctx.fillStyle = '#4a5a74'; roundRect(ctx, ox - 70, oy - 30, 140, 60, 14); ctx.fill();
       ctx.strokeStyle = '#6dffb0'; ctx.lineWidth = 2; ctx.stroke();
       ctx.fillStyle = '#6dffb0'; ctx.font = '700 13px Rajdhani, sans-serif';
-      ctx.fillText(`🤖 OUTPOST LV${o.lv}`, ox, oy - 4);
+      ctx.fillText(`OUTPOST LV${o.lv}`, ox + 9, oy - 4);
+      drawIcon(ctx, 'drone', ox - ctx.measureText(`OUTPOST LV${o.lv}`).width / 2 - 5, oy - 5, 15);
       ctx.fillStyle = '#ffd24a'; ctx.fillText(`+${fmt(outpostIncome(l.id))}/s`, ox, oy + 14);
     }
   },

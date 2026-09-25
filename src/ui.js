@@ -273,6 +273,10 @@ function renderDock(fresh) {
 function powerButtons(pws) {
   return `<div class="powers">${pws.map(o => `<button class="btn small-btn ${o.kind === 'nuke' ? 'danger' : ''}" ${o.ok ? '' : 'disabled'} onclick="doPower('${o.kind}','${o.arg}')" title="${o.d || ''}">${o.icon} ${o.label} · ${fmt(o.cost)}${o.why ? ` <small>(${o.why})</small>` : o.d ? ` <small>— ${o.d}</small>` : ''}</button>`).join('')}</div>`;
 }
+function demandChip(loc, g) {
+  const d = demandOf(loc, g), [t, c] = demandLabel(d);
+  return `<span class="dem ${c}" title="${t}${d < 1 ? ` · full again in ~${demandDays(loc, g)} days` : ''}"><i style="width:${Math.round(d * 100)}%"></i><b>${t}</b></span>`;
+}
 function tradeRun(g, to) {
   const n = doBuy(S.loc, g, 9999);
   if (!n) { toast('Not enough credits or space', 'bad'); return; }
@@ -327,10 +331,10 @@ function dockBody(tab) {
     const routes = tradeRoutes(id);
     const fc = FREIGHT.cost(), fn = (S.freighters || []).length;
     let h = routes.length ? `<div class="routes"><div class="sub">💡 Best trades from here</div>${routes.slice(0, 3).map(r => `<div class="route">
-      <div><i class="sw" style="background:${ITEMS[r.g].c}"></i><b>${ITEMS[r.g].n}</b> buy ${fmt(r.bp)} → <b>${LOC[r.to].n}</b> pays ${fmt(r.sp)} <em>×${(r.sp / r.bp).toFixed(1)}</em> <small>≈ +${fmt((r.sp - r.bp) * r.units * 0.8)} for ${r.units}</small></div>
+      <div><i class="sw" style="background:${ITEMS[r.g].c}"></i><b>${ITEMS[r.g].n}</b> buy ${fmt(r.bp)} → <b>${LOC[r.to].n}</b> pays ${fmt(r.sp)} <em>×${(r.avg / r.bp).toFixed(1)}</em> ${demandChip(r.to, r.g)} <small>≈ +${fmt(r.profit * 0.9)} for ${r.units}</small></div>
       <div class="rt-btns"><button class="btn small-btn primary" ${r.units && S.credits >= r.bp ? '' : 'disabled'} onclick="tradeRun('${r.g}','${r.to}')">Buy ${r.units} & fly there</button>
-      ${has(U.TRADE) ? `<button class="btn small-btn" ${fn < FREIGHT.max && S.credits >= fc && routeCount(id, r.to, r.g) < FREIGHT.perRoute ? '' : 'disabled'} onclick="doFreighter('${id}','${r.to}','${r.g}')">🚚 Freighter · ${fmt(fc)} <small>(+${fmt(freighterIncome({ from: id, to: r.to, g: r.g }))}/s)</small></button>` : ''}</div></div>`).join('')}</div>` : '<p class="hint">Nothing here is worth hauling right now — try another station.</p>';
-    h += `<p class="hint">Buy where it's cheap (▼), sell where it's wanted (▲) — or hire a 🚚 freighter to run the route for you forever. Stock is limited and refills daily.</p>
+      ${has(U.TRADE) ? `<button class="btn small-btn" ${fn < FREIGHT.max && S.credits >= fc && routeCount(id, r.to, r.g) < FREIGHT.perRoute ? '' : 'disabled'} onclick="doFreighter('${id}','${r.to}','${r.g}')">🚚 Freighter · ${fmt(fc)} <small>(+${fmt(freighterIncome({ from: id, to: r.to, g: r.g }))}/s)</small></button>` : ''}</div></div>`).join('')}</div>` : '<p class="hint">Nothing here is worth hauling right now — the markets that want these goods are saturated. Try another station, or wait for demand to return.</p>';
+    h += `<p class="hint">Buy where it's cheap (▼), sell where it's wanted (▲) — or hire a 🚚 freighter to run the route for you forever. Each market only wants so much: deliveries use up its <b>demand</b>, which returns slowly (~3%/day). Shortages and wars create fresh demand.</p>
       <div class="mkt"><div class="mrow mh"><span>Good</span><span>Sell</span><span>Have</span><span></span><span>Buy</span><span></span></div>`;
     for (const k of keys) {
       const sp = sellPrice(id, k), bp = buyPrice(id, k), have = S.cargo[k] || 0;
@@ -339,7 +343,7 @@ function dockBody(tab) {
       const ev = eventPriceMult(id, k) !== 1 ? '<i class="evi">⚡</i>' : '';
       h += `<div class="mrow">
         <span class="mname c-n"><i class="sw" style="background:${ITEMS[k].c}"></i>${ITEMS[k].n}${ev}</span>
-        <span class="price c-sp">${sp ? fmt(sp) + ' ' + trend : '<small class="dim">—</small>'}</span>
+        <span class="price c-sp">${sp ? fmt(sp) + ' ' + trend + (wantsGood(id, k) ? demandChip(id, k) : '') : '<small class="dim">—</small>'}</span>
         <span class="have c-h">${have || '<small class="dim">0</small>'}</span>
         <span class="bb c-sb">${sp && have ? `<button onclick="mktSell('${k}',1)">1</button><button onclick="mktSell('${k}',10)">10</button><button class="all" onclick="mktSell('${k}',9999)">All</button>` : ''}</span>
         <span class="price c-bp">${bp ? fmt(bp) + `<small class="stock">${stockLeft(id, k)} left</small>` : '<small class="dim">—</small>'}</span>

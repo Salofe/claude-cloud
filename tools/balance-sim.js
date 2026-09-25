@@ -59,17 +59,19 @@ function bestActivity() {
         const pm = P.market[g], cmk = C.market[g]; if (pm == null || pm > 1 || cmk == null) continue;
         const b = A.ITEMS[g].b * A.econScale();
         const buy = b * pm * 1.07 * 1.25, sell = b * cmk * projMult(C.id) * 0.95 * 0.8;
-        const units = Math.min(cargo, 150 * Math.pow(1.8, Math.max(0, s.unlock - 5)), s.credits / buy);
+        // sustained: each market's demand refills ~3%/day of demandCap; a player rotating
+        // between ~3 hungry markets sells at ~55% of the fresh price on average
+        const t = legTime(P.id, C.id) * 2 + 6, D = 1.5 * 150 * Math.pow(1.8, Math.max(0, s.unlock - 5));
+        const units = Math.min(cargo, D / 1.5, s.credits / buy, D * 0.03 * (t / 20) * 3);
         if (units < 5) continue;
-        // sustained: stock refills ~10%/day, repeated runs get ~50% of a fresh run
-        const t = legTime(P.id, C.id) * 2 + 6;
-        opts.push({ kind: 'trade', where: `${g} ${P.id}→${C.id}`, rate: units * (sell - buy) * 0.5 * 2 / t });  // ×2: players chain routes (sell here, buy the next good)
+        opts.push({ kind: 'trade', where: `${g} ${P.id}→${C.id}`, rate: units * (sell * 0.55 / 0.8 - buy) * 2 / t });
+        const fu = Math.min(cargo, D / 1.5, s.credits / buy); opts.push({ kind: "fresh", where: `${g} ${P.id}→${C.id}`, rate: fu * (sell * 0.72 / 0.8 - buy) / t, noPick: 1 });  // ×2: players chain routes (sell here, buy the next good)
       }
     }
   }
   opts.sort((a, b) => b.rate - a.rate);
   bestActivity.last = opts;
-  return opts[0];
+  return opts.find(o => !o.noPick);
 }
 function rateNow() { const a = bestActivity(); return (a ? a.rate : 0) + A.totalIncome(); }
 

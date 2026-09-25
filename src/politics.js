@@ -12,6 +12,10 @@ const pcost = (f, min) => Math.round(Math.max(min, S.stats.earned * f));
 function addEvent(ev) {
   if (ev.mine && ev.kind) S.events = S.events.filter(e => !(e.mine && e.kind === ev.kind && (e.locs || []).some(l => (ev.locs || []).includes(l))));
   ev.start = S.day; ev.end = S.day + ev.dur; ev.uid = uid();
+  // a shortage or boom creates fresh appetite for those goods
+  for (const p of ev.price || []) if (p.m > 1 && p.loc !== '*' && !ITEMS[p.item].ore && LOC[p.loc] && LOC[p.loc].market) {
+    S.demand[p.loc] = S.demand[p.loc] || {}; S.demand[p.loc][p.item] = Math.max(demandOf(p.loc, p.item), 0.85);
+  }
   S.events.push(ev);
   return ev;
 }
@@ -355,17 +359,27 @@ function freighterIncome(f) {
   return Math.max(0, sp - bp) * FREIGHT.cap() / routeCycle(f.from, f.to) * tradeMult();
 }
 function freightIncome() { let v = 0; for (const f of S.freighters || []) v += freighterIncome(f); return v; }
-// best trades starting at a station (used by the Trade tab and freighters)
-function tradeRoutes(id) {
+// best trades starting at a station (used by the Trade tab and freighters).
+// Only counts what the destination still wants: a saturated market isn't offered.
+function tradeRoutes(id, all) {
   const out = [];
   if (!cityOpen(id)) return out;
+  const D = demandCap();
   for (const g of GOODS) {
     const bp = buyPrice(id, g); if (!bp) continue;
     let best = null;
-    for (const C of NODES) if (cityOpen(C.id) && C.id !== id && C.market[g] != null) { const sp = sellPrice(C.id, g); if (sp && (!best || sp > best.sp)) best = { to: C.id, sp }; }
-    if (best && best.sp > bp * 1.2) out.push({ g, from: id, bp, ...best, units: Math.min(stockLeft(id, g), ship.cargoMax) });
+    for (const C of NODES) if (cityOpen(C.id) && C.id !== id && C.market[g] != null && !marketClosed(C.id)) {
+      const sp = sellPrice(C.id, g); if (!sp) continue;
+      const d = demandOf(C.id, g), f0 = demandFactor(C.id, g);
+      const units = Math.min(stockLeft(id, g), ship.cargoMax, Math.floor(d * D));
+      if (units < 1 || d < 0.2) continue;
+      const f1 = 0.15 + 0.85 * (d - units / D), avg = Math.round(sp * (f0 + f1) / 2 / f0);
+      const profit = (avg - bp) * units;
+      if (avg > bp * 1.15 && (!best || profit > best.profit)) best = { to: C.id, sp, avg, units, profit, d };
+    }
+    if (best) out.push({ g, from: id, bp, ...best });
   }
-  return out.sort((a, b) => (b.sp - b.bp) * b.units - (a.sp - a.bp) * a.units);
+  return out.sort((a, b) => b.profit - a.profit);
 }
 const routeCount = (from, to, g) => (S.freighters || []).filter(f => f.from === from && f.to === to && f.g === g).length;
 function hireFreighter(from, to, g) {

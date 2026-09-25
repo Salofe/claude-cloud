@@ -177,6 +177,7 @@ function startGame(cont) {
 
 // ---------- inicio ----------
 function init() {
+  startIconizer();
   setupTouchControls();
   $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
   const snd = $('bSnd');

@@ -239,7 +239,7 @@ const MapScene = {
         for (let i = 0; i < 4; i++) { const a0 = i * TAU / 4 + t * 0.8; ctx.beginPath(); ctx.arc(p.x, p.y, rr, a0, a0 + 0.9); ctx.stroke(); }
       }
       // label pill
-      const label = open ? l.n.toUpperCase() : '🔒 ' + l.n.toUpperCase();
+      const label = open ? l.n.toUpperCase() : '     ' + l.n.toUpperCase();
       ctx.font = `700 ${isSel ? 12 : 11}px Rajdhani, sans-serif`;
       const tw = ctx.measureText(label).width + 14, ly = p.y + r + 14;
       ctx.globalAlpha = open ? 1 : 0.55;
@@ -248,6 +248,7 @@ const MapScene = {
       ctx.strokeStyle = isSel ? '#3de8ff' : 'rgba(120,170,255,0.25)'; ctx.lineWidth = 1; ctx.stroke();
       ctx.fillStyle = isSel ? '#ffffff' : '#cfe0ff';
       ctx.fillText(label, p.x, ly + 0.5);
+      if (!open) drawIcon(ctx, 'lock', p.x - tw / 2 + 11, ly, 11, '#8fa3c7');
       ctx.globalAlpha = 1;
       if (open) {
         let icons = '';
@@ -257,7 +258,7 @@ const MapScene = {
         const dg = locDanger(l.id);
         if (dg >= 0.2) icons += dg > 0.45 ? '☠☠' : '☠';
         if (S.active.some(c => c.type === 'deliver' && c.to === l.id)) icons += '📜';
-        if (icons) { ctx.font = '12px sans-serif'; ctx.fillText(icons, p.x, p.y - r - 10); }
+        if (icons) drawIconRow(ctx, icons, p.x, p.y - r - 13, 14);
       }
     }
     ctx.textBaseline = 'alphabetic';

@@ -10,7 +10,7 @@ A 2D space mining game that starts simple and slowly opens up into trading, pira
 2. **Dock & sell.** The station sits at the bottom of every field. Fly back down into the docking zone to refuel and repair. Once the Star Map is unlocked, you choose where to sell: field depots pay about 0.6×, while city planets pay 2–3.8× (Mars for ice, Titan for Helium-3, Europa for iridium, Pluto for exotics). A full hold sold in one place pushes the price down about 20%.
 3. **Automate.** Build a drone outpost in each field. Drones mine slowly but never stop, even while you're offline. Automation starts at roughly 10–15% of active mining income, as in classic idle games: each drone takes 5+ minutes to pay back, costs 18% more than the last, and every outpost level adds only 5 drone slots while doubling output.
 4. **Upgrade.** There are 11 upgrade lines (including the Extractor, which makes rocks drop more ore) with up to 60 levels each and exponential costs and effects. Each of the 5 ship classes is a new ship design.
-5. **Trade.** Each station's Trade tab lists the best deals from there: one tap buys the goods and plots your course. Stock is limited and refills daily. Hire freighters (up to 10, max 3 per route) to run a route automatically; their income follows live prices and events.
+5. **Trade.** Each station's Trade tab lists the best deals from there: one tap buys the goods and plots your course. Stock is limited and refills daily, and every market has a **demand** meter per good: deliveries use it up and it only recovers ~3%/day, so a route pays well once or twice and then you move on (shortages and wars refill demand). Hire freighters (up to 10, max 3 per route) to run a route automatically; their income follows live prices and events.
 6. **Fight.** Pirates attack in the dangerous zones. You fly and shoot in real time, and destroyed ships drop credits. During travel you can fight, run, pay them off, or warp out.
 7. **Unlock.** Your lifetime earnings open up the Solar System one layer at a time:
 
@@ -43,3 +43,7 @@ node tools/balance-sim.js  # simulates an efficient player and prints when each 
 ```
 
 All art is procedural (canvas 2D, including noise-generated planet textures) and all sound is synthesized with WebAudio. Progress is saved to `localStorage` under the versioned key `solar_prospector_v3` (about 20 KB even late in the game). Clawcade persists each game's localStorage on the player's device.
+
+## Icons
+
+All icons are hand-drawn vector paths in `src/icons.js` (24×24 grid, duotone neon style). Game text uses emoji as keys; a MutationObserver swaps them for inline SVG in the UI, and `drawIcon`/`drawIconRow` render the same paths on the canvases, so no emoji is ever shown.

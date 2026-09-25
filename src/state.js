@@ -9,7 +9,7 @@ function newGame() {
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, outposts: {}, projects: {}, stock: {}, freighters: [], cd: {}, nuked: [], loans: [], peace: 0, sat: {}, drift: {}, depl: {}, bal: 2,
+    invest: {}, outposts: {}, projects: {}, stock: {}, freighters: [], cd: {}, nuked: [], loans: [], peace: 0, sat: {}, demand: {}, drift: {}, depl: {}, bal: 2,
     events: [], news: [], contracts: {}, active: [],
     stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
     unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
@@ -26,7 +26,7 @@ function loadSave() {
     if (!d || d.v !== 3) return null;
     d.projects = d.projects || {};
     d.lv.extractor = d.lv.extractor || 1;
-    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
+    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0; d.demand = d.demand || {};
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     return d;
   } catch (e) { return null; }
@@ -38,7 +38,7 @@ const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0);
 const upgOpen = k => has(UPG[k].stage);
 const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
-const econScale = () => S.unlock < 5 ? 1 : 3.5 * Math.pow(2, S.unlock - 5);
+const econScale = () => S.unlock < 5 ? 1 : 5 * Math.pow(2, S.unlock - 5);
 const itemBase = k => ITEMS[k].ore ? ITEMS[k].b : ITEMS[k].b * econScale();
 
 // ---------- derived stats ----------
@@ -68,7 +68,13 @@ function incomeMult() {
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
 function addCargo(k, n) { S.cargo[k] = (S.cargo[k] || 0) + n; if (S.cargo[k] <= 0) delete S.cargo[k]; }
-function oreValueAt(locId) { let v = 0; for (const k of ORES) if (S.cargo[k]) v += (sellPrice(locId, k) || 0) * S.cargo[k]; return v; }
+function oreValueAt(locId) { let v = 0; for (const k of ORES) if (S.cargo[k]) v += goodsValue(locId, k, S.cargo[k]); return v; }
+// what n units would fetch, accounting for the demand they use up
+function goodsValue(locId, k, n) {
+  const sp = sellPrice(locId, k); if (!sp) return 0;
+  const d = demandOf(locId, k), D = demandCap(), u = Math.min(n, d * D);
+  return sp / demandFactor(locId, k) * (u * (0.15 + 0.85 * (d - u / D / 2)) + (n - u) * 0.15);
+}
 // what your whole hold is worth here: ore, plus goods this station actually wants (never dumps goods at their source)
 const wantsGood = (locId, k) => { const m = LOC[locId].market; return m && m[k] != null && m[k] > 1; };
 function cargoValueAt(locId) { let v = oreValueAt(locId); for (const k of GOODS) if (S.cargo[k] && wantsGood(locId, k)) v += (sellPrice(locId, k) || 0) * S.cargo[k]; return v; }
@@ -128,11 +134,24 @@ function basePrice(locId, item) {
   if (mult == null) return null;
   const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() * (built('elevator') ? 1.25 : 1) : itemBase(item);
   const pm = locId === 'marte' && built('terraform') ? 2 : 1;
-  return b * mult * pm * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
+  return b * mult * pm * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * demandFactor(locId, item);
 }
+// ---------- demand: each station only wants so many goods ----------
+// Deliveries use up a station's appetite for a good; it comes back slowly
+// (~3%/day), so one route pays well once or twice, then you move on.
+const demandCap = () => Math.round(stockMax() * 1.5);
+function demandOf(locId, item) { if (ITEMS[item].ore) return 1; const d = (S.demand[locId] || {})[item]; return d == null ? 1 : d; }
+function demandFactor(locId, item) { return ITEMS[item].ore ? 1 : 0.15 + 0.85 * demandOf(locId, item); }
+function useDemand(locId, item, units) {
+  S.demand[locId] = S.demand[locId] || {};
+  S.demand[locId][item] = Math.max(0, demandOf(locId, item) - units / demandCap());
+}
+const DEMAND_REGEN = 0.03;
+function demandDays(locId, item) { return Math.ceil((1 - demandOf(locId, item)) / DEMAND_REGEN); }
+function demandLabel(d) { return d >= 0.75 ? ['Hungry', 'good'] : d >= 0.45 ? ['Steady', 'mid'] : d >= 0.2 ? ['Low', 'low'] : ['Saturated', 'bad']; }
 function priceRatio(locId, item) {
   const l = LOC[locId]; const m = l.market && l.market[item]; if (m == null) return 0;
-  return m * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * (locId === 'marte' && built('terraform') ? 2 : 1);
+  return m * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * demandFactor(locId, item) * (locId === 'marte' && built('terraform') ? 2 : 1);
 }
 function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.95)); }
 function buyPrice(locId, item) {
@@ -155,8 +174,9 @@ function doSell(locId, item, n) {
   let total = 0;
   for (let i = 0; i < n; i++) {
     total += sellPrice(locId, item);
-    // market depth scales with your hold: a full hold moves ore prices ~22%, goods ~40%
-    S.sat[locId][item] = Math.max(ITEMS[item].ore ? 0.4 : 0.3, S.sat[locId][item] * (1 - (ITEMS[item].ore ? 0.25 : 0.5) / Math.max(100, ship.cargoMax)));
+    // ore: market depth scales with your hold (a full hold moves prices ~22%); goods: use up demand
+    if (ITEMS[item].ore) S.sat[locId][item] = Math.max(0.4, S.sat[locId][item] * (1 - 0.25 / Math.max(100, ship.cargoMax)));
+    else useDemand(locId, item, 1);
   }
   addCargo(item, -n);
   S.stats.traded += n;
@@ -405,6 +425,8 @@ function tickDay() {
   }
   for (const id in S.depl) S.depl[id] = Math.max(0, S.depl[id] - 0.06);
   for (const id in S.stock) for (const k in S.stock[id]) S.stock[id][k] = Math.min(1, S.stock[id][k] + 0.1);
+  for (const id in S.demand) for (const k in S.demand[id]) S.demand[id][k] = Math.min(1, S.demand[id][k] + DEMAND_REGEN);
+  for (const f of S.freighters || []) if (freighterIncome(f) > 0) useDemand(f.to, f.g, FREIGHT.cap() / routeCycle(f.from, f.to));
   if (has(U.TRADE)) {
     const ended = S.events.filter(e => e.end <= S.day);
     for (const e of ended) { addNews('🕊️', `Over: ${e.title}`, '#8fa3c7'); onEventEnd(e); }
