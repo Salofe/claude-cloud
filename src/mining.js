@@ -352,7 +352,8 @@ const MineScene = {
     const cx = this.cam.x - W / 2 + sx, cy = this.cam.y - H / 2 + sy;
     drawSpaceBg(ctx, W, H, cx, cy, t, this.loc.field.cold ? '#0c1838' : this.loc.field.hazard === 'heat' ? '#2a1408' : this.space ? '#1c0b1e' : null);
     const bgLoc = this.space ? LOC[S.loc] : this.loc.id === 'kuiper' ? LOC.pluton : this.loc.parent ? LOC[this.loc.parent] : this.loc.follow ? LOC[this.loc.follow] : this.loc;
-    if (bgLoc && bgLoc.col) {
+    if (bgLoc && bgLoc.nuked) glow(ctx, W * 0.8 - cx * 0.03, H * 0.25 - (cy - MH) * 0.03, Math.min(W, H) * 0.5, '#ff5a2a55', 0.9);
+    else if (bgLoc && bgLoc.col) {
       const bx = W * 0.8 - cx * 0.03, by = H * 0.25 - (cy - MH) * 0.03;
       drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }

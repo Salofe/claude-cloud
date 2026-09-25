@@ -176,6 +176,8 @@ const PROJECTS = [
     d: 'A city-sized refinery woven into Saturn\'s rings.', fx: 'ALL drone income ×3' },
   { id: 'dyson', icon: '☀️', n: 'Dyson Swarm', loc: null, stage: 8, cost: 5e12, infl: 25,
     d: 'Billions of mirrors around the Sun. You now own a star\'s worth of power.', fx: 'ALL income ×5' },
+  { id: 'nova', icon: '💥', n: 'Nova Cannon', loc: null, stage: 8, cost: 2e13, infl: 10, req: 'dyson',
+    d: 'A beam that channels the Dyson Swarm into a single point. Nothing can stand against it.', fx: 'Lets you DESTROY planets (from the Star Map)' },
 ];
 const PROJ = Object.fromEntries(PROJECTS.map(p => [p.id, p]));
 

@@ -177,7 +177,14 @@ const MapScene = {
       const open = l.body ? locOpen(l.id) : locOpen(l.id);
       ctx.globalAlpha = open ? 1 : 0.35;
       const la = Math.atan2(sun.y - p.y, sun.x - p.x);
-      if (l.id === 'kuiper') {
+      if (l.nuked) {
+        glow(ctx, p.x, p.y, r * 3, '#ff5a2a66', 0.8 + 0.2 * Math.sin(t * 2));
+        for (let i = 0; i < 26; i++) {
+          const a = i * 2.39996 + t * (0.15 + (i % 4) * 0.05), rr = r * (0.3 + (i % 6) * 0.25);
+          ctx.fillStyle = i % 3 ? '#b86a4a' : '#ffb347';
+          ctx.fillRect(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr * 0.8, 2 + (i % 3), 2 + (i % 3));
+        }
+      } else if (l.id === 'kuiper') {
         glow(ctx, p.x, p.y, r * 2.5, '#9fb6ff66', 0.7);
         ctx.fillStyle = '#c9d6ff';
         for (let i = 0; i < 11; i++) { const a = i * 0.7 + t * 0.1; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * r * (0.4 + (i % 3) * 0.45), p.y + Math.sin(a * 1.3) * r * 0.8, 1.7, 0, TAU); ctx.fill(); }
@@ -185,6 +192,30 @@ const MapScene = {
       ctx.globalAlpha = 1;
     }
     this.drawProjects(ctx, t, day);
+    // freighters shuttling along their routes
+    for (const f of S.freighters || []) {
+      const a = this.spos(f.from, day), b = this.spos(f.to, day);
+      ctx.strokeStyle = 'rgba(255,210,74,0.12)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      const ph = (t * 0.12 + (f.t0 || 0)) % 2, k = ph < 1 ? ph : 2 - ph;
+      const x = lerp(a.x, b.x, k), y = lerp(a.y, b.y, k);
+      glow(ctx, x, y, 6, '#ffd24a', 0.8);
+      ctx.fillStyle = '#ffe9a0'; ctx.fillRect(x - 2, y - 2, 4, 4);
+    }
+    // Nova Cannon blast
+    if (this.nukeFx) {
+      const fx = this.nukeFx; fx.t += 1 / 60;
+      const p = this.spos(fx.id, day), k = fx.t / 3;
+      if (k >= 1) this.nukeFx = null;
+      else {
+        const sun = this.w2s(0, 0);
+        ctx.strokeStyle = `rgba(255,120,60,${(1 - k) * 0.9})`; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(sun.x, sun.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+        glow(ctx, p.x, p.y, 40 + k * 260, '#ffffff', 1 - k);
+        glow(ctx, p.x, p.y, 20 + k * 160, '#ff7a3a', 1 - k * 0.8);
+        for (let i = 0; i < 3; i++) { ctx.strokeStyle = `rgba(255,${200 - i * 60},120,${(1 - k) * 0.8})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, k * (120 + i * 70), 0, TAU); ctx.stroke(); }
+      }
+    }
     // node markers & labels
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const l of NODES) {
@@ -222,7 +253,7 @@ const MapScene = {
         let icons = '';
         if (l.field) icons += '⛏';
         const evs = S.events.filter(e => e.locs && e.locs.includes(l.id));
-        for (const e of evs) icons += e.icon;
+        for (const e of evs) icons += e.icon || '';
         const dg = locDanger(l.id);
         if (dg >= 0.2) icons += dg > 0.45 ? '☠☠' : '☠';
         if (S.active.some(c => c.type === 'deliver' && c.to === l.id)) icons += '📜';

@@ -162,6 +162,7 @@ function startGame(cont) {
   audioInit();
   if (cont) S = loadSave();
   if (!S) { newGame(); save(); }
+  applyNukes();
   shownCredits = S.credits;
   pendingUnlocks = [];
   if (cont && has(U.MAP)) setScene(MapScene);

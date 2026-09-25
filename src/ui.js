@@ -87,6 +87,7 @@ function updateHUD() {
   } else o.innerHTML = `<small>SOLAR SOVEREIGN</small><b>👑 You rule the system</b><span>Keep growing your empire.</span>`;
   if (!S.won && has(U.SATURN) && inf >= 100 && !isBlocking()) victory();
   if (pendingUnlocks.length && $('modal').classList.contains('hidden') && !(scene === MineScene && (MineScene.inCombat || MineScene.space)) && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
+  else if (pendingChoices.length && $('modal').classList.contains('hidden') && $('sheet').classList.contains('hidden') && scene !== MineScene && !MapScene.travel) showChoice(pendingChoices.shift());
 }
 function showUnlock(i) {
   const u = UNLOCKS[i];
@@ -137,12 +138,8 @@ function selectLoc(id) {
     const hot = Object.keys(l.market).map(k => ({ k, m: priceRatio(id, k) })).filter(x => x.m >= 1.45).sort((a, b) => b.m - a.m).slice(0, 4);
     if (hot.length) html += `<div class="sub">Pays well for</div><div class="ores">${hot.map(x => `<span class="ore" style="--c:${ITEMS[x.k].c}">${ITEMS[x.k].n} <b>×${x.m.toFixed(1)}</b></span>`).join('')}</div>`;
   }
-  if (has(U.TRADE)) {
-    const pw = [];
-    if (l.market && !l.depot) pw.push(`<button class="btn small-btn" ${S.credits >= POWERS.boom.cost() ? '' : 'disabled'} onclick="doPower('boom','${id}')">🏗️ Fund a boom (ore ×1.9) · ${fmt(POWERS.boom.cost())}</button>`);
-    if (has(U.BELT) && (LOC[id].danger || 0) >= 0.1) pw.push(`<button class="btn small-btn" ${S.credits >= POWERS.purge.cost() ? '' : 'disabled'} onclick="doPower('purge','${id}')">🛡️ Clear pirates (30 days) · ${fmt(POWERS.purge.cost())}</button>`);
-    if (pw.length) html += `<div class="sub">⚡ Your power</div><div class="powers">${pw.join('')}</div>`;
-  }
+  const pws = powersAt(id);
+  if (pws.length) html += `<div class="sub">⚡ Your power</div>${powerButtons(pws)}`;
   if (here) {
     html += `<div class="lp-actions">`;
     if (l.station) html += `<button class="btn primary big" onclick="openDock()">🛰 Dock at ${l.station}</button>`;
@@ -235,7 +232,7 @@ function renderDock(fresh) {
   const tabs = [['upg', '🔧 Upgrades']];
   if (has(U.OUTPOST) && l.field) tabs.push(['outpost', '🤖 Outpost' + (!S.outposts[l.id] && S.credits >= buildCost(l.id) ? ' <i class="dot"></i>' : '')]);
   if (has(U.TRADE) && !l.depot) tabs.push(['trade', '📦 Trade'], ['contracts', '📜 Contracts' + (S.active.some(canDeliver) ? ' <i class="dot"></i>' : '')]);
-  if (has(U.SATURN) && STATION_TIER[l.id]) tabs.push(['invest', '🏛 Invest']);
+  if (has(U.TRADE) && !l.depot && (powersAt(l.id).length || (has(U.SATURN) && STATION_TIER[l.id]))) tabs.push(['planet', '🏛 Planet']);
   let receipt = '';
   const r = lastDock;
   if (fresh && r && (r.sold.length || r.fuel || r.repair)) {
@@ -246,13 +243,13 @@ function renderDock(fresh) {
     </div>`;
   }
   let sellbox = '';
-  const oreN = ORES.reduce((n, k) => n + (S.cargo[k] || 0), 0);
+  const oreN = cargoUsed();
   if (oreN && has(U.MAP)) {
-    const here = oreValueAt(S.loc), alts = betterMarkets(S.loc);
+    const here = cargoValueAt(S.loc), alts = betterMarkets(S.loc);
     sellbox = `<div class="sellbox">
-      <div class="sb-cargo"><small>ORE IN CARGO</small><span>${ORES.filter(k => S.cargo[k]).map(k => `<i class="sw" style="background:${ITEMS[k].c}"></i>${fmt(S.cargo[k])} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div>
+      <div class="sb-cargo"><small>CARGO</small><span>${ITEM_KEYS.filter(k => S.cargo[k]).map(k => `<i class="sw" style="background:${ITEMS[k].c}"></i>${fmt(S.cargo[k])} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div>
       <div class="sb-row">
-        ${marketClosed(S.loc) ? '<div class="badt">Market closed by a strike.</div>' : `<button class="btn primary" onclick="sellHere()">Sell here · <b>${fmt(here)} cr</b></button>`}
+        ${marketClosed(S.loc) ? '<div class="badt">Market closed by a strike.</div>' : here ? `<button class="btn primary" onclick="sellHere()">Sell all here · <b>${fmt(here)} cr</b></button>` : '<small>Nothing in your hold sells well here.</small>'}
         <div class="sb-alts">${alts.length ? alts.map(a => `<span onclick="closeSheet();selectLoc('${a.id}')"><b>${LOC[a.id].n}</b> pays <b class="cr">${fmt(a.v)}</b> <em>+${Math.round((a.v / Math.max(1, here) - 1) * 100)}%</em> <small>· ${a.fuel} ⛽</small></span>`).join('') : '<small>This is the best price you can get right now.</small>'}</div>
       </div></div>`;
   }
@@ -273,8 +270,22 @@ function renderDock(fresh) {
   save();   // every purchase/sale re-renders the dock, so this checkpoints them
   updateHUD();
 }
+function powerButtons(pws) {
+  return `<div class="powers">${pws.map(o => `<button class="btn small-btn ${o.kind === 'nuke' ? 'danger' : ''}" ${o.ok ? '' : 'disabled'} onclick="doPower('${o.kind}','${o.arg}')" title="${o.d || ''}">${o.icon} ${o.label} · ${fmt(o.cost)}${o.why ? ` <small>(${o.why})</small>` : o.d ? ` <small>— ${o.d}</small>` : ''}</button>`).join('')}</div>`;
+}
+function tradeRun(g, to) {
+  const n = doBuy(S.loc, g, 9999);
+  if (!n) { toast('Not enough credits or space', 'bad'); return; }
+  sfx('click'); toast(`Bought ${n} ${ITEMS[g].n} — course plotted to ${LOC[to].n}`, 'good');
+  save(); closeSheet(); selectLoc(to); MapScene.focus(to);
+}
+function doFreighter(from, to, g) {
+  if (!hireFreighter(from, to, g)) { toast('Not enough credits (or fleet full)', 'bad'); return; }
+  sfx('upgrade'); toast(`🚚 Freighter now runs ${ITEMS[g].n} to ${LOC[to].n}`, 'good'); renderDock();
+}
 function sellHere() {
   const r = sellAllOre(S.loc);
+  for (const k of GOODS) if (S.cargo[k] && wantsGood(S.loc, k)) { const n = S.cargo[k]; const got = doSell(S.loc, k, n); r.sold.push([k, n, got]); r.total += got; }
   if (!r.total) return;
   sfx('cash');
   lastDock = { ...r, fuel: 0, repair: 0 };
@@ -313,17 +324,13 @@ function dockBody(tab) {
   if (tab === 'trade') {
     if (marketClosed(id)) return `<div class="empty">✊ Market closed by a strike. Come back in a few days.</div>`;
     const keys = ITEM_KEYS.filter(k => (!ITEMS[k].ore && l.market[k] != null) || S.cargo[k]);
-    // best trade routes starting here
-    const routes = [];
-    for (const g of GOODS) {
-      const bp = buyPrice(id, g); if (!bp || stockLeft(id, g) < 1) continue;
-      let best = null;
-      for (const C of NODES) if (C.market && !C.depot && C.id !== id && locOpen(C.id) && C.market[g] != null) { const sp = sellPrice(C.id, g); if (!best || sp > best.sp) best = { id: C.id, sp }; }
-      if (best && best.sp > bp * 1.2) routes.push({ g, bp, ...best, units: Math.min(stockLeft(id, g), ship.cargoMax) });
-    }
-    routes.sort((a, b) => (b.sp - b.bp) * b.units - (a.sp - a.bp) * a.units);
-    let h = routes.length ? `<div class="routes"><div class="sub">💡 Best trades from here</div>${routes.slice(0, 3).map(r => `<div class="route"><i class="sw" style="background:${ITEMS[r.g].c}"></i><b>${ITEMS[r.g].n}</b> buy ${fmt(r.bp)} → <b>${LOC[r.id].n}</b> pays ${fmt(r.sp)} <em>×${(r.sp / r.bp).toFixed(1)}</em> <small>≈ +${fmt((r.sp - r.bp) * r.units * 0.8)} profit for ${r.units}</small></div>`).join('')}</div>` : '';
-    h += `<p class="hint">Buy where it's cheap (▼), sell where it's wanted (▲). Each station only has limited stock (refills daily), and selling a lot lowers the price — spread your cargo around.</p>
+    const routes = tradeRoutes(id);
+    const fc = FREIGHT.cost(), fn = (S.freighters || []).length;
+    let h = routes.length ? `<div class="routes"><div class="sub">💡 Best trades from here</div>${routes.slice(0, 3).map(r => `<div class="route">
+      <div><i class="sw" style="background:${ITEMS[r.g].c}"></i><b>${ITEMS[r.g].n}</b> buy ${fmt(r.bp)} → <b>${LOC[r.to].n}</b> pays ${fmt(r.sp)} <em>×${(r.sp / r.bp).toFixed(1)}</em> <small>≈ +${fmt((r.sp - r.bp) * r.units * 0.8)} for ${r.units}</small></div>
+      <div class="rt-btns"><button class="btn small-btn primary" ${r.units && S.credits >= r.bp ? '' : 'disabled'} onclick="tradeRun('${r.g}','${r.to}')">Buy ${r.units} & fly there</button>
+      ${has(U.TRADE) ? `<button class="btn small-btn" ${fn < FREIGHT.max && S.credits >= fc && routeCount(id, r.to, r.g) < FREIGHT.perRoute ? '' : 'disabled'} onclick="doFreighter('${id}','${r.to}','${r.g}')">🚚 Freighter · ${fmt(fc)} <small>(+${fmt(freighterIncome({ from: id, to: r.to, g: r.g }))}/s)</small></button>` : ''}</div></div>`).join('')}</div>` : '<p class="hint">Nothing here is worth hauling right now — try another station.</p>';
+    h += `<p class="hint">Buy where it's cheap (▼), sell where it's wanted (▲) — or hire a 🚚 freighter to run the route for you forever. Stock is limited and refills daily.</p>
       <div class="mkt"><div class="mrow mh"><span>Good</span><span>Sell</span><span>Have</span><span></span><span>Buy</span><span></span></div>`;
     for (const k of keys) {
       const sp = sellPrice(id, k), bp = buyPrice(id, k), have = S.cargo[k] || 0;
@@ -355,6 +362,13 @@ function dockBody(tab) {
       h += `<div class="contract"><div>${c.urgent ? '<span class="chip bad">URGENT</span> ' : ''}${contractText(c)}<small>Reward <b class="cr">${fmt(c.reward)} cr</b> · +${c.rep} rep · ${c.days} days</small></div>
         <button class="btn" onclick="acceptContract('${id}','${c.id}');renderDock()">Accept</button></div>`;
     }
+    return h;
+  }
+  if (tab === 'planet') {
+    const pws = powersAt(id);
+    let h = pws.length ? `<div class="sub">⚡ Your power on ${l.n}</div>${powerButtons(pws)}` : '';
+    if (has(U.SATURN) && STATION_TIER[id]) h += dockBody('invest');
+    else if (!has(U.SATURN)) h += '<p class="hint center">🔒 Investments and politics (wars, peace deals) unlock with Saturn & Influence.</p>';
     return h;
   }
   if (tab === 'invest') {
@@ -504,7 +518,11 @@ function openFactions() {
   const inf = influence();
   let h = '';
   const tot = totalIncome();
-  h += `<div class="inf-big"><div><small>DRONE INCOME</small><b class="cr">${fmt(tot)}</b><span>cr/s</span></div><div class="hint center">Income multiplier ×${incomeMult().toFixed(2)} · Drones earned ${fmt(S.stats.droneEarned)} cr total</div></div>`;
+  h += `<div class="inf-big"><div><small>PASSIVE INCOME</small><b class="cr">${fmt(tot)}</b><span>cr/s</span></div><div class="hint center">Drones ${fmt(droneIncome())}/s · Freighters ${fmt(freightIncome())}/s · ore multiplier ×${incomeMult().toFixed(2)}</div></div>`;
+  if ((S.freighters || []).length) {
+    h += `<div class="sub">Freighters ${S.freighters.length}/${FREIGHT.max}</div>`;
+    for (const f of S.freighters) h += `<div class="srow"><span>🚚 ${ITEMS[f.g].n}: ${LOC[f.from].n} → ${LOC[f.to].n}</span><b class="cr">+${fmt(freighterIncome(f))}/s</b></div>`;
+  }
   h += '<div class="sub">Outposts</div>';
   for (const l of FIELDS) {
     const o = S.outposts[l.id];
@@ -513,7 +531,7 @@ function openFactions() {
   }
   if (has(U.SATURN)) {
     h += `<div class="inf-big" style="margin-top:14px"><div><small>INFLUENCE</small><b>${inf}</b><span>/ 100</span></div><div class="meter big gold"><i style="width:${Math.min(100, inf)}%"></i></div><div class="rank">${rankName(inf)}</div></div>`;
-    h += '<p class="hint">Influence comes from station investments, outpost levels, good reputation and pirate kills.</p>';
+    h += `<p class="hint">Influence comes from investments, outpost levels, megaprojects, reputation, pirate kills${S.peace ? `, ${S.peace} peace deal${S.peace > 1 ? 's' : ''}` : ''}${(S.nuked || []).length ? `, and fear (${S.nuked.length} planet${S.nuked.length > 1 ? 's' : ''} destroyed)` : ''}.</p>`;
   }
   if (has(U.TRADE)) {
     h += '<div class="sub">Faction reputation</div>';
@@ -534,14 +552,14 @@ function openProjects() {
     const done = built(p.id), open = projectOpen(p), can = open && !done && S.credits >= p.cost;
     const pct = Math.min(100, S.credits / p.cost * 100);
     h += `<div class="proj ${done ? 'done' : ''} ${open ? '' : 'locked'} ${can ? 'can' : ''}">
-      <div class="pj-icon">${open ? p.icon : '🔒'}</div>
-      <div class="pj-main"><b>${p.n}</b>${p.loc ? `<small>${LOC[p.loc].n}</small>` : ''}<p>${open ? p.d : `Unlocks with: ${UNLOCKS[p.stage].title}`}</p>
+      <div class="pj-icon">${open || done ? p.icon : '🔒'}</div>
+      <div class="pj-main"><b>${p.n}</b>${p.loc ? `<small>${LOC[p.loc].n}</small>` : ''}<p>${open ? p.d : has(p.stage) && p.req ? `Requires the ${PROJ[p.req].n}` : `Unlocks with: ${UNLOCKS[p.stage].title}`}</p>
         <div class="pj-fx">⚡ ${p.fx} · +${p.infl} influence</div>
         ${done ? '<div class="pj-done">✔ BUILT</div>' : open ? `<div class="pj-bar"><i style="width:${pct}%"></i></div><button class="btn ${can ? 'primary' : ''}" ${can ? '' : 'disabled'} onclick="doProject('${p.id}')">${can ? 'Build' : 'Need'} · ${fmt(p.cost)} cr</button>` : ''}
       </div></div>`;
   }
   h += '</div>';
-  if (has(U.TRADE)) h += `<div class="sub">System powers</div><p class="hint">Select a planet on the Star Map to fund a boom or hire mercenaries there. End wars and plagues from the Empire panel.</p>`;
+  if (has(U.TRADE)) h += `<div class="sub">System powers</div><p class="hint">Select any planet on the Star Map (or open its 🏛 Planet tab) to fund booms, hire mercenaries, and later start wars, back a side or broker peace. End crises from the Empire panel.</p>`;
   openSheet('🌌 Megaprojects', h);
 }
 function doProject(id) {
@@ -553,11 +571,25 @@ function doProject(id) {
     buttons: [{ label: 'Behold!', cls: 'primary', fn: () => { if (scene === MapScene && !MapScene.travel) { showMapUI(true); if (p.loc) { selectLoc(p.loc); MapScene.focus(p.loc); } else MapScene.zoomAll(); } } }] });
 }
 function doPower(kind, arg) {
-  if (!usePower(kind, arg)) { toast('Not enough credits', 'bad'); return; }
+  if (kind === 'nuke') {
+    const l = LOC[arg];
+    showModal({ icon: '💥', title: `Destroy ${l.n}?`, danger: true, html: `This cannot be undone. ${l.station || l.n} and everyone's business there will be wiped out, and every faction will fear — and hate — you.<br><br>What remains will be <b>the richest debris field in the system</b>.`,
+      buttons: [{ label: `🔥 FIRE · ${fmt(POWERS.nuke.cost())} cr`, cls: 'danger', fn: () => { if (usePower('nuke', arg)) { closeSheet(true); setScene(MapScene); MapScene.focus(arg); selectLoc(arg); } } }, { label: 'Stand down', fn: () => {} }] });
+    return;
+  }
+  if (!usePower(kind, arg)) { toast('Not available right now', 'bad'); return; }
   sfx('win'); toast('Done. The system bends to your will.', 'good');
-  if (!$('sheet').classList.contains('hidden')) openFactions(); else if (MapScene.sel) selectLoc(MapScene.sel);
+  const sh = $('sheet');
+  if (!sh.classList.contains('hidden')) { if (sh.classList.contains('dock')) renderDock(); else openFactions(); }
+  else if (MapScene.sel) selectLoc(MapScene.sel);
   updateHUD();
 }
+function showChoice(ev) {
+  sfx('event');
+  showModal({ icon: ev.icon, title: ev.title, html: `<p>${ev.text}</p>`, cls: 'unlock',
+    buttons: ev.choices.map(c => ({ label: c.label, cls: c.cost ? 'primary' : '', disabled: c.cost > S.credits, fn: () => { if (c.cost > S.credits) return; S.credits -= c.cost; c.fn(); if (c.cost) addNews(ev.icon, `You chose: ${c.label.split(' · ')[0]}`, '#ffd24a'); save(); } })) });
+}
+
 function openNews() {
   sfx('click');
   openSheet('📰 System News', S.news.map(n => `<div class="news"><i>DAY ${n.day}</i><span>${n.icon}</span><div>${n.html}</div></div>`).join(''));
@@ -583,5 +615,7 @@ function openHelp() {
     <h4>⚔ Pirates</h4><p>In dangerous zones pirates attack. <b>Hold the mouse</b> to fire your guns. Destroyed ships drop credits.</p>
     <h4>🔓 Unlock</h4><p>The more you earn, the more of the Solar System opens up: the star map, new planets, pirates, trading, events and finally influence.</p>
     <h4>🗺 Travel</h4><p>Planets orbit the Sun, so distances change every day. Farther places pay more and are more dangerous.</p>
+    <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
+    <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — and later incite wars, back a side or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
     <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the Solar System.</p></div>`);
 }

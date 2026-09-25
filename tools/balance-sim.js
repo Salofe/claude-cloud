@@ -6,12 +6,12 @@ const fs = require('fs'), vm = require('vm'), path = require('path');
 const ctx = { console, Math, Date, JSON, Object, Array, localStorage: { getItem() { return null; }, setItem() {} } };
 vm.createContext(ctx);
 const src = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
-vm.runInContext(src('data.js') + '\n' + src('state.js') + `
+vm.runInContext(src('data.js') + '\n' + src('state.js') + '\n' + src('politics.js') + `
 function toast() {} function sfx() {} function showEventBanner() {} function updateTicker() {}
 var TEX = {};
 this.api = { newGame, ship, UPG, UPG_KEYS, upgCost, LOC, NODES, FIELDS, ITEMS, ORES, GOODS, OUTPOST, outpostRate, outpostCap,
   PROJECTS, PROJ, built, INVEST, STATION_TIER, UNLOCKS, U, Z_ENEMY, incomeMult, totalIncome, locOpen, has, travelInfo,
-  econScale, influence, checkUnlocks, getS: () => S };
+  econScale, influence, checkUnlocks, tradeRoutes, hireFreighter, FREIGHT, freighterIncome, getS: () => S };
 `, ctx);
 const A = ctx.api;
 const S = () => A.getS();
@@ -91,6 +91,11 @@ function candidates() {
     if (o.n < A.outpostCap(o.lv)) out.push({ name: 'drone ' + L.id, cost: A.OUTPOST.drone[z] * Math.pow(A.OUTPOST.growth, o.n), gain: A.OUTPOST.rate[z] * Math.pow(2, o.lv - 1) * boost, buy: () => o.n++ });
     if (o.lv < A.OUTPOST.maxLv) out.push({ name: 'outlv ' + L.id, cost: A.OUTPOST.build[z] * A.OUTPOST.lvCost[o.lv - 1], gain: A.outpostRate(z, o.lv, o.n) * boost, buy: () => o.lv++ });
   }
+  if (A.has(A.U.TRADE) && (s.freighters || []).length < A.FREIGHT.max) {
+    let best = null;
+    for (const L of A.NODES) for (const r of A.tradeRoutes(L.id)) { const f = { from: L.id, to: r.to, g: r.g }; if ((s.freighters || []).filter(x => x.from === f.from && x.to === f.to && x.g === f.g).length >= 3) continue; const inc = A.freighterIncome(f); if (!best || inc > best.inc) best = { f, inc }; }
+    if (best) out.push({ name: 'freighter', cost: A.FREIGHT.cost(), gain: best.inc, buy: () => { s.freighters.push(best.f); } });
+  }
   for (const p of A.PROJECTS) {
     if (A.built(p.id) || !A.has(p.stage)) continue;
     const g = tryDelta(() => s.projects[p.id] = 1, () => delete s.projects[p.id]);
@@ -137,4 +142,4 @@ console.log(log.join('\n'));
 console.log('\nfinal', (t / 60).toFixed(0), 'min · lv', JSON.stringify(s.lv));
 console.log('outposts', JSON.stringify(s.outposts), 'projects', Object.keys(s.projects).join(','));
 console.log('time share', Object.entries(actCount).map(([k, v]) => `${k} ${Math.round(v / t * 100)}%`).join(' · '));
-console.log('influence', A.influence(), 'drone share of income', Math.round(A.totalIncome() / rateNow() * 100) + '%');
+console.log('freighters', (s.freighters || []).length, 'influence', A.influence(), 'passive share of income', Math.round(A.totalIncome() / rateNow() * 100) + '%');

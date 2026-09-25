@@ -9,12 +9,13 @@ function newGame() {
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, outposts: {}, projects: {}, stock: {}, sat: {}, drift: {}, depl: {}, bal: 2,
+    invest: {}, outposts: {}, projects: {}, stock: {}, freighters: [], cd: {}, nuked: [], loans: [], peace: 0, sat: {}, drift: {}, depl: {}, bal: 2,
     events: [], news: [], contracts: {}, active: [],
     stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
     unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
   };
   for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.06, 0.06); } }
+  if (typeof resetLocs === 'function') resetLocs();
   addNews('📡', 'Your old mining ship is ready at Tranquility Base. Time to get rich.', '#3de8ff');
   return S;
 }
@@ -25,7 +26,7 @@ function loadSave() {
     if (!d || d.v !== 3) return null;
     d.projects = d.projects || {};
     d.lv.extractor = d.lv.extractor || 1;
-    d.stock = d.stock || {};
+    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     return d;
   } catch (e) { return null; }
@@ -37,7 +38,7 @@ const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0);
 const upgOpen = k => has(UPG[k].stage);
 const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
-const econScale = () => S.unlock < 5 ? 1 : 3 * Math.pow(2, S.unlock - 5);
+const econScale = () => S.unlock < 5 ? 1 : 3.5 * Math.pow(2, S.unlock - 5);
 const itemBase = k => ITEMS[k].ore ? ITEMS[k].b : ITEMS[k].b * econScale();
 
 // ---------- derived stats ----------
@@ -68,6 +69,9 @@ function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; retu
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
 function addCargo(k, n) { S.cargo[k] = (S.cargo[k] || 0) + n; if (S.cargo[k] <= 0) delete S.cargo[k]; }
 function oreValueAt(locId) { let v = 0; for (const k of ORES) if (S.cargo[k]) v += (sellPrice(locId, k) || 0) * S.cargo[k]; return v; }
+// what your whole hold is worth here: ore, plus goods this station actually wants (never dumps goods at their source)
+const wantsGood = (locId, k) => { const m = LOC[locId].market; return m && m[k] != null && m[k] > 1; };
+function cargoValueAt(locId) { let v = oreValueAt(locId); for (const k of GOODS) if (S.cargo[k] && wantsGood(locId, k)) v += (sellPrice(locId, k) || 0) * S.cargo[k]; return v; }
 function oreValueBase(k) { return ITEMS[k].b * incomeMult(); }
 
 // ---------- orbital positions ----------
@@ -95,7 +99,7 @@ function travelInfo(to, from) {
   const danger = routeDanger(from, to);
   return { d, fuel, days, danger };
 }
-function fuelEventMult() { let m = 1; for (const e of S.events) if (e.fuelCost) m *= e.fuelCost; return m; }
+function fuelEventMult() { let m = 1; for (const e of S.events) if (e.fuelCost) m = Math.max(m, e.fuelCost); return m; }
 function locDanger(id) {
   if (!has(U.BELT)) return 0;
   let d = LOC[id].danger || 0;
@@ -109,10 +113,14 @@ function routeDanger(a, b) {
 }
 
 // ---------- market ----------
+// Several events can touch the same price. They never stack: the strongest boost
+// and the strongest drop apply, so repeating an action can't multiply prices.
 function eventPriceMult(locId, item) {
-  let m = 1;
-  for (const e of S.events) if (e.price) for (const p of e.price) if ((p.loc === locId || p.loc === '*') && p.item === item) m *= p.m;
-  return m;
+  let up = 1, down = 1;
+  for (const e of S.events) if (e.price) for (const p of e.price) if ((p.loc === locId || p.loc === '*') && p.item === item) {
+    if (p.m > 1) up = Math.max(up, p.m); else down = Math.min(down, p.m);
+  }
+  return clamp(up * down, 0.25, 3.5);
 }
 function basePrice(locId, item) {
   const l = LOC[locId];
@@ -133,7 +141,8 @@ function buyPrice(locId, item) {
   return Math.max(2, Math.round(basePrice(locId, item) * 1.07));
 }
 function fuelPrice(locId) {
-  let p = (LOC[locId].fuel || 6) * (1 + S.unlock * 0.5); for (const e of S.events) if (e.fuelPrice) p *= e.fuelPrice; return Math.max(1, Math.round(p * 10) / 10);
+  let m = 1; for (const e of S.events) if (e.fuelPrice) m = Math.max(m, e.fuelPrice);
+  return Math.max(1, Math.round((LOC[locId].fuel || 6) * (1 + S.unlock * 0.5) * m * 10) / 10);
 }
 function marketClosed(locId) { return S.events.some(e => e.closed && e.closed.includes(locId)); }
 
@@ -199,9 +208,9 @@ function sellAllOre(id, r) {
 }
 // Where else would this cargo sell for more? (open stations, best first)
 function betterMarkets(id) {
-  const here = oreValueAt(id);
+  const here = cargoValueAt(id);
   return NODES.filter(l => l.market && l.id !== id && locOpen(l.id) && !marketClosed(l.id))
-    .map(l => ({ id: l.id, v: oreValueAt(l.id), fuel: travelInfo(l.id).fuel }))
+    .map(l => ({ id: l.id, v: cargoValueAt(l.id), fuel: travelInfo(l.id).fuel }))
     .filter(x => x.v > here * 1.05).sort((a, b) => b.v - a.v).slice(0, 3);
 }
 // Docking: refuel & repair. Ore is only auto-sold before the Star Map exists.
@@ -233,7 +242,8 @@ function outpostIncome(id) {
   const o = S.outposts[id]; if (!o) return 0;
   return outpostRate(LOC[id].field.z, o.lv, o.n) * incomeMult() * (id === 'luna' && built('driver') ? 3 : 1) * (built('ringstation') ? 3 : 1);
 }
-function totalIncome() { let v = 0; for (const id in S.outposts) v += outpostIncome(id); return v; }
+function droneIncome() { let v = 0; for (const id in S.outposts) v += outpostIncome(id); return v; }
+function totalIncome() { return droneIncome() + freightIncome(); }
 function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
 function droneCost(id, k) {
   const o = S.outposts[id]; const n = o ? o.n : 0; const z = LOC[id].field.z;
@@ -304,7 +314,7 @@ function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock 
 
 // ---------- megaprojects & system powers ----------
 function built(id) { return S && S.projects && S.projects[id]; }
-function projectOpen(p) { return has(p.stage); }
+function projectOpen(p) { return has(p.stage) && (!p.req || built(p.req)); }
 function buildProject(id) {
   const p = PROJ[id];
   if (built(id) || !projectOpen(p) || S.credits < p.cost) return false;
@@ -314,47 +324,13 @@ function buildProject(id) {
   save();
   return true;
 }
-const powerScale = () => Math.pow(4, Math.max(0, S.unlock - 5));
-const POWERS = {
-  end:   { n: 'End this crisis', cost: () => Math.round(Math.max(200000, S.stats.earned * 0.004)) },
-  boom:  { n: 'Fund a construction boom', cost: () => Math.round(Math.max(300000, S.stats.earned * 0.006)) },
-  purge: { n: 'Hire mercenaries to clear pirates', cost: () => Math.round(Math.max(250000, S.stats.earned * 0.005)) },
-};
-function usePower(kind, arg) {
-  const c = POWERS[kind].cost(); if (S.credits < c) return false;
-  if (kind === 'end') {
-    const e = S.events.find(x => x.uid === arg); if (!e) return false;
-    S.credits -= c;
-    S.events = S.events.filter(x => x !== e);
-    const facs = new Set((e.locs || []).map(l => LOC[l].faction).filter(f => f && f !== 'piratas'));
-    for (const f of facs) repChange(f, 10, true);
-    addNews('🕊️', `Your money ended it: <b>${e.title}</b>. The system owes you one.`, '#6dffb0');
-  } else if (kind === 'boom') {
-    S.credits -= c;
-    const l = LOC[arg];
-    S.events.push({ icon: '🏗️', title: `Your boom on ${l.n}`, text: `You funded a building frenzy at ${l.station}. Every ore sells for ×1.9 there.`,
-      start: S.day, end: S.day + 20, uid: uid(), locs: [arg], price: ORES.map(i => ({ loc: arg, item: i, m: 1.9 })) });
-    if (l.faction) repChange(l.faction, 6, true);
-    addNews('🏗️', `You funded a construction boom on ${l.n}`, '#ffd24a');
-  } else if (kind === 'purge') {
-    S.credits -= c;
-    const l = LOC[arg];
-    S.events = S.events.filter(e => !(e.danger && e.locs && e.locs.includes(arg) && e.icon === '☠️'));
-    S.events.push({ icon: '🛡️', title: `${l.n} secured`, text: `Your mercenaries hunt every pirate near ${l.n}. No ambushes there for 30 days.`,
-      start: S.day, end: S.day + 30, uid: uid(), locs: [arg], danger: [{ loc: arg, add: -1 }] });
-    repChange('piratas', -5, true);
-    addNews('🛡️', `Mercenaries cleared the pirates near ${l.n}`, '#6dffb0');
-  }
-  save();
-  return true;
-}
-
 // ---------- influence ----------
 function influence() {
   let v = 0;
   for (const id in S.invest) for (let i = 0; i < S.invest[id]; i++) v += INVEST.infl[i];
   for (const id in S.outposts) v += S.outposts[id].lv - 1;
   for (const id in S.projects) if (PROJ[id]) v += PROJ[id].infl;
+  v += (S.peace || 0) * 3 + (S.nuked || []).length * 10;
   for (const f in S.rep) if (f !== 'piratas') v += Math.max(0, S.rep[f]) / 8;
   v += Math.max(0, S.rep.piratas) / 16;
   v += Math.min(10, S.stats.kills * 0.05);
@@ -420,90 +396,6 @@ function completeContract(c) {
   sfx('cash');
 }
 
-// ---------- system events ----------
-const WAR_PAIRS = [['tierra', 'marte'], ['marte', 'cinturon'], ['tierra', 'exterior'], ['cinturon', 'exterior'], ['marte', 'exterior']];
-const openMarkets = () => NODES.filter(x => x.market && !x.depot && locOpen(x.id));
-const EVENT_GEN = [
-  { w: 1.1, make() {
-      if (S.events.some(e => e.war)) return null;
-      const pairs = WAR_PAIRS.filter(p => p.every(f => FACTIONS[f].locs.some(locOpen)));
-      if (!pairs.length) return null;
-      const [a, b] = pick(pairs);
-      const locs = [...FACTIONS[a].locs, ...FACTIONS[b].locs].filter(locOpen);
-      return { icon: '⚔️', title: `War: ${FACTIONS[a].n} vs ${FACTIONS[b].n}`,
-        text: 'Weapons and fuel prices soar in their markets and routes get dangerous. Selling weapons to one side angers the other.',
-        dur: randi(28, 50), war: [a, b], locs,
-        price: locs.flatMap(l => [{ loc: l, item: 'arms', m: 2.3 }, { loc: l, item: 'meds', m: 1.5 }, { loc: l, item: 'machinery', m: 1.3 }]),
-        danger: locs.map(l => ({ loc: l, add: 0.22 })), fuelPrice: 1.3 };
-  } },
-  { w: 1, make() {
-      const l = pick(openMarkets().filter(x => !x.black));
-      return { icon: '☣️', title: `Plague on ${l.n}`, text: `An outbreak hits ${l.station}. Medicine is worth a fortune there — and delivering it earns big reputation.`,
-        dur: randi(18, 32), locs: [l.id], price: [{ loc: l.id, item: 'meds', m: 3 }, { loc: l.id, item: 'food', m: 1.3 }], relief: { loc: l.id, item: 'meds' } };
-  } },
-  { w: 1, make() {
-      const l = pick(openMarkets());
-      return { icon: '🌾', title: `Famine on ${l.n}`, text: `${l.station}'s hydroponic farms failed. Food is worth gold.`,
-        dur: randi(15, 28), locs: [l.id], price: [{ loc: l.id, item: 'food', m: 2.6 }], relief: { loc: l.id, item: 'food' } };
-  } },
-  { w: 1.2, make() {
-      const l = pick(openMarkets());
-      return { icon: '🏗️', title: `Construction boom on ${l.n}`, text: `${l.station} is expanding. Metals and machinery are in huge demand.`,
-        dur: randi(20, 35), locs: [l.id], price: ['iron', 'nickel', 'titanium', 'platinum', 'machinery'].map(i => ({ loc: l.id, item: i, m: 1.85 })) };
-  } },
-  { w: 1, make() {
-      const l = pick(NODES.filter(x => x.field && locOpen(x.id)));
-      return { icon: '💎', title: `Rich strike: ${l.field.n}`, text: `Probes found rich veins at ${l.n}. Time to mine!`,
-        dur: randi(15, 25), locs: [l.id], rich: l.id };
-  } },
-  { w: 0.9, make() {
-      const l = pick(NODES.filter(x => x.id !== 'pluton' && locOpen(x.id)));
-      return { icon: '☠️', title: `Pirate surge near ${l.n}`, text: `The Black Syndicate gathers fleets near ${l.n}. Hunting them pays well.`,
-        dur: randi(15, 30), locs: [l.id], danger: [{ loc: l.id, add: 0.35 }] };
-  } },
-  { w: 0.7, make() {
-      return { icon: '⛽', title: 'Fuel crisis', text: 'Sabotage at the refineries. Fuel costs double everywhere; Ice and Helium-3 sell higher.',
-        dur: randi(12, 22), locs: [], fuelPrice: 2, price: [{ loc: '*', item: 'ice', m: 1.4 }, { loc: '*', item: 'he3', m: 1.3 }] };
-  } },
-  { w: 0.7, make() {
-      return { icon: '⚛️', title: 'Helium-3 rush', text: 'New fusion reactors on Earth and Mars. Helium-3 prices spike everywhere.',
-        dur: randi(18, 30), locs: ['tierra', 'marte'], price: [{ loc: '*', item: 'he3', m: 1.9 }] };
-  } },
-  { w: 0.5, make() {
-      const l = pick(openMarkets().filter(x => x.id !== 'luna' && x.id !== 'tierra'));
-      if (!l) return null;
-      return { icon: '✊', title: `Strike at ${l.station}`, text: `Dockworkers on ${l.n} walk out. Market closed; fuel and repairs only.`,
-        dur: randi(5, 10), locs: [l.id], closed: [l.id] };
-  } },
-  { w: 0.5, make() {
-      return { icon: '☀️', title: 'Solar storm', text: 'A coronal mass ejection sweeps the inner system. Travel near the Sun damages your hull.',
-        dur: randi(6, 12), locs: ['mercurio', 'venus', 'tierra', 'luna'], storm: ['mercurio', 'venus', 'tierra', 'luna'] };
-  } },
-  { w: 0.6, make() {
-      const l = pick(openMarkets());
-      return { icon: '🎉', title: `Festival on ${l.n}`, text: `${l.station} celebrates its founding. Luxuries and food fly off the shelves.`,
-        dur: randi(8, 14), locs: [l.id], price: [{ loc: l.id, item: 'luxury', m: 1.9 }, { loc: l.id, item: 'food', m: 1.4 }] };
-  } },
-];
-function spawnEvent() {
-  const total = EVENT_GEN.reduce((a, e) => a + e.w, 0);
-  let r = Math.random() * total, gen = EVENT_GEN[0];
-  for (const e of EVENT_GEN) { r -= e.w; if (r <= 0) { gen = e; break; } }
-  const ev = gen.make();
-  if (!ev) return;
-  ev.start = S.day; ev.end = S.day + ev.dur; ev.uid = uid();
-  S.events.push(ev);
-  addNews(ev.icon, `<b>${ev.title}</b> — ${ev.text}`, '#ffc857');
-  showEventBanner(ev);
-  if (ev.relief) {
-    const l = LOC[ev.relief.loc];
-    const qty = Math.max(6, Math.round(ship.cargoMax * rand(0.3, 0.6)));
-    (S.contracts[l.id] = S.contracts[l.id] || []).unshift({ type: 'deliver', id: uid(), from: l.id, to: l.id, item: ev.relief.item, qty,
-      reward: Math.round(qty * itemBase(ev.relief.item) * 3.2 / 10) * 10, rep: 15, days: ev.dur, faction: l.faction, urgent: 1 });
-  }
-}
-
-// ---------- one day passes ----------
 // ---------- one day passes ----------
 function tickDay() {
   S.day++;
@@ -515,10 +407,10 @@ function tickDay() {
   for (const id in S.stock) for (const k in S.stock[id]) S.stock[id][k] = Math.min(1, S.stock[id][k] + 0.1);
   if (has(U.TRADE)) {
     const ended = S.events.filter(e => e.end <= S.day);
-    for (const e of ended) addNews('🕊️', `Over: ${e.title}`, '#8fa3c7');
+    for (const e of ended) { addNews('🕊️', `Over: ${e.title}`, '#8fa3c7'); onEventEnd(e); }
     S.events = S.events.filter(e => e.end > S.day);
     if (S.day >= S.nextEvent) {
-      if (S.events.length < 3) spawnEvent();
+      if (S.events.filter(e => !e.mine).length < 4) spawnEvent();
       S.nextEvent = S.day + randi(9, 17);
     }
     for (const id in S.nextContracts) if (S.day >= S.nextContracts[id]) genContracts(id);
@@ -529,6 +421,7 @@ function tickDay() {
       toast('A contract expired', 'bad');
     }
   }
+  politicsDay();
   if (S.day % 3 === 0) save();
 }
 
