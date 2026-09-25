@@ -38,4 +38,4 @@ node tools/thumbnail.js    # generates dist/thumbnail.png and dist/thumbnail-squ
 node tools/balance-sim.js  # simulates an efficient player and prints when each unlock is reached
 ```
 
-All art is procedural (canvas 2D, including noise-generated planet textures) and all sound is synthesized with WebAudio. Progress is saved to `localStorage`.
+All art is procedural (canvas 2D, including noise-generated planet textures) and all sound is synthesized with WebAudio. Progress is saved to `localStorage` under the versioned key `solar_prospector_v3` (about 20 KB even late in the game). Clawcade persists each game's localStorage on the player's device.

@@ -131,6 +131,7 @@ const TitleScene = {
     $('title').classList.remove('hidden'); $('hud').classList.add('hidden');
     const sv = hasSave();
     $('cont').classList.toggle('hidden', !sv);
+    if (sv) { const d = loadSave(); $('cont').innerHTML = `▶ Continue <small>${fmt(d.credits)} cr · ${d.unlock ? UNLOCKS[d.unlock].title : 'Moon'}</small>`; }
     $('newg').textContent = sv ? 'New game' : '▶ PLAY';
     $('newg').classList.toggle('primary', !sv);
   },
@@ -252,5 +253,6 @@ function thumbMode(kind) {
 }
 
 function fmtTime(s) { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m` : `${s}s`; }
+window.addEventListener('pagehide', () => save());
 document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) save(); else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
 window.addEventListener('load', init);

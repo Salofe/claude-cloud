@@ -394,6 +394,7 @@ body.mining #objective, body.battle #objective { display: none; }
 .route em { color: var(--good); font-style: normal; font-weight: 800; }
 .route .sw { display: inline-block; }
 .stock { display: block; font-size: 11px; font-weight: 500; }
+#cont small { display: block; font-size: 12px; font-weight: 600; opacity: .8; }
 body.thumb * { display: none; }
 body.thumb canvas#c { display: block; }
 </style>
@@ -1396,6 +1397,8 @@ function loadSave() {
   } catch (e) { return null; }
 }
 function hasSave() { return !!loadSave(); }
+// earlier formats were incompatible prototypes; free their space
+try { localStorage.removeItem('solar_prospector_v1'); localStorage.removeItem('solar_prospector_v2'); } catch (e) {}
 const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0);
 const upgOpen = k => has(UPG[k].stage);
@@ -3313,6 +3316,7 @@ function renderDock(fresh) {
   const rt = $('rcTotal');
   if (rt) countUp(rt, +rt.dataset.v);
   for (const k of UPG_KEYS) if (upgOpen(k)) S.seenUpg[k] = 1;
+  save();   // every purchase/sale re-renders the dock, so this checkpoints them
   updateHUD();
 }
 function sellHere() {
@@ -3762,6 +3766,7 @@ const TitleScene = {
     $('title').classList.remove('hidden'); $('hud').classList.add('hidden');
     const sv = hasSave();
     $('cont').classList.toggle('hidden', !sv);
+    if (sv) { const d = loadSave(); $('cont').innerHTML = `▶ Continue <small>${fmt(d.credits)} cr · ${d.unlock ? UNLOCKS[d.unlock].title : 'Moon'}</small>`; }
     $('newg').textContent = sv ? 'New game' : '▶ PLAY';
     $('newg').classList.toggle('primary', !sv);
   },
@@ -3883,6 +3888,7 @@ function thumbMode(kind) {
 }
 
 function fmtTime(s) { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m` : `${s}s`; }
+window.addEventListener('pagehide', () => save());
 document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) save(); else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
 window.addEventListener('load', init);
 </script>

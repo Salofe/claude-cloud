@@ -31,6 +31,8 @@ function loadSave() {
   } catch (e) { return null; }
 }
 function hasSave() { return !!loadSave(); }
+// earlier formats were incompatible prototypes; free their space
+try { localStorage.removeItem('solar_prospector_v1'); localStorage.removeItem('solar_prospector_v2'); } catch (e) {}
 const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0);
 const upgOpen = k => has(UPG[k].stage);

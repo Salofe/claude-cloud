@@ -270,6 +270,7 @@ function renderDock(fresh) {
   const rt = $('rcTotal');
   if (rt) countUp(rt, +rt.dataset.v);
   for (const k of UPG_KEYS) if (upgOpen(k)) S.seenUpg[k] = 1;
+  save();   // every purchase/sale re-renders the dock, so this checkpoints them
   updateHUD();
 }
 function sellHere() {
