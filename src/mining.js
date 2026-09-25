@@ -40,6 +40,7 @@ const MineScene = {
         this.spawnRock(x, y, i < 3 ? 3 : pick([3, 3, 2, 2, 1]), null, rich);
       }
     }
+    this.escorts = built('fleet') ? [0, 1].map(i => ({ i, x: 0, y: 0, a: 0, gcd: rand(0, 1) })) : [];
     this.drones = [];
     for (let i = 0; i < ship.drones; i++) this.drones.push({ x: this.p.x, y: this.p.y, vx: 0, vy: 0, tgt: null, carry: null, a: i });
     this.odrones = [];

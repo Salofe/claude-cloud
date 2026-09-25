@@ -109,7 +109,7 @@ for (const l of LOCS) if (l.market) for (const o of ORES) if (l.market[o] == nul
 // ============ PROGRESSION (lifetime earnings) ============
 const UNLOCKS = [
   { at: 0 },
-  { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and fill it with <b>drones</b>. They mine for you <b>all the time</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
+  { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and add <b>drones</b>. They mine <b>slowly</b> but <b>never stop</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
   { at: 1500, icon: '🗺️', title: 'Star Map', text: 'Fly to <b>Earth</b> — it pays <b>50–70% more</b> for metals. Travel uses fuel; your tank refills when you dock. <b>Refinery</b> upgrades now boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
   { at: 10000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mercury</b> is covered in <b>Platinum</b> (worth 60× iron) but the heat burns your hull — buy <b>Shields</b>. <b>Mars</b> pays a fortune for ice.', upg: ['shield'] },
   { at: 60000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt: nickel, platinum, iridium… and <b>pirates</b>. You fly and shoot in battle — buy <b>Weapons</b>!', upg: ['weapons'] },
@@ -141,15 +141,41 @@ function upgCost(k, lv) { const u = UPG[k]; return u.costs ? u.costs[lv - 1] : M
 
 // ============ DRONE OUTPOSTS ============
 // per field zone: build cost, drone base cost, drone income per second
+// Balanced like classic idle games: automation starts at a small fraction of
+// what active mining earns (~10–15%), each drone takes 5+ minutes to pay back,
+// costs grow 18% per drone, and every outpost level only holds 5 more drones.
 const OUTPOST = {
-  build: [60, 6000, 80000, 2.5e6, 30e6, 400e6],
-  drone: [15, 1200, 16000, 450000, 6e6, 80e6],
-  rate:  [0.5, 30, 300, 7000, 80000, 900000],
-  growth: 1.14,          // each drone costs 14% more than the last
-  lvCost: [8, 60, 400, 3000, 20000, 150000, 1e6, 8e6, 6e7], // × build cost, to reach level 2..10
+  build: [150, 4000, 30000, 250000, 2e6, 15e6],
+  drone: [30, 600, 2400, 18000, 120000, 750000],
+  rate:  [0.1, 2, 8, 60, 400, 2500],
+  growth: 1.18,
+  slots: 5,              // drone slots per outpost level
+  lvCost: [15, 100, 700, 5000, 35000, 250000, 1.8e6, 1.3e7, 1e8], // × build cost, to reach level 2..10
   maxLv: 10,
 };
 const outpostRate = (z, lv, n) => OUTPOST.rate[z] * n * Math.pow(2, lv - 1);
+const outpostCap = lv => OUTPOST.slots * lv;
+
+// ============ MEGAPROJECTS (things to do with a fortune) ============
+const PROJECTS = [
+  { id: 'driver', icon: '🧲', n: 'Lunar Mass Driver', loc: 'luna', stage: 2, cost: 25000, infl: 2,
+    d: 'A kilometer-long magnetic rail on the Moon hurls ore straight to Earth.', fx: 'Moon outpost output ×3' },
+  { id: 'beacons', icon: '📡', n: 'Deep Space Beacons', loc: null, stage: 3, cost: 250000, infl: 3,
+    d: 'A navigation network spanning the inner system.', fx: 'Travel 50% faster · fuel −30%' },
+  { id: 'fleet', icon: '🛡️', n: 'Private Security Fleet', loc: null, stage: 4, cost: 3e6, infl: 5,
+    d: 'Hire a fleet of gunships that patrol your routes — and fly with you into battle.', fx: 'Pirate danger −50% · 2 escort gunships in every fight' },
+  { id: 'elevator', icon: '🗼', n: 'Earth Space Elevator', loc: 'tierra', stage: 5, cost: 40e6, infl: 6,
+    d: 'A cable 36,000 km tall. Earth\'s industry is now yours to supply.', fx: 'All ore sells for +25% everywhere' },
+  { id: 'terraform', icon: '🌍', n: 'Terraform Mars', loc: 'marte', stage: 6, cost: 400e6, infl: 12,
+    d: 'Ice comets, orbital mirrors and a century of work in one budget line. Mars turns blue.', fx: 'Mars pays ×2 for everything · Mars Republic reputation +50' },
+  { id: 'gates', icon: '🌀', n: 'Jump Gate Network', loc: null, stage: 7, cost: 5e9, infl: 10,
+    d: 'Wormhole gates at every station. Distance no longer matters.', fx: 'Instant, free travel anywhere' },
+  { id: 'ringstation', icon: '💫', n: 'Saturn Ring Megastation', loc: 'saturno', stage: 7, cost: 30e9, infl: 10,
+    d: 'A city-sized refinery woven into Saturn\'s rings.', fx: 'ALL drone income ×3' },
+  { id: 'dyson', icon: '☀️', n: 'Dyson Swarm', loc: null, stage: 8, cost: 500e9, infl: 25,
+    d: 'Billions of mirrors around the Sun. You now own a star\'s worth of power.', fx: 'ALL income ×5' },
+];
+const PROJ = Object.fromEntries(PROJECTS.map(p => [p.id, p]));
 
 // ============ INVESTMENTS ============
 const STATION_TIER = { luna: 1, tierra: 2, venus: 4, marte: 4, ceres: 10, europa: 40, titan: 150, pluton: 400 };

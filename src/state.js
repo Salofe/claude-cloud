@@ -9,7 +9,7 @@ function newGame() {
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, outposts: {}, sat: {}, drift: {}, depl: {},
+    invest: {}, outposts: {}, projects: {}, sat: {}, drift: {}, depl: {}, bal: 2,
     events: [], news: [], contracts: {}, active: [],
     stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
     unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
@@ -20,7 +20,13 @@ function newGame() {
 }
 function save() { if (!S) return; S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
-  try { const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s); return d && d.v === 3 ? d : null; } catch (e) { return null; }
+  try {
+    const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s);
+    if (!d || d.v !== 3) return null;
+    d.projects = d.projects || {};
+    if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
+    return d;
+  } catch (e) { return null; }
 }
 function hasSave() { return !!loadSave(); }
 const has = stage => S && S.unlock >= stage;
@@ -51,7 +57,7 @@ const ship = {
 };
 function incomeMult() {
   let inv = 0; for (const id in S.invest) inv += S.invest[id];
-  return ship.refinery * (1 + INVEST.bonus * inv);
+  return ship.refinery * (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1);
 }
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
@@ -78,8 +84,9 @@ function locDist(a, b, day) { const p = locPos(a, day), q = locPos(b, day); retu
 function travelInfo(to, from) {
   from = from || S.loc;
   const d = Math.max(8, locDist(from, to, S.day));
-  const fuel = Math.ceil(d * 0.1 * ship.mass / ship.eff * fuelEventMult());
-  const days = Math.max(1, Math.round(d / (22 * ship.speed)));
+  let fuel = Math.ceil(d * 0.1 * ship.mass / ship.eff * fuelEventMult() * (built('beacons') ? 0.7 : 1));
+  let days = Math.max(1, Math.round(d / (22 * ship.speed * (built('beacons') ? 1.5 : 1))));
+  if (built('gates')) { fuel = 0; days = 1; }
   const danger = routeDanger(from, to);
   return { d, fuel, days, danger };
 }
@@ -88,6 +95,7 @@ function locDanger(id) {
   if (!has(U.BELT)) return 0;
   let d = LOC[id].danger || 0;
   for (const e of S.events) if (e.danger) for (const x of e.danger) if (x.loc === id) d += x.add;
+  if (built('fleet')) d *= 0.5;
   return clamp(d, 0, 0.95);
 }
 function routeDanger(a, b) {
@@ -105,8 +113,13 @@ function basePrice(locId, item) {
   const l = LOC[locId];
   const mult = l.market && l.market[item];
   if (mult == null) return null;
-  const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() : itemBase(item);
-  return b * mult * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
+  const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() * (built('elevator') ? 1.25 : 1) : itemBase(item);
+  const pm = locId === 'marte' && built('terraform') ? 2 : 1;
+  return b * mult * pm * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
+}
+function priceRatio(locId, item) {
+  const l = LOC[locId]; const m = l.market && l.market[item]; if (m == null) return 0;
+  return m * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * (locId === 'marte' && built('terraform') ? 2 : 1);
 }
 function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.95)); }
 function buyPrice(locId, item) {
@@ -196,7 +209,7 @@ function dockAtStation() {
 function outpostOf(id) { return S.outposts[id]; }
 function outpostIncome(id) {
   const o = S.outposts[id]; if (!o) return 0;
-  return outpostRate(LOC[id].field.z, o.lv, o.n) * incomeMult();
+  return outpostRate(LOC[id].field.z, o.lv, o.n) * incomeMult() * (id === 'luna' && built('driver') ? 3 : 1) * (built('ringstation') ? 3 : 1);
 }
 function totalIncome() { let v = 0; for (const id in S.outposts) v += outpostIncome(id); return v; }
 function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
@@ -215,13 +228,14 @@ function buildOutpost(id) {
 function maxAffordableDrones(id) {
   const o = S.outposts[id]; if (!o) return 0;
   let n = 0, c = 0; const z = LOC[id].field.z;
-  while (n < 500) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n); if (c + nc > S.credits) break; c += nc; n++; }
+  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n); if (c + nc > S.credits) break; c += nc; n++; }
   return n;
 }
 function buyDrones(id, k) {
   const o = S.outposts[id]; if (!o) return 0;
   if (k === 'max') k = maxAffordableDrones(id);
-  if (!k) return 0;
+  k = Math.min(k, outpostCap(o.lv) - o.n);
+  if (k <= 0) return 0;
   const c = droneCost(id, k); if (S.credits < c) return 0;
   S.credits -= c; o.n += k; return k;
 }
@@ -266,11 +280,59 @@ function checkUnlocks() {
 }
 function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock + 1] : null; }
 
+// ---------- megaprojects & system powers ----------
+function built(id) { return S && S.projects && S.projects[id]; }
+function projectOpen(p) { return has(p.stage); }
+function buildProject(id) {
+  const p = PROJ[id];
+  if (built(id) || !projectOpen(p) || S.credits < p.cost) return false;
+  S.credits -= p.cost; S.projects[id] = S.day || 1;
+  if (id === 'terraform') { repChange('marte', 50, true); delete TEX.marte; }
+  addNews(p.icon, `<b>${p.n}</b> completed. ${p.fx}.`, '#ffd24a');
+  save();
+  return true;
+}
+const powerScale = () => Math.pow(4, Math.max(0, S.unlock - 5));
+const POWERS = {
+  end:   { n: 'End this crisis', cost: () => 60000 * powerScale() },
+  boom:  { n: 'Fund a construction boom', cost: () => 90000 * powerScale() },
+  purge: { n: 'Hire mercenaries to clear pirates', cost: () => 70000 * powerScale() },
+};
+function usePower(kind, arg) {
+  const c = POWERS[kind].cost(); if (S.credits < c) return false;
+  if (kind === 'end') {
+    const e = S.events.find(x => x.uid === arg); if (!e) return false;
+    S.credits -= c;
+    S.events = S.events.filter(x => x !== e);
+    const facs = new Set((e.locs || []).map(l => LOC[l].faction).filter(f => f && f !== 'piratas'));
+    for (const f of facs) repChange(f, 10, true);
+    addNews('🕊️', `Your money ended it: <b>${e.title}</b>. The system owes you one.`, '#6dffb0');
+  } else if (kind === 'boom') {
+    S.credits -= c;
+    const l = LOC[arg];
+    S.events.push({ icon: '🏗️', title: `Your boom on ${l.n}`, text: `You funded a building frenzy at ${l.station}. Every ore sells for ×1.9 there.`,
+      start: S.day, end: S.day + 20, uid: uid(), locs: [arg], price: ORES.map(i => ({ loc: arg, item: i, m: 1.9 })) });
+    if (l.faction) repChange(l.faction, 6, true);
+    addNews('🏗️', `You funded a construction boom on ${l.n}`, '#ffd24a');
+  } else if (kind === 'purge') {
+    S.credits -= c;
+    const l = LOC[arg];
+    S.events = S.events.filter(e => !(e.danger && e.locs && e.locs.includes(arg) && e.icon === '☠️'));
+    S.events.push({ icon: '🛡️', title: `${l.n} secured`, text: `Your mercenaries hunt every pirate near ${l.n}. No ambushes there for 30 days.`,
+      start: S.day, end: S.day + 30, uid: uid(), locs: [arg], danger: [{ loc: arg, add: -1 }] });
+    repChange('piratas', -5, true);
+    addNews('🛡️', `Mercenaries cleared the pirates near ${l.n}`, '#6dffb0');
+  }
+  save();
+  return true;
+}
+
 // ---------- influence ----------
 function influence() {
   let v = 0;
   for (const id in S.invest) for (let i = 0; i < S.invest[id]; i++) v += INVEST.infl[i];
   for (const id in S.outposts) v += S.outposts[id].lv - 1;
+  for (const id in S.projects) if (PROJ[id]) v += PROJ[id].infl;
   for (const f in S.rep) if (f !== 'piratas') v += Math.max(0, S.rep[f]) / 8;
   v += Math.max(0, S.rep.piratas) / 16;
   v += Math.min(10, S.stats.kills * 0.05);

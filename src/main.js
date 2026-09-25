@@ -176,7 +176,7 @@ function startGame(cont) {
 // ---------- inicio ----------
 function init() {
   setupTouchControls();
-  $('bShip').onclick = openShip; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
+  $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
   const snd = $('bSnd');
   snd.textContent = muted ? '🔇' : '🔊';
   snd.onclick = () => { audioInit(); setMuted(!muted); snd.textContent = muted ? '🔇' : '🔊'; };

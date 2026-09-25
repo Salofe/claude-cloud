@@ -96,6 +96,19 @@ const Combat = {
       }
       if (Math.random() < dt * 20) sc.parts.add(e.x - Math.cos(e.a) * 16 * e.size, e.y - Math.sin(e.a) * 16 * e.size, rand(-20, 20), rand(-20, 20), 0.3, e.military ? '#9fe0ff' : '#ff6a3a', 2);
     }
+    // escort gunships (Private Security Fleet)
+    for (const es of sc.escorts || []) {
+      const ang = sc.t * 0.9 + es.i * Math.PI;
+      const tx = p.x + Math.cos(ang) * 110, ty = p.y + Math.sin(ang) * 110;
+      es.x = lerp(es.x || tx, tx, dt * 3); es.y = lerp(es.y || ty, ty, dt * 3);
+      const tgt = sc.enemies.filter(e => !e.dead).sort((a, b) => Math.hypot(a.x - es.x, a.y - es.y) - Math.hypot(b.x - es.x, b.y - es.y))[0];
+      es.a = tgt ? Math.atan2(tgt.y - es.y, tgt.x - es.x) : p.a;
+      es.gcd -= dt;
+      if (tgt && es.gcd <= 0 && Math.hypot(tgt.x - es.x, tgt.y - es.y) < 650) {
+        es.gcd = 0.35;
+        sc.bolts.push({ x: es.x, y: es.y, vx: Math.cos(es.a) * 800, vy: Math.sin(es.a) * 800, life: 1, dmg: ship.weaponDps * 0.12, foe: 0, col: '#ffd24a' });
+      }
+    }
     // ship drones shoot too
     if (sc.enemies.some(e => !e.dead)) for (const dr of sc.drones) {
       dr.gcd = (dr.gcd || rand(0, 0.8)) - dt;
@@ -144,6 +157,7 @@ const Combat = {
       glow(ctx, b.x, b.y, b.foe ? 10 : 8, b.col, 0.8);
     }
     ctx.globalCompositeOperation = 'source-over';
+    for (const es of sc.escorts || []) if (es.x) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, es.x, es.y, es.a, 0.8, 0.6, t);
     for (const e of sc.enemies) {
       drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t);
       if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);

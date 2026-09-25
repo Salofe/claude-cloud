@@ -359,6 +359,26 @@ body.mining #objective, body.battle #objective { display: none; }
 .op-row .btn { flex: 1; min-width: 120px; }
 .srow.dim { opacity: .5; }
 #battleUI .bt-btns .btn { min-width: 150px; }
+/* ---------- megaprojects & powers ---------- */
+.op-drones i { opacity: .25; animation: none; box-shadow: none; background: rgba(109,255,176,.5); }
+.op-drones i.on { opacity: 1; background: #6dffb0; box-shadow: 0 0 6px #6dffb0; animation: pulse 2s infinite; }
+.projs { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px; }
+.proj { display: flex; gap: 12px; background: var(--panel2); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 12px; }
+.proj.can { border-color: var(--gold); box-shadow: 0 0 18px rgba(255,210,74,.25); }
+.proj.done { border-color: rgba(109,255,176,.5); background: rgba(109,255,176,.06); }
+.proj.locked { opacity: .5; }
+.pj-icon { font-size: 40px; line-height: 1; }
+.pj-main { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.pj-main b { font-size: 17px; } .pj-main small { color: var(--dim); }
+.pj-main p { margin: 0; color: #b8c6e8; font-size: 14px; }
+.pj-fx { color: var(--gold); font-size: 13px; font-weight: 700; }
+.pj-done { color: var(--good); font-weight: 800; letter-spacing: 2px; }
+.pj-bar { height: 5px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+.pj-bar i { display: block; height: 100%; background: linear-gradient(90deg, #ff9d2a, #ffd24a); }
+.powers { display: flex; flex-direction: column; gap: 6px; }
+.small-btn { padding: 6px 10px !important; font-size: 13px !important; }
+.ev .small-btn { display: block; margin-top: 6px; }
+@media (max-width: 900px) { .projs { grid-template-columns: 1fr; } }
 body.thumb * { display: none; }
 body.thumb canvas#c { display: block; }
 </style>
@@ -391,6 +411,7 @@ body.thumb canvas#c { display: block; }
       <button id="bShip" title="Ship">🚀<span>Ship</span></button>
       <button id="bNews" title="News" data-need="4">📰<span>News</span></button>
       <button id="bFac" title="Empire" data-need="1">🤖<span>Empire</span></button>
+      <button id="bProj" title="Megaprojects" data-need="2">🌌<span>Projects</span></button>
       <button id="bSnd" title="Sound">🔊</button>
       <button id="bMenu" title="Menu">☰</button>
     </div>
@@ -541,7 +562,7 @@ for (const l of LOCS) if (l.market) for (const o of ORES) if (l.market[o] == nul
 // ============ PROGRESSION (lifetime earnings) ============
 const UNLOCKS = [
   { at: 0 },
-  { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and fill it with <b>drones</b>. They mine for you <b>all the time</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
+  { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and add <b>drones</b>. They mine <b>slowly</b> but <b>never stop</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
   { at: 1500, icon: '🗺️', title: 'Star Map', text: 'Fly to <b>Earth</b> — it pays <b>50–70% more</b> for metals. Travel uses fuel; your tank refills when you dock. <b>Refinery</b> upgrades now boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
   { at: 10000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mercury</b> is covered in <b>Platinum</b> (worth 60× iron) but the heat burns your hull — buy <b>Shields</b>. <b>Mars</b> pays a fortune for ice.', upg: ['shield'] },
   { at: 60000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt: nickel, platinum, iridium… and <b>pirates</b>. You fly and shoot in battle — buy <b>Weapons</b>!', upg: ['weapons'] },
@@ -573,15 +594,41 @@ function upgCost(k, lv) { const u = UPG[k]; return u.costs ? u.costs[lv - 1] : M
 
 // ============ DRONE OUTPOSTS ============
 // per field zone: build cost, drone base cost, drone income per second
+// Balanced like classic idle games: automation starts at a small fraction of
+// what active mining earns (~10–15%), each drone takes 5+ minutes to pay back,
+// costs grow 18% per drone, and every outpost level only holds 5 more drones.
 const OUTPOST = {
-  build: [60, 6000, 80000, 2.5e6, 30e6, 400e6],
-  drone: [15, 1200, 16000, 450000, 6e6, 80e6],
-  rate:  [0.5, 30, 300, 7000, 80000, 900000],
-  growth: 1.14,          // each drone costs 14% more than the last
-  lvCost: [8, 60, 400, 3000, 20000, 150000, 1e6, 8e6, 6e7], // × build cost, to reach level 2..10
+  build: [150, 4000, 30000, 250000, 2e6, 15e6],
+  drone: [30, 600, 2400, 18000, 120000, 750000],
+  rate:  [0.1, 2, 8, 60, 400, 2500],
+  growth: 1.18,
+  slots: 5,              // drone slots per outpost level
+  lvCost: [15, 100, 700, 5000, 35000, 250000, 1.8e6, 1.3e7, 1e8], // × build cost, to reach level 2..10
   maxLv: 10,
 };
 const outpostRate = (z, lv, n) => OUTPOST.rate[z] * n * Math.pow(2, lv - 1);
+const outpostCap = lv => OUTPOST.slots * lv;
+
+// ============ MEGAPROJECTS (things to do with a fortune) ============
+const PROJECTS = [
+  { id: 'driver', icon: '🧲', n: 'Lunar Mass Driver', loc: 'luna', stage: 2, cost: 25000, infl: 2,
+    d: 'A kilometer-long magnetic rail on the Moon hurls ore straight to Earth.', fx: 'Moon outpost output ×3' },
+  { id: 'beacons', icon: '📡', n: 'Deep Space Beacons', loc: null, stage: 3, cost: 250000, infl: 3,
+    d: 'A navigation network spanning the inner system.', fx: 'Travel 50% faster · fuel −30%' },
+  { id: 'fleet', icon: '🛡️', n: 'Private Security Fleet', loc: null, stage: 4, cost: 3e6, infl: 5,
+    d: 'Hire a fleet of gunships that patrol your routes — and fly with you into battle.', fx: 'Pirate danger −50% · 2 escort gunships in every fight' },
+  { id: 'elevator', icon: '🗼', n: 'Earth Space Elevator', loc: 'tierra', stage: 5, cost: 40e6, infl: 6,
+    d: 'A cable 36,000 km tall. Earth\'s industry is now yours to supply.', fx: 'All ore sells for +25% everywhere' },
+  { id: 'terraform', icon: '🌍', n: 'Terraform Mars', loc: 'marte', stage: 6, cost: 400e6, infl: 12,
+    d: 'Ice comets, orbital mirrors and a century of work in one budget line. Mars turns blue.', fx: 'Mars pays ×2 for everything · Mars Republic reputation +50' },
+  { id: 'gates', icon: '🌀', n: 'Jump Gate Network', loc: null, stage: 7, cost: 5e9, infl: 10,
+    d: 'Wormhole gates at every station. Distance no longer matters.', fx: 'Instant, free travel anywhere' },
+  { id: 'ringstation', icon: '💫', n: 'Saturn Ring Megastation', loc: 'saturno', stage: 7, cost: 30e9, infl: 10,
+    d: 'A city-sized refinery woven into Saturn\'s rings.', fx: 'ALL drone income ×3' },
+  { id: 'dyson', icon: '☀️', n: 'Dyson Swarm', loc: null, stage: 8, cost: 500e9, infl: 25,
+    d: 'Billions of mirrors around the Sun. You now own a star\'s worth of power.', fx: 'ALL income ×5' },
+];
+const PROJ = Object.fromEntries(PROJECTS.map(p => [p.id, p]));
 
 // ============ INVESTMENTS ============
 const STATION_TIER = { luna: 1, tierra: 2, venus: 4, marte: 4, ceres: 10, europa: 40, titan: 150, pluton: 400 };
@@ -730,6 +777,7 @@ const TW = 256, TH = 128;
 function planetTex(loc) {
   if (!loc.tex) return null;
   if (TEX[loc.id]) return TEX[loc.id];
+  if (loc.id === 'marte' && typeof built === 'function' && built('terraform')) loc = { ...loc, tex: 'marsgreen' };
   const c = document.createElement('canvas'); c.width = TW; c.height = TH;
   const x = c.getContext('2d');
   const img = x.createImageData(TW, TH);
@@ -757,6 +805,13 @@ function planetTex(loc) {
         break;
       }
       case 'rock': col = mixc(D, L, clamp((n - 0.3) * 1.6, 0, 1)); break;
+      case 'marsgreen': {
+        const land = fbm(u * 4 / 6, v * 4 / 6, seed + 5, 4, 5);
+        if (land > 0.5) col = ramp([[0, [90, 140, 70]], [0.6, [170, 110, 70]], [1, [200, 120, 80]]], (land - 0.5) * 3 + (n - 0.5));
+        else col = ramp([[0, [20, 60, 130]], [1, [60, 140, 200]]], land * 1.8);
+        if (lat > 0.85) col = [240, 245, 250];
+        break;
+      }
       case 'mars': {
         const dark = fbm(u * 4 / 6, v * 4 / 6, seed + 3, 4, 4);
         col = ramp([[0, [120, 40, 20]], [0.5, [205, 95, 55]], [1, [240, 150, 100]]], n);
@@ -809,7 +864,7 @@ function planetTex(loc) {
     x.fillStyle = 'rgba(190,80,50,0.85)'; x.beginPath(); x.ellipse(TW * 0.3, TH * 0.64, 13, 7, 0, 0, TAU); x.fill();
     x.strokeStyle = 'rgba(240,190,150,0.6)'; x.lineWidth = 2; x.stroke();
   }
-  if (loc.tex === 'earth') {
+  if (loc.tex === 'earth' || loc.tex === 'marsgreen') {
     clouds = document.createElement('canvas'); clouds.width = TW; clouds.height = TH;
     const cx = clouds.getContext('2d'); const ci = cx.createImageData(TW, TH);
     for (let j = 0; j < TH; j++) for (let i = 0; i < TW; i++) {
@@ -1302,7 +1357,7 @@ function newGame() {
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, outposts: {}, sat: {}, drift: {}, depl: {},
+    invest: {}, outposts: {}, projects: {}, sat: {}, drift: {}, depl: {}, bal: 2,
     events: [], news: [], contracts: {}, active: [],
     stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
     unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
@@ -1313,7 +1368,13 @@ function newGame() {
 }
 function save() { if (!S) return; S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
-  try { const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s); return d && d.v === 3 ? d : null; } catch (e) { return null; }
+  try {
+    const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s);
+    if (!d || d.v !== 3) return null;
+    d.projects = d.projects || {};
+    if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
+    return d;
+  } catch (e) { return null; }
 }
 function hasSave() { return !!loadSave(); }
 const has = stage => S && S.unlock >= stage;
@@ -1344,7 +1405,7 @@ const ship = {
 };
 function incomeMult() {
   let inv = 0; for (const id in S.invest) inv += S.invest[id];
-  return ship.refinery * (1 + INVEST.bonus * inv);
+  return ship.refinery * (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1);
 }
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
@@ -1371,8 +1432,9 @@ function locDist(a, b, day) { const p = locPos(a, day), q = locPos(b, day); retu
 function travelInfo(to, from) {
   from = from || S.loc;
   const d = Math.max(8, locDist(from, to, S.day));
-  const fuel = Math.ceil(d * 0.1 * ship.mass / ship.eff * fuelEventMult());
-  const days = Math.max(1, Math.round(d / (22 * ship.speed)));
+  let fuel = Math.ceil(d * 0.1 * ship.mass / ship.eff * fuelEventMult() * (built('beacons') ? 0.7 : 1));
+  let days = Math.max(1, Math.round(d / (22 * ship.speed * (built('beacons') ? 1.5 : 1))));
+  if (built('gates')) { fuel = 0; days = 1; }
   const danger = routeDanger(from, to);
   return { d, fuel, days, danger };
 }
@@ -1381,6 +1443,7 @@ function locDanger(id) {
   if (!has(U.BELT)) return 0;
   let d = LOC[id].danger || 0;
   for (const e of S.events) if (e.danger) for (const x of e.danger) if (x.loc === id) d += x.add;
+  if (built('fleet')) d *= 0.5;
   return clamp(d, 0, 0.95);
 }
 function routeDanger(a, b) {
@@ -1398,8 +1461,13 @@ function basePrice(locId, item) {
   const l = LOC[locId];
   const mult = l.market && l.market[item];
   if (mult == null) return null;
-  const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() : itemBase(item);
-  return b * mult * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
+  const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() * (built('elevator') ? 1.25 : 1) : itemBase(item);
+  const pm = locId === 'marte' && built('terraform') ? 2 : 1;
+  return b * mult * pm * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item);
+}
+function priceRatio(locId, item) {
+  const l = LOC[locId]; const m = l.market && l.market[item]; if (m == null) return 0;
+  return m * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * (locId === 'marte' && built('terraform') ? 2 : 1);
 }
 function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.95)); }
 function buyPrice(locId, item) {
@@ -1489,7 +1557,7 @@ function dockAtStation() {
 function outpostOf(id) { return S.outposts[id]; }
 function outpostIncome(id) {
   const o = S.outposts[id]; if (!o) return 0;
-  return outpostRate(LOC[id].field.z, o.lv, o.n) * incomeMult();
+  return outpostRate(LOC[id].field.z, o.lv, o.n) * incomeMult() * (id === 'luna' && built('driver') ? 3 : 1) * (built('ringstation') ? 3 : 1);
 }
 function totalIncome() { let v = 0; for (const id in S.outposts) v += outpostIncome(id); return v; }
 function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
@@ -1508,13 +1576,14 @@ function buildOutpost(id) {
 function maxAffordableDrones(id) {
   const o = S.outposts[id]; if (!o) return 0;
   let n = 0, c = 0; const z = LOC[id].field.z;
-  while (n < 500) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n); if (c + nc > S.credits) break; c += nc; n++; }
+  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n); if (c + nc > S.credits) break; c += nc; n++; }
   return n;
 }
 function buyDrones(id, k) {
   const o = S.outposts[id]; if (!o) return 0;
   if (k === 'max') k = maxAffordableDrones(id);
-  if (!k) return 0;
+  k = Math.min(k, outpostCap(o.lv) - o.n);
+  if (k <= 0) return 0;
   const c = droneCost(id, k); if (S.credits < c) return 0;
   S.credits -= c; o.n += k; return k;
 }
@@ -1559,11 +1628,59 @@ function checkUnlocks() {
 }
 function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock + 1] : null; }
 
+// ---------- megaprojects & system powers ----------
+function built(id) { return S && S.projects && S.projects[id]; }
+function projectOpen(p) { return has(p.stage); }
+function buildProject(id) {
+  const p = PROJ[id];
+  if (built(id) || !projectOpen(p) || S.credits < p.cost) return false;
+  S.credits -= p.cost; S.projects[id] = S.day || 1;
+  if (id === 'terraform') { repChange('marte', 50, true); delete TEX.marte; }
+  addNews(p.icon, `<b>${p.n}</b> completed. ${p.fx}.`, '#ffd24a');
+  save();
+  return true;
+}
+const powerScale = () => Math.pow(4, Math.max(0, S.unlock - 5));
+const POWERS = {
+  end:   { n: 'End this crisis', cost: () => 60000 * powerScale() },
+  boom:  { n: 'Fund a construction boom', cost: () => 90000 * powerScale() },
+  purge: { n: 'Hire mercenaries to clear pirates', cost: () => 70000 * powerScale() },
+};
+function usePower(kind, arg) {
+  const c = POWERS[kind].cost(); if (S.credits < c) return false;
+  if (kind === 'end') {
+    const e = S.events.find(x => x.uid === arg); if (!e) return false;
+    S.credits -= c;
+    S.events = S.events.filter(x => x !== e);
+    const facs = new Set((e.locs || []).map(l => LOC[l].faction).filter(f => f && f !== 'piratas'));
+    for (const f of facs) repChange(f, 10, true);
+    addNews('🕊️', `Your money ended it: <b>${e.title}</b>. The system owes you one.`, '#6dffb0');
+  } else if (kind === 'boom') {
+    S.credits -= c;
+    const l = LOC[arg];
+    S.events.push({ icon: '🏗️', title: `Your boom on ${l.n}`, text: `You funded a building frenzy at ${l.station}. Every ore sells for ×1.9 there.`,
+      start: S.day, end: S.day + 20, uid: uid(), locs: [arg], price: ORES.map(i => ({ loc: arg, item: i, m: 1.9 })) });
+    if (l.faction) repChange(l.faction, 6, true);
+    addNews('🏗️', `You funded a construction boom on ${l.n}`, '#ffd24a');
+  } else if (kind === 'purge') {
+    S.credits -= c;
+    const l = LOC[arg];
+    S.events = S.events.filter(e => !(e.danger && e.locs && e.locs.includes(arg) && e.icon === '☠️'));
+    S.events.push({ icon: '🛡️', title: `${l.n} secured`, text: `Your mercenaries hunt every pirate near ${l.n}. No ambushes there for 30 days.`,
+      start: S.day, end: S.day + 30, uid: uid(), locs: [arg], danger: [{ loc: arg, add: -1 }] });
+    repChange('piratas', -5, true);
+    addNews('🛡️', `Mercenaries cleared the pirates near ${l.n}`, '#6dffb0');
+  }
+  save();
+  return true;
+}
+
 // ---------- influence ----------
 function influence() {
   let v = 0;
   for (const id in S.invest) for (let i = 0; i < S.invest[id]; i++) v += INVEST.infl[i];
   for (const id in S.outposts) v += S.outposts[id].lv - 1;
+  for (const id in S.projects) if (PROJ[id]) v += PROJ[id].infl;
   for (const f in S.rep) if (f !== 'piratas') v += Math.max(0, S.rep[f]) / 8;
   v += Math.max(0, S.rep.piratas) / 16;
   v += Math.min(10, S.stats.kills * 0.05);
@@ -1830,7 +1947,7 @@ const MapScene = {
     if (info.fuel > S.fuel) { toast('Not enough fuel', 'bad'); sfx('full'); return; }
     if (S.loc === to) return;
     S.fuel -= info.fuel;
-    const dur = clamp(1.2 + info.days * 0.3, 1.6, 6);
+    const dur = built('gates') ? 1.1 : clamp(1.2 + info.days * 0.3, 1.6, 6);
     let enc = null;
     if (Math.random() < info.danger) enc = { kind: 'hostile', at: rand(0.3, 0.7), danger: info.danger };
     else if (Math.random() < 0.22 + info.days * 0.01) enc = { kind: 'random', at: rand(0.25, 0.75), danger: info.danger };
@@ -1895,6 +2012,19 @@ const MapScene = {
     ctx.fillStyle = locOpen('troyanos') ? 'rgba(210,190,160,0.75)' : 'rgba(210,190,160,0.25)';
     for (let i = 0; i < 50; i++) { const a = i * 2.4 + t * 0.02, rr = (i % 9) * 2.6 * clamp(z, 0.8, 2.2); ctx.fillRect(tp.x + Math.cos(a) * rr, tp.y + Math.sin(a) * rr * 0.8, 1.6, 1.6); }
     drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36), t);
+    if (built('dyson')) {
+      const R = clamp(15 * z, 10, 36) * 2.6;
+      ctx.strokeStyle = 'rgba(255,210,74,0.35)'; ctx.lineWidth = 1;
+      for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.ellipse(sun.x, sun.y, R * (1 + k * 0.15), R * (0.35 + k * 0.1), k * 1.1 + t * 0.05, 0, TAU); ctx.stroke(); }
+      ctx.fillStyle = '#ffe9a0';
+      for (let i = 0; i < 140; i++) { const a = i * 2.39996 + t * (0.2 + (i % 5) * 0.05), rr = R * (0.8 + (i % 7) * 0.08); ctx.fillRect(sun.x + Math.cos(a) * rr, sun.y + Math.sin(a) * rr * (0.5 + (i % 3) * 0.2), 1.6, 1.6); }
+    }
+    if (built('beacons')) {
+      for (const id of ['mercurio', 'venus', 'tierra', 'marte', 'ceres']) {
+        const R = LOC[id].r * z;
+        for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + id.length; const on = Math.sin(t * 3 + i + id.length) > 0.3; ctx.fillStyle = on ? '#3de8ff' : 'rgba(61,232,255,0.3)'; ctx.fillRect(sun.x + Math.cos(a) * R - 1.5, sun.y + Math.sin(a) * R - 1.5, 3, 3); }
+      }
+    }
     // route preview
     const selId = this.sel;
     if (!tr && selId && selId !== S.loc && locOpen(selId)) {
@@ -1920,6 +2050,7 @@ const MapScene = {
       } else drawPlanet(ctx, p.x, p.y, r, l, la, t);
       ctx.globalAlpha = 1;
     }
+    this.drawProjects(ctx, t, day);
     // node markers & labels
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const l of NODES) {
@@ -1928,7 +2059,7 @@ const MapScene = {
       const r = this.pr(l) + (l.id === 'troyanos' ? 10 : 0);
       const isSel = l.id === selId, isHere = l.id === S.loc && !tr, isHov = l.id === this.hover;
       if (open && l.station) {
-        const a = t * 0.6 + l.r;
+        const a = t * 0.6 + (l.r || 3);
         const sx = p.x + Math.cos(a) * (r + 8), sy = p.y + Math.sin(a) * (r + 8) * 0.6;
         drawStationIcon(ctx, sx, sy, 2.6, l.faction ? FACTIONS[l.faction].c : '#6dffb0', t);
       }
@@ -1978,12 +2109,42 @@ const MapScene = {
       if (!tr.paused) for (let i = 0; i < 2; i++) this.trail.add(sp.x - Math.cos(ang) * 10 + rand(-2, 2), sp.y - Math.sin(ang) * 10 + rand(-2, 2), -Math.cos(ang) * 20 + rand(-8, 8), -Math.sin(ang) * 20 + rand(-8, 8), 0.8, ec, 2.2);
       this.trail.draw(ctx);
       drawPlayerShip(ctx, shipLv(), sp.x, sp.y, ang, 0.55, 1, t);
+      if (built('fleet')) for (const o of [-1, 1]) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, sp.x - Math.cos(ang) * 14 - Math.sin(ang) * o * 12, sp.y - Math.sin(ang) * 14 + Math.cos(ang) * o * 12, ang, 0.3, 1, t);
     } else {
       this.trail.draw(ctx);
       const p = this.spos(S.loc);
       const r = this.pr(LOC[S.loc]) + 16;
       const a = t * 0.7;
       drawPlayerShip(ctx, shipLv(), p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, a + Math.PI / 2, 0.42, 0.5, t);
+    }
+  },
+  drawProjects(ctx, t, day) {
+    if (built('driver')) {
+      const a = this.spos('luna', day), b = this.spos('tierra', day);
+      ctx.strokeStyle = 'rgba(255,210,74,0.35)'; ctx.lineWidth = 1.5; ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]);
+      for (let i = 0; i < 3; i++) { const k = (t * 0.8 + i / 3) % 1; glow(ctx, lerp(a.x, b.x, k), lerp(a.y, b.y, k), 5, '#ffd24a', 0.9); }
+    }
+    if (built('elevator')) {
+      const e = this.spos('tierra', day), sun = this.w2s(0, 0), r = this.pr(LOC.tierra);
+      const a = Math.atan2(e.y - sun.y, e.x - sun.x) + 2.2, L = r * 2.4;
+      ctx.strokeStyle = 'rgba(220,235,255,0.8)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * r, e.y + Math.sin(a) * r); ctx.lineTo(e.x + Math.cos(a) * L, e.y + Math.sin(a) * L); ctx.stroke();
+      drawStationIcon(ctx, e.x + Math.cos(a) * L, e.y + Math.sin(a) * L, 2.4, '#ffd24a', t);
+    }
+    if (built('ringstation')) {
+      const p = this.spos('saturno', day), r = this.pr(LOC.saturno);
+      const a = t * 0.3;
+      glow(ctx, p.x + Math.cos(a) * r * 1.9, p.y + Math.sin(a) * r * 0.55, 10, '#ffd24a', 0.9);
+      drawStationIcon(ctx, p.x + Math.cos(a) * r * 1.9, p.y + Math.sin(a) * r * 0.55, 3, '#ffd24a', t);
+    }
+    if (built('gates')) {
+      for (const l of NODES) if (l.station && locOpen(l.id)) {
+        const p = this.spos(l, day), r = this.pr(l) + 20;
+        ctx.strokeStyle = `rgba(180,120,255,${0.5 + 0.3 * Math.sin(t * 4 + (l.r || 3))})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(p.x - r, p.y, 3, 7, 0, 0, TAU); ctx.stroke();
+        glow(ctx, p.x - r, p.y, 8, '#a07cff', 0.6);
+      }
     }
   },
   pick(x, y) {
@@ -2172,6 +2333,7 @@ const MineScene = {
         this.spawnRock(x, y, i < 3 ? 3 : pick([3, 3, 2, 2, 1]), null, rich);
       }
     }
+    this.escorts = built('fleet') ? [0, 1].map(i => ({ i, x: 0, y: 0, a: 0, gcd: rand(0, 1) })) : [];
     this.drones = [];
     for (let i = 0; i < ship.drones; i++) this.drones.push({ x: this.p.x, y: this.p.y, vx: 0, vy: 0, tgt: null, carry: null, a: i });
     this.odrones = [];
@@ -2764,6 +2926,19 @@ const Combat = {
       }
       if (Math.random() < dt * 20) sc.parts.add(e.x - Math.cos(e.a) * 16 * e.size, e.y - Math.sin(e.a) * 16 * e.size, rand(-20, 20), rand(-20, 20), 0.3, e.military ? '#9fe0ff' : '#ff6a3a', 2);
     }
+    // escort gunships (Private Security Fleet)
+    for (const es of sc.escorts || []) {
+      const ang = sc.t * 0.9 + es.i * Math.PI;
+      const tx = p.x + Math.cos(ang) * 110, ty = p.y + Math.sin(ang) * 110;
+      es.x = lerp(es.x || tx, tx, dt * 3); es.y = lerp(es.y || ty, ty, dt * 3);
+      const tgt = sc.enemies.filter(e => !e.dead).sort((a, b) => Math.hypot(a.x - es.x, a.y - es.y) - Math.hypot(b.x - es.x, b.y - es.y))[0];
+      es.a = tgt ? Math.atan2(tgt.y - es.y, tgt.x - es.x) : p.a;
+      es.gcd -= dt;
+      if (tgt && es.gcd <= 0 && Math.hypot(tgt.x - es.x, tgt.y - es.y) < 650) {
+        es.gcd = 0.35;
+        sc.bolts.push({ x: es.x, y: es.y, vx: Math.cos(es.a) * 800, vy: Math.sin(es.a) * 800, life: 1, dmg: ship.weaponDps * 0.12, foe: 0, col: '#ffd24a' });
+      }
+    }
     // ship drones shoot too
     if (sc.enemies.some(e => !e.dead)) for (const dr of sc.drones) {
       dr.gcd = (dr.gcd || rand(0, 0.8)) - dt;
@@ -2812,6 +2987,7 @@ const Combat = {
       glow(ctx, b.x, b.y, b.foe ? 10 : 8, b.col, 0.8);
     }
     ctx.globalCompositeOperation = 'source-over';
+    for (const es of sc.escorts || []) if (es.x) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, es.x, es.y, es.a, 0.8, 0.6, t);
     for (const e of sc.enemies) {
       drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t);
       if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);
@@ -2961,8 +3137,14 @@ function selectLoc(id) {
     if (v) html += `<div class="valline">Your ore sells for <b class="cr">${fmt(v)} cr</b> here${LOC[S.loc].market ? ` <small>(${fmt(oreValueAt(S.loc))} at ${LOC[S.loc].n})</small>` : ''}</div>`;
   }
   if (l.market && has(U.TRADE) && !here) {
-    const hot = Object.keys(l.market).map(k => ({ k, m: basePrice(id, k) / ITEMS[k].b })).filter(x => x.m >= 1.45).sort((a, b) => b.m - a.m).slice(0, 4);
+    const hot = Object.keys(l.market).map(k => ({ k, m: priceRatio(id, k) })).filter(x => x.m >= 1.45).sort((a, b) => b.m - a.m).slice(0, 4);
     if (hot.length) html += `<div class="sub">Pays well for</div><div class="ores">${hot.map(x => `<span class="ore" style="--c:${ITEMS[x.k].c}">${ITEMS[x.k].n} <b>×${x.m.toFixed(1)}</b></span>`).join('')}</div>`;
+  }
+  if (has(U.TRADE)) {
+    const pw = [];
+    if (l.market && !l.depot) pw.push(`<button class="btn small-btn" ${S.credits >= POWERS.boom.cost() ? '' : 'disabled'} onclick="doPower('boom','${id}')">🏗️ Fund a boom (ore ×1.9) · ${fmt(POWERS.boom.cost())}</button>`);
+    if (has(U.BELT) && (LOC[id].danger || 0) >= 0.1) pw.push(`<button class="btn small-btn" ${S.credits >= POWERS.purge.cost() ? '' : 'disabled'} onclick="doPower('purge','${id}')">🛡️ Clear pirates (30 days) · ${fmt(POWERS.purge.cost())}</button>`);
+    if (pw.length) html += `<div class="sub">⚡ Your power</div><div class="powers">${pw.join('')}</div>`;
   }
   if (here) {
     html += `<div class="lp-actions">`;
@@ -3119,7 +3301,7 @@ function dockBody(tab) {
       <div class="mkt"><div class="mrow mh"><span>Good</span><span>Sell</span><span>Have</span><span></span><span>Buy</span><span></span></div>`;
     for (const k of keys) {
       const sp = sellPrice(id, k), bp = buyPrice(id, k), have = S.cargo[k] || 0;
-      const ratio = sp ? sp / ITEMS[k].b : 0;
+      const ratio = sp ? priceRatio(id, k) : 0;
       const trend = !sp ? '' : ratio > 1.4 ? '<i class="up">▲▲</i>' : ratio > 1.1 ? '<i class="up">▲</i>' : ratio < 0.75 ? '<i class="dn">▼▼</i>' : ratio < 0.95 ? '<i class="dn">▼</i>' : '';
       const ev = eventPriceMult(id, k) !== 1 ? '<i class="evi">⚡</i>' : '';
       h += `<div class="mrow">
@@ -3230,31 +3412,34 @@ function buyUpg(k, n) {
 }
 function outpostBody(id) {
   const l = LOC[id], o = S.outposts[id], z = l.field.z;
+  const boost = (id === 'luna' && built('driver') ? 3 : 1) * (built('ringstation') ? 3 : 1);
   if (!o) {
     const c = buildCost(id);
     return `<div class="op-empty"><div class="op-art">🤖</div><h3>Build a Drone Outpost</h3>
-      <p>Drones mine <b>${l.field.n}</b> for you <b>24/7</b> — even when you're somewhere else or offline.</p>
-      <p>Each drone earns <b class="cr">${fmt(OUTPOST.rate[z] * incomeMult())} cr/s</b> here.</p>
+      <p>Drones slowly mine <b>${l.field.n}</b> for you — even when you're somewhere else or offline.</p>
+      <p>Each drone earns <b class="cr">${fmt(OUTPOST.rate[z] * incomeMult() * boost)} cr/s</b> here. Starts with room for ${OUTPOST.slots} drones.</p>
       <button class="btn primary big" ${S.credits >= c ? '' : 'disabled'} onclick="doBuild('${id}')">Build outpost · ${fmt(c)} cr</button></div>`;
   }
-  const inc = outpostIncome(id), per = OUTPOST.rate[z] * Math.pow(2, o.lv - 1) * incomeMult();
-  const d1 = droneCost(id, 1), d10 = droneCost(id, 10), nm = maxAffordableDrones(id);
+  const cap = outpostCap(o.lv), full = o.n >= cap;
+  const inc = outpostIncome(id), per = OUTPOST.rate[z] * Math.pow(2, o.lv - 1) * incomeMult() * boost;
+  const d1 = droneCost(id, 1), n10 = Math.min(10, cap - o.n), d10 = droneCost(id, n10), nm = maxAffordableDrones(id);
   const lc = outpostLvCost(id);
-  let drones = '';
-  for (let i = 0; i < Math.min(o.n, 60); i++) drones += '<i></i>';
+  let slots = '';
+  for (let i = 0; i < cap; i++) slots += `<i class="${i < o.n ? 'on' : ''}"></i>`;
   return `<div class="op">
-    <div class="op-top"><div><small>OUTPOST · LEVEL ${o.lv}</small><b class="cr">+${fmt(inc)} cr/s</b><span>${o.n} drones × ${fmt(per)} cr/s</span></div><div class="op-drones">${drones}${o.n > 60 ? `<em>+${o.n - 60}</em>` : ''}</div></div>
-    <div class="sub">Drones</div>
-    <div class="op-row">
+    <div class="op-top"><div><small>OUTPOST · LEVEL ${o.lv}</small><b class="cr">+${fmt(inc)} cr/s</b><span>${o.n} drones × ${fmt(per)} cr/s</span></div><div class="op-drones">${slots}</div></div>
+    <div class="sub">Drones <span class="dim">${o.n} / ${cap} slots</span></div>
+    ${full ? `<div class="empty small">All slots full — upgrade the outpost for <b>+${OUTPOST.slots} slots</b> and <b>×2 output</b>.</div>` : `<div class="op-row">
       <button class="btn ${S.credits >= d1 ? 'primary' : ''}" ${S.credits >= d1 ? '' : 'disabled'} onclick="doDrones('${id}',1)">+1 drone · ${fmt(d1)}</button>
-      <button class="btn ${S.credits >= d10 ? 'primary' : ''}" ${S.credits >= d10 ? '' : 'disabled'} onclick="doDrones('${id}',10)">+10 · ${fmt(d10)}</button>
+      ${n10 > 1 ? `<button class="btn ${S.credits >= d10 ? 'primary' : ''}" ${S.credits >= d10 ? '' : 'disabled'} onclick="doDrones('${id}',${n10})">+${n10} · ${fmt(d10)}</button>` : ''}
       <button class="btn ${nm ? 'primary' : ''}" ${nm ? '' : 'disabled'} onclick="doDrones('${id}','max')">MAX${nm ? ` (+${nm})` : ''}</button>
-    </div>
+    </div>`}
     <div class="sub">Outpost level</div>
-    ${lc != null ? `<button class="btn ${S.credits >= lc ? 'primary' : ''} big" ${S.credits >= lc ? '' : 'disabled'} onclick="doOutLv('${id}')">Upgrade to level ${o.lv + 1} — <b>×2 output</b> · ${fmt(lc)} cr</button>` : '<div class="empty small">Max level reached 👑</div>'}
-    <p class="hint">Drones cost 14% more each. Upgrading the outpost doubles every drone's output. Refinery upgrades and investments multiply all drone income.</p>
+    ${lc != null ? `<button class="btn ${S.credits >= lc ? 'primary' : ''} big" ${S.credits >= lc ? '' : 'disabled'} onclick="doOutLv('${id}')">Level ${o.lv + 1}: <b>×2 output</b> & +${OUTPOST.slots} slots · ${fmt(lc)} cr</button>` : '<div class="empty small">Max level reached 👑</div>'}
+    <p class="hint">Drones are slow but never stop — they keep earning while you're offline. Each costs 18% more than the last. Refinery upgrades, investments and megaprojects multiply their income.</p>
   </div>`;
 }
+
 function doBuild(id) { if (buildOutpost(id)) { sfx('win'); toast('Outpost online! Your drones are mining.', 'good'); renderDock(); } }
 function doDrones(id, k) { const n = buyDrones(id, k); if (n) { sfx('upgrade'); toast(`+${n} drone${n > 1 ? 's' : ''}`, 'good'); renderDock(); } }
 function doOutLv(id) { if (upgradeOutpost(id)) { sfx('win'); toast('Outpost upgraded: ×2 output!', 'good'); renderDock(); } }
@@ -3309,11 +3494,43 @@ function openFactions() {
       const r = S.rep[f];
       h += `<div class="fac"><span style="color:${FACTIONS[f].c}">${FACTIONS[f].n}</span><div class="repbar"><i style="left:50%;width:${Math.abs(r) / 2}%;${r < 0 ? `left:${50 - Math.abs(r) / 2}%;background:#ff4d6d` : `background:${FACTIONS[f].c}`}"></i><em></em></div><b>${Math.round(r)}</b></div>`;
     }
-    h += '<div class="sub">Active events</div>' + (S.events.length ? S.events.map(e => `<div class="ev">${e.icon} <b>${e.title}</b> <small>— ${e.text} (${e.end - S.day}d)</small></div>`).join('') : '<div class="empty small">The system is calm… for now.</div>');
+    const bad = e => e.war || e.relief || e.closed || e.storm || e.fuelPrice || (e.danger && e.danger.some(d => d.add > 0));
+    h += '<div class="sub">Active events</div>' + (S.events.length ? S.events.map(e => `<div class="ev">${e.icon} <b>${e.title}</b> <small>— ${e.text} (${e.end - S.day}d)</small>${bad(e) ? `<button class="btn small-btn" ${S.credits >= POWERS.end.cost() ? '' : 'disabled'} onclick="doPower('end','${e.uid}')">🕊️ End it · ${fmt(POWERS.end.cost())}</button>` : ''}</div>`).join('') : '<div class="empty small">The system is calm… for now.</div>');
   }
   openSheet('🤖 Your Empire', h);
 }
 
+function openProjects() {
+  sfx('click');
+  let h = '<p class="hint">Spend your fortune on projects that change the Solar System forever. Each one also adds influence.</p><div class="projs">';
+  for (const p of PROJECTS) {
+    const done = built(p.id), open = projectOpen(p), can = open && !done && S.credits >= p.cost;
+    const pct = Math.min(100, S.credits / p.cost * 100);
+    h += `<div class="proj ${done ? 'done' : ''} ${open ? '' : 'locked'} ${can ? 'can' : ''}">
+      <div class="pj-icon">${open ? p.icon : '🔒'}</div>
+      <div class="pj-main"><b>${p.n}</b>${p.loc ? `<small>${LOC[p.loc].n}</small>` : ''}<p>${open ? p.d : `Unlocks with: ${UNLOCKS[p.stage].title}`}</p>
+        <div class="pj-fx">⚡ ${p.fx} · +${p.infl} influence</div>
+        ${done ? '<div class="pj-done">✔ BUILT</div>' : open ? `<div class="pj-bar"><i style="width:${pct}%"></i></div><button class="btn ${can ? 'primary' : ''}" ${can ? '' : 'disabled'} onclick="doProject('${p.id}')">${can ? 'Build' : 'Need'} · ${fmt(p.cost)} cr</button>` : ''}
+      </div></div>`;
+  }
+  h += '</div>';
+  if (has(U.TRADE)) h += `<div class="sub">System powers</div><p class="hint">Select a planet on the Star Map to fund a boom or hire mercenaries there. End wars and plagues from the Empire panel.</p>`;
+  openSheet('🌌 Megaprojects', h);
+}
+function doProject(id) {
+  if (!buildProject(id)) return;
+  const p = PROJ[id];
+  sfx('win');
+  closeSheet(true);
+  showModal({ icon: p.icon, title: `${p.n} complete!`, cls: 'unlock', html: `<div class="unl-tag">MEGAPROJECT</div><p>${p.d}</p><p><b class="cr">⚡ ${p.fx}</b></p><small>+${p.infl} influence</small>`,
+    buttons: [{ label: 'Behold!', cls: 'primary', fn: () => { if (scene === MapScene && !MapScene.travel) { showMapUI(true); if (p.loc) { selectLoc(p.loc); MapScene.focus(p.loc); } else MapScene.zoomAll(); } } }] });
+}
+function doPower(kind, arg) {
+  if (!usePower(kind, arg)) { toast('Not enough credits', 'bad'); return; }
+  sfx('win'); toast('Done. The system bends to your will.', 'good');
+  if (!$('sheet').classList.contains('hidden')) openFactions(); else if (MapScene.sel) selectLoc(MapScene.sel);
+  updateHUD();
+}
 function openNews() {
   sfx('click');
   openSheet('📰 System News', S.news.map(n => `<div class="news"><i>DAY ${n.day}</i><span>${n.icon}</span><div>${n.html}</div></div>`).join(''));
@@ -3521,7 +3738,7 @@ function startGame(cont) {
 // ---------- inicio ----------
 function init() {
   setupTouchControls();
-  $('bShip').onclick = openShip; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
+  $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
   const snd = $('bSnd');
   snd.textContent = muted ? '🔇' : '🔊';
   snd.onclick = () => { audioInit(); setMuted(!muted); snd.textContent = muted ? '🔇' : '🔊'; };

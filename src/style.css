@@ -350,5 +350,25 @@ body.mining #objective, body.battle #objective { display: none; }
 .op-row .btn { flex: 1; min-width: 120px; }
 .srow.dim { opacity: .5; }
 #battleUI .bt-btns .btn { min-width: 150px; }
+/* ---------- megaprojects & powers ---------- */
+.op-drones i { opacity: .25; animation: none; box-shadow: none; background: rgba(109,255,176,.5); }
+.op-drones i.on { opacity: 1; background: #6dffb0; box-shadow: 0 0 6px #6dffb0; animation: pulse 2s infinite; }
+.projs { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px; }
+.proj { display: flex; gap: 12px; background: var(--panel2); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 12px; }
+.proj.can { border-color: var(--gold); box-shadow: 0 0 18px rgba(255,210,74,.25); }
+.proj.done { border-color: rgba(109,255,176,.5); background: rgba(109,255,176,.06); }
+.proj.locked { opacity: .5; }
+.pj-icon { font-size: 40px; line-height: 1; }
+.pj-main { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.pj-main b { font-size: 17px; } .pj-main small { color: var(--dim); }
+.pj-main p { margin: 0; color: #b8c6e8; font-size: 14px; }
+.pj-fx { color: var(--gold); font-size: 13px; font-weight: 700; }
+.pj-done { color: var(--good); font-weight: 800; letter-spacing: 2px; }
+.pj-bar { height: 5px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+.pj-bar i { display: block; height: 100%; background: linear-gradient(90deg, #ff9d2a, #ffd24a); }
+.powers { display: flex; flex-direction: column; gap: 6px; }
+.small-btn { padding: 6px 10px !important; font-size: 13px !important; }
+.ev .small-btn { display: block; margin-top: 6px; }
+@media (max-width: 900px) { .projs { grid-template-columns: 1fr; } }
 body.thumb * { display: none; }
 body.thumb canvas#c { display: block; }

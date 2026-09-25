@@ -124,6 +124,7 @@ const TW = 256, TH = 128;
 function planetTex(loc) {
   if (!loc.tex) return null;
   if (TEX[loc.id]) return TEX[loc.id];
+  if (loc.id === 'marte' && typeof built === 'function' && built('terraform')) loc = { ...loc, tex: 'marsgreen' };
   const c = document.createElement('canvas'); c.width = TW; c.height = TH;
   const x = c.getContext('2d');
   const img = x.createImageData(TW, TH);
@@ -151,6 +152,13 @@ function planetTex(loc) {
         break;
       }
       case 'rock': col = mixc(D, L, clamp((n - 0.3) * 1.6, 0, 1)); break;
+      case 'marsgreen': {
+        const land = fbm(u * 4 / 6, v * 4 / 6, seed + 5, 4, 5);
+        if (land > 0.5) col = ramp([[0, [90, 140, 70]], [0.6, [170, 110, 70]], [1, [200, 120, 80]]], (land - 0.5) * 3 + (n - 0.5));
+        else col = ramp([[0, [20, 60, 130]], [1, [60, 140, 200]]], land * 1.8);
+        if (lat > 0.85) col = [240, 245, 250];
+        break;
+      }
       case 'mars': {
         const dark = fbm(u * 4 / 6, v * 4 / 6, seed + 3, 4, 4);
         col = ramp([[0, [120, 40, 20]], [0.5, [205, 95, 55]], [1, [240, 150, 100]]], n);
@@ -203,7 +211,7 @@ function planetTex(loc) {
     x.fillStyle = 'rgba(190,80,50,0.85)'; x.beginPath(); x.ellipse(TW * 0.3, TH * 0.64, 13, 7, 0, 0, TAU); x.fill();
     x.strokeStyle = 'rgba(240,190,150,0.6)'; x.lineWidth = 2; x.stroke();
   }
-  if (loc.tex === 'earth') {
+  if (loc.tex === 'earth' || loc.tex === 'marsgreen') {
     clouds = document.createElement('canvas'); clouds.width = TW; clouds.height = TH;
     const cx = clouds.getContext('2d'); const ci = cx.createImageData(TW, TH);
     for (let j = 0; j < TH; j++) for (let i = 0; i < TW; i++) {

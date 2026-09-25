@@ -81,7 +81,7 @@ const MapScene = {
     if (info.fuel > S.fuel) { toast('Not enough fuel', 'bad'); sfx('full'); return; }
     if (S.loc === to) return;
     S.fuel -= info.fuel;
-    const dur = clamp(1.2 + info.days * 0.3, 1.6, 6);
+    const dur = built('gates') ? 1.1 : clamp(1.2 + info.days * 0.3, 1.6, 6);
     let enc = null;
     if (Math.random() < info.danger) enc = { kind: 'hostile', at: rand(0.3, 0.7), danger: info.danger };
     else if (Math.random() < 0.22 + info.days * 0.01) enc = { kind: 'random', at: rand(0.25, 0.75), danger: info.danger };
@@ -146,6 +146,19 @@ const MapScene = {
     ctx.fillStyle = locOpen('troyanos') ? 'rgba(210,190,160,0.75)' : 'rgba(210,190,160,0.25)';
     for (let i = 0; i < 50; i++) { const a = i * 2.4 + t * 0.02, rr = (i % 9) * 2.6 * clamp(z, 0.8, 2.2); ctx.fillRect(tp.x + Math.cos(a) * rr, tp.y + Math.sin(a) * rr * 0.8, 1.6, 1.6); }
     drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36), t);
+    if (built('dyson')) {
+      const R = clamp(15 * z, 10, 36) * 2.6;
+      ctx.strokeStyle = 'rgba(255,210,74,0.35)'; ctx.lineWidth = 1;
+      for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.ellipse(sun.x, sun.y, R * (1 + k * 0.15), R * (0.35 + k * 0.1), k * 1.1 + t * 0.05, 0, TAU); ctx.stroke(); }
+      ctx.fillStyle = '#ffe9a0';
+      for (let i = 0; i < 140; i++) { const a = i * 2.39996 + t * (0.2 + (i % 5) * 0.05), rr = R * (0.8 + (i % 7) * 0.08); ctx.fillRect(sun.x + Math.cos(a) * rr, sun.y + Math.sin(a) * rr * (0.5 + (i % 3) * 0.2), 1.6, 1.6); }
+    }
+    if (built('beacons')) {
+      for (const id of ['mercurio', 'venus', 'tierra', 'marte', 'ceres']) {
+        const R = LOC[id].r * z;
+        for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + id.length; const on = Math.sin(t * 3 + i + id.length) > 0.3; ctx.fillStyle = on ? '#3de8ff' : 'rgba(61,232,255,0.3)'; ctx.fillRect(sun.x + Math.cos(a) * R - 1.5, sun.y + Math.sin(a) * R - 1.5, 3, 3); }
+      }
+    }
     // route preview
     const selId = this.sel;
     if (!tr && selId && selId !== S.loc && locOpen(selId)) {
@@ -171,6 +184,7 @@ const MapScene = {
       } else drawPlanet(ctx, p.x, p.y, r, l, la, t);
       ctx.globalAlpha = 1;
     }
+    this.drawProjects(ctx, t, day);
     // node markers & labels
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const l of NODES) {
@@ -179,7 +193,7 @@ const MapScene = {
       const r = this.pr(l) + (l.id === 'troyanos' ? 10 : 0);
       const isSel = l.id === selId, isHere = l.id === S.loc && !tr, isHov = l.id === this.hover;
       if (open && l.station) {
-        const a = t * 0.6 + l.r;
+        const a = t * 0.6 + (l.r || 3);
         const sx = p.x + Math.cos(a) * (r + 8), sy = p.y + Math.sin(a) * (r + 8) * 0.6;
         drawStationIcon(ctx, sx, sy, 2.6, l.faction ? FACTIONS[l.faction].c : '#6dffb0', t);
       }
@@ -229,12 +243,42 @@ const MapScene = {
       if (!tr.paused) for (let i = 0; i < 2; i++) this.trail.add(sp.x - Math.cos(ang) * 10 + rand(-2, 2), sp.y - Math.sin(ang) * 10 + rand(-2, 2), -Math.cos(ang) * 20 + rand(-8, 8), -Math.sin(ang) * 20 + rand(-8, 8), 0.8, ec, 2.2);
       this.trail.draw(ctx);
       drawPlayerShip(ctx, shipLv(), sp.x, sp.y, ang, 0.55, 1, t);
+      if (built('fleet')) for (const o of [-1, 1]) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, sp.x - Math.cos(ang) * 14 - Math.sin(ang) * o * 12, sp.y - Math.sin(ang) * 14 + Math.cos(ang) * o * 12, ang, 0.3, 1, t);
     } else {
       this.trail.draw(ctx);
       const p = this.spos(S.loc);
       const r = this.pr(LOC[S.loc]) + 16;
       const a = t * 0.7;
       drawPlayerShip(ctx, shipLv(), p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, a + Math.PI / 2, 0.42, 0.5, t);
+    }
+  },
+  drawProjects(ctx, t, day) {
+    if (built('driver')) {
+      const a = this.spos('luna', day), b = this.spos('tierra', day);
+      ctx.strokeStyle = 'rgba(255,210,74,0.35)'; ctx.lineWidth = 1.5; ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]);
+      for (let i = 0; i < 3; i++) { const k = (t * 0.8 + i / 3) % 1; glow(ctx, lerp(a.x, b.x, k), lerp(a.y, b.y, k), 5, '#ffd24a', 0.9); }
+    }
+    if (built('elevator')) {
+      const e = this.spos('tierra', day), sun = this.w2s(0, 0), r = this.pr(LOC.tierra);
+      const a = Math.atan2(e.y - sun.y, e.x - sun.x) + 2.2, L = r * 2.4;
+      ctx.strokeStyle = 'rgba(220,235,255,0.8)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * r, e.y + Math.sin(a) * r); ctx.lineTo(e.x + Math.cos(a) * L, e.y + Math.sin(a) * L); ctx.stroke();
+      drawStationIcon(ctx, e.x + Math.cos(a) * L, e.y + Math.sin(a) * L, 2.4, '#ffd24a', t);
+    }
+    if (built('ringstation')) {
+      const p = this.spos('saturno', day), r = this.pr(LOC.saturno);
+      const a = t * 0.3;
+      glow(ctx, p.x + Math.cos(a) * r * 1.9, p.y + Math.sin(a) * r * 0.55, 10, '#ffd24a', 0.9);
+      drawStationIcon(ctx, p.x + Math.cos(a) * r * 1.9, p.y + Math.sin(a) * r * 0.55, 3, '#ffd24a', t);
+    }
+    if (built('gates')) {
+      for (const l of NODES) if (l.station && locOpen(l.id)) {
+        const p = this.spos(l, day), r = this.pr(l) + 20;
+        ctx.strokeStyle = `rgba(180,120,255,${0.5 + 0.3 * Math.sin(t * 4 + (l.r || 3))})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(p.x - r, p.y, 3, 7, 0, 0, TAU); ctx.stroke();
+        glow(ctx, p.x - r, p.y, 8, '#a07cff', 0.6);
+      }
     }
   },
   pick(x, y) {

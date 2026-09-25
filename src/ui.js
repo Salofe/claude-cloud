@@ -134,8 +134,14 @@ function selectLoc(id) {
     if (v) html += `<div class="valline">Your ore sells for <b class="cr">${fmt(v)} cr</b> here${LOC[S.loc].market ? ` <small>(${fmt(oreValueAt(S.loc))} at ${LOC[S.loc].n})</small>` : ''}</div>`;
   }
   if (l.market && has(U.TRADE) && !here) {
-    const hot = Object.keys(l.market).map(k => ({ k, m: basePrice(id, k) / ITEMS[k].b })).filter(x => x.m >= 1.45).sort((a, b) => b.m - a.m).slice(0, 4);
+    const hot = Object.keys(l.market).map(k => ({ k, m: priceRatio(id, k) })).filter(x => x.m >= 1.45).sort((a, b) => b.m - a.m).slice(0, 4);
     if (hot.length) html += `<div class="sub">Pays well for</div><div class="ores">${hot.map(x => `<span class="ore" style="--c:${ITEMS[x.k].c}">${ITEMS[x.k].n} <b>×${x.m.toFixed(1)}</b></span>`).join('')}</div>`;
+  }
+  if (has(U.TRADE)) {
+    const pw = [];
+    if (l.market && !l.depot) pw.push(`<button class="btn small-btn" ${S.credits >= POWERS.boom.cost() ? '' : 'disabled'} onclick="doPower('boom','${id}')">🏗️ Fund a boom (ore ×1.9) · ${fmt(POWERS.boom.cost())}</button>`);
+    if (has(U.BELT) && (LOC[id].danger || 0) >= 0.1) pw.push(`<button class="btn small-btn" ${S.credits >= POWERS.purge.cost() ? '' : 'disabled'} onclick="doPower('purge','${id}')">🛡️ Clear pirates (30 days) · ${fmt(POWERS.purge.cost())}</button>`);
+    if (pw.length) html += `<div class="sub">⚡ Your power</div><div class="powers">${pw.join('')}</div>`;
   }
   if (here) {
     html += `<div class="lp-actions">`;
@@ -292,7 +298,7 @@ function dockBody(tab) {
       <div class="mkt"><div class="mrow mh"><span>Good</span><span>Sell</span><span>Have</span><span></span><span>Buy</span><span></span></div>`;
     for (const k of keys) {
       const sp = sellPrice(id, k), bp = buyPrice(id, k), have = S.cargo[k] || 0;
-      const ratio = sp ? sp / ITEMS[k].b : 0;
+      const ratio = sp ? priceRatio(id, k) : 0;
       const trend = !sp ? '' : ratio > 1.4 ? '<i class="up">▲▲</i>' : ratio > 1.1 ? '<i class="up">▲</i>' : ratio < 0.75 ? '<i class="dn">▼▼</i>' : ratio < 0.95 ? '<i class="dn">▼</i>' : '';
       const ev = eventPriceMult(id, k) !== 1 ? '<i class="evi">⚡</i>' : '';
       h += `<div class="mrow">
@@ -403,31 +409,34 @@ function buyUpg(k, n) {
 }
 function outpostBody(id) {
   const l = LOC[id], o = S.outposts[id], z = l.field.z;
+  const boost = (id === 'luna' && built('driver') ? 3 : 1) * (built('ringstation') ? 3 : 1);
   if (!o) {
     const c = buildCost(id);
     return `<div class="op-empty"><div class="op-art">🤖</div><h3>Build a Drone Outpost</h3>
-      <p>Drones mine <b>${l.field.n}</b> for you <b>24/7</b> — even when you're somewhere else or offline.</p>
-      <p>Each drone earns <b class="cr">${fmt(OUTPOST.rate[z] * incomeMult())} cr/s</b> here.</p>
+      <p>Drones slowly mine <b>${l.field.n}</b> for you — even when you're somewhere else or offline.</p>
+      <p>Each drone earns <b class="cr">${fmt(OUTPOST.rate[z] * incomeMult() * boost)} cr/s</b> here. Starts with room for ${OUTPOST.slots} drones.</p>
       <button class="btn primary big" ${S.credits >= c ? '' : 'disabled'} onclick="doBuild('${id}')">Build outpost · ${fmt(c)} cr</button></div>`;
   }
-  const inc = outpostIncome(id), per = OUTPOST.rate[z] * Math.pow(2, o.lv - 1) * incomeMult();
-  const d1 = droneCost(id, 1), d10 = droneCost(id, 10), nm = maxAffordableDrones(id);
+  const cap = outpostCap(o.lv), full = o.n >= cap;
+  const inc = outpostIncome(id), per = OUTPOST.rate[z] * Math.pow(2, o.lv - 1) * incomeMult() * boost;
+  const d1 = droneCost(id, 1), n10 = Math.min(10, cap - o.n), d10 = droneCost(id, n10), nm = maxAffordableDrones(id);
   const lc = outpostLvCost(id);
-  let drones = '';
-  for (let i = 0; i < Math.min(o.n, 60); i++) drones += '<i></i>';
+  let slots = '';
+  for (let i = 0; i < cap; i++) slots += `<i class="${i < o.n ? 'on' : ''}"></i>`;
   return `<div class="op">
-    <div class="op-top"><div><small>OUTPOST · LEVEL ${o.lv}</small><b class="cr">+${fmt(inc)} cr/s</b><span>${o.n} drones × ${fmt(per)} cr/s</span></div><div class="op-drones">${drones}${o.n > 60 ? `<em>+${o.n - 60}</em>` : ''}</div></div>
-    <div class="sub">Drones</div>
-    <div class="op-row">
+    <div class="op-top"><div><small>OUTPOST · LEVEL ${o.lv}</small><b class="cr">+${fmt(inc)} cr/s</b><span>${o.n} drones × ${fmt(per)} cr/s</span></div><div class="op-drones">${slots}</div></div>
+    <div class="sub">Drones <span class="dim">${o.n} / ${cap} slots</span></div>
+    ${full ? `<div class="empty small">All slots full — upgrade the outpost for <b>+${OUTPOST.slots} slots</b> and <b>×2 output</b>.</div>` : `<div class="op-row">
       <button class="btn ${S.credits >= d1 ? 'primary' : ''}" ${S.credits >= d1 ? '' : 'disabled'} onclick="doDrones('${id}',1)">+1 drone · ${fmt(d1)}</button>
-      <button class="btn ${S.credits >= d10 ? 'primary' : ''}" ${S.credits >= d10 ? '' : 'disabled'} onclick="doDrones('${id}',10)">+10 · ${fmt(d10)}</button>
+      ${n10 > 1 ? `<button class="btn ${S.credits >= d10 ? 'primary' : ''}" ${S.credits >= d10 ? '' : 'disabled'} onclick="doDrones('${id}',${n10})">+${n10} · ${fmt(d10)}</button>` : ''}
       <button class="btn ${nm ? 'primary' : ''}" ${nm ? '' : 'disabled'} onclick="doDrones('${id}','max')">MAX${nm ? ` (+${nm})` : ''}</button>
-    </div>
+    </div>`}
     <div class="sub">Outpost level</div>
-    ${lc != null ? `<button class="btn ${S.credits >= lc ? 'primary' : ''} big" ${S.credits >= lc ? '' : 'disabled'} onclick="doOutLv('${id}')">Upgrade to level ${o.lv + 1} — <b>×2 output</b> · ${fmt(lc)} cr</button>` : '<div class="empty small">Max level reached 👑</div>'}
-    <p class="hint">Drones cost 14% more each. Upgrading the outpost doubles every drone's output. Refinery upgrades and investments multiply all drone income.</p>
+    ${lc != null ? `<button class="btn ${S.credits >= lc ? 'primary' : ''} big" ${S.credits >= lc ? '' : 'disabled'} onclick="doOutLv('${id}')">Level ${o.lv + 1}: <b>×2 output</b> & +${OUTPOST.slots} slots · ${fmt(lc)} cr</button>` : '<div class="empty small">Max level reached 👑</div>'}
+    <p class="hint">Drones are slow but never stop — they keep earning while you're offline. Each costs 18% more than the last. Refinery upgrades, investments and megaprojects multiply their income.</p>
   </div>`;
 }
+
 function doBuild(id) { if (buildOutpost(id)) { sfx('win'); toast('Outpost online! Your drones are mining.', 'good'); renderDock(); } }
 function doDrones(id, k) { const n = buyDrones(id, k); if (n) { sfx('upgrade'); toast(`+${n} drone${n > 1 ? 's' : ''}`, 'good'); renderDock(); } }
 function doOutLv(id) { if (upgradeOutpost(id)) { sfx('win'); toast('Outpost upgraded: ×2 output!', 'good'); renderDock(); } }
@@ -482,11 +491,43 @@ function openFactions() {
       const r = S.rep[f];
       h += `<div class="fac"><span style="color:${FACTIONS[f].c}">${FACTIONS[f].n}</span><div class="repbar"><i style="left:50%;width:${Math.abs(r) / 2}%;${r < 0 ? `left:${50 - Math.abs(r) / 2}%;background:#ff4d6d` : `background:${FACTIONS[f].c}`}"></i><em></em></div><b>${Math.round(r)}</b></div>`;
     }
-    h += '<div class="sub">Active events</div>' + (S.events.length ? S.events.map(e => `<div class="ev">${e.icon} <b>${e.title}</b> <small>— ${e.text} (${e.end - S.day}d)</small></div>`).join('') : '<div class="empty small">The system is calm… for now.</div>');
+    const bad = e => e.war || e.relief || e.closed || e.storm || e.fuelPrice || (e.danger && e.danger.some(d => d.add > 0));
+    h += '<div class="sub">Active events</div>' + (S.events.length ? S.events.map(e => `<div class="ev">${e.icon} <b>${e.title}</b> <small>— ${e.text} (${e.end - S.day}d)</small>${bad(e) ? `<button class="btn small-btn" ${S.credits >= POWERS.end.cost() ? '' : 'disabled'} onclick="doPower('end','${e.uid}')">🕊️ End it · ${fmt(POWERS.end.cost())}</button>` : ''}</div>`).join('') : '<div class="empty small">The system is calm… for now.</div>');
   }
   openSheet('🤖 Your Empire', h);
 }
 
+function openProjects() {
+  sfx('click');
+  let h = '<p class="hint">Spend your fortune on projects that change the Solar System forever. Each one also adds influence.</p><div class="projs">';
+  for (const p of PROJECTS) {
+    const done = built(p.id), open = projectOpen(p), can = open && !done && S.credits >= p.cost;
+    const pct = Math.min(100, S.credits / p.cost * 100);
+    h += `<div class="proj ${done ? 'done' : ''} ${open ? '' : 'locked'} ${can ? 'can' : ''}">
+      <div class="pj-icon">${open ? p.icon : '🔒'}</div>
+      <div class="pj-main"><b>${p.n}</b>${p.loc ? `<small>${LOC[p.loc].n}</small>` : ''}<p>${open ? p.d : `Unlocks with: ${UNLOCKS[p.stage].title}`}</p>
+        <div class="pj-fx">⚡ ${p.fx} · +${p.infl} influence</div>
+        ${done ? '<div class="pj-done">✔ BUILT</div>' : open ? `<div class="pj-bar"><i style="width:${pct}%"></i></div><button class="btn ${can ? 'primary' : ''}" ${can ? '' : 'disabled'} onclick="doProject('${p.id}')">${can ? 'Build' : 'Need'} · ${fmt(p.cost)} cr</button>` : ''}
+      </div></div>`;
+  }
+  h += '</div>';
+  if (has(U.TRADE)) h += `<div class="sub">System powers</div><p class="hint">Select a planet on the Star Map to fund a boom or hire mercenaries there. End wars and plagues from the Empire panel.</p>`;
+  openSheet('🌌 Megaprojects', h);
+}
+function doProject(id) {
+  if (!buildProject(id)) return;
+  const p = PROJ[id];
+  sfx('win');
+  closeSheet(true);
+  showModal({ icon: p.icon, title: `${p.n} complete!`, cls: 'unlock', html: `<div class="unl-tag">MEGAPROJECT</div><p>${p.d}</p><p><b class="cr">⚡ ${p.fx}</b></p><small>+${p.infl} influence</small>`,
+    buttons: [{ label: 'Behold!', cls: 'primary', fn: () => { if (scene === MapScene && !MapScene.travel) { showMapUI(true); if (p.loc) { selectLoc(p.loc); MapScene.focus(p.loc); } else MapScene.zoomAll(); } } }] });
+}
+function doPower(kind, arg) {
+  if (!usePower(kind, arg)) { toast('Not enough credits', 'bad'); return; }
+  sfx('win'); toast('Done. The system bends to your will.', 'good');
+  if (!$('sheet').classList.contains('hidden')) openFactions(); else if (MapScene.sel) selectLoc(MapScene.sel);
+  updateHUD();
+}
 function openNews() {
   sfx('click');
   openSheet('📰 System News', S.news.map(n => `<div class="news"><i>DAY ${n.day}</i><span>${n.icon}</span><div>${n.html}</div></div>`).join(''));
