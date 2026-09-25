@@ -177,16 +177,27 @@ function repChange(f, d, silent) {
   return S.rep[f] - before;
 }
 
-// Docking: auto-sell ore, refuel, repair
+function sellAllOre(id, r) {
+  r = r || { sold: [], total: 0 };
+  if (marketClosed(id)) return r;
+  for (const k of ORES) if (S.cargo[k]) {
+    const n = S.cargo[k]; const got = doSell(id, k, n);
+    r.sold.push([k, n, got]); r.total += got;
+  }
+  return r;
+}
+// Where else would this cargo sell for more? (open stations, best first)
+function betterMarkets(id) {
+  const here = oreValueAt(id);
+  return NODES.filter(l => l.market && l.id !== id && locOpen(l.id) && !marketClosed(l.id))
+    .map(l => ({ id: l.id, v: oreValueAt(l.id), fuel: travelInfo(l.id).fuel }))
+    .filter(x => x.v > here * 1.05).sort((a, b) => b.v - a.v).slice(0, 3);
+}
+// Docking: refuel & repair. Ore is only auto-sold before the Star Map exists.
 function dockAtStation() {
   const id = S.loc, l = LOC[id];
   const r = { sold: [], total: 0, fuel: 0, fuelCost: 0, repair: 0, repairCost: 0 };
-  if (!marketClosed(id)) {
-    for (const k of ORES) if (S.cargo[k]) {
-      const n = S.cargo[k]; const got = doSell(id, k, n);
-      r.sold.push([k, n, got]); r.total += got;
-    }
-  }
+  if (!has(U.MAP)) sellAllOre(id, r);
   if (has(U.MAP)) {
     const fp = fuelPrice(id);
     const need = Math.floor(ship.fuelMax - S.fuel);

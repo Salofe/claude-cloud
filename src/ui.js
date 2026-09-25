@@ -245,13 +245,24 @@ function renderDock(fresh) {
       ${r.fuel || r.repair ? `<div class="rc-sub">${r.fuel ? `⛽ Refueled +${r.fuel} (−${fmt(r.fuelCost)} cr)` : ''} ${r.repair ? `🔧 Repaired +${r.repair} (−${fmt(r.repairCost)} cr)` : ''}</div>` : ''}
     </div>`;
   }
+  let sellbox = '';
+  const oreN = ORES.reduce((n, k) => n + (S.cargo[k] || 0), 0);
+  if (oreN && has(U.MAP)) {
+    const here = oreValueAt(S.loc), alts = betterMarkets(S.loc);
+    sellbox = `<div class="sellbox">
+      <div class="sb-cargo"><small>ORE IN CARGO</small><span>${ORES.filter(k => S.cargo[k]).map(k => `<i class="sw" style="background:${ITEMS[k].c}"></i>${fmt(S.cargo[k])} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div>
+      <div class="sb-row">
+        ${marketClosed(S.loc) ? '<div class="badt">Market closed by a strike.</div>' : `<button class="btn primary" onclick="sellHere()">Sell here · <b>${fmt(here)} cr</b></button>`}
+        <div class="sb-alts">${alts.length ? alts.map(a => `<span onclick="closeSheet();selectLoc('${a.id}')"><b>${LOC[a.id].n}</b> pays <b class="cr">${fmt(a.v)}</b> <em>+${Math.round((a.v / Math.max(1, here) - 1) * 100)}%</em> <small>· ${a.fuel} ⛽</small></span>`).join('') : '<small>This is the best price you can get right now.</small>'}</div>
+      </div></div>`;
+  }
   const body = dockBody(dockTab);
   const foot = [];
   if (l.field) foot.push(`<button class="btn ore big" onclick="enterMine()">⛏ Launch — ${l.field.n}</button>`);
   if (has(U.MAP)) foot.push(`<button class="btn big" onclick="closeSheet()">🗺 Star Map</button>`);
   const keep = $('sheet').querySelector('.tabbody');
   const sc = keep && !fresh ? keep.scrollTop : 0;
-  openSheet(`🛰 ${l.station} <small>${l.n}</small>`, `${receipt}
+  openSheet(`🛰 ${l.station} <small>${l.n}</small>`, `${receipt}${sellbox}
     ${tabs.length > 1 ? `<div class="tabs">${tabs.map(([k, n]) => `<button class="tab ${k === dockTab ? 'on' : ''}" onclick="dockTab='${k}';renderDock()">${n}</button>`).join('')}</div>` : ''}
     <div class="tabbody">${body}</div>
     <div class="dock-foot">${foot.join('')}</div>`, 'dock');
@@ -260,6 +271,13 @@ function renderDock(fresh) {
   if (rt) countUp(rt, +rt.dataset.v);
   for (const k of UPG_KEYS) if (upgOpen(k)) S.seenUpg[k] = 1;
   updateHUD();
+}
+function sellHere() {
+  const r = sellAllOre(S.loc);
+  if (!r.total) return;
+  sfx('cash');
+  lastDock = { ...r, fuel: 0, repair: 0 };
+  renderDock(true);
 }
 function countUp(el, v) {
   const t0 = performance.now(), dur = Math.min(1200, 300 + v / 4);

@@ -303,7 +303,7 @@ const MineScene = {
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
-    else if (!this.space && cargoFree() <= 0) msg = '📦 Cargo full! Fly back <b>down</b> to the station to sell ⬇';
+    else if (!this.space && cargoFree() <= 0) msg = '📦 Cargo full! Fly back <b>down</b> to the station ⬇';
     else if (!this.space && !h.deep && S.stats.docks >= 2 && this.p.y > DOCK_Y - 900) { msg = 'Tip: rocks get <b>richer</b> the farther up you fly ⬆'; }
     if (this.p.y < DOCK_Y - 1400) h.deep = 1;
     coach(msg);

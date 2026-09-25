@@ -47,7 +47,8 @@ const FACTIONS = {
 };
 
 // field.z = zone tier: drives rock toughness, enemy strength, loot and outposts
-const DEPOT = { iron: 0.9, ice: 0.9, titanium: 0.9, nickel: 0.9, he3: 0.9, platinum: 0.9, iridium: 0.9, exotic: 0.9 };
+// Field depots buy ore cheap (quick cash); planets with cities pay much more.
+const DEPOT = { iron: 0.7, ice: 0.7, titanium: 0.7, nickel: 0.7, he3: 0.7, platinum: 0.7, iridium: 0.7, exotic: 0.7 };
 const LOCS = [
   { id: 'mercurio', n: 'Mercury', r: 62, period: 70, a0: 1.2, size: 5, tex: 'rock', col: ['#d8c3a5', '#6b5a48'], danger: 0.06, tier: 3,
     station: 'Caloris Depot', depot: 1, fuel: 5, repair: 3, market: { ...DEPOT },
@@ -63,7 +64,7 @@ const LOCS = [
     desc: 'The cradle of humanity. Pays 50–70% more for every metal you bring.' },
   { id: 'luna', n: 'Moon', parent: 'tierra', r: 17, period: 27, a0: 0, size: 4, tex: 'moon', col: ['#e3e3e3', '#6a6a72'], faction: 'tierra', danger: 0.02, tier: 0,
     station: 'Tranquility Base', fuel: 4, repair: 2.5,
-    market: { iron: 1.0, nickel: 1.0, ice: 1.1, titanium: 1.0, he3: 1.0, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
+    market: { iron: 0.8, nickel: 0.8, ice: 0.85, titanium: 0.8, he3: 0.8, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
     field: { n: 'Lunar Maria', z: 0, ores: { iron: 5, ice: 3, titanium: 1.2, he3: 0.3 }, count: 24 },
     desc: 'Your home base. A calm mining field with a station at the bottom.' },
   { id: 'marte', n: 'Mars', r: 196, period: 330, a0: 4.1, size: 7, tex: 'mars', col: ['#ff8a5c', '#7a2a14'], faction: 'marte', danger: 0.05, tier: 3,
@@ -72,7 +73,7 @@ const LOCS = [
     desc: 'A militarized republic. Pays a fortune for ice — water is life on Mars.' },
   { id: 'ceres', n: 'Ceres', r: 262, period: 560, a0: 5.4, size: 5, tex: 'rock', col: ['#b7b0a4', '#4c463e'], faction: 'cinturon', danger: 0.22, tier: 4,
     station: 'Ceres Station', fuel: 5, repair: 3.5,
-    market: { iron: 0.8, nickel: 1.0, ice: 1.3, titanium: 1.0, platinum: 1.1, he3: 1.2, iridium: 1.15, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
+    market: { iron: 0.75, nickel: 0.8, ice: 1.1, titanium: 0.8, platinum: 0.85, he3: 0.9, iridium: 0.85, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
     field: { n: 'Main Belt', z: 2, ores: { nickel: 3, platinum: 3, titanium: 1, iridium: 1.5 }, count: 30 },
     desc: 'Capital of the Asteroid Belt. Nickel, platinum, iridium… and pirates.' },
   { id: 'jupiter', n: 'Jupiter', r: 345, period: 1000, a0: 1.0, size: 19, tex: 'jupiter', col: ['#e8c49a', '#8a5a36'], body: 1, tier: 6 },
@@ -110,7 +111,7 @@ for (const l of LOCS) if (l.market) for (const o of ORES) if (l.market[o] == nul
 const UNLOCKS = [
   { at: 0 },
   { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and add <b>drones</b>. They mine <b>slowly</b> but <b>never stop</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
-  { at: 1500, icon: '🗺️', title: 'Star Map', text: 'Fly to <b>Earth</b> — it pays <b>50–70% more</b> for metals. Travel uses fuel; your tank refills when you dock. <b>Refinery</b> upgrades now boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
+  { at: 1500, icon: '🗺️', title: 'Star Map', text: 'From now on <b>you choose where to sell</b>. Station depots pay little; <b>Earth pays about double</b> for metals — load up and fly there! Travel uses fuel, which refills when you dock. <b>Refinery</b> upgrades boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
   { at: 10000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mercury</b> is covered in <b>Platinum</b> (worth 60× iron) but the heat burns your hull — buy <b>Shields</b>. <b>Mars</b> pays a fortune for ice.', upg: ['shield'] },
   { at: 60000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt: nickel, platinum, iridium… and <b>pirates</b>. You fly and shoot in battle — buy <b>Weapons</b>!', upg: ['weapons'] },
   { at: 400000, icon: '📈', title: 'Trade & Events', text: 'Stations let you <b>buy and sell goods</b> and offer <b>contracts</b>. System <b>events</b> — wars, plagues, booms — swing prices. <b>Venus</b> is open.', upg: [] },

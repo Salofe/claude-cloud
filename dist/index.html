@@ -379,6 +379,15 @@ body.mining #objective, body.battle #objective { display: none; }
 .small-btn { padding: 6px 10px !important; font-size: 13px !important; }
 .ev .small-btn { display: block; margin-top: 6px; }
 @media (max-width: 900px) { .projs { grid-template-columns: 1fr; } }
+.sellbox { background: rgba(61,232,255,.06); border: 1px solid rgba(61,232,255,.35); border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; flex-shrink: 0; }
+.sb-cargo small { display: block; letter-spacing: 2px; font-size: 11px; color: var(--cyan); }
+.sb-cargo span { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-weight: 700; }
+.sb-cargo .sw { display: inline-block; margin-right: 3px; }
+.sb-row { display: flex; gap: 12px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.sb-row .btn { font-size: 16px; }
+.sb-alts { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.sb-alts span { cursor: pointer; } .sb-alts span:hover b:first-child { text-decoration: underline; }
+.sb-alts em { color: var(--good); font-style: normal; font-weight: 800; }
 body.thumb * { display: none; }
 body.thumb canvas#c { display: block; }
 </style>
@@ -500,7 +509,8 @@ const FACTIONS = {
 };
 
 // field.z = zone tier: drives rock toughness, enemy strength, loot and outposts
-const DEPOT = { iron: 0.9, ice: 0.9, titanium: 0.9, nickel: 0.9, he3: 0.9, platinum: 0.9, iridium: 0.9, exotic: 0.9 };
+// Field depots buy ore cheap (quick cash); planets with cities pay much more.
+const DEPOT = { iron: 0.7, ice: 0.7, titanium: 0.7, nickel: 0.7, he3: 0.7, platinum: 0.7, iridium: 0.7, exotic: 0.7 };
 const LOCS = [
   { id: 'mercurio', n: 'Mercury', r: 62, period: 70, a0: 1.2, size: 5, tex: 'rock', col: ['#d8c3a5', '#6b5a48'], danger: 0.06, tier: 3,
     station: 'Caloris Depot', depot: 1, fuel: 5, repair: 3, market: { ...DEPOT },
@@ -516,7 +526,7 @@ const LOCS = [
     desc: 'The cradle of humanity. Pays 50–70% more for every metal you bring.' },
   { id: 'luna', n: 'Moon', parent: 'tierra', r: 17, period: 27, a0: 0, size: 4, tex: 'moon', col: ['#e3e3e3', '#6a6a72'], faction: 'tierra', danger: 0.02, tier: 0,
     station: 'Tranquility Base', fuel: 4, repair: 2.5,
-    market: { iron: 1.0, nickel: 1.0, ice: 1.1, titanium: 1.0, he3: 1.0, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
+    market: { iron: 0.8, nickel: 0.8, ice: 0.85, titanium: 0.8, he3: 0.8, food: 1.25, meds: 1.1, machinery: 1.2, tech: 1.1 },
     field: { n: 'Lunar Maria', z: 0, ores: { iron: 5, ice: 3, titanium: 1.2, he3: 0.3 }, count: 24 },
     desc: 'Your home base. A calm mining field with a station at the bottom.' },
   { id: 'marte', n: 'Mars', r: 196, period: 330, a0: 4.1, size: 7, tex: 'mars', col: ['#ff8a5c', '#7a2a14'], faction: 'marte', danger: 0.05, tier: 3,
@@ -525,7 +535,7 @@ const LOCS = [
     desc: 'A militarized republic. Pays a fortune for ice — water is life on Mars.' },
   { id: 'ceres', n: 'Ceres', r: 262, period: 560, a0: 5.4, size: 5, tex: 'rock', col: ['#b7b0a4', '#4c463e'], faction: 'cinturon', danger: 0.22, tier: 4,
     station: 'Ceres Station', fuel: 5, repair: 3.5,
-    market: { iron: 0.8, nickel: 1.0, ice: 1.3, titanium: 1.0, platinum: 1.1, he3: 1.2, iridium: 1.15, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
+    market: { iron: 0.75, nickel: 0.8, ice: 1.1, titanium: 0.8, platinum: 0.85, he3: 0.9, iridium: 0.85, food: 1.7, meds: 1.5, machinery: 1.3, tech: 1.45, arms: 1.3, luxury: 1.4 },
     field: { n: 'Main Belt', z: 2, ores: { nickel: 3, platinum: 3, titanium: 1, iridium: 1.5 }, count: 30 },
     desc: 'Capital of the Asteroid Belt. Nickel, platinum, iridium… and pirates.' },
   { id: 'jupiter', n: 'Jupiter', r: 345, period: 1000, a0: 1.0, size: 19, tex: 'jupiter', col: ['#e8c49a', '#8a5a36'], body: 1, tier: 6 },
@@ -563,7 +573,7 @@ for (const l of LOCS) if (l.market) for (const o of ORES) if (l.market[o] == nul
 const UNLOCKS = [
   { at: 0 },
   { at: 250, icon: '🤖', title: 'Drone Outposts', text: 'Build an <b>outpost</b> in a mining field and add <b>drones</b>. They mine <b>slowly</b> but <b>never stop</b> — even while you\'re away. Open the <b>Outpost</b> tab when docked.', upg: ['cargo'] },
-  { at: 1500, icon: '🗺️', title: 'Star Map', text: 'Fly to <b>Earth</b> — it pays <b>50–70% more</b> for metals. Travel uses fuel; your tank refills when you dock. <b>Refinery</b> upgrades now boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
+  { at: 1500, icon: '🗺️', title: 'Star Map', text: 'From now on <b>you choose where to sell</b>. Station depots pay little; <b>Earth pays about double</b> for metals — load up and fly there! Travel uses fuel, which refills when you dock. <b>Refinery</b> upgrades boost ALL ore income.', upg: ['refinery', 'engine', 'tank'] },
   { at: 10000, icon: '🔴', title: 'Mars & Mercury', text: '<b>Mercury</b> is covered in <b>Platinum</b> (worth 60× iron) but the heat burns your hull — buy <b>Shields</b>. <b>Mars</b> pays a fortune for ice.', upg: ['shield'] },
   { at: 60000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt: nickel, platinum, iridium… and <b>pirates</b>. You fly and shoot in battle — buy <b>Weapons</b>!', upg: ['weapons'] },
   { at: 400000, icon: '📈', title: 'Trade & Events', text: 'Stations let you <b>buy and sell goods</b> and offer <b>contracts</b>. System <b>events</b> — wars, plagues, booms — swing prices. <b>Venus</b> is open.', upg: [] },
@@ -1525,16 +1535,27 @@ function repChange(f, d, silent) {
   return S.rep[f] - before;
 }
 
-// Docking: auto-sell ore, refuel, repair
+function sellAllOre(id, r) {
+  r = r || { sold: [], total: 0 };
+  if (marketClosed(id)) return r;
+  for (const k of ORES) if (S.cargo[k]) {
+    const n = S.cargo[k]; const got = doSell(id, k, n);
+    r.sold.push([k, n, got]); r.total += got;
+  }
+  return r;
+}
+// Where else would this cargo sell for more? (open stations, best first)
+function betterMarkets(id) {
+  const here = oreValueAt(id);
+  return NODES.filter(l => l.market && l.id !== id && locOpen(l.id) && !marketClosed(l.id))
+    .map(l => ({ id: l.id, v: oreValueAt(l.id), fuel: travelInfo(l.id).fuel }))
+    .filter(x => x.v > here * 1.05).sort((a, b) => b.v - a.v).slice(0, 3);
+}
+// Docking: refuel & repair. Ore is only auto-sold before the Star Map exists.
 function dockAtStation() {
   const id = S.loc, l = LOC[id];
   const r = { sold: [], total: 0, fuel: 0, fuelCost: 0, repair: 0, repairCost: 0 };
-  if (!marketClosed(id)) {
-    for (const k of ORES) if (S.cargo[k]) {
-      const n = S.cargo[k]; const got = doSell(id, k, n);
-      r.sold.push([k, n, got]); r.total += got;
-    }
-  }
+  if (!has(U.MAP)) sellAllOre(id, r);
   if (has(U.MAP)) {
     const fp = fuelPrice(id);
     const need = Math.floor(ship.fuelMax - S.fuel);
@@ -2596,7 +2617,7 @@ const MineScene = {
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
-    else if (!this.space && cargoFree() <= 0) msg = '📦 Cargo full! Fly back <b>down</b> to the station to sell ⬇';
+    else if (!this.space && cargoFree() <= 0) msg = '📦 Cargo full! Fly back <b>down</b> to the station ⬇';
     else if (!this.space && !h.deep && S.stats.docks >= 2 && this.p.y > DOCK_Y - 900) { msg = 'Tip: rocks get <b>richer</b> the farther up you fly ⬆'; }
     if (this.p.y < DOCK_Y - 1400) h.deep = 1;
     coach(msg);
@@ -3248,13 +3269,24 @@ function renderDock(fresh) {
       ${r.fuel || r.repair ? `<div class="rc-sub">${r.fuel ? `⛽ Refueled +${r.fuel} (−${fmt(r.fuelCost)} cr)` : ''} ${r.repair ? `🔧 Repaired +${r.repair} (−${fmt(r.repairCost)} cr)` : ''}</div>` : ''}
     </div>`;
   }
+  let sellbox = '';
+  const oreN = ORES.reduce((n, k) => n + (S.cargo[k] || 0), 0);
+  if (oreN && has(U.MAP)) {
+    const here = oreValueAt(S.loc), alts = betterMarkets(S.loc);
+    sellbox = `<div class="sellbox">
+      <div class="sb-cargo"><small>ORE IN CARGO</small><span>${ORES.filter(k => S.cargo[k]).map(k => `<i class="sw" style="background:${ITEMS[k].c}"></i>${fmt(S.cargo[k])} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div>
+      <div class="sb-row">
+        ${marketClosed(S.loc) ? '<div class="badt">Market closed by a strike.</div>' : `<button class="btn primary" onclick="sellHere()">Sell here · <b>${fmt(here)} cr</b></button>`}
+        <div class="sb-alts">${alts.length ? alts.map(a => `<span onclick="closeSheet();selectLoc('${a.id}')"><b>${LOC[a.id].n}</b> pays <b class="cr">${fmt(a.v)}</b> <em>+${Math.round((a.v / Math.max(1, here) - 1) * 100)}%</em> <small>· ${a.fuel} ⛽</small></span>`).join('') : '<small>This is the best price you can get right now.</small>'}</div>
+      </div></div>`;
+  }
   const body = dockBody(dockTab);
   const foot = [];
   if (l.field) foot.push(`<button class="btn ore big" onclick="enterMine()">⛏ Launch — ${l.field.n}</button>`);
   if (has(U.MAP)) foot.push(`<button class="btn big" onclick="closeSheet()">🗺 Star Map</button>`);
   const keep = $('sheet').querySelector('.tabbody');
   const sc = keep && !fresh ? keep.scrollTop : 0;
-  openSheet(`🛰 ${l.station} <small>${l.n}</small>`, `${receipt}
+  openSheet(`🛰 ${l.station} <small>${l.n}</small>`, `${receipt}${sellbox}
     ${tabs.length > 1 ? `<div class="tabs">${tabs.map(([k, n]) => `<button class="tab ${k === dockTab ? 'on' : ''}" onclick="dockTab='${k}';renderDock()">${n}</button>`).join('')}</div>` : ''}
     <div class="tabbody">${body}</div>
     <div class="dock-foot">${foot.join('')}</div>`, 'dock');
@@ -3263,6 +3295,13 @@ function renderDock(fresh) {
   if (rt) countUp(rt, +rt.dataset.v);
   for (const k of UPG_KEYS) if (upgOpen(k)) S.seenUpg[k] = 1;
   updateHUD();
+}
+function sellHere() {
+  const r = sellAllOre(S.loc);
+  if (!r.total) return;
+  sfx('cash');
+  lastDock = { ...r, fuel: 0, repair: 0 };
+  renderDock(true);
 }
 function countUp(el, v) {
   const t0 = performance.now(), dur = Math.min(1200, 300 + v / 4);
