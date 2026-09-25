@@ -6,10 +6,10 @@ let S = null;
 function newGame() {
   S = {
     v: 3, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: 'Pioneer',
-    lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
+    lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, outposts: {}, projects: {}, sat: {}, drift: {}, depl: {}, bal: 2,
+    invest: {}, outposts: {}, projects: {}, stock: {}, sat: {}, drift: {}, depl: {}, bal: 2,
     events: [], news: [], contracts: {}, active: [],
     stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
     unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
@@ -24,6 +24,8 @@ function loadSave() {
     const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s);
     if (!d || d.v !== 3) return null;
     d.projects = d.projects || {};
+    d.lv.extractor = d.lv.extractor || 1;
+    d.stock = d.stock || {};
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     return d;
   } catch (e) { return null; }
@@ -33,7 +35,7 @@ const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0);
 const upgOpen = k => has(UPG[k].stage);
 const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
-const econScale = () => Math.pow(4, Math.max(0, S.unlock - 5));
+const econScale = () => S.unlock < 5 ? 1 : 3 * Math.pow(2, S.unlock - 5);
 const itemBase = k => ITEMS[k].ore ? ITEMS[k].b : ITEMS[k].b * econScale();
 
 // ---------- derived stats ----------
@@ -42,7 +44,8 @@ const ship = {
   get hpMax() { return UPG.hull.hp[S.lv.hull - 1]; },
   get mass() { return UPG.hull.mass[S.lv.hull - 1]; },
   get fuelMax() { return Math.round(60 * Math.pow(1.22, S.lv.tank - 1)); },
-  get laserDps() { return 12 * Math.pow(1.19, S.lv.laser - 1); },
+  get laserDps() { return 12 * Math.pow(1.17, S.lv.laser - 1); },
+  get yieldMult() { return 1 + 0.15 * (S.lv.extractor - 1); },
   get laserRange() { return 190 + Math.min(190, (S.lv.laser - 1) * 6); },
   get thrust() { return Math.min(2.2, 1 + 0.06 * (S.lv.engine - 1)); },
   get speed() { return 1 + 0.12 * (S.lv.engine - 1); },
@@ -53,7 +56,7 @@ const ship = {
   get magnet() { return 130 + Math.min(370, (S.lv.magnet - 1) * 16); },
   get drones() { return Math.min(6, Math.floor((S.lv.magnet - 1) / 3)); },
   get avoid() { return [0, 0.12, 0.22, 0.32, 0.42][S.lv.scanner - 1]; },
-  get refinery() { return Math.pow(1.1, S.lv.refinery - 1); },
+  get refinery() { return Math.pow(1.07, S.lv.refinery - 1); },
 };
 function incomeMult() {
   let inv = 0; for (const id in S.invest) inv += S.invest[id];
@@ -141,7 +144,8 @@ function doSell(locId, item, n) {
   let total = 0;
   for (let i = 0; i < n; i++) {
     total += sellPrice(locId, item);
-    S.sat[locId][item] = Math.max(0.55, S.sat[locId][item] * (ITEMS[item].ore ? 0.9985 : 0.982));
+    // market depth scales with your hold: a full hold moves ore prices ~22%, goods ~40%
+    S.sat[locId][item] = Math.max(ITEMS[item].ore ? 0.4 : 0.3, S.sat[locId][item] * (1 - (ITEMS[item].ore ? 0.25 : 0.5) / Math.max(100, ship.cargoMax)));
   }
   addCargo(item, -n);
   S.stats.traded += n;
@@ -158,16 +162,21 @@ function doSell(locId, item, n) {
   earn(total);
   return total;
 }
+// Producers hold limited stock (grows each stage), which refills ~10% per day.
+const stockMax = () => Math.round(150 * Math.pow(1.8, Math.max(0, S.unlock - 5)));
+function stockLeft(locId, item) { const f = (S.stock[locId] || {})[item]; return Math.floor(stockMax() * (f == null ? 1 : f)); }
 function doBuy(locId, item, n) {
-  n = Math.min(n, cargoFree());
+  n = Math.min(n, cargoFree(), stockLeft(locId, item));
   let total = 0, bought = 0;
   for (let i = 0; i < n; i++) {
     const p = buyPrice(locId, item);
     if (p == null || S.credits - total < p) break;
     total += p; bought++;
-    S.sat[locId][item] = Math.min(1.6, S.sat[locId][item] * 1.012);
+    S.sat[locId][item] = Math.min(2.5, S.sat[locId][item] * (1 + 0.5 / Math.max(100, ship.cargoMax)));
   }
   S.credits -= total; addCargo(item, bought);
+  S.stock[locId] = S.stock[locId] || {};
+  S.stock[locId][item] = Math.max(0, (S.stock[locId][item] == null ? 1 : S.stock[locId][item]) - bought / stockMax());
   return bought;
 }
 function repChange(f, d, silent) {
@@ -305,9 +314,9 @@ function buildProject(id) {
 }
 const powerScale = () => Math.pow(4, Math.max(0, S.unlock - 5));
 const POWERS = {
-  end:   { n: 'End this crisis', cost: () => 60000 * powerScale() },
-  boom:  { n: 'Fund a construction boom', cost: () => 90000 * powerScale() },
-  purge: { n: 'Hire mercenaries to clear pirates', cost: () => 70000 * powerScale() },
+  end:   { n: 'End this crisis', cost: () => Math.round(Math.max(200000, S.stats.earned * 0.004)) },
+  boom:  { n: 'Fund a construction boom', cost: () => Math.round(Math.max(300000, S.stats.earned * 0.006)) },
+  purge: { n: 'Hire mercenaries to clear pirates', cost: () => Math.round(Math.max(250000, S.stats.earned * 0.005)) },
 };
 function usePower(kind, arg) {
   const c = POWERS[kind].cost(); if (S.credits < c) return false;
@@ -501,6 +510,7 @@ function tickDay() {
     S.drift[id][k] = clamp(S.drift[id][k] * 0.96 + rand(-0.035, 0.035), -0.25, 0.25);
   }
   for (const id in S.depl) S.depl[id] = Math.max(0, S.depl[id] - 0.06);
+  for (const id in S.stock) for (const k in S.stock[id]) S.stock[id][k] = Math.min(1, S.stock[id][k] + 0.1);
   if (has(U.TRADE)) {
     const ended = S.events.filter(e => e.end <= S.day);
     for (const e of ended) addNews('🕊️', `Over: ${e.title}`, '#8fa3c7');

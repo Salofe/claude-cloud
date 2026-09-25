@@ -312,7 +312,17 @@ function dockBody(tab) {
   if (tab === 'trade') {
     if (marketClosed(id)) return `<div class="empty">✊ Market closed by a strike. Come back in a few days.</div>`;
     const keys = ITEM_KEYS.filter(k => (!ITEMS[k].ore && l.market[k] != null) || S.cargo[k]);
-    let h = `<p class="hint">Buy goods where they're cheap (▼) and sell them where they're wanted (▲). Selling a lot at once lowers the price.</p>
+    // best trade routes starting here
+    const routes = [];
+    for (const g of GOODS) {
+      const bp = buyPrice(id, g); if (!bp || stockLeft(id, g) < 1) continue;
+      let best = null;
+      for (const C of NODES) if (C.market && !C.depot && C.id !== id && locOpen(C.id) && C.market[g] != null) { const sp = sellPrice(C.id, g); if (!best || sp > best.sp) best = { id: C.id, sp }; }
+      if (best && best.sp > bp * 1.2) routes.push({ g, bp, ...best, units: Math.min(stockLeft(id, g), ship.cargoMax) });
+    }
+    routes.sort((a, b) => (b.sp - b.bp) * b.units - (a.sp - a.bp) * a.units);
+    let h = routes.length ? `<div class="routes"><div class="sub">💡 Best trades from here</div>${routes.slice(0, 3).map(r => `<div class="route"><i class="sw" style="background:${ITEMS[r.g].c}"></i><b>${ITEMS[r.g].n}</b> buy ${fmt(r.bp)} → <b>${LOC[r.id].n}</b> pays ${fmt(r.sp)} <em>×${(r.sp / r.bp).toFixed(1)}</em> <small>≈ +${fmt((r.sp - r.bp) * r.units * 0.8)} profit for ${r.units}</small></div>`).join('')}</div>` : '';
+    h += `<p class="hint">Buy where it's cheap (▼), sell where it's wanted (▲). Each station only has limited stock (refills daily), and selling a lot lowers the price — spread your cargo around.</p>
       <div class="mkt"><div class="mrow mh"><span>Good</span><span>Sell</span><span>Have</span><span></span><span>Buy</span><span></span></div>`;
     for (const k of keys) {
       const sp = sellPrice(id, k), bp = buyPrice(id, k), have = S.cargo[k] || 0;
@@ -324,7 +334,7 @@ function dockBody(tab) {
         <span class="price c-sp">${sp ? fmt(sp) + ' ' + trend : '<small class="dim">—</small>'}</span>
         <span class="have c-h">${have || '<small class="dim">0</small>'}</span>
         <span class="bb c-sb">${sp && have ? `<button onclick="mktSell('${k}',1)">1</button><button onclick="mktSell('${k}',10)">10</button><button class="all" onclick="mktSell('${k}',9999)">All</button>` : ''}</span>
-        <span class="price c-bp">${bp ? fmt(bp) : '<small class="dim">—</small>'}</span>
+        <span class="price c-bp">${bp ? fmt(bp) + `<small class="stock">${stockLeft(id, k)} left</small>` : '<small class="dim">—</small>'}</span>
         <span class="bb c-bb">${bp ? `<button onclick="mktBuy('${k}',1)">1</button><button onclick="mktBuy('${k}',10)">10</button><button class="all" onclick="mktBuy('${k}',9999)">Max</button>` : ''}</span></div>`;
     }
     return h + '</div>';
@@ -372,6 +382,7 @@ function upgDelta(k, a, b) {
     case 'laser': return `Mining power ${ar(fmt(at(a, () => ship.laserDps)), fmt(at(b, () => ship.laserDps)))}`;
     case 'magnet': return `Range ${ar(at(a, () => ship.magnet), at(b, () => ship.magnet))}${at(b, () => ship.drones) > at(a, () => ship.drones) ? ' · <b>+1 drone</b>' : ` · drones ${at(a, () => ship.drones)}`}`;
     case 'cargo': return `Cargo ${ar(at(a, () => ship.cargoMax), at(b, () => ship.cargoMax))}`;
+    case 'extractor': return `Ore per rock ${ar('×' + at(a, () => ship.yieldMult).toFixed(2), '×' + at(b, () => ship.yieldMult).toFixed(2))}`;
     case 'refinery': return `All ore value ${ar('×' + at(a, () => ship.refinery).toFixed(2), '×' + at(b, () => ship.refinery).toFixed(2))}`;
     case 'engine': return `Speed ${ar('×' + at(a, () => ship.speed).toFixed(2), '×' + at(b, () => ship.speed).toFixed(2))} · Warp ${at(b, () => ship.warpTime).toFixed(1)}s`;
     case 'tank': return `Fuel ${ar(at(a, () => ship.fuelMax), at(b, () => ship.fuelMax))}`;

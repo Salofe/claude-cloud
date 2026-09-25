@@ -3,7 +3,7 @@
 // The station sits at the bottom. Fly back down into the docking zone to sell.
 // The higher up (farther from the station) you go, the richer the rocks.
 const MW = 1800, MH = 3400, DOCK_Y = MH - 240;
-const Z_HP = [1, 5, 16, 60, 220, 800];
+const Z_HP = [1, 3.5, 6, 11, 16, 38];   // each new zone is tougher, but its ore is worth even more
 const mineScale = () => 1.35 - (S.lv.hull - 1) * 0.08;
 const shipR = () => shipLen(S.lv) * mineScale();
 const SPACE = { id: 'space', n: 'Deep Space', col: ['#6a7fb0', '#1b2340'], field: { n: 'Deep Space', z: 2, ores: { iron: 3, nickel: 1 }, count: 10 } };
@@ -96,9 +96,11 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
       }
-      if (Math.random() < 0.5) this.dropChunk(r.x, r.y, r.ore);
+      const m = 0.5 * ship.yieldMult;
+      for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
     } else {
-      const n = randi(1, 2) + (r.rich ? 2 : 0);
+      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult;
+      const n = Math.floor(m) + (Math.random() < m % 1 ? 1 : 0);
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.ore);
     }
   },
