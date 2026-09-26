@@ -27,7 +27,7 @@ function postPeak() {
   postedPeak = S.stats.peak;
   try { if (window.parent && window.parent !== window) window.parent.postMessage({ clawcade: 'score', score: S.stats.peak }, '*'); } catch (e) {}
 }
-function save() { if (!S) return; trackPeak(); postPeak(); S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+function save() { if (!S) return; trackPeak(); S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
   try {
     const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s);

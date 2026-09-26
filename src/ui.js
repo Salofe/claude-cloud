@@ -53,7 +53,6 @@ function updateTicker() {
 // ---------- HUD ----------
 function hudTick(dt) {
   if (!S) return;
-  trackPeak();
   const d = S.credits - shownCredits;
   if (Math.abs(d) < 1) shownCredits = S.credits;
   else shownCredits += d * Math.min(1, dt * 6) + Math.sign(d) * Math.min(Math.abs(d), dt * 40);

@@ -110,7 +110,7 @@ function setupTouchControls() {
 }
 
 // ---------- bucle ----------
-let last = performance.now(), hudT = 0, saveT = 0;
+let last = performance.now(), hudT = 0, saveT = 0, peakT = 0, postT = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -120,7 +120,10 @@ function frame(now) {
   }
   if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); }
   hudT += dt;
-  if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); } }
+  if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); }
+    // leaderboard: check the record every 5 s, send it at most once a minute
+    if ((peakT += 0.3) >= 5) { peakT = 0; trackPeak(); }
+    if ((postT += 0.3) >= 60) { postT = 0; postPeak(); } }
   requestAnimationFrame(frame);
 }
 
@@ -255,6 +258,6 @@ function thumbMode(kind) {
 }
 
 function fmtTime(s) { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m` : `${s}s`; }
-window.addEventListener('pagehide', () => save());
-document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) save(); else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
+window.addEventListener('pagehide', () => { save(); postPeak(); });
+document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) { save(); postPeak(); } else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
 window.addEventListener('load', init);
