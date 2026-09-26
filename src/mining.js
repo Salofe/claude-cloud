@@ -334,6 +334,9 @@ const MineScene = {
     repChange(near, 2, true);
     S.stats.won++;
     addNews('🏆', `Pirate fleet destroyed`, '#6dffb0');
+    // clearing raiders in the war zone helps the side you back
+    const w = backedWar(), tr = MapScene.travel, here = [S.loc, tr && tr.from, tr && tr.to];
+    if (w && here.some(id => id && w.locs.includes(id))) warPush(w, 6, 'raiders cleared');
     if (this.space) this.clearT = 4;
   },
   finishSpace(won) {

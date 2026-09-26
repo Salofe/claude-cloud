@@ -9,7 +9,7 @@ function newGame() {
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, outposts: {}, projects: {}, stock: {}, freighters: [], cd: {}, nuked: [], loans: [], peace: 0, sat: {}, demand: {}, drift: {}, depl: {}, bal: 2,
+    invest: {}, outposts: {}, projects: {}, stock: {}, freighters: [], cd: {}, nuked: [], loans: [], peace: 0, sat: {}, demand: {}, allies: {}, spoils: {}, drift: {}, depl: {}, bal: 2,
     events: [], news: [], contracts: {}, active: [],
     stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
     unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
@@ -26,7 +26,7 @@ function loadSave() {
     if (!d || d.v !== 3) return null;
     d.projects = d.projects || {};
     d.lv.extractor = d.lv.extractor || 1;
-    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0; d.demand = d.demand || {};
+    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0; d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     return d;
   } catch (e) { return null; }
@@ -48,7 +48,7 @@ const ship = {
   get mass() { return UPG.hull.mass[S.lv.hull - 1]; },
   get fuelMax() { return Math.round(60 * Math.pow(1.22, S.lv.tank - 1)); },
   get laserDps() { return 12 * Math.pow(1.17, S.lv.laser - 1); },
-  get yieldMult() { return 1 + 0.15 * (S.lv.extractor - 1); },
+  get yieldMult() { return (1 + 0.15 * (S.lv.extractor - 1)) * (1 + 0.1 * spoilCount('rights')); },
   get laserRange() { return 190 + Math.min(190, (S.lv.laser - 1) * 6); },
   get thrust() { return Math.min(2.2, 1 + 0.06 * (S.lv.engine - 1)); },
   get speed() { return 1 + 0.12 * (S.lv.engine - 1); },
@@ -103,10 +103,12 @@ function locPos(loc, day) {
   return { x: Math.cos(a) * loc.r, y: Math.sin(a) * loc.r };
 }
 function locDist(a, b, day) { const p = locPos(a, day), q = locPos(b, day); return Math.hypot(p.x - q.x, p.y - q.y); }
-function travelInfo(to, from) {
+// a full hold is heavy: empty ships burn 60% of the fuel, full ones 140%
+function travelInfo(to, from, load) {
   from = from || S.loc;
+  if (load == null) load = Math.min(1, cargoUsed() / ship.cargoMax);
   const d = Math.max(8, locDist(from, to, S.day));
-  let fuel = Math.ceil(d * 0.1 * ship.mass / ship.eff * fuelEventMult() * (built('beacons') ? 0.7 : 1));
+  let fuel = Math.ceil(d * 0.1 * ship.mass / ship.eff * (0.6 + 0.8 * load) * fuelEventMult() * (built('beacons') ? 0.7 : 1));
   let days = Math.max(1, Math.round(d / (22 * ship.speed * (built('beacons') ? 1.5 : 1))));
   if (built('gates')) { fuel = 0; days = 1; }
   const danger = routeDanger(from, to);
@@ -140,7 +142,7 @@ function basePrice(locId, item) {
   const mult = l.market && l.market[item];
   if (mult == null) return null;
   const b = ITEMS[item].ore ? ITEMS[item].b * incomeMult() * (built('elevator') ? 1.25 : 1) : itemBase(item);
-  const pm = locId === 'marte' && built('terraform') ? 2 : 1;
+  const pm = (locId === 'marte' && built('terraform') ? 2 : 1) * (ITEMS[item].ore ? allyMult(locId) : 1);
   return b * mult * pm * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * demandFactor(locId, item);
 }
 // ---------- demand: each station only wants so many goods ----------
@@ -156,9 +158,12 @@ function useDemand(locId, item, units) {
 const DEMAND_REGEN = 0.03;
 function demandDays(locId, item) { return Math.ceil((1 - demandOf(locId, item)) / DEMAND_REGEN); }
 function demandLabel(d) { return d >= 0.75 ? ['Hungry', 'good'] : d >= 0.45 ? ['Steady', 'mid'] : d >= 0.2 ? ['Low', 'low'] : ['Saturated', 'bad']; }
+// permanent war alliances: +15% for ore at an ally's stations per star (max 3)
+function allyMult(locId) { const f = LOC[locId].faction; return 1 + 0.15 * ((S.allies || {})[f] || 0); }
+function spoilCount(kind) { let n = 0; for (const f in S.spoils || {}) if (S.spoils[f].includes(kind)) n++; return n; }
 function priceRatio(locId, item) {
   const l = LOC[locId]; const m = l.market && l.market[item]; if (m == null) return 0;
-  return m * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * demandFactor(locId, item) * (locId === 'marte' && built('terraform') ? 2 : 1);
+  return m * (1 + (S.drift[locId][item] || 0)) * (S.sat[locId][item] || 1) * eventPriceMult(locId, item) * demandFactor(locId, item) * (locId === 'marte' && built('terraform') ? 2 : 1) * (ITEMS[item].ore ? allyMult(locId) : 1);
 }
 function sellPrice(locId, item) { const p = basePrice(locId, item); return p == null ? null : Math.max(1, Math.round(p * 0.95)); }
 function buyPrice(locId, item) {
@@ -166,9 +171,12 @@ function buyPrice(locId, item) {
   if (mult == null || mult > 1.0 || ITEMS[item].ore) return null;
   return Math.max(2, Math.round(basePrice(locId, item) * 1.07));
 }
+// Fuel follows the economy: a round trip costs roughly a tenth of what a typical haul earns.
+// (eased in over the first stages so the Star Map doesn't bite new players)
+const fuelBase = () => Math.max(1, 0.09 * Math.pow(S.stats.earned, 0.72) * clamp(0.5 + 0.125 * (S.unlock - 2), 0.5, 1));
 function fuelPrice(locId) {
   let m = 1; for (const e of S.events) if (e.fuelPrice) m = Math.max(m, e.fuelPrice);
-  return Math.max(1, Math.round((LOC[locId].fuel || 6) * (1 + S.unlock * 0.5) * m * 10) / 10);
+  return Math.max(1, Math.round((LOC[locId].fuel || 6) / 5 * fuelBase() * m * Math.pow(0.85, spoilCount('fuel'))));
 }
 function marketClosed(locId) { return S.events.some(e => e.closed && e.closed.includes(locId)); }
 
@@ -198,6 +206,7 @@ function doSell(locId, item, n) {
     if (l.black) for (const f in FACTIONS) if (f !== 'piratas') repChange(f, -n * 0.02, true);
   }
   earn(total);
+  if (n > 0 && typeof warSalePush === 'function') warSalePush(locId, item, total);
   return total;
 }
 // Producers hold limited stock (grows each stage), which refills ~10% per day.
@@ -275,7 +284,7 @@ function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
 function droneCost(id, k) {
   const o = S.outposts[id]; const n = o ? o.n : 0; const z = LOC[id].field.z;
   let c = 0; for (let i = 0; i < (k || 1); i++) c += OUTPOST.drone[z] * Math.pow(OUTPOST.growth, n + i);
-  return Math.ceil(c);
+  return Math.ceil(c * Math.pow(0.88, spoilCount('drones')));
 }
 function outpostLvCost(id) { const o = S.outposts[id]; if (!o || o.lv >= OUTPOST.maxLv) return null; return OUTPOST.build[LOC[id].field.z] * OUTPOST.lvCost[o.lv - 1]; }
 function buildOutpost(id) {
@@ -287,7 +296,7 @@ function buildOutpost(id) {
 function maxAffordableDrones(id) {
   const o = S.outposts[id]; if (!o) return 0;
   let n = 0, c = 0; const z = LOC[id].field.z;
-  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n); if (c + nc > S.credits) break; c += nc; n++; }
+  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n) * Math.pow(0.88, spoilCount('drones')); if (c + nc > S.credits) break; c += nc; n++; }
   return n;
 }
 function buyDrones(id, k) {

@@ -180,21 +180,94 @@ function spawnEvent() {
 function makeWar(a, b, dur) {
   const locs = [...FACTIONS[a].locs, ...FACTIONS[b].locs].filter(id => locOpen(id) && !LOC[id].nuked);
   return { kind: 'war', icon: '⚔️', title: `War: ${FACTIONS[a].n} vs ${FACTIONS[b].n}`,
-    text: 'Weapons sell ×2.3, medicine ×1.5 and fuel costs more in their markets. Routes get dangerous. Selling weapons to one side angers the other.',
-    dur, war: [a, b], locs,
+    text: 'Weapons sell ×2.3, medicine ×1.5 and fuel costs more in their markets. Routes get dangerous. Back a side and sell your ore there to push the front.',
+    dur, war: [a, b], locs, front: 0, push: 0,
     price: locs.flatMap(l => [{ loc: l, item: 'arms', m: 2.3 }, { loc: l, item: 'meds', m: 1.5 }, { loc: l, item: 'machinery', m: 1.3 }]),
     danger: locs.map(l => ({ loc: l, add: 0.22 })), fuelPrice: 1.3 };
 }
 function onEventEnd(e) {
-  if (e.war && e.backed && factionAlive(e.backed)) {
-    const f = e.backed;
-    addEvent({ kind: 'victory', mine: 1, icon: '🏆', title: `${FACTIONS[f].n} wins the war`, text: 'Your side won. Their stations celebrate: every ore sells ×1.5 there.', dur: 25,
-      locs: FACTIONS[f].locs.filter(id => !LOC[id].nuked), price: FACTIONS[f].locs.flatMap(id => ORES.map(i => ({ loc: id, item: i, m: 1.5 }))) });
-    repChange(f, 10, true);
-    addNews('🏆', `<b>${FACTIONS[f].n}</b> won the war you backed`, '#ffd24a');
+  if (e.war && !e.resolved) {
+    const f = e.front || 0;
+    endWar(e, Math.abs(f) >= WAR.decisive ? (f > 0 ? e.war[0] : e.war[1]) : null);
+  }
+}
+
+// ---------- the war front ----------
+// e.front runs from −100 (e.war[1] wins) to +100 (e.war[0] wins). It drifts each
+// day with each side's strength; you push it by selling ore/supplies to the side
+// you back, funding offensives and beating raiders in their space.
+const WAR = { decisive: 25, minPush: 15, maxStars: 3, starBonus: 0.15 };
+const SPOILS = {
+  rights: { icon: '⛏', n: 'Mining rights', d: '+10% ore from every rock, everywhere' },
+  drones: { icon: '🤖', n: 'Drone contract', d: 'Drones cost 12% less at every outpost' },
+  fuel:   { icon: '⛽', n: 'Fuel treaty', d: 'Fuel is 15% cheaper at every station' },
+};
+const warSign = (e, f) => e.war[0] === f ? 1 : -1;
+const backedWar = () => S.events.find(e => e.war && e.backed && !e.resolved);
+function facStrength(f) { return FACTIONS[f].locs.filter(id => !LOC[id].nuked).length; }
+// value of "one good haul" right now, so pushes stay meaningful all game
+const haulRef = () => 40 * Math.pow(Math.max(1000, S.stats.earned), 0.72);
+function warPush(e, amt, why) {
+  if (!e || !e.backed || e.resolved || amt <= 0) return 0;
+  amt = Math.min(amt, 100 - warSign(e, e.backed) * (e.front || 0)); if (amt <= 0) return 0;
+  e.front = clamp((e.front || 0) + warSign(e, e.backed) * amt, -100, 100);
+  e.push = (e.push || 0) + amt;
+  if (why) toast(`Front +${Math.round(amt)}% for ${FACTIONS[e.backed].n} (${why})`, 'good');
+  if (Math.abs(e.front) >= 100) endWar(e, e.backed);
+  if (typeof updateWarBar === 'function') updateWarBar();
+  return amt;
+}
+// how far a sale of this value pushes the front (0 if it doesn't count)
+function salePushAmt(locId, item, value) {
+  const e = backedWar(); if (!e || LOC[locId].faction !== e.backed) return 0;
+  const k = ITEMS[item].ore ? 15 : item === 'arms' ? 30 : 20;
+  return Math.min(30, value / haulRef() * k);
+}
+function warSalePush(locId, item, value) {
+  const a = salePushAmt(locId, item, value);
+  if (a >= 0.5) warPush(backedWar(), a, `${ITEMS[item].n} delivered`);
+}
+function warDay(e) {
+  if (e.resolved) return;
+  const [a, b] = e.war;
+  e.front = clamp((e.front || 0) + (facStrength(a) - facStrength(b)) * 0.6 + rand(-4, 4), -100, 100);
+  if (Math.abs(e.front) >= 100) endWar(e, e.front > 0 ? a : b);
+}
+function warBarHTML(e, big) {
+  const [a, b] = e.war, f = e.front || 0, pct = (100 + f) / 2;
+  const you = e.backed ? `<small>You back <b style="color:${FACTIONS[e.backed].c}">${FACTIONS[e.backed].n}</b> · your push +${Math.round(e.push || 0)}%</small>` : '<small>Back a side at one of their stations to take part</small>';
+  return `<div class="warbar ${big ? 'big' : ''}"><div class="wb-names"><b style="color:${FACTIONS[a].c}">${FACTIONS[a].n}</b><span>⚔ ${e.resolved ? 'final' : Math.max(0, e.end - S.day) + 'd left'}</span><b style="color:${FACTIONS[b].c}">${FACTIONS[b].n}</b></div>
+    <div class="wb-track"><i style="width:${pct}%;background:${FACTIONS[a].c}"></i><i style="width:${100 - pct}%;background:${FACTIONS[b].c}"></i><em style="left:${pct}%"></em><span class="wb-mid"></span></div>${you}</div>`;
+}
+function endWar(e, winner) {
+  if (e.resolved) return;
+  e.resolved = 1;
+  S.events = S.events.filter(x => x !== e);
+  const names = e.war.map(f => FACTIONS[f].n).join(' vs ');
+  if (winner) { addNews('🏆', `<b>${FACTIONS[winner].n}</b> won the war (${names})`, FACTIONS[winner].c); repChange(winner, 3, true); }
+  else addNews('🕊️', `Stalemate: ${names} sign a truce`, '#8fa3c7');
+  if (!e.backed || typeof pendingChoices === 'undefined') return;
+  const f = e.backed, bar = warBarHTML(e, true);
+  if (winner === f && e.push >= WAR.minPush) {
+    S.allies = S.allies || {}; S.spoils = S.spoils || {};
+    const stars = S.allies[f] = Math.min(WAR.maxStars, (S.allies[f] || 0) + 1);
+    repChange(f, 15, true);
+    const owned = S.spoils[f] = S.spoils[f] || [];
+    const opts = Object.keys(SPOILS).filter(k => !owned.includes(k));
+    const starTxt = `<div class="ally-stars">${'★'.repeat(stars)}${'☆'.repeat(WAR.maxStars - stars)}</div><p><b>${FACTIONS[f].n}</b> is now your ally: <b>ore sells +${Math.round(stars * WAR.starBonus * 100)}%</b> at all their stations, forever.</p>`;
+    if (opts.length) pendingChoices.push({ icon: '🏆', title: `${FACTIONS[f].n} wins!`, html: bar + starTxt + '<p>Choose your spoils of war (permanent):</p>',
+      choices: opts.map(k => ({ label: `${SPOILS[k].n} — ${SPOILS[k].d}`, cost: 0, fn: () => { owned.push(k); addNews(SPOILS[k].icon, `Spoils of war: ${SPOILS[k].n} from ${FACTIONS[f].n}`, '#ffd24a'); } })) });
+    else { const prize = Math.round(haulRef() * 3); earn(prize); pendingChoices.push({ icon: '🏆', title: `${FACTIONS[f].n} wins!`, html: bar + starTxt + `<p>They already gave you everything they have — a war bonus of <b class="cr">${fmt(prize)} cr</b> instead.</p>`, choices: [{ label: 'Collect', cost: 0, fn: () => {} }] }); }
+  } else if (winner === f) {
+    repChange(f, 8, true);
+    pendingChoices.push({ icon: '🏆', title: `${FACTIONS[f].n} wins`, html: bar + `<p>They won, but you barely helped (push +${Math.round(e.push || 0)}%, needed +${WAR.minPush}%). No alliance this time.</p>`, choices: [{ label: 'OK', cost: 0, fn: () => {} }] });
+  } else {
+    repChange(f, -8, true);
+    pendingChoices.push({ icon: winner ? '💥' : '🕊️', title: winner ? `${FACTIONS[f].n} lost the war` : 'The war ended in a stalemate', html: bar + `<p>${winner ? 'Your side was beaten.' : 'Neither side broke through.'} No spoils this time — but your ore buys you another chance in the next war.</p>`, choices: [{ label: 'OK', cost: 0, fn: () => {} }] });
   }
 }
 function politicsDay() {
+  for (const e of [...S.events]) if (e.war) warDay(e);
   if (!S.loans) return;
   for (const ln of [...S.loans]) if (S.day >= ln.due) {
     S.loans = S.loans.filter(x => x !== ln);
@@ -211,7 +284,8 @@ const POWERS = {
   purge:  { icon: '🛡️', n: 'Hire mercenaries', stage: U.TRADE, cd: 30, cost: () => pcost(0.005, 250000), d: 'No pirates here for 30 days' },
   end:    { icon: '🕊️', n: 'End this crisis', stage: U.TRADE, cd: 0, cost: () => pcost(0.004, 200000) },
   incite: { icon: '🔥', n: 'Incite a war', stage: U.SATURN, cd: 60, cost: () => pcost(0.02, 5e7), d: 'Start a war against another faction. Wars pay: weapons ×2.3. Risky if discovered.' },
-  back:   { icon: '🎖️', n: 'Back this side', stage: U.SATURN, cd: 0, cost: () => pcost(0.01, 3e7), d: '+15 rep here, −15 with their enemy. If they win: ore ×1.5 at all their stations.' },
+  back:   { icon: '🎖️', n: 'Back this side', stage: U.TRADE, cd: 0, cost: () => pcost(0.004, 150000), d: 'Their stations pay +30% for metals during the war and every sale pushes the front. Win → a permanent ally.' },
+  offensive: { icon: '🚀', n: 'Fund an offensive', stage: U.TRADE, cd: 8, cost: () => pcost(0.008, 300000), d: 'Push the front +20% right now' },
   peace:  { icon: '🤝', n: 'Broker peace', stage: U.SATURN, cd: 0, cost: () => pcost(0.015, 4e7), d: 'End the war: +20 rep with both sides, +3 influence.' },
   nuke:   { icon: '💥', n: 'Fire the Nova Cannon', stage: U.FRONTIER, cd: 0, cost: () => pcost(0.05, 1e12), d: 'Destroy this planet.' },
 };
@@ -235,14 +309,16 @@ function powersAt(id) {
   if (city && l.faction && l.faction !== 'piratas') add('works');
   if (city) add('boom', kindActive('boom', id) ? { why: 'a boom is already running' } : {});
   if (has(U.BELT) && (l.danger || 0) >= 0.1) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
-  if (city && l.faction && l.faction !== 'piratas' && has(U.SATURN)) {
+  if (city && l.faction && l.faction !== 'piratas' && has(U.TRADE)) {
     const w = warOf(l.faction);
-    if (!w) {
+    if (!w && has(U.SATURN)) {
       for (const f of ['tierra', 'marte', 'cinturon', 'exterior']) if (f !== l.faction && factionAlive(f) && FACTIONS[f].locs.some(locOpen))
         add('incite', { arg: id + '|' + f, label: `Incite war vs ${FACTIONS[f].n}`, why: S.events.some(e => e.war) ? 'another war is running' : null });
-    } else {
-      add('back', w.backed ? { why: `you already backed ${FACTIONS[w.backed].n}` } : {});
-      add('peace');
+    } else if (w) {
+      const other = backedWar();
+      if (!w.backed) add('back', other && other !== w ? { why: 'you already back a side in another war' } : {});
+      else if (w.backed === l.faction) add('offensive');
+      if (has(U.SATURN)) add('peace');
     }
   }
   if (has(U.FRONTIER) && built('nova') && NUKABLE.includes(id)) add('nuke');
@@ -255,7 +331,7 @@ function usePower(kind, arg) {
   if (kind === 'end') {
     const e = S.events.find(x => x.uid === arg); if (!e || e.mine) return false;
     S.credits -= c;
-    S.events = S.events.filter(x => x !== e);
+    S.events = S.events.filter(x => x !== e); e.resolved = 1;
     const facs = new Set((e.locs || []).map(l => LOC[l].faction).filter(f => f && f !== 'piratas'));
     for (const f of facs) repChange(f, 10, true);
     addNews('🕊️', `Your money ended it: <b>${e.title}</b>. The system owes you one.`, '#6dffb0');
@@ -291,13 +367,21 @@ function usePower(kind, arg) {
     addNews('🛡️', `Mercenaries cleared the pirates near ${l.n}`, '#6dffb0');
   } else if (kind === 'back') {
     const w = warOf(l.faction); if (!w || w.backed) { S.credits += c; return false; }
-    w.backed = l.faction;
+    if (backedWar()) { S.credits += c; return false; }
+    w.backed = l.faction; w.push = 0; w.front = w.front || 0;
     const enemy = w.war.find(f => f !== l.faction);
+    // their war industry buys metals: +30% at the stations of the side you back
+    for (const id of FACTIONS[l.faction].locs) if (!LOC[id].nuked) for (const it of ['iron', 'titanium', 'nickel', 'platinum', 'iridium']) w.price.push({ loc: id, item: it, m: 1.3 });
     repChange(l.faction, 15); repChange(enemy, -15);
     addNews('🎖️', `You back ${FACTIONS[l.faction].n} in the war`, '#ffd24a');
+  } else if (kind === 'offensive') {
+    const w = warOf(l.faction); if (!w || w.backed !== l.faction) { S.credits += c; return false; }
+    warPush(w, 20, 'offensive');
+    for (const x of FACTIONS[l.faction].locs) setCd(x, 'offensive', POWERS.offensive.cd);
+    addNews('🚀', `You funded an offensive for ${FACTIONS[l.faction].n}`, '#ffd24a');
   } else if (kind === 'peace') {
     const w = warOf(l.faction); if (!w) { S.credits += c; return false; }
-    S.events = S.events.filter(e => e !== w);
+    S.events = S.events.filter(e => e !== w); w.resolved = 1;
     for (const f of w.war) repChange(f, 20, true);
     S.peace = Math.min(5, (S.peace || 0) + 1);
     addNews('🤝', `You brokered peace between ${w.war.map(f => FACTIONS[f].n).join(' and ')}. The system celebrates your name.`, '#6dffb0');

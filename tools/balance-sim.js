@@ -11,7 +11,7 @@ function toast() {} function sfx() {} function showEventBanner() {} function upd
 var TEX = {};
 this.api = { newGame, ship, UPG, UPG_KEYS, upgCost, LOC, NODES, FIELDS, ITEMS, ORES, GOODS, OUTPOST, outpostRate, outpostCap,
   PROJECTS, PROJ, built, INVEST, STATION_TIER, UNLOCKS, U, Z_ENEMY, incomeMult, totalIncome, locOpen, has, travelInfo,
-  econScale, influence, checkUnlocks, tradeRoutes, hireFreighter, FREIGHT, freighterIncome, getS: () => S };
+  econScale, influence, fuelPrice, checkUnlocks, tradeRoutes, hireFreighter, FREIGHT, freighterIncome, getS: () => S };
 `, ctx);
 const A = ctx.api;
 const S = () => A.getS();
@@ -32,6 +32,7 @@ function legTime(from, to) { const i = A.travelInfo(to, from); const dur = A.bui
 function combatOK(z) { if (z < 2) return 1; const need = 15 * A.Z_ENEMY[z] * 2.2; const r = A.ship.weaponDps / need; return r >= 1 ? 1 : Math.max(0.25, r); }
 
 // best active activity: returns { rate (cr/s), kind, where }
+const fuelShare = [];
 function bestActivity() {
   const s = S(); const opts = [];
   const cargo = A.ship.cargoMax, im = A.incomeMult();
@@ -49,7 +50,9 @@ function bestActivity() {
       if (!C.market || C.depot || C.id === L.id || !A.locOpen(C.id)) continue;
       const cm = marketMult(C.id, st.mix) * projMult(C.id);
       const t = fill + over + legTime(L.id, C.id) + legTime(C.id, L.id);
-      opts.push({ kind: 'mine+haul', where: L.id + '→' + C.id, rate: cargo * st.val * im * cm * 0.89 / t * cOK });
+      const fuelCost = (A.travelInfo(C.id, L.id, 1).fuel + A.travelInfo(L.id, C.id, 0).fuel) * A.fuelPrice(C.id);
+      fuelShare.push(fuelCost / (cargo * st.val * im * cm * 0.89));
+      opts.push({ kind: 'mine+haul', where: L.id + '→' + C.id, rate: (cargo * st.val * im * cm * 0.89 - fuelCost) / t * cOK, fuelPct: fuelCost / (cargo * st.val * im * cm * 0.89) });
     }
   }
   if (A.has(A.U.TRADE)) {
@@ -122,7 +125,7 @@ while (t < 5 * 3600) {
   s.credits += gain; s.stats.earned += gain; t += dt;
   if (a) actCount[a.kind] = (actCount[a.kind] || 0) + dt;
   A.checkUnlocks();
-  if (s.unlock > lastUnlock) { for (let u = lastUnlock + 1; u <= s.unlock; u++) unlockAt[u] = t; lastUnlock = s.unlock; const bk = {}; for (const o of bestActivity.last || []) if (!bk[o.kind]) bk[o.kind] = o; const fl = {}; for (const o of bestActivity.last || []) if (o.kind === 'mine+depot') fl[o.where] = Math.round(o.rate); log.push('         best by kind: ' + Object.values(bk).map(o => `${o.kind} ${Math.round(o.rate)} (${o.where})`).join(' | ') + ' || fields ' + JSON.stringify(fl)); log.push(`${(t / 60).toFixed(1).padStart(6)} min  UNLOCK ${s.unlock} ${A.UNLOCKS[s.unlock].title.padEnd(20)} active ${Math.round(a ? a.rate : 0)}/s (${a && a.kind} ${a && a.where})  drones ${Math.round(A.totalIncome())}/s`); }
+  if (s.unlock > lastUnlock) { for (let u = lastUnlock + 1; u <= s.unlock; u++) unlockAt[u] = t; lastUnlock = s.unlock; const bk = {}; for (const o of bestActivity.last || []) if (!bk[o.kind]) bk[o.kind] = o; const fl = {}; for (const o of bestActivity.last || []) if (o.kind === 'mine+depot') fl[o.where] = Math.round(o.rate); log.push('         best by kind: ' + Object.values(bk).map(o => `${o.kind} ${Math.round(o.rate)} (${o.where})`).join(' | ') + ' || fields ' + JSON.stringify(fl)); if (a && a.fuelPct != null) log.push(`         fuel = ${(a.fuelPct * 100).toFixed(1)}% of haul revenue`); log.push(`${(t / 60).toFixed(1).padStart(6)} min  UNLOCK ${s.unlock} ${A.UNLOCKS[s.unlock].title.padEnd(20)} active ${Math.round(a ? a.rate : 0)}/s (${a && a.kind} ${a && a.where})  drones ${Math.round(A.totalIncome())}/s`); }
   // a real player buys guns & shields to handle the best zone they have open
   { const zs = A.FIELDS.filter(L => A.locOpen(L.id)).map(L => L.field.z); const zmax = Math.max(...zs);
     if (zmax >= 2) for (let g = 0; g < 60; g++) { if (combatOK(zmax) >= 1) break; const c = A.upgCost('weapons', s.lv.weapons); if (c > s.credits * 0.5) break; s.credits -= c; s.lv.weapons++; } }

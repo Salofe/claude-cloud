@@ -61,10 +61,16 @@ function hudTick(dt) {
   const inc = totalIncome();
   $('hRate').textContent = inc > 0 ? `+${fmt(inc)}/s` : '';
 }
+function updateWarBar() {
+  const el = $('warHud'), w = S && backedWar();
+  el.classList.toggle('hidden', !w);
+  if (w) el.innerHTML = `<small>WAR FRONT</small>${warBarHTML(w)}`;
+}
 function updateHUD() {
   if (!S) return;
   for (const el of document.querySelectorAll('[data-need]')) el.classList.toggle('locked', S.unlock < +el.dataset.need);
   $('hDay').textContent = S.day;
+  updateWarBar();
   $('hFuel').style.width = (S.fuel / ship.fuelMax * 100) + '%';
   $('hFuelT').textContent = `${Math.floor(S.fuel)}/${ship.fuelMax}`;
   $('hHull').style.width = (S.hull / ship.hpMax * 100) + '%';
@@ -125,6 +131,8 @@ function selectLoc(id) {
   html += '</div>';
   const evs = S.events.filter(e => e.locs && e.locs.includes(id));
   if (evs.length) html += `<div class="evs">${evs.map(e => `<div class="ev">${e.icon} <b>${e.title}</b> <small>(${e.end - S.day}d)</small></div>`).join('')}</div>`;
+  for (const e of evs) if (e.war) html += warBarHTML(e);
+  if (l.faction && (S.allies || {})[l.faction]) html += `<div class="valline"><span class="ally-stars sm">${'★'.repeat(S.allies[l.faction])}</span> Your ally: ore sells <b>+${Math.round(S.allies[l.faction] * WAR.starBonus * 100)}%</b> here</div>`;
   if (l.field) {
     const ores = Object.keys(l.field.ores).sort((a, b) => l.field.ores[b] - l.field.ores[a]);
     html += `<div class="ores">${ores.map(o => `<span class="ore" style="--c:${ITEMS[o].c}">${ITEMS[o].n}</span>`).join('')}</div>`;
@@ -156,6 +164,7 @@ function selectLoc(id) {
     html += `<div class="travel">
       <div><small>Fuel</small><b class="${ok ? '' : 'badt'}">${info.fuel} <small>/ ${Math.floor(S.fuel)}</small></b></div>
       <div><small>Time</small><b>${info.days} day${info.days > 1 ? 's' : ''}</b></div>
+      ${l.station ? `<div><small>Fuel price</small><b>${fmt(fuelPrice(id))} <small>cr</small></b></div>` : ''}
       ${has(U.BELT) ? `<div><small>Ambush risk</small><b class="${info.danger > 0.3 ? 'badt' : ''}">${Math.round(info.danger * 100)}%</b></div>` : ''}</div>
       <button class="btn primary big" ${ok ? '' : 'disabled'} onclick="MapScene.startTravel('${id}')">${ok ? '🚀 Fly here' : '⛽ Not enough fuel — upgrade your tank or wait for a closer orbit'}</button>`;
   }
@@ -248,6 +257,7 @@ function renderDock(fresh) {
     const here = cargoValueAt(S.loc), alts = betterMarkets(S.loc);
     sellbox = `<div class="sellbox">
       <div class="sb-cargo"><small>CARGO</small><span>${ITEM_KEYS.filter(k => S.cargo[k]).map(k => `<i class="sw" style="background:${ITEMS[k].c}"></i>${fmt(S.cargo[k])} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div>
+      ${warSellHint()}
       <div class="sb-row">
         ${marketClosed(S.loc) ? '<div class="badt">Market closed by a strike.</div>' : here ? `<button class="btn primary" onclick="sellHere()">Sell all here · <b>${fmt(here)} cr</b></button>` : '<small>Nothing in your hold sells well here.</small>'}
         <div class="sb-alts">${alts.length ? alts.map(a => `<span onclick="closeSheet();selectLoc('${a.id}')"><b>${LOC[a.id].n}</b> pays <b class="cr">${fmt(a.v)}</b> <em>+${Math.round((a.v / Math.max(1, here) - 1) * 100)}%</em> <small>· ${a.fuel} ⛽</small></span>`).join('') : '<small>This is the best price you can get right now.</small>'}</div>
@@ -286,6 +296,12 @@ function tradeRun(g, to) {
 function doFreighter(from, to, g) {
   if (!hireFreighter(from, to, g)) { toast('Not enough credits (or fleet full)', 'bad'); return; }
   sfx('upgrade'); toast(`🚚 Freighter now runs ${ITEMS[g].n} to ${LOC[to].n}`, 'good'); renderDock();
+}
+function warSellHint() {
+  const w = backedWar(); if (!w || LOC[S.loc].faction !== w.backed || marketClosed(S.loc)) return '';
+  let p = salePushAmt(S.loc, 'iron', oreValueAt(S.loc));
+  for (const k of GOODS) if (S.cargo[k] && wantsGood(S.loc, k)) p += salePushAmt(S.loc, k, goodsValue(S.loc, k, S.cargo[k]));
+  return p >= 0.5 ? `<div class="warhint">⚔ Selling here pushes the front <b>+${Math.round(p)}%</b> for ${FACTIONS[w.backed].n}</div>` : '';
 }
 function sellHere() {
   const r = sellAllOre(S.loc);
@@ -537,6 +553,13 @@ function openFactions() {
     h += `<div class="inf-big" style="margin-top:14px"><div><small>INFLUENCE</small><b>${inf}</b><span>/ 100</span></div><div class="meter big gold"><i style="width:${Math.min(100, inf)}%"></i></div><div class="rank">${rankName(inf)}</div></div>`;
     h += `<p class="hint">Influence comes from investments, outpost levels, megaprojects, reputation, pirate kills${S.peace ? `, ${S.peace} peace deal${S.peace > 1 ? 's' : ''}` : ''}${(S.nuked || []).length ? `, and fear (${S.nuked.length} planet${S.nuked.length > 1 ? 's' : ''} destroyed)` : ''}.</p>`;
   }
+  const wars = S.events.filter(e => e.war);
+  if (wars.length) h += '<div class="sub">Wars</div>' + wars.map(e => warBarHTML(e)).join('');
+  const allies = Object.keys(S.allies || {}).filter(f => S.allies[f]);
+  if (allies.length) {
+    h += '<div class="sub">Allies (won wars)</div>';
+    for (const f of allies) h += `<div class="srow"><span><b style="color:${FACTIONS[f].c}">${FACTIONS[f].n}</b> <span class="ally-stars sm">${'★'.repeat(S.allies[f])}${'☆'.repeat(WAR.maxStars - S.allies[f])}</span></span><span class="dim">${(S.spoils[f] || []).map(k => `${SPOILS[k].icon} ${SPOILS[k].n}`).join(' · ')}</span><b class="cr">ore +${Math.round(S.allies[f] * WAR.starBonus * 100)}%</b></div>`;
+  }
   if (has(U.TRADE)) {
     h += '<div class="sub">Faction reputation</div>';
     for (const f in FACTIONS) {
@@ -590,7 +613,7 @@ function doPower(kind, arg) {
 }
 function showChoice(ev) {
   sfx('event');
-  showModal({ icon: ev.icon, title: ev.title, html: `<p>${ev.text}</p>`, cls: 'unlock',
+  showModal({ icon: ev.icon, title: ev.title, html: ev.html || `<p>${ev.text}</p>`, cls: 'unlock',
     buttons: ev.choices.map(c => ({ label: c.label, cls: c.cost ? 'primary' : '', disabled: c.cost > S.credits, fn: () => { if (c.cost > S.credits) return; S.credits -= c.cost; c.fn(); if (c.cost) addNews(ev.icon, `You chose: ${c.label.split(' · ')[0]}`, '#ffd24a'); save(); } })) });
 }
 
@@ -618,8 +641,9 @@ function openHelp() {
     <h4>🤖 Drones</h4><p>Build an outpost in each field and buy drones. They earn credits every second — even while you're offline.</p>
     <h4>⚔ Pirates</h4><p>In dangerous zones pirates attack. <b>Hold the mouse</b> to fire your guns. Destroyed ships drop credits.</p>
     <h4>🔓 Unlock</h4><p>The more you earn, the more of the Solar System opens up: the star map, new planets, pirates, trading, events and finally influence.</p>
-    <h4>🗺 Travel</h4><p>Planets orbit the Sun, so distances change every day. Farther places pay more and are more dangerous.</p>
+    <h4>🗺 Travel</h4><p>Planets orbit the Sun, so distances change every day. Farther places pay more and are more dangerous. Fuel gets pricier as you get richer, and a <b>full hold burns more</b> — pick your sell trips wisely. Prices differ per station.</p>
+    <h4>⚔ Wars</h4><p>When two factions fight, <b>back a side</b> at one of their stations. Their stations pay +30% for metals and every ore sale there <b>pushes the front</b> (see the bar). Help them win to gain a <b>permanent ally</b>: +15% ore at their stations (up to 3 stars) and spoils of war.</p>
     <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
-    <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — and later incite wars, back a side or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
+    <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — back a side in wars and fund offensives; later incite wars or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
     <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the Solar System.</p></div>`);
 }

@@ -192,6 +192,7 @@ const MapScene = {
       ctx.globalAlpha = 1;
     }
     this.drawProjects(ctx, t, day);
+    this.drawWars(ctx, t, day);
     // freighters shuttling along their routes
     for (const f of S.freighters || []) {
       const a = this.spos(f.from, day), b = this.spos(f.to, day);
@@ -259,6 +260,14 @@ const MapScene = {
         if (dg >= 0.2) icons += dg > 0.45 ? '☠☠' : '☠';
         if (S.active.some(c => c.type === 'deliver' && c.to === l.id)) icons += '📜';
         if (icons) drawIconRow(ctx, icons, p.x, p.y - r - 13, 14);
+        const war = evs.find(e => e.war);
+        if (war) {
+          const bw = 34, bx = p.x - bw / 2, by = p.y - r - (icons ? 28 : 14), k = (100 + (war.front || 0)) / 200;
+          ctx.fillStyle = 'rgba(4,8,20,0.85)'; roundRect(ctx, bx - 2, by - 2, bw + 4, 7, 3); ctx.fill();
+          ctx.fillStyle = FACTIONS[war.war[0]].c; ctx.fillRect(bx, by, bw * k, 3);
+          ctx.fillStyle = FACTIONS[war.war[1]].c; ctx.fillRect(bx + bw * k, by, bw * (1 - k), 3);
+          ctx.fillStyle = '#fff'; ctx.fillRect(bx + bw * k - 1, by - 2, 2, 7);
+        }
       }
     }
     ctx.textBaseline = 'alphabetic';
@@ -282,6 +291,28 @@ const MapScene = {
       const r = this.pr(LOC[S.loc]) + 16;
       const a = t * 0.7;
       drawPlayerShip(ctx, shipLv(), p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, a + Math.PI / 2, 0.42, 0.5, t);
+    }
+  },
+  // war front lines: pulsing red links between the two sides, with flak at the middle
+  drawWars(ctx, t, day) {
+    for (const e of S.events) if (e.war) {
+      const A = FACTIONS[e.war[0]].locs.filter(id => locOpen(id) && !LOC[id].nuked), B = FACTIONS[e.war[1]].locs.filter(id => locOpen(id) && !LOC[id].nuked);
+      for (const a of A) for (const b of B) {
+        const p = this.spos(a, day), q = this.spos(b, day);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,77,109,0.18)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+        ctx.setLineDash([6, 8]); ctx.lineDashOffset = -t * 30;
+        ctx.strokeStyle = 'rgba(255,107,125,0.7)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+        ctx.restore();
+        // the front sits where the bar says it is
+        const k = 0.5 - (e.front || 0) / 250, fx = p.x + (q.x - p.x) * k, fy = p.y + (q.y - p.y) * k;
+        for (let i = 0; i < 4; i++) {
+          const ph = (t * 1.3 + i * 0.37 + a.length) % 1, rr = 3 + ph * 9;
+          ctx.globalAlpha = (1 - ph) * 0.8; ctx.strokeStyle = i % 2 ? '#ffd24a' : '#ff6b7d'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(fx + Math.cos(i * 2.1) * 5, fy + Math.sin(i * 2.1) * 5, rr, 0, TAU); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
     }
   },
   drawProjects(ctx, t, day) {
