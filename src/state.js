@@ -19,7 +19,15 @@ function newGame() {
   addNews('📡', 'Your old mining ship is ready at Tranquility Base. Time to get rich.', '#3de8ff');
   return S;
 }
-function save() { if (!S) return; S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+// ---------- Clawcade leaderboard: the most credits you've ever held ----------
+function trackPeak() { if (S && S.credits > (S.stats.peak || 0)) S.stats.peak = Math.floor(S.credits); }
+let postedPeak = 0;
+function postPeak() {
+  if (!S || !S.stats.peak || S.stats.peak <= postedPeak) return;
+  postedPeak = S.stats.peak;
+  try { if (window.parent && window.parent !== window) window.parent.postMessage({ clawcade: 'score', score: S.stats.peak }, '*'); } catch (e) {}
+}
+function save() { if (!S) return; trackPeak(); postPeak(); S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
   try {
     const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s);

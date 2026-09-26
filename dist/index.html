@@ -1600,7 +1600,15 @@ function newGame() {
   addNews('📡', 'Your old mining ship is ready at Tranquility Base. Time to get rich.', '#3de8ff');
   return S;
 }
-function save() { if (!S) return; S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+// ---------- Clawcade leaderboard: the most credits you've ever held ----------
+function trackPeak() { if (S && S.credits > (S.stats.peak || 0)) S.stats.peak = Math.floor(S.credits); }
+let postedPeak = 0;
+function postPeak() {
+  if (!S || !S.stats.peak || S.stats.peak <= postedPeak) return;
+  postedPeak = S.stats.peak;
+  try { if (window.parent && window.parent !== window) window.parent.postMessage({ clawcade: 'score', score: S.stats.peak }, '*'); } catch (e) {}
+}
+function save() { if (!S) return; trackPeak(); postPeak(); S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
   try {
     const s = localStorage.getItem(SAVE_KEY); if (!s) return null; const d = JSON.parse(s);
@@ -3792,6 +3800,7 @@ function updateTicker() {
 // ---------- HUD ----------
 function hudTick(dt) {
   if (!S) return;
+  trackPeak();
   const d = S.credits - shownCredits;
   if (Math.abs(d) < 1) shownCredits = S.credits;
   else shownCredits += d * Math.min(1, dt * 6) + Math.sign(d) * Math.min(Math.abs(d), dt * 40);
@@ -4264,7 +4273,7 @@ function openShip() {
   for (const k of UPG_KEYS) if (upgOpen(k)) upg += `<div class="srow"><span>${UPG[k].icon} ${UPG[k].n}</span><b>${k === 'hull' ? UPG.hull.names[S.lv.hull - 1] : 'Lv ' + S.lv[k] + ' / ' + UPG[k].max}</b></div>`;
   openSheet(`🚀 ${S.shipName} <small>${UPG.hull.names[S.lv.hull - 1]} class</small>`, `<div class="yard-top"><canvas id="shipView" width="420" height="190"></canvas></div>
     <div class="cols"><div><div class="sub">Systems</div>${upg}</div><div><div class="sub">Cargo hold ${cargoUsed()}/${ship.cargoMax}</div>${rows || '<div class="empty small">Empty</div>'}
-    <div class="sub">Stats</div><div class="srow"><span>Ore mined</span><b>${fmt(S.stats.mined)}</b></div><div class="srow"><span>Lifetime earnings</span><b>${fmt(S.stats.earned)} cr</b></div>
+    <div class="sub">Stats</div><div class="srow"><span>Ore mined</span><b>${fmt(S.stats.mined)}</b></div><div class="srow"><span>Lifetime earnings</span><b>${fmt(S.stats.earned)} cr</b></div><div class="srow"><span>Record credits (leaderboard)</span><b class="cr">${fmt(S.stats.peak || 0)} cr</b></div>
     ${has(U.BELT) ? `<div class="srow"><span>Battles won / lost</span><b>${S.stats.won} / ${S.stats.lost}</b></div>` : ''}${has(U.TRADE) ? `<div class="srow"><span>Contracts</span><b>${S.stats.contracts}</b></div>` : ''}</div></div>`);
   const t0 = performance.now();
   const anim = () => { if (!$('sheet').classList.contains('hidden') && $('shipView')) { drawShipPreview('shipView', shipLv(), (performance.now() - t0) / 1000); requestAnimationFrame(anim); } };
