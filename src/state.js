@@ -68,7 +68,14 @@ function incomeMult() {
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
 function addCargo(k, n) { S.cargo[k] = (S.cargo[k] || 0) + n; if (S.cargo[k] <= 0) delete S.cargo[k]; }
-function oreValueAt(locId) { let v = 0; for (const k of ORES) if (S.cargo[k]) v += goodsValue(locId, k, S.cargo[k]); return v; }
+function oreValueAt(locId) { let v = 0; for (const k of ORES) if (S.cargo[k]) v += oreSaleValue(locId, k, S.cargo[k]); return v; }
+// what n units of ore fetch, following the same price slide doSell applies
+function oreSaleValue(locId, k, n) {
+  const sp = sellPrice(locId, k); if (!sp) return 0;
+  const s0 = S.sat[locId][k] || 1, q = 1 - 0.25 / Math.max(100, ship.cargoMax), fl = 0.4;
+  const m = s0 <= fl ? 0 : Math.min(n, Math.ceil(Math.log(fl / s0) / Math.log(q)));
+  return sp * (1 - Math.pow(q, m)) / (1 - q) + (n - m) * sp * Math.min(1, fl / s0);
+}
 // what n units would fetch, accounting for the demand they use up
 function goodsValue(locId, k, n) {
   const sp = sellPrice(locId, k); if (!sp) return 0;
@@ -77,7 +84,7 @@ function goodsValue(locId, k, n) {
 }
 // what your whole hold is worth here: ore, plus goods this station actually wants (never dumps goods at their source)
 const wantsGood = (locId, k) => { const m = LOC[locId].market; return m && m[k] != null && m[k] > 1; };
-function cargoValueAt(locId) { let v = oreValueAt(locId); for (const k of GOODS) if (S.cargo[k] && wantsGood(locId, k)) v += (sellPrice(locId, k) || 0) * S.cargo[k]; return v; }
+function cargoValueAt(locId) { let v = oreValueAt(locId); for (const k of GOODS) if (S.cargo[k] && wantsGood(locId, k)) v += goodsValue(locId, k, S.cargo[k]); return v; }
 function oreValueBase(k) { return ITEMS[k].b * incomeMult(); }
 
 // ---------- orbital positions ----------
