@@ -1,0 +1,67 @@
+{
+ "match": "A",
+ "shots": [
+  {
+   "t": 50.1,
+   "frames": 30,
+   "shot": {
+    "type": "orbit",
+    "r0": 7,
+    "h0": 2,
+    "auto": true,
+    "spin": 0.3,
+    "fov": 55,
+    "target": 1003
+   },
+   "name": "A10"
+  },
+  {
+   "t": 83.5,
+   "frames": 30,
+   "shot": {
+    "type": "fp"
+   },
+   "name": "A4"
+  },
+  {
+   "t": 88.0,
+   "frames": 30,
+   "shot": {
+    "type": "fp"
+   },
+   "name": "U6"
+  },
+  {
+   "t": 100,
+   "frames": 15,
+   "shot": {
+    "type": "orbit",
+    "r0": 16,
+    "h0": 9,
+    "auto": true,
+    "spin": 0.6,
+    "fov": 60,
+    "center": [
+     221,
+     1,
+     0
+    ]
+   },
+   "name": "M1"
+  },
+  {
+   "t": 128.7,
+   "frames": 30,
+   "shot": {
+    "type": "orbit",
+    "r0": 12,
+    "h0": 7,
+    "auto": true,
+    "spin": 0.25,
+    "fov": 55,
+    "target": 1005
+   },
+   "name": "U2"
+  }
+ ]
+}

@@ -1,0 +1,59 @@
+{
+ "match": "C",
+ "shots": [
+  {
+   "t": 27.45,
+   "frames": 30,
+   "shot": {
+    "type": "follow",
+    "target": 1003,
+    "dist": 4,
+    "side": 1.1,
+    "height": 0.7,
+    "fov": 60,
+    "smooth": 0.1
+   },
+   "name": "A5"
+  },
+  {
+   "t": 98.3,
+   "frames": 15,
+   "shot": {
+    "type": "orbit",
+    "r0": 6,
+    "h0": 2,
+    "auto": true,
+    "spin": 0.4,
+    "fov": 55,
+    "target": 1003
+   },
+   "name": "U3"
+  },
+  {
+   "t": 120,
+   "frames": 15,
+   "shot": {
+    "type": "orbit",
+    "r0": 16,
+    "h0": 9,
+    "auto": true,
+    "spin": 0.6,
+    "fov": 60,
+    "center": [
+     440,
+     3,
+     3
+    ]
+   },
+   "name": "M3"
+  },
+  {
+   "t": 151.0,
+   "frames": 30,
+   "shot": {
+    "type": "fp"
+   },
+   "name": "A9"
+  }
+ ]
+}

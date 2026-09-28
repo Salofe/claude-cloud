@@ -1,0 +1,21 @@
+{
+ "match": "C",
+ "shots": [
+  {
+   "t": 27.85,
+   "frames": 15,
+   "speed": 0.4,
+   "shot": {
+    "type": "orbit",
+    "r0": 3.6,
+    "h0": 0.4,
+    "auto": true,
+    "spin": 0.8,
+    "fov": 45,
+    "target": 1003,
+    "lookUp": 0.3
+   },
+   "name": "R1"
+  }
+ ]
+}

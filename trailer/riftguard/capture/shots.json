@@ -1,0 +1,417 @@
+{
+ "H1": {
+  "t": 129.4,
+  "frames": 30,
+  "speed": 0,
+  "shot": {
+   "type": "orbit",
+   "r0": 8,
+   "h0": 3.5,
+   "auto": true,
+   "spin": 0.35,
+   "fov": 55,
+   "target": 1005
+  }
+ },
+ "H2": {
+  "t": 140.9,
+  "frames": 30,
+  "speed": 0,
+  "shot": {
+   "type": "orbit",
+   "r0": 6.5,
+   "h0": 2,
+   "auto": true,
+   "spin": 0.35,
+   "fov": 55,
+   "target": 1001
+  }
+ },
+ "H3": {
+  "t": 90.6,
+  "frames": 60,
+  "ramp": [
+   [
+    0.95,
+    0
+   ],
+   [
+    1.35,
+    1
+   ]
+  ],
+  "shot": {
+   "type": "orbit",
+   "r0": 4.5,
+   "h0": 1.2,
+   "auto": true,
+   "spin": 0.3,
+   "fov": 55,
+   "target": 1
+  }
+ },
+ "A4": {
+  "t": 83.5,
+  "frames": 30,
+  "shot": {
+   "type": "fp"
+  }
+ },
+ "A5": {
+  "t": 27.45,
+  "frames": 30,
+  "shot": {
+   "type": "follow",
+   "target": 1003,
+   "dist": 4,
+   "side": 1.1,
+   "height": 0.7,
+   "fov": 60,
+   "smooth": 0.1
+  }
+ },
+ "A6": {
+  "t": 28.4,
+  "frames": 30,
+  "shot": {
+   "type": "fp"
+  }
+ },
+ "A7": {
+  "t": 60.7,
+  "frames": 30,
+  "shot": {
+   "type": "orbit",
+   "r0": 6,
+   "h0": 1.5,
+   "auto": true,
+   "spin": 0.5,
+   "fov": 55,
+   "target": 1001
+  }
+ },
+ "A8": {
+  "t": 61.5,
+  "frames": 30,
+  "shot": {
+   "type": "orbit",
+   "r0": 9,
+   "h0": 3.5,
+   "auto": true,
+   "spin": 0.4,
+   "fov": 55,
+   "target": 1005
+  }
+ },
+ "A9": {
+  "t": 151.0,
+  "frames": 30,
+  "shot": {
+   "type": "fp"
+  }
+ },
+ "A10": {
+  "t": 50.1,
+  "frames": 30,
+  "shot": {
+   "type": "orbit",
+   "r0": 7,
+   "h0": 2,
+   "auto": true,
+   "spin": 0.3,
+   "fov": 55,
+   "target": 1003
+  }
+ },
+ "A11": {
+  "t": 80.9,
+  "frames": 30,
+  "shot": {
+   "type": "fp"
+  }
+ },
+ "R1": {
+  "t": 27.85,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1003,
+   "lookUp": 0.3
+  }
+ },
+ "R2": {
+  "t": 27.45,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1004,
+   "lookUp": 0.3
+  }
+ },
+ "R3": {
+  "t": 32.2,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1002,
+   "lookUp": 0.3
+  }
+ },
+ "R4": {
+  "t": 50.45,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1003,
+   "lookUp": 0.3
+  }
+ },
+ "R5": {
+  "t": 60.85,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1001,
+   "lookUp": 0.3
+  }
+ },
+ "R6": {
+  "t": 41.7,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1006,
+   "lookUp": 0.3
+  }
+ },
+ "R7": {
+  "t": 74.8,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1001,
+   "lookUp": 0.3
+  }
+ },
+ "R8": {
+  "t": 34.4,
+  "frames": 15,
+  "speed": 0.4,
+  "shot": {
+   "type": "orbit",
+   "r0": 3.6,
+   "h0": 0.4,
+   "auto": true,
+   "spin": 0.8,
+   "fov": 45,
+   "target": 1005,
+   "lookUp": 0.3
+  }
+ },
+ "U1": {
+  "t": 74.55,
+  "frames": 30,
+  "ramp": [
+   [
+    0.5,
+    1
+   ],
+   [
+    0.6,
+    0.25
+   ]
+  ],
+  "shot": {
+   "type": "orbit",
+   "r0": 7,
+   "h0": 2.5,
+   "auto": true,
+   "spin": 0.3,
+   "fov": 55,
+   "target": 1001
+  }
+ },
+ "U2": {
+  "t": 128.7,
+  "frames": 30,
+  "shot": {
+   "type": "orbit",
+   "r0": 12,
+   "h0": 7,
+   "auto": true,
+   "spin": 0.25,
+   "fov": 55,
+   "target": 1005
+  }
+ },
+ "U3": {
+  "t": 98.3,
+  "frames": 15,
+  "shot": {
+   "type": "orbit",
+   "r0": 6,
+   "h0": 2,
+   "auto": true,
+   "spin": 0.4,
+   "fov": 55,
+   "target": 1003
+  }
+ },
+ "U4": {
+  "t": 83.3,
+  "frames": 15,
+  "shot": {
+   "type": "orbit",
+   "r0": 7,
+   "h0": 2,
+   "auto": true,
+   "spin": 0.4,
+   "fov": 55,
+   "target": 1001
+  }
+ },
+ "U5": {
+  "t": 140.2,
+  "frames": 60,
+  "ramp": [
+   [
+    0.6,
+    1
+   ],
+   [
+    0.75,
+    0.3
+   ],
+   [
+    1.5,
+    0.3
+   ],
+   [
+    1.7,
+    1
+   ]
+  ],
+  "shot": {
+   "type": "orbit",
+   "r0": 10,
+   "h0": 4,
+   "auto": true,
+   "spin": 0.25,
+   "fov": 55,
+   "target": 1003
+  }
+ },
+ "U6": {
+  "t": 88.0,
+  "frames": 30,
+  "shot": {
+   "type": "fp"
+  }
+ },
+ "M1": {
+  "t": 100,
+  "frames": 15,
+  "shot": {
+   "type": "orbit",
+   "r0": 16,
+   "h0": 9,
+   "auto": true,
+   "spin": 0.6,
+   "fov": 60,
+   "center": [
+    221,
+    1,
+    0
+   ]
+  }
+ },
+ "M2": {
+  "t": 110,
+  "frames": 15,
+  "shot": {
+   "type": "orbit",
+   "r0": 14,
+   "h0": 8,
+   "auto": true,
+   "spin": 0.6,
+   "fov": 60,
+   "target": 1000
+  }
+ },
+ "M3": {
+  "t": 120,
+  "frames": 15,
+  "shot": {
+   "type": "orbit",
+   "r0": 16,
+   "h0": 9,
+   "auto": true,
+   "spin": 0.6,
+   "fov": 60,
+   "center": [
+    440,
+    3,
+    3
+   ]
+  }
+ },
+ "M4": {
+  "t": 120,
+  "frames": 15,
+  "shot": {
+   "type": "orbit",
+   "r0": 16,
+   "h0": 9,
+   "auto": true,
+   "spin": 0.6,
+   "fov": 60,
+   "center": [
+    0,
+    1,
+    0
+   ]
+  }
+ }
+}

@@ -1,0 +1,1 @@
+{"match":"C","shots":[{"name":"t_s03","t":90.6,"frames":6,"shot":{"type":"orbit","target":1,"r0":6,"h0":2,"auto":true,"spin":0.4,"fov":55},"ramp":[[0.1,0],[0.2,1]]}]}
