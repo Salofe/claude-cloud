@@ -124,7 +124,7 @@
   }
  },
  "A11": {
-  "t": 80.9,
+  "t": 62.9,
   "frames": 30,
   "shot": {
    "type": "fp"
@@ -355,16 +355,17 @@
   "frames": 15,
   "shot": {
    "type": "orbit",
-   "r0": 16,
-   "h0": 9,
+   "r0": 20,
+   "h0": 13,
    "auto": true,
-   "spin": 0.6,
-   "fov": 60,
+   "spin": 0.35,
+   "fov": 50,
    "center": [
     221,
     1,
     0
-   ]
+   ],
+   "collide": false
   }
  },
  "M2": {
@@ -385,16 +386,17 @@
   "frames": 15,
   "shot": {
    "type": "orbit",
-   "r0": 16,
-   "h0": 9,
+   "r0": 20,
+   "h0": 13,
    "auto": true,
-   "spin": 0.6,
-   "fov": 60,
+   "spin": 0.35,
+   "fov": 50,
    "center": [
     440,
     3,
     3
-   ]
+   ],
+   "collide": false
   }
  },
  "M4": {
@@ -402,16 +404,17 @@
   "frames": 15,
   "shot": {
    "type": "orbit",
-   "r0": 16,
-   "h0": 9,
+   "r0": 20,
+   "h0": 13,
    "auto": true,
-   "spin": 0.6,
-   "fov": 60,
+   "spin": 0.35,
+   "fov": 50,
    "center": [
     0,
     1,
     0
-   ]
+   ],
+   "collide": false
   }
  }
 }

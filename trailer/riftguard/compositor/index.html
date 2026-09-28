@@ -75,6 +75,7 @@ function hash(n) { n = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b); n ^= n >>> 13; n =
 const grain = document.createElement('canvas'); grain.width = grain.height = 256;
 { const g = grain.getContext('2d'), d = g.createImageData(256, 256); for (let i = 0; i < d.data.length; i += 4) { const v = 128 + (hash(i) - 0.5) * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); }
 const off = document.createElement('canvas'); off.width = W; off.height = H; const ox = off.getContext('2d');
+const logoLayer = document.createElement('canvas'); logoLayer.width = W; logoLayer.height = 500;
 const tint = document.createElement('canvas'); tint.width = W; tint.height = H; const tx = tint.getContext('2d');
 
 function goldGrad(ctx, y0, y1) { const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#ffffff'); g.addColorStop(0.45, '#ffe08a'); g.addColorStop(1, '#ff9d2e'); return g; }
@@ -155,7 +156,10 @@ function slam(s, lt, dur, size = 190) {
 }
 function sub(s, lt, dur) {
   const k = eOut(lt / 0.2), a = k * (1 - clamp((lt - dur + 0.1) / 0.1, 0, 1));
-  x.save(); x.globalAlpha = a; x.font = '700 64px Raj'; x.textBaseline = 'middle'; x.fillStyle = '#fff';
+  x.save(); x.globalAlpha = a;
+  const bg = x.createLinearGradient(0, 0, W, 0); bg.addColorStop(0, 'rgba(0,0,0,0)'); bg.addColorStop(0.2, 'rgba(0,0,0,0.62)'); bg.addColorStop(0.8, 'rgba(0,0,0,0.62)'); bg.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = bg; x.fillRect(0, H / 2 - 60, W, 140);
+  x.font = '700 64px Raj'; x.textBaseline = 'middle'; x.fillStyle = '#fff';
   x.shadowColor = 'rgba(0,0,0,0.8)'; x.shadowBlur = 24;
   spaced(x, s, W / 2, H / 2 + 10, 14 + 6 * (lt / dur), 'center');
   x.restore();
@@ -223,20 +227,23 @@ async function endCard(t) {
   const kIn = eOutExpo(lt / 0.35), up = eOut(clamp((lt - 2.6) / 0.5, 0, 1));
   const sc = 1.35 - 0.35 * kIn;
   const ly = H / 2 - 20 - 190 * up;
-  x.save(); x.translate(W / 2, ly); x.scale(sc * (1 - 0.25 * up), sc * (1 - 0.25 * up));
-  x.font = 'italic 800 250px Ox'; x.textAlign = 'center'; x.textBaseline = 'middle';
-  x.globalAlpha = kIn; x.shadowColor = 'rgba(255,150,40,0.6)'; x.shadowBlur = 60;
-  x.fillStyle = goldGrad(x, -110, 110); x.fillText('RIFTGUARD', 0, 0);
-  x.shadowBlur = 0;
-  // light sweep through the letters
+  // draw the logo on its own layer so the light sweep only touches the letters
+  const lc = logoLayer.getContext('2d'); lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, W, 500);
+  lc.translate(W / 2, 250);
+  lc.font = 'italic 800 250px Ox'; lc.textAlign = 'center'; lc.textBaseline = 'middle';
+  lc.shadowColor = 'rgba(255,150,40,0.6)'; lc.shadowBlur = 60;
+  lc.fillStyle = goldGrad(lc, -110, 110); lc.fillText('RIFTGUARD', 0, 0);
+  lc.shadowBlur = 0;
   const sw = (lt - 0.25) / 0.9;
   if (sw > 0 && sw < 1) {
-    x.globalCompositeOperation = 'source-atop';
-    const gx = -900 + 1800 * sw, gl = x.createLinearGradient(gx - 160, 0, gx + 160, 0);
+    lc.globalCompositeOperation = 'source-atop';
+    const gx = -900 + 1800 * sw, gl = lc.createLinearGradient(gx - 160, 0, gx + 160, 0);
     gl.addColorStop(0, 'rgba(255,255,255,0)'); gl.addColorStop(0.5, 'rgba(255,255,255,0.95)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
-    x.fillStyle = gl; x.fillRect(-1000, -150, 2000, 300);
-    x.globalCompositeOperation = 'source-over';
+    lc.fillStyle = gl; lc.fillRect(-1000, -150, 2000, 300);
+    lc.globalCompositeOperation = 'source-over';
   }
+  x.save(); x.globalAlpha = kIn; x.translate(W / 2, ly); const ls = sc * (1 - 0.25 * up); x.scale(ls, ls);
+  x.drawImage(logoLayer, -W / 2, -250);
   x.restore();
   // subtitle
   const ka = clamp((lt - 0.45) / 0.3, 0, 1);

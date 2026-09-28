@@ -1,0 +1,24 @@
+{
+ "match": "C",
+ "shots": [
+  {
+   "t": 120,
+   "frames": 15,
+   "shot": {
+    "type": "orbit",
+    "r0": 20,
+    "h0": 13,
+    "auto": true,
+    "spin": 0.35,
+    "fov": 50,
+    "center": [
+     440,
+     3,
+     3
+    ],
+    "collide": false
+   },
+   "name": "M3"
+  }
+ ]
+}

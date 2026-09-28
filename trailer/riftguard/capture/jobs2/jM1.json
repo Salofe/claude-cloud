@@ -1,0 +1,24 @@
+{
+ "match": "A",
+ "shots": [
+  {
+   "t": 100,
+   "frames": 15,
+   "shot": {
+    "type": "orbit",
+    "r0": 20,
+    "h0": 13,
+    "auto": true,
+    "spin": 0.35,
+    "fov": 50,
+    "center": [
+     221,
+     1,
+     0
+    ],
+    "collide": false
+   },
+   "name": "M1"
+  }
+ ]
+}

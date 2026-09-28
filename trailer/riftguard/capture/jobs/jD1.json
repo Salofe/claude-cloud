@@ -24,24 +24,6 @@
    "name": "A11"
   },
   {
-   "t": 120,
-   "frames": 15,
-   "shot": {
-    "type": "orbit",
-    "r0": 16,
-    "h0": 9,
-    "auto": true,
-    "spin": 0.6,
-    "fov": 60,
-    "center": [
-     0,
-     1,
-     0
-    ]
-   },
-   "name": "M4"
-  },
-  {
    "t": 140.9,
    "frames": 30,
    "speed": 0,
