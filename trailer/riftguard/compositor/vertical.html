@@ -1,0 +1,309 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: 'Ox'; src: url(fonts/Oxanium-800.woff2) format('woff2'); font-weight: 200 800; }
+@font-face { font-family: 'Raj'; src: url(fonts/Rajdhani-700.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'Raj'; src: url(fonts/Rajdhani-600.woff2) format('woff2'); font-weight: 600; }
+html, body { margin: 0; background: #000; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// ---- Riftguard trailer compositor: every frame is a pure function of t ----
+const W = 1080, H = 1920, FPS = 30;
+const c = document.getElementById('c'), x = c.getContext('2d');
+const SHOTS = '../work/shots/';
+// Edit decision list: [start, dur, shot, srcOffsetFrames, opts]
+const EDL = [
+  [0.0, 1.0, 'H1', 0, { punch: 1.5 }],
+  [1.0, 1.0, 'H2', 0, { punch: 1.5 }],
+  [2.0, 2.0, 'H3', 0, { punch: 1.5 }],
+  [4.0, 1.0, 'A4', 0, { punch: 1 }],
+  [5.0, 1.0, 'A5', 0, {}],
+  [6.0, 1.0, 'A6', 0, {}],
+  [7.0, 1.0, 'A7', 0, {}],
+  [8.0, 1.0, 'A8', 0, {}],
+  [9.0, 1.0, 'A9', 0, {}],
+  [10.0, 1.0, 'A10', 0, {}],
+  [11.0, 1.0, 'A11', 0, {}],
+  [12.0, 0.5, 'R1', 0, { roll: ['MONOLITH', 'TANK', 'Basalt colossus. Walls, quakes, eruptions.'] }],
+  [12.5, 0.5, 'R2', 0, { roll: ['KESTREL', 'DAMAGE', 'Falcon-eyed scout. Long shots, updrafts, tripwires.'] }],
+  [13.0, 0.5, 'R3', 0, { roll: ['SOLACE', 'SUPPORT', 'Floating lantern monk. Light that heals and burns.'] }],
+  [13.5, 0.5, 'R4', 0, { roll: ['KODIAK', 'TANK', 'Bear-frame brawler. Rams, magnets, bear slams.'] }],
+  [14.0, 0.5, 'R5', 0, { roll: ['RIPTIDE', 'DAMAGE', 'Jet-board surfer. Grapples, waves, tsunamis.'] }],
+  [14.5, 0.5, 'R6', 0, { roll: ['HEX', 'SUPPORT', 'Top-hatted warlock. Curses, swaps, soul links.'] }],
+  [15.0, 0.5, 'R7', 0, { roll: ['ARCLIGHT', 'DAMAGE', 'Living tesla coil. Chains, surges, overloads.'] }],
+  [15.5, 0.5, 'R8', 0, { roll: ['RIME', 'DAMAGE', 'Crystal elemental. Chills, spikes, shells.'] }],
+  [16.0, 1.0, 'U1', 0, { punch: 1.5 }],
+  [17.0, 1.0, 'U2', 0, {}],
+  [18.0, 0.5, 'U3', 0, {}],
+  [18.5, 0.5, 'U4', 0, {}],
+  [19.0, 0.5, 'M1', 0, { map: ['EMBERFALL FOUNDRY', 'CONTROL'] }],
+  [19.5, 0.5, 'M2', 0, { map: ['NEON CROSSING', 'ESCORT'] }],
+  [20.0, 0.5, 'M3', 0, { map: ['SKYREACH SANCTUM', 'CONTROL'] }],
+  [20.5, 0.5, 'M4', 0, { map: ['HALCYON TERRACE', 'CONTROL'] }],
+  [21.0, 2.0, 'U5', 0, { punch: 1 }],
+  [23.0, 1.0, 'U6', 0, {}],
+];
+const ROLE_COL = { TANK: '#43c9ff', DAMAGE: '#ff4658', SUPPORT: '#5dffb0' };
+// text beats: [t0, t1, kind, ...]
+const TEXT = [
+  [0.03, 0.97, 'slam', '20 HEROES'],
+  [1.03, 1.97, 'slam', '4V4 ONLINE'],
+  [2.03, 2.97, 'slam', '0 DOWNLOADS'],
+  [3.0, 3.93, 'sub', 'IT RUNS IN YOUR BROWSER'],
+  [4.1, 11.95, 'tag', 'REAL GAMEPLAY · CAPTURED IN-BROWSER'],
+  [12.0, 15.98, 'counter', '20 HEROES'],
+  [19.0, 20.98, 'counter', '4 MAPS · 2 MODES'],
+  [21.15, 22.9, 'line', 'TEAM UP. ONLINE. INSTANTLY.'],
+];
+const FLASH = [[3.9, 4.12, 1.0], [15.95, 16.12, 0.8], [24.45, 24.75, 1.0], [21.0, 21.08, 0.5]];
+
+// ---------- helpers ----------
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const eOut = k => 1 - Math.pow(1 - clamp(k, 0, 1), 3);
+const eOutExpo = k => k >= 1 ? 1 : 1 - Math.pow(2, -10 * clamp(k, 0, 1));
+const cache = new Map();
+function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const p = new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+  cache.set(src, p); if (cache.size > 90) cache.delete(cache.keys().next().value);
+  return p;
+}
+function hash(n) { n = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b); n ^= n >>> 13; n = Math.imul(n, 0xc2b2ae35); n ^= n >>> 16; return (n >>> 0) / 4294967296; }
+// grain tile
+const grain = document.createElement('canvas'); grain.width = grain.height = 256;
+{ const g = grain.getContext('2d'), d = g.createImageData(256, 256); for (let i = 0; i < d.data.length; i += 4) { const v = 128 + (hash(i) - 0.5) * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); }
+const off = document.createElement('canvas'); off.width = W; off.height = H; const ox = off.getContext('2d');
+const logoLayer = document.createElement('canvas'); logoLayer.width = 1920; logoLayer.height = 500;
+const tint = document.createElement('canvas'); tint.width = W; tint.height = H; const tx = tint.getContext('2d');
+
+function goldGrad(ctx, y0, y1) { const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#ffffff'); g.addColorStop(0.45, '#ffe08a'); g.addColorStop(1, '#ff9d2e'); return g; }
+function spaced(ctx, s, px, py, sp, align) {
+  // letter-spaced text
+  let w = 0; for (const ch of s) w += ctx.measureText(ch).width + sp; w -= sp;
+  let xx = align === 'center' ? px - w / 2 : align === 'right' ? px - w : px;
+  for (const ch of s) { ctx.fillText(ch, xx, py); xx += ctx.measureText(ch).width + sp; }
+  return w;
+}
+
+// chromatic split of the current canvas (on cuts / impacts)
+function chroma(amount) {
+  if (amount < 0.5) return;
+  ox.clearRect(0, 0, W, H); ox.drawImage(c, 0, 0);
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'lighter';
+  const ch = [['#ff0000', -amount, 0], ['#00ff00', 0, 0], ['#0000ff', amount, 0]];
+  for (const [col, dx, dy] of ch) {
+    tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, W, H); tx.drawImage(off, 0, 0);
+    tx.globalCompositeOperation = 'multiply'; tx.fillStyle = col; tx.fillRect(0, 0, W, H);
+    tx.globalCompositeOperation = 'destination-in'; tx.drawImage(off, 0, 0);
+    x.drawImage(tint, dx, dy);
+  }
+  x.globalCompositeOperation = 'source-over';
+}
+
+function grade(t) {
+  // teal shadows / warm highlights + vignette
+  x.globalCompositeOperation = 'soft-light';
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, 'rgba(0,120,160,0.35)'); g.addColorStop(1, 'rgba(255,140,40,0.30)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'source-over';
+  const v = x.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+  // film grain
+  x.globalAlpha = 0.07; x.globalCompositeOperation = 'overlay';
+  const f = Math.floor(t * FPS);
+  const gx = -Math.floor(hash(f) * 256), gy = -Math.floor(hash(f + 999) * 256);
+  for (let yy = gy; yy < H; yy += 256) for (let xx = gx; xx < W; xx += 256) x.drawImage(grain, xx, yy);
+  x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
+}
+
+// ---- vertical 9:16 layout: footage panel over a blurred fill, titles in the safe zones ----
+const PY = 240, PH = 1440, SRCW = 810;           // panel: 1080x1440 from a 810x1080 crop (1.33x)
+async function drawShot(t) {
+  const e = EDL.find(e => t >= e[0] - 1e-6 && t < e[0] + e[1] - 1e-6);
+  if (!e) return null;
+  const [st, dur, name, offF, o] = e;
+  const lt = t - st, fi = offF + Math.round(lt * FPS);
+  const im = await img(`${SHOTS}${name}/f${String(fi).padStart(5, '0')}.jpg`);
+  if (!im) { x.fillStyle = '#200'; x.fillRect(0, 0, W, H); return e; }
+  // blurred, darkened fill behind the panel
+  x.filter = 'blur(26px) brightness(0.42) saturate(1.3)';
+  x.drawImage(im, (W - 3413) / 2, 0, 3413, 1920);
+  x.filter = 'none';
+  const punch = (o.punch || 0.6) * 0.06 * Math.exp(-lt * 9);
+  const s = 1 + 0.03 * (lt / dur) + punch;
+  const shake = (o.punch || 0) * 10 * Math.exp(-lt * 10);
+  const sx = Math.sin(t * 91) * shake, sy = Math.cos(t * 77) * shake;
+  const fx = o.fx || 960, cw = SRCW / s, ch = 1080 / s;
+  // draw the panel on the offscreen layer, feather its top/bottom into the fill
+  ox.clearRect(0, 0, W, H);
+  ox.filter = 'contrast(1.1) saturate(1.15) brightness(1.03)';
+  ox.drawImage(im, fx - cw / 2 - sx, 540 - ch / 2 - sy, cw, ch, 0, PY, W, PH);
+  ox.filter = 'none';
+  ox.globalCompositeOperation = 'destination-in';
+  const fg = ox.createLinearGradient(0, PY, 0, PY + PH);
+  fg.addColorStop(0, 'rgba(0,0,0,0)'); fg.addColorStop(0.06, 'rgba(0,0,0,1)'); fg.addColorStop(0.94, 'rgba(0,0,0,1)'); fg.addColorStop(1, 'rgba(0,0,0,0)');
+  ox.fillStyle = fg; ox.fillRect(0, PY, W, PH);
+  ox.globalCompositeOperation = 'source-over';
+  x.drawImage(off, 0, 0);
+  chroma(12 * Math.exp(-lt * 22) * (o.punch ? 1.4 : 1));
+  return e;
+}
+function fitFont(ctx, s, weightFam, size, maxW, sp = 0) {
+  ctx.font = `${weightFam.replace('#', size)}`;
+  let w = 0; for (const ch of s) w += ctx.measureText(ch).width + sp; w -= sp;
+  return w > maxW ? size * maxW / w : size;
+}
+function slam(s, lt, dur) {
+  const kIn = eOutExpo(lt / 0.16), kOut = clamp((lt - (dur - 0.08)) / 0.08, 0, 1);
+  const sc = 1.55 - 0.55 * kIn + 0.04 * (lt / dur);
+  const size = fitFont(x, s, 'italic 800 #px Ox', 190, 960);
+  x.save(); x.translate(W / 2, H / 2 - 20); x.scale(sc, sc);
+  x.font = `italic 800 ${size}px Ox`; x.textAlign = 'center'; x.textBaseline = 'middle';
+  const a = kIn * (1 - kOut);
+  for (let i = 3; i >= 1; i--) { x.globalAlpha = a * 0.12 * (1 - kIn) * i; x.fillStyle = '#ffb347'; x.fillText(s, 0, i * 12 * (1 - kIn)); }
+  x.globalAlpha = a; x.shadowColor = 'rgba(255,150,40,0.55)'; x.shadowBlur = 40;
+  x.fillStyle = goldGrad(x, -size * 0.45, size * 0.45); x.fillText(s, 0, 0);
+  x.restore(); x.globalAlpha = 1;
+}
+function sub(s, lt, dur) {
+  const k = eOut(lt / 0.2), a = k * (1 - clamp((lt - dur + 0.1) / 0.1, 0, 1));
+  x.save(); x.globalAlpha = a;
+  x.fillStyle = 'rgba(0,0,0,0.62)'; x.fillRect(0, H / 2 - 150, W, 260);
+  x.textBaseline = 'middle'; x.fillStyle = '#fff'; x.shadowColor = 'rgba(0,0,0,0.8)'; x.shadowBlur = 24;
+  const words = s.split(' '), l1 = words.slice(0, 2).join(' '), l2 = words.slice(2).join(' ');
+  x.font = '700 70px Raj'; spaced(x, l1, W / 2, H / 2 - 70, 14, 'center');
+  x.font = 'italic 800 104px Ox'; x.textAlign = 'center'; x.fillStyle = goldGrad(x, H / 2 - 20, H / 2 + 80);
+  x.fillText(l2, W / 2, H / 2 + 30);
+  x.restore();
+}
+function tag(s, lt, dur) {
+  const a = clamp(lt / 0.3, 0, 1) * clamp((dur - lt) / 0.2, 0, 1) * 0.9;
+  x.save(); x.globalAlpha = a; x.font = '700 26px Raj'; x.textBaseline = 'middle';
+  let w = 0; for (const ch of s) w += x.measureText(ch).width + 3;
+  const bx = W / 2 - w / 2 - 30;
+  x.fillStyle = 'rgba(0,0,0,0.5)'; roundRect(bx, 176, w + 60, 46, 23); x.fill();
+  x.fillStyle = '#ff4658'; x.beginPath(); x.arc(bx + 24, 199, 7, 0, 7); x.fill();
+  x.fillStyle = '#f4f7ff'; spaced(x, s, bx + 42, 200, 3, 'left');
+  x.restore();
+}
+function counter(s, lt, dur) {
+  const a = clamp(lt / 0.15, 0, 1) * clamp((dur - lt) / 0.1, 0, 1);
+  x.save(); x.globalAlpha = a; x.font = 'italic 800 64px Ox'; x.textBaseline = 'middle'; x.fillStyle = goldGrad(x, 170, 230);
+  x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 16;
+  spaced(x, s, W / 2, 200, 6, 'center');
+  x.restore();
+}
+function line(s, lt, dur) {
+  const k = eOut(lt / 0.25), a = k * clamp((dur - lt) / 0.15, 0, 1);
+  const parts = s.split('. ').map((p, i, arr) => i < arr.length - 1 ? p + '.' : p);
+  x.save(); x.globalAlpha = a; x.textBaseline = 'middle'; x.textAlign = 'center';
+  x.shadowColor = 'rgba(0,0,0,0.9)'; x.shadowBlur = 30; x.fillStyle = '#fff'; x.font = 'italic 800 104px Ox';
+  parts.forEach((p, i) => x.fillText(p, W / 2, 1250 + i * 110 - 20 * (1 - k)));
+  x.restore();
+}
+function rollCard(r, lt, dur) {
+  const [name, role, tagl] = r, k = eOutExpo(lt / 0.12);
+  const x0 = 70 - 60 * (1 - k), y0 = 1330;
+  x.save(); x.globalAlpha = k;
+  const g = x.createLinearGradient(0, y0 - 120, 0, y0 + 220); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.35, 'rgba(0,0,0,0.6)'); g.addColorStop(1, 'rgba(0,0,0,0.6)');
+  x.fillStyle = g; x.fillRect(0, y0 - 120, W, 340);
+  x.fillStyle = ROLE_COL[role]; x.fillRect(x0, y0 - 58, 8, 210);
+  x.font = '700 34px Raj'; x.textBaseline = 'alphabetic'; x.fillStyle = ROLE_COL[role];
+  spaced(x, role, x0 + 30, y0 - 22, 10, 'left');
+  const size = fitFont(x, name, 'italic 800 #px Ox', 150, 900);
+  x.font = `italic 800 ${size}px Ox`; x.fillStyle = goldGrad(x, y0, y0 + 110); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 20;
+  x.fillText(name, x0 + 22 + 30 * (1 - k), y0 + 104);
+  x.shadowBlur = 0; x.font = '600 34px Raj'; x.fillStyle = '#dfe6ff';
+  x.fillText(tagl, x0 + 30, y0 + 150);
+  x.restore();
+}
+function mapCard(m, lt, dur) {
+  const [name, mode] = m, k = eOutExpo(lt / 0.12);
+  const words = name.split(' ');
+  x.save(); x.globalAlpha = k; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.fillStyle = 'rgba(0,0,0,0.45)'; x.fillRect(0, 1200, W, 300);
+  x.font = 'italic 800 118px Ox'; x.fillStyle = '#fff'; x.shadowColor = 'rgba(0,0,0,0.8)'; x.shadowBlur = 26;
+  x.fillText(words[0], W / 2, 1320 + 20 * (1 - k)); x.fillText(words.slice(1).join(' '), W / 2, 1430 + 20 * (1 - k));
+  x.shadowBlur = 0; x.font = '700 36px Raj'; x.fillStyle = mode === 'ESCORT' ? '#ffc53a' : '#43c9ff';
+  spaced(x, mode, W / 2, 1482, 12, 'center');
+  x.restore();
+}
+async function endCard(t) {
+  const lt = t - 24.5;
+  const bg = await img('lineup.jpg');
+  if (bg) {
+    const s = 1.12 - 0.06 * eOut(lt / 5.5), bw = 3413 * s, bh = 1920 * s;
+    x.filter = `brightness(${0.5 - 0.12 * clamp((lt - 2.6) / 0.6, 0, 1)}) saturate(1.1) blur(${lt > 2.6 ? 3 * clamp((lt - 2.6) / 0.6, 0, 1) : 0}px)`;
+    x.drawImage(bg, (W - bw) / 2 - 30 * (lt / 5.5), (H - bh) / 2, bw, bh);
+    x.filter = 'none';
+  }
+  const kIn = eOutExpo(lt / 0.35), up = eOut(clamp((lt - 2.6) / 0.5, 0, 1));
+  const sc = (1.35 - 0.35 * kIn) * 0.66;
+  const ly = 820 - 300 * up;
+  const lc = logoLayer.getContext('2d'); lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, logoLayer.width, 500);
+  lc.translate(logoLayer.width / 2, 250);
+  lc.font = 'italic 800 250px Ox'; lc.textAlign = 'center'; lc.textBaseline = 'middle';
+  lc.shadowColor = 'rgba(255,150,40,0.6)'; lc.shadowBlur = 60;
+  lc.fillStyle = goldGrad(lc, -110, 110); lc.fillText('RIFTGUARD', 0, 0);
+  lc.shadowBlur = 0;
+  const sw = (lt - 0.25) / 0.9;
+  if (sw > 0 && sw < 1) {
+    lc.globalCompositeOperation = 'source-atop';
+    const gx = -900 + 1800 * sw, gl = lc.createLinearGradient(gx - 160, 0, gx + 160, 0);
+    gl.addColorStop(0, 'rgba(255,255,255,0)'); gl.addColorStop(0.5, 'rgba(255,255,255,0.95)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+    lc.fillStyle = gl; lc.fillRect(-1000, -150, 2000, 300);
+    lc.globalCompositeOperation = 'source-over';
+  }
+  x.save(); x.globalAlpha = kIn; x.translate(W / 2, ly); const ls = sc * (1 - 0.12 * up); x.scale(ls, ls);
+  x.drawImage(logoLayer, -logoLayer.width / 2, -250);
+  x.restore();
+  const ka = clamp((lt - 0.45) / 0.3, 0, 1);
+  x.save(); x.globalAlpha = ka; x.font = '700 40px Raj'; x.fillStyle = '#dfe6ff'; x.textBaseline = 'middle';
+  spaced(x, '4V4 HERO ARENA', W / 2, ly + 125, 18, 'center');
+  x.restore();
+  if (lt > 2.7) {
+    const k = eOutExpo((lt - 2.7) / 0.35), k2 = eOutExpo((lt - 3.0) / 0.35), k3 = clamp((lt - 3.3) / 0.3, 0, 1);
+    x.save(); x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.globalAlpha = k; x.font = 'italic 800 118px Ox'; x.fillStyle = '#fff'; x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 24;
+    x.fillText('PLAY FREE', W / 2, 860 + 30 * (1 - k));
+    const bsz = fitFont(x, 'IN YOUR BROWSER', 'italic 800 #px Ox', 118, 980); x.font = `italic 800 ${bsz}px Ox`; x.fillStyle = goldGrad(x, 930, 1030); x.fillText('IN YOUR BROWSER', W / 2, 985 + 30 * (1 - k));
+    x.shadowBlur = 0; x.globalAlpha = k2;
+    const url = 'play.clawcade.gg/g/CXhdNnoY';
+    x.font = '700 50px Raj'; const uw = x.measureText(url).width + 80;
+    const py = 1150 + 20 * (1 - k2);
+    x.fillStyle = 'rgba(8,12,24,0.85)'; roundRect(W / 2 - uw / 2, py - 44, uw, 88, 44); x.fill();
+    x.lineWidth = 3; x.strokeStyle = '#ffc53a'; x.stroke();
+    x.fillStyle = '#ffe08a'; x.fillText(url, W / 2, py + 2);
+    x.globalAlpha = k3; x.font = '700 32px Raj'; x.fillStyle = '#b8c3e0';
+    spaced(x, 'NO DOWNLOAD  ·  ONLINE 4V4', W / 2, py + 100, 6, 'center');
+    spaced(x, 'INVITE YOUR FRIENDS', W / 2, py + 148, 6, 'center');
+    x.restore();
+  }
+}
+function roundRect(a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
+
+window.draw = async function (t) {
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.filter = 'none'; x.shadowBlur = 0;
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  let e = null;
+  if (t < 24.0) e = await drawShot(t);
+  else if (t >= 24.5) await endCard(t);
+  grade(t);
+  if (e && e[4].roll) rollCard(e[4].roll, t - e[0], e[1]);
+  if (e && e[4].map) mapCard(e[4].map, t - e[0], e[1]);
+  for (const [a, b, kind, s] of TEXT) if (t >= a && t < b) {
+    const lt = t - a, d = b - a;
+    if (kind === 'slam') slam(s, lt, d); else if (kind === 'sub') sub(s, lt, d); else if (kind === 'tag') tag(s, lt, d);
+    else if (kind === 'counter') counter(s, lt, d); else if (kind === 'line') line(s, lt, d);
+  }
+  for (const [a, b, amt] of FLASH) if (t >= a && t < b) { const k = (t - a) / (b - a); x.fillStyle = `rgba(255,255,255,${amt * (1 - k) ** 1.5})`; x.fillRect(0, 0, W, H); }
+  // fade out to black at the very end
+  if (t > 29.6) { x.fillStyle = `rgba(0,0,0,${clamp((t - 29.6) / 0.4, 0, 1)})`; x.fillRect(0, 0, W, H); }
+  return true;
+};
+window.ready = document.fonts.load('italic 800 100px Ox').then(() => document.fonts.load('700 30px Raj')).then(() => document.fonts.load('600 30px Raj'));
+</script></body></html>

@@ -1,6 +1,8 @@
 # Riftguard: 30-second trailer
 
 `riftguard_trailer.mp4` is a 30-second, 1080p30 trailer for **Riftguard, a 4v4 hero arena** ([play.clawcade.gg/g/CXhdNnoY](https://play.clawcade.gg/g/CXhdNnoY)).
+`riftguard_trailer_vertical.mp4` is the same cut at 1080×1920 for TikTok, Reels and Shorts. The footage sits in a 1080×1440 panel (a 1.33× crop) over a blurred fill, and the titles are re-laid out for the platforms' safe zones (`compositor/vertical.html`).
+
 Everything in it was made with code. The footage is real gameplay rendered by the game itself, the score is synthesized, and the titles are composited on a canvas.
 
 ## Edit (120 BPM, one bar = 2 s)
