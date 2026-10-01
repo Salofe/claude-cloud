@@ -45,6 +45,15 @@ node tools/balance-sim.js  # simulates an efficient player and prints when each 
 
 All art is procedural (canvas 2D, including noise-generated planet textures) and all sound is synthesized with WebAudio. Progress is saved to `localStorage` under the versioned key `solar_prospector_v3` (about 20 KB even late in the game). Clawcade persists each game's localStorage on the player's device.
 
+## The galaxy
+
+Defeating a system's final guardian opens its **jump gate**. The **Galaxy** map (HUD button, or "Enter the gate" at the final field) shows the road of 15 star systems from the rim to **Sagittarius A\***, the black hole at the core. Jumping starts you fresh in the next system — credits, ship upgrades, outposts, freighters and reputation stay behind — while you keep **Tribute**, **Legacy** and your records.
+
+- **Tribute**: every conquered system pays 1 per minute (also offline, same 8 h cap), plus a one-off jump bonus (10 + 5 for the guardian + 3 per ally star + 2 per megaproject).
+- **Legacy** (spent with Tribute, permanent, all systems): +10% ore value per level, drones −8%, fuel −8%, Head Start (Star Map open + 50K credits), and Laser/Cargo/Extractor plans (+5 starting levels each).
+- Each system is hand-made on top of Sol's layout (same slots, new names, looks, ores, factions, texts and boss) and is harder: tougher rocks and pirates (`SYSTEMS` in `src/galaxy.js`). Run `SYS=centauri LEG='{"ore":4,"quick":1}' node tools/balance-sim.js` to simulate one.
+- **Alpha Centauri** (system 2): binary stars, ocean world Pandora, the **Shard Belt** of **crystal asteroids** that shatter into fast shards, and the **Hive Queen**, who keeps spawning swarmers. Simulated: ~150 min without Legacy, ~100 min with a typical Legacy (Sol: ~140 min).
+
 ## Fields & comets
 
 Every field has its own signature ores: the Moon (iron, ice), Mercury (platinum, **Sunstone**), the Main Belt (nickel, **Cobalt**, iridium), the Trojans (iridium), Saturn's rings (Helium-3, **Ring Pearls**), the Kuiper Belt (iridium, Ring Pearls, exotics) and the Oort Cloud (exotics, **Void Shards**). Average field values match the old balance. Every 45–80 s a **comet** streaks across the field; break it before it escapes for ice and a handful of the field's most valuable ore.

@@ -118,7 +118,7 @@ function frame(now) {
     if (!isBlocking() || scene === MapScene || scene === TitleScene) scene.update(dt);
     scene.draw(ctx);
   }
-  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); dayClock(dt); }
+  if (S && scene !== TitleScene) { incomeTick(dt); tributeTick(dt); hudTick(dt); dayClock(dt); }
   hudT += dt;
   if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); }
     // leaderboard: check the record every 5 s, send it at most once a minute
@@ -134,7 +134,7 @@ const TitleScene = {
     $('title').classList.remove('hidden'); $('hud').classList.add('hidden');
     const sv = hasSave();
     $('cont').classList.toggle('hidden', !sv);
-    if (sv) { const d = loadSave(); $('cont').innerHTML = `▶ Continue <small>${fmt(d.credits)} cr · ${d.unlock ? UNLOCKS[d.unlock].title : 'Moon'}</small>`; }
+    if (sv) { const d = loadSave(); $('cont').innerHTML = `▶ Continue <small>${fmt(d.credits)} cr · ${(SYSTEMS[d.sys || 'sol'] || SYSTEMS.sol).n}${d.galaxy ? ` · ${d.galaxy.done.length} system${d.galaxy.done.length > 1 ? 's' : ''} conquered` : ''}</small>`; }
     $('newg').textContent = sv ? 'New game' : '▶ PLAY';
     $('newg').classList.toggle('primary', !sv);
   },
@@ -164,8 +164,9 @@ const TitleScene = {
 function startGame(cont) {
   audioInit();
   if (cont) S = loadSave();
-  if (!S) { newGame(); save(); }
-  applyNukes();
+  if (!S) { applySystem('sol'); newGame(); save(); }
+  applySystem(sysId());
+  ensureMarkets();
   shownCredits = S.credits;
   pendingUnlocks = [];
   if (cont && has(U.MAP)) setScene(MapScene);
@@ -182,7 +183,7 @@ function startGame(cont) {
 function init() {
   startIconizer();
   setupTouchControls();
-  $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
+  $('bGal').onclick = openGalaxy; $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
   const snd = $('bSnd');
   snd.textContent = muted ? '🔇' : '🔊';
   snd.onclick = () => { audioInit(); setMuted(!muted); snd.textContent = muted ? '🔇' : '🔊'; };
@@ -266,12 +267,14 @@ function dayClock(dt) {
   if (S.dayT >= DAY_SEC) { S.dayT -= DAY_SEC; tickDay(); updateHUD(); }
 }
 function welcomeBack(off) {
+  const trib = off.trib >= 1 ? `<p>Your conquered systems sent <b>+${Math.floor(off.trib)} Tribute</b>.</p>` : '';
   const away = off.capped
     ? `You were away <b>${fmtTime(off.real)}</b>. Drones only work unsupervised for <b>${fmtTime(OFFLINE_CAP)}</b>, so you were paid for the <b>last 8 hours</b>.`
     : `You were away <b>${fmtTime(off.real)}</b>.`;
   const days = off.days ? `<p class="hint"><b>${off.days} day${off.days > 1 ? 's' : ''}</b> passed in the system.</p>${off.news.length ? `<div class="wb-news">${off.news.map(n => `<div>${n.icon} ${n.html}</div>`).join('')}</div>` : ''}` : '';
   showModal({ icon: '🤖', title: 'Welcome back!', html: `<p>${away}</p>${off.g >= 1 ? `<p>Your drones and freighters earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>${off.capped ? `<br><small class="dim">(${Math.round(OFFLINE_RATE * 100)}% of your income rate, max ${fmtTime(OFFLINE_CAP)})</small>` : ''}</p>` : ''}${days}`,
     buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] });
+  if (trib) $('modal').querySelector('.mbody').insertAdjacentHTML('beforeend', trib);
 }
 function fmtTime(s) { s = Math.floor(s); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return d ? `${d}d${h ? ` ${h}h` : ''}` : h ? `${h}h${m ? ` ${m}m` : ''}` : m ? `${m}m` : `${s}s`; }
 window.addEventListener('pagehide', () => { save(); postPeak(); });

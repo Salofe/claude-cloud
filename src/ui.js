@@ -93,8 +93,9 @@ function updateHUD() {
     o.innerHTML = `<small>NEXT UNLOCK</small><b>${nu.icon} ${nu.title}</b><div class="meter gold"><i style="width:${pct * 100}%"></i></div><span>${fmt(S.stats.earned)} / ${fmt(nu.at)} cr earned</span>`;
   } else if (!S.won) {
     o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest & upgrade outposts</span>`;
-  } else if (!S.gateOpen) o.innerHTML = `<small>THE SIGNAL</small><b>📡 Find the source in the Oort Cloud</b><span>Mine there to draw out whatever is broadcasting. Bring good guns and shields.</span>`;
-  else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>The jump gate at the Oort Cloud is awake. Next update: travel to the stars.</span>`;
+  } else if (!S.gateOpen) o.innerHTML = `<small>FINAL GUARDIAN</small><b>📡 Find the source in ${LOC.oort.n}</b><span>Mine there to draw it out. Bring good guns and shields.</span>`;
+  else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>Open the Galaxy map to jump — or stay and earn more Tribute first.</span>`;
+  $('bGal').classList.toggle('hidden', !(S.gateOpen || (S.galaxy && S.galaxy.done.length)));
   if (!S.won && has(U.SATURN) && inf >= 100 && !isBlocking()) victory();
   if (pendingUnlocks.length && $('modal').classList.contains('hidden') && !(scene === MineScene && (MineScene.inCombat || MineScene.space)) && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
   else if (pendingChoices.length && $('modal').classList.contains('hidden') && $('sheet').classList.contains('hidden') && scene !== MineScene && !MapScene.travel) showChoice(pendingChoices.shift());
@@ -110,7 +111,7 @@ function showUnlock(i) {
 function victory() {
   S.won = true; save();
   sfx('win');
-  showModal({ icon: '👑', title: 'You rule the Solar System!', html: `In <b>${S.day} days</b> you went from chipping rocks on the Moon to the most powerful force in the system.<br><br>
+  showModal({ icon: '👑', title: `You rule ${sysId() === 'sol' ? 'the Solar System' : sysName()}!`, html: `In <b>${S.day} days</b> you went from chipping rocks on ${LOC.luna.n} to the most powerful force in the system.<br><br>
     Ore mined: <b>${fmt(S.stats.mined)}</b><br>Total earnings: <b>${fmt(S.stats.earned)} cr</b><br>Battles won: <b>${S.stats.won}</b><br>Contracts: <b>${S.stats.contracts}</b>`,
     buttons: [{ label: 'Keep playing', cls: 'primary', fn: () => setTimeout(revealSignal, 400) }] });
 }
@@ -118,9 +119,9 @@ function victory() {
 function revealSignal() {
   if (S.signal) return;
   S.signal = 1; save();
-  addNews('📡', '<b>A signal from the Oort Cloud.</b> It is not human.', '#7fdfff');
+  addNews('📡', `<b>${sysDef().signal.title}</b> — ${LOC.oort.n} appears on your map.`, '#7fdfff');
   sfx('event');
-  showModal({ icon: '📡', title: 'A signal from the dark', cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>Your deep-space dishes caught a <b>repeating signal</b> from the <b>Oort Cloud</b>, far beyond the Kuiper Belt. It is <b>not human</b>.</p><p>A new location is on your map. Mine there to find the source — and bring your best <b>guns and shields</b>.</p>`,
+  showModal({ icon: '📡', title: sysDef().signal.title, cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>${sysDef().signal.text}</p><p>A new location is on your map: <b>${LOC.oort.n}</b>. Mine there to find the source — and bring your best <b>guns and shields</b>.</p>`,
     buttons: [{ label: 'Set course', cls: 'primary', fn: () => {} }] });
 }
 
@@ -165,6 +166,7 @@ function selectLoc(id) {
     html += `<div class="lp-actions">`;
     if (l.station) html += `<button class="btn primary big" onclick="openDock()">🛰 Dock at ${l.station}</button>`;
     if (l.field) html += `<button class="btn ore big" onclick="enterMine()">⛏ Mine ${l.field.n}</button>`;
+    if (id === 'oort' && S.gateOpen) html += `<button class="btn primary big" onclick="openGalaxy()">🌀 Enter the gate</button>`;
     if (!l.station) {
       const stations = NODES.filter(x => x.station && locOpen(x.id));
       const reachable = stations.some(x => travelInfo(x.id).fuel <= S.fuel);
@@ -214,7 +216,7 @@ function updateMineHUD() {
   document.body.classList.toggle('battle', combat);
   $('battleUI').classList.toggle('hidden', !combat);
   if (combat) {
-    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
     $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
     $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
     $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
@@ -414,7 +416,7 @@ function dockBody(tab) {
     const pws = powersAt(id);
     let h = pws.length ? `<div class="sub">⚡ Your power on ${l.n}</div>${powerButtons(pws)}` : '';
     if (has(U.SATURN) && STATION_TIER[id]) h += dockBody('invest');
-    else if (!has(U.SATURN)) h += '<p class="hint center">🔒 Investments and politics (wars, peace deals) unlock with Saturn & Influence.</p>';
+    else if (!has(U.SATURN)) h += `<p class="hint center">🔒 Investments and politics (wars, peace deals) unlock with ${UNLOCKS[U.SATURN].title}.</p>`;
     return h;
   }
   if (tab === 'invest') {
@@ -601,7 +603,7 @@ function openFactions() {
 
 function openProjects() {
   sfx('click');
-  let h = '<p class="hint">Spend your fortune on projects that change the Solar System forever. Each one also adds influence.</p><div class="projs">';
+  let h = '<p class="hint">Spend your fortune on projects that change the system forever. Each one also adds influence.</p><div class="projs">';
   for (const p of PROJECTS) {
     const done = built(p.id), open = projectOpen(p), can = open && !done && S.credits >= p.cost;
     const pct = Math.min(100, S.credits / p.cost * 100);
@@ -672,5 +674,6 @@ function openHelp() {
     <h4>⚔ Wars</h4><p>When two factions fight, <b>back a side</b> at one of their stations. Their stations pay +30% for metals and every ore sale there <b>pushes the front</b> (see the bar). Help them win to gain a <b>permanent ally</b>: +15% ore at their stations (up to 3 stars) and spoils of war.</p>
     <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
     <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — back a side in wars and fund offensives; later incite wars or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
-    <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the Solar System.</p></div>`);
+    <h4>🌀 Galaxy</h4><p>Each system's guardian opens a jump gate. In the <b>Galaxy</b> map you jump to the next star: you start fresh there, but conquered systems pay <b>Tribute</b> forever, which buys permanent <b>Legacy</b> bonuses. 15 systems lead to the black hole at the core.</p>
+    <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the system — then defeat its guardian and jump through the gate to the next star.</p></div>`);
 }

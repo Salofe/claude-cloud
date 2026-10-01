@@ -14,7 +14,7 @@ function buildFleet(danger) {
   return fleet;
 }
 function fleetThreat(fleet, z) {
-  const m = Z_ENEMY[z];
+  const m = Z_ENEMY[z] * sysDef().enemy;
   let ehp = 0, dps = 0;
   for (const k of fleet) { const e = ENEMIES[k]; ehp += (e.hp + e.sp) * m; dps += e.dmg * m * (e.burst || 1) / e.rate; }
   const mine = Math.sqrt(Math.max(1, S.hull + ship.shieldMax) * ship.weaponDps * 1.6);
@@ -23,7 +23,7 @@ function fleetThreat(fleet, z) {
 
 const Combat = {
   spawn(sc, fleet, z, fromTop) {
-    const m = Z_ENEMY[z];
+    const m = Z_ENEMY[z] * sysDef().enemy;
     fleet.forEach((k, i) => {
       const e = ENEMIES[k];
       let x, y;
@@ -42,7 +42,7 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : e.military ? '#b6ff7a' : '#ff4d6d';
     for (let i = 0; i < n; i++) {
       const b = a + (i - (n - 1) / 2) * 0.2;
       sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
@@ -73,7 +73,7 @@ const Combat = {
     S.stats.kills++;
     if (ENEMIES[e.k].boss && sc.loc) {
       sc.shake = 24; sc.parts.burst(e.x, e.y, 120, ENEMIES[e.k].alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
-      if (e.k === 'sentinel') sentinelKilled(); else warlordKilled(sc.loc.id);
+      if (ENEMIES[e.k].final) finalBossKilled(); else warlordKilled(sc.loc.id);
     }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
@@ -101,6 +101,17 @@ const Combat = {
         e.cd -= dt;
         if (e.cd <= 0) { e.burstLeft = ENEMIES[e.k].burst || 1; e.cd = e.rate * rand(0.85, 1.2); }
         if (e.burstLeft > 0) { e.burstT -= dt; if (e.burstT <= 0) { this.fireEnemy(sc, e); e.burstLeft--; e.burstT = 0.12; } }
+      }
+      const E = ENEMIES[e.k];
+      if (E.summon) {
+        e.sumT = (e.sumT == null ? 4 : e.sumT) - dt;
+        if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < 6) {
+          e.sumT = 7;
+          const m = e.max / (E.hp * 1), sw = ENEMIES[E.summon];
+          for (let i = 0; i < 2; i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: 0, spMax: 0, dmg: sw.dmg * m,
+            rate: sw.rate, spd: sw.spd, size: sw.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1, prefer: rand(160, 260), shT: 0, hitT: 0, loot: sw.loot * Z_LOOT[sc.combatZ || 0] });
+          sc.parts.burst(e.x, e.y, 20, '#b0ff9a', 150, 0.6, 2);
+        }
       }
       if (Math.random() < dt * 20) sc.parts.add(e.x - Math.cos(e.a) * 16 * e.size, e.y - Math.sin(e.a) * 16 * e.size, rand(-20, 20), rand(-20, 20), 0.3, e.military ? '#9fe0ff' : '#ff6a3a', 2);
     }

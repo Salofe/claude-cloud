@@ -193,6 +193,31 @@ function planetTex(loc) {
         if (heart > 0.58) col = mixc(col, [250, 240, 230], 0.75);
         break;
       }
+      // generic worlds coloured by loc.col (used by other star systems)
+      case 'ocean': {
+        const land = fbm(u * 4 / 6, v * 4 / 6, seed + 5, 4, 5);
+        col = land > 0.6 ? mixc(L, [235, 225, 190], clamp((land - 0.6) * 3 + (n - 0.5) * 0.6, 0, 1)) : mixc(D, mixc(D, L, 0.5), land * 1.4);
+        if (lat > 0.84 + n * 0.08) col = [235, 245, 250];
+        break;
+      }
+      case 'gas': {
+        const turb = fbm(u * 1.5, v * 3, seed + 7, P * 1.5, 4);
+        const band = Math.sin((j / TH) * 18 + turb * 3.4);
+        col = mixc(D, L, clamp(0.5 + band * 0.42 + (n - 0.5) * 0.3, 0, 1));
+        break;
+      }
+      case 'ice': {
+        const ridge = Math.abs(fbm(u * 8 / 6, v * 8 / 6, seed + 4, 8, 5) - 0.5);
+        col = mixc(D, L, clamp(0.4 + n * 0.8, 0, 1));
+        if (ridge < 0.03) col = mixc(D, [40, 60, 110], 0.5);
+        break;
+      }
+      case 'lava': {
+        const crack = Math.abs(fbm(u * 6 / 6, v * 6 / 6, seed + 6, 6, 5) - 0.5);
+        col = mixc([30, 22, 20], D, n);
+        if (crack < 0.04) col = mixc(L, [255, 240, 180], 1 - crack / 0.04);
+        break;
+      }
       default: col = mixc(D, L, n);
     }
     const k = (j * TW + i) * 4;
@@ -281,28 +306,37 @@ function drawRing(ctx, x, y, r, c, back) {
   ctx.restore();
 }
 
-function drawSun(ctx, x, y, r, t) {
-  glow(ctx, x, y, r * 9, '#ff7a1a33', 0.7);
-  glow(ctx, x, y, r * 4, '#ffb04a88', 0.7);
+// star palettes: Sol is yellow; other systems bring white, orange, red and blue stars
+const STAR_PAL = {
+  sol:    { g1: '#ff7a1a33', g2: '#ffb04a88', r0: 'rgba(255,210,120,0.35)', r1: 'rgba(255,150,60,0)', core: ['#ffffff', '#fff4c2', '#ffd060', '#ff9a2a'], f0: 'rgba(255,220,160,0)', f1: 'rgba(255,240,200,0.45)' },
+  white:  { g1: '#9fd0ff33', g2: '#e8f4ff88', r0: 'rgba(230,240,255,0.35)', r1: 'rgba(160,200,255,0)', core: ['#ffffff', '#f4f8ff', '#d6e8ff', '#9cc4ff'], f0: 'rgba(210,230,255,0)', f1: 'rgba(235,245,255,0.45)' },
+  orange: { g1: '#ff5a1a33', g2: '#ff8a3a88', r0: 'rgba(255,170,90,0.35)', r1: 'rgba(255,110,40,0)', core: ['#ffffff', '#ffe0b0', '#ffa050', '#ff6a1a'], f0: 'rgba(255,190,140,0)', f1: 'rgba(255,215,170,0.45)' },
+  red:    { g1: '#ff2a1a33', g2: '#ff5a3a88', r0: 'rgba(255,120,90,0.35)', r1: 'rgba(255,60,40,0)', core: ['#ffe6e0', '#ffb09a', '#ff5a3a', '#c41a10'], f0: 'rgba(255,140,120,0)', f1: 'rgba(255,170,150,0.4)' },
+  blue:   { g1: '#3a7aff33', g2: '#7ab0ff88', r0: 'rgba(160,200,255,0.4)', r1: 'rgba(90,140,255,0)', core: ['#ffffff', '#dff0ff', '#9cc8ff', '#4a7aff'], f0: 'rgba(160,200,255,0)', f1: 'rgba(200,225,255,0.5)' },
+};
+function drawSun(ctx, x, y, r, t, pal) {
+  const P = STAR_PAL[pal] || STAR_PAL.sol;
+  glow(ctx, x, y, r * 9, P.g1, 0.7);
+  glow(ctx, x, y, r * 4, P.g2, 0.7);
   ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < 16; i++) {
     const a = i / 16 * TAU + t * 0.04 + Math.sin(t * 0.7 + i) * 0.05;
     const l = r * (1.7 + 0.5 * Math.sin(t * 1.3 + i * 2.1));
     const g = ctx.createLinearGradient(x, y, x + Math.cos(a) * l, y + Math.sin(a) * l);
-    g.addColorStop(0, 'rgba(255,210,120,0.35)'); g.addColorStop(1, 'rgba(255,150,60,0)');
+    g.addColorStop(0, P.r0); g.addColorStop(1, P.r1);
     ctx.strokeStyle = g; ctx.lineWidth = r * (0.18 + 0.08 * Math.sin(i));
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); ctx.stroke();
   }
   ctx.globalCompositeOperation = 'source-over';
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, '#fff4c2'); g.addColorStop(0.75, '#ffd060'); g.addColorStop(1, '#ff9a2a');
+  g.addColorStop(0, P.core[0]); g.addColorStop(0.35, P.core[1]); g.addColorStop(0.75, P.core[2]); g.addColorStop(1, P.core[3]);
   ctx.fillStyle = g;
   ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
   // lens flare
   glow(ctx, x, y, r * 1.5, '#ffffffaa', 0.6);
   ctx.globalCompositeOperation = 'lighter';
   const fl = ctx.createLinearGradient(x - r * 6, y, x + r * 6, y);
-  fl.addColorStop(0, 'rgba(255,220,160,0)'); fl.addColorStop(0.5, 'rgba(255,240,200,0.45)'); fl.addColorStop(1, 'rgba(255,220,160,0)');
+  fl.addColorStop(0, P.f0); fl.addColorStop(0.5, P.f1); fl.addColorStop(1, P.f0);
   ctx.fillStyle = fl; ctx.fillRect(x - r * 6, y - 1, r * 12, 2);
   ctx.globalCompositeOperation = 'source-over';
 }
@@ -489,9 +523,32 @@ function drawAlienShip(ctx, type, x, y, ang, s, t) {
   ctx.fillStyle = '#e8fdff'; ctx.beginPath(); ctx.arc(0, 0, big ? 3.5 : 2, 0, TAU); ctx.fill();
   ctx.restore();
 }
+function drawHiveShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type], big = type === 'queen';
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, big ? 30 : 16, '#7aff6a33', 0.8);
+  const flap = Math.sin(t * (big ? 6 : 18)) * 0.35;
+  ctx.fillStyle = 'rgba(176,255,154,0.25)'; ctx.strokeStyle = 'rgba(176,255,154,0.6)'; ctx.lineWidth = 0.8;
+  for (const side of [-1, 1]) {
+    ctx.save(); ctx.rotate(side * (0.9 + flap));
+    ctx.beginPath(); ctx.ellipse(-4, side * 0, 14, 5, side * 0.3, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+  const g = ctx.createLinearGradient(-14, 0, 14, 0); g.addColorStop(0, '#2a1a3a'); g.addColorStop(0.6, '#5a2a6a'); g.addColorStop(1, '#8a4a9a');
+  ctx.fillStyle = g; ctx.strokeStyle = '#c08ad0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(-2, 0, big ? 16 : 11, big ? 8 : 5, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(big ? 14 : 10, 0, big ? 6 : 4, big ? 5 : 3.5, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.globalCompositeOperation = 'lighter';
+  const pulse = 0.5 + 0.5 * Math.sin(t * 4 + x);
+  ctx.fillStyle = `rgba(176,255,154,${0.5 + pulse * 0.4})`;
+  for (let i = 0; i < (big ? 4 : 2); i++) { ctx.beginPath(); ctx.arc(-10 + i * 5, (i % 2 ? 2 : -2) * (big ? 1.5 : 1), big ? 2.4 : 1.4, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#ff6a6a'; ctx.beginPath(); ctx.arc(big ? 17 : 12, -1.5, 1.2, 0, TAU); ctx.arc(big ? 17 : 12, 1.5, 1.2, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
   if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
+  if (e.hive) return drawHiveShip(ctx, type, x, y, ang, s, t);
   const mil = e.military;
   const main = mil ? PAL.military : PAL.enemyMid, dark = mil ? PAL.militaryDark : PAL.enemyDark, lit = mil ? '#d8f0a8' : PAL.enemy;
   ctx.save();
@@ -545,7 +602,26 @@ function makeRockShape(n, jag) {
   }
   return pts;
 }
+// crystal asteroids (other star systems): faceted, translucent, glowing with their ore
+function drawCrystalRock(ctx, a, t) {
+  const ore = ITEMS[a.ore], n = a.tier === 1 ? 5 : a.tier === 2 ? 6 : 7;
+  ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+  glow(ctx, 0, 0, a.r * 1.8, ore.c + '55', 0.6 + 0.2 * Math.sin(t * 3 + a.x));
+  const pts = Array.from({ length: n }, (_, i) => { const ang = i / n * TAU, k = i % 2 ? 0.72 : 1.05; return [Math.cos(ang) * a.r * k, Math.sin(ang) * a.r * k]; });
+  const g = ctx.createLinearGradient(-a.r, -a.r, a.r, a.r);
+  g.addColorStop(0, 'rgba(240,235,255,0.85)'); g.addColorStop(0.5, ore.c + 'aa'); g.addColorStop(1, 'rgba(60,40,110,0.85)');
+  ctx.fillStyle = g; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fill();
+  if (a.hit > 0) { ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fill(); }
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
+  ctx.beginPath(); for (const p of pts) { ctx.moveTo(0, 0); ctx.lineTo(p[0], p[1]); } ctx.stroke();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'; const gl = (t * 0.7 + a.x * 0.01) % 1;
+  ctx.beginPath(); ctx.arc(pts[0][0] * gl, pts[0][1] * gl, 1.8, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function drawRock(ctx, a, t, scanLv) {
+  if (a.crystal) return drawCrystalRock(ctx, a, t);
   const ore = ITEMS[a.ore];
   ctx.save();
   ctx.translate(a.x, a.y); ctx.rotate(a.rot);

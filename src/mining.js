@@ -49,7 +49,7 @@ const MineScene = {
     this.ambush = null;
     if (!this.space) {
       const dg = locDanger(this.loc.id) * (1 - ship.avoid);
-      if (this.loc.id === 'oort' && !S.gateOpen) this.ambush = { at: rand(16, 24), warned: false, boss: 'sentinel' };
+      if (this.loc.id === 'oort' && !S.gateOpen) this.ambush = { at: rand(16, 24), warned: false, boss: 'final' };
       else if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
       else if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
     }
@@ -70,9 +70,10 @@ const MineScene = {
     const isRich = Math.random() < (rich ? 0.3 : 0.06) + depth * 0.2;
     const gold = !this.space && Math.random() < 0.006 + depth * 0.02;
     const nv = 2 + Math.floor(tier * 1.5);
-    const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * (gold ? 2 : 1);
+    const crystal = !this.space && !!this.loc.field.crystal && Math.random() < this.loc.field.crystal;
+    const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -87,7 +88,7 @@ const MineScene = {
     const dir = Math.random() < 0.5 ? 1 : -1, p = this.p;
     const c = this.spawnRock(dir > 0 ? -40 : MW + 40, clamp(p.y + rand(-450, 250), 300, DOCK_Y - 500), 2, 'ice');
     Object.assign(c, { comet: 1, core: best, vx: dir * rand(150, 200), vy: rand(-25, 25), vr: rand(1.5, 3) * dir, rich: false, gold: false, cold: 1 });
-    c.hp = c.maxhp = c.r * 0.7 * ITEMS[best].h * Z_HP[this.z] * 1.3;
+    c.hp = c.maxhp = c.r * 0.7 * ITEMS[best].h * Z_HP[this.z] * sysDef().rock * 1.3; c.crystal = false;
     toast('☄ A comet is crossing the field — break it before it escapes!', 'good'); sfx('event');
   },
   breakComet(r) {
@@ -113,7 +114,16 @@ const MineScene = {
       this.floaters.push({ x: r.x, y: r.y - 30, txt: 'JACKPOT!', col: '#ffd24a', life: 2, big: 1 });
       S.stats.jackpots++; sfx('win');
     }
-    if (r.tier > 1) {
+    if (r.crystal && r.tier > 1) {
+      // crystals shatter into a spray of fast shards you have to chase
+      const n = r.tier === 3 ? 5 : 3;
+      this.parts.burst(r.x, r.y, 30, '#e8dcff', 220, 0.7, 2);
+      for (let i = 0; i < n; i++) {
+        const c = this.spawnRock(r.x, r.y, 1, r.ore), a = i / n * TAU + rand(-0.3, 0.3), v = rand(170, 240);
+        Object.assign(c, { crystal: true, shard: true, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vr: rand(-4, 4), rich: r.rich, gold: false });
+        c.hp = c.maxhp = c.maxhp * 0.75;
+      }
+    } else if (r.tier > 1) {
       for (let i = 0; i < 2; i++) {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
@@ -219,6 +229,7 @@ const MineScene = {
         if (r.x < -80 || r.x > MW + 80) r.gone = 1;
         r.y = clamp(r.y, r.r, maxY);
       } else {
+        if (r.shard) { const sp = Math.hypot(r.vx, r.vy); if (sp > 35) { const k = Math.pow(0.55, dt); r.vx *= k; r.vy *= k; } }
         if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
         if (r.y < r.r || r.y > maxY) r.vy *= -1;
         r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, maxY);
@@ -295,10 +306,10 @@ const MineScene = {
     // --- ambush ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss === 'sentinel' ? '📡 The signal is moving toward you…' : this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss === 'final' ? '📡 Something huge is moving toward you…' : this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
-        const boss = this.ambush.boss === 'sentinel' || (this.ambush.boss && warlordAt(this.loc.id));
-        const fleet = this.ambush.boss === 'sentinel' ? ['sentinel', 'adrone', 'adrone', 'adrone'] : boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
+        const boss = this.ambush.boss === 'final' || (this.ambush.boss && warlordAt(this.loc.id));
+        const fleet = this.ambush.boss === 'final' ? sysDef().bossFleet : boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
         this.ambush = null;
         if (boss) Combat.spawn(this, fleet, this.z, true);
         else if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
@@ -331,7 +342,7 @@ const MineScene = {
   coach() {
     const h = S.hints;
     let msg = '';
-    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
+    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
@@ -391,7 +402,7 @@ const MineScene = {
       const bx = W * 0.8 - cx * 0.03, by = H * 0.25 - (cy - MH) * 0.03;
       drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }
-    if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t);
+    if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
     ctx.save();
     ctx.translate(-cx, -cy);
     ctx.strokeStyle = 'rgba(61,232,255,0.12)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
@@ -499,7 +510,7 @@ const MineScene = {
       ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.5; ctx.stroke();
       drawIcon(ctx, 'skull', bx + 8, by + 8, 16, '#ffd24a');
       ctx.fillStyle = '#ffd24a'; ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(boss.k === 'sentinel' ? 'ALIEN SENTINEL · guardian of the signal' : `PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
+      ctx.fillText(ENEMIES[boss.k].final ? `${ENEMIES[boss.k].n.toUpperCase()} · guardian of ${sysName()}` : `PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
       ctx.fillStyle = '#2a1018'; ctx.fillRect(bx, by + 19, bw, 9);
       ctx.fillStyle = '#ff4d6d'; ctx.fillRect(bx, by + 19, bw * clamp(boss.hp / boss.max, 0, 1), 9);
       ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);

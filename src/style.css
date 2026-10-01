@@ -431,3 +431,18 @@ body.mining #warHud { top: 62px; }
 .meter.dayclock i { background: var(--cyan); transition: width .3s linear; }
 .wb-news { text-align: left; font-size: 12px; color: var(--dim); background: rgba(255,255,255,.04); border-radius: 8px; padding: 6px 10px; margin-top: 6px; }
 .wb-news div { padding: 2px 0; }
+/* ---- galaxy ---- */
+#galPanel { width: 360px; }
+body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy #locPanel { display: none !important; }
+.gal-trib { display: flex; align-items: center; gap: 12px; background: rgba(217,179,255,.08); border: 1px solid rgba(217,179,255,.3); border-radius: 10px; padding: 8px 12px; margin: 8px 0; }
+.gal-trib small { display: block; font-size: 10px; letter-spacing: 1.5px; color: #d9b3ff; }
+.gal-trib b { font-size: 26px; color: #f0e0ff; font-family: var(--fh); }
+.gal-trib span { font-size: 12px; color: var(--dim); }
+.legacy { display: flex; flex-direction: column; gap: 6px; }
+.lg-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 13px; }
+.lg-row small.good { color: var(--good); }
+@media (max-width: 520px) {
+  .topbar .tbtns { gap: 4px; }
+  .topbar .tbtns button { padding: 5px 6px; }
+  .tbtns button .ico { width: 1.15em; height: 1.15em; }
+}

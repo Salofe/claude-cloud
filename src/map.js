@@ -145,7 +145,8 @@ const MapScene = {
     const tp = this.spos('troyanos', day);
     ctx.fillStyle = locOpen('troyanos') ? 'rgba(210,190,160,0.75)' : 'rgba(210,190,160,0.25)';
     for (let i = 0; i < 50; i++) { const a = i * 2.4 + t * 0.02, rr = (i % 9) * 2.6 * clamp(z, 0.8, 2.2); ctx.fillRect(tp.x + Math.cos(a) * rr, tp.y + Math.sin(a) * rr * 0.8, 1.6, 1.6); }
-    drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36), t);
+    drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36), t, sysDef().star);
+    if (sysDef().companion) { const a = t * 0.05, d = clamp(15 * z, 10, 36) * 3.2; drawSun(ctx, sun.x + Math.cos(a) * d, sun.y + Math.sin(a) * d * 0.6, clamp(9 * z, 6, 20), t, sysDef().companion); }
     if (built('dyson')) {
       const R = clamp(15 * z, 10, 36) * 2.6;
       ctx.strokeStyle = 'rgba(255,210,74,0.35)'; ctx.lineWidth = 1;

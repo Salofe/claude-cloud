@@ -201,7 +201,9 @@ const ENEMIES = {
   frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
   carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
   warlord: { n: 'Pirate Warlord',  hp: 520, sp: 230, dmg: 5, rate: 1.3, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 5, boss: 1 },
-  sentinel: { n: 'Alien Sentinel',  hp: 650, sp: 500, dmg: 2.5, rate: 1.0, spd: 70, size: 3.2, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, alien: 1 },
+  sentinel: { n: 'Alien Sentinel',  hp: 650, sp: 500, dmg: 2.5, rate: 1.0, spd: 70, size: 3.2, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, alien: 1 },
+  queen:   { n: 'Hive Queen',      hp: 760, sp: 260, dmg: 2.5, rate: 1.2, spd: 60, size: 3.4, loot: 20000, pow: 30, burst: 4, boss: 1, final: 1, hive: 1, summon: 'swarmer' },
+  swarmer: { n: 'Swarmer',         hp: 26,  sp: 0,   dmg: 2,  rate: 0.9, spd: 270, size: 0.55, loot: 150,  pow: 1, hive: 1 },
   adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };

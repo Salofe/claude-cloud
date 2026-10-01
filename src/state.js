@@ -16,7 +16,7 @@ function newGame() {
   };
   for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.06, 0.06); } }
   if (typeof resetLocs === 'function') resetLocs();
-  addNews('📡', 'Your old mining ship is ready at Tranquility Base. Time to get rich.', '#3de8ff');
+  addNews('📡', `Your old mining ship is ready at ${LOC.luna.station}. Time to get rich.`, '#3de8ff');
   return S;
 }
 // ---------- Clawcade leaderboard: the most credits you've ever held ----------
@@ -75,7 +75,7 @@ const ship = {
 };
 function incomeMult() {
   let inv = 0; for (const id in S.invest) inv += S.invest[id];
-  return ship.refinery * (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1);
+  return ship.refinery * (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1) * sysDef().value * (1 + 0.1 * legacyLv('ore'));
 }
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
@@ -188,7 +188,7 @@ function buyPrice(locId, item) {
 const fuelBase = () => Math.max(1, 0.09 * Math.pow(S.stats.earned, 0.72) * clamp(0.5 + 0.125 * (S.unlock - 2), 0.5, 1));
 function fuelPrice(locId) {
   let m = 1; for (const e of S.events) if (e.fuelPrice) m = Math.max(m, e.fuelPrice);
-  return Math.max(1, Math.round((LOC[locId].fuel || 6) / 5 * fuelBase() * m * Math.pow(0.85, spoilCount('fuel'))));
+  return Math.max(1, Math.round((LOC[locId].fuel || 6) / 5 * fuelBase() * m * Math.pow(0.85, spoilCount('fuel')) * Math.pow(0.92, legacyLv('fuel'))));
 }
 function marketClosed(locId) { return S.events.some(e => e.closed && e.closed.includes(locId)); }
 
@@ -300,7 +300,7 @@ function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
 function droneCost(id, k) {
   const o = S.outposts[id]; const n = o ? o.n : 0; const z = LOC[id].field.z;
   let c = 0; for (let i = 0; i < (k || 1); i++) c += OUTPOST.drone[z] * Math.pow(OUTPOST.growth, n + i);
-  return Math.ceil(c * Math.pow(0.88, spoilCount('drones')));
+  return Math.ceil(c * Math.pow(0.88, spoilCount('drones')) * Math.pow(0.92, legacyLv('drones')));
 }
 function outpostLvCost(id) { const o = S.outposts[id]; if (!o || o.lv >= OUTPOST.maxLv) return null; return OUTPOST.build[LOC[id].field.z] * OUTPOST.lvCost[o.lv - 1]; }
 function buildOutpost(id) {
@@ -312,7 +312,7 @@ function buildOutpost(id) {
 function maxAffordableDrones(id) {
   const o = S.outposts[id]; if (!o) return 0;
   let n = 0, c = 0; const z = LOC[id].field.z;
-  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n) * Math.pow(0.88, spoilCount('drones')); if (c + nc > S.credits) break; c += nc; n++; }
+  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n) * Math.pow(0.88, spoilCount('drones')) * Math.pow(0.92, legacyLv('drones')); if (c + nc > S.credits) break; c += nc; n++; }
   return n;
 }
 function buyDrones(id, k) {
@@ -351,6 +351,8 @@ function offlineGains() {
   if (secs < 30) return null;
   const g = totalIncome() * secs * OFFLINE_RATE;
   if (g >= 1) { S.credits += g; S.stats.earned += g; S.stats.droneEarned += g; }
+  const trib = S.galaxy && conquered() ? tributeRate() * secs / 60 : 0;
+  if (trib) S.galaxy.tribute += trib;
   // the system keeps living while you're gone
   let days = 0; const newsBefore = S.news.length && S.news[0];
   if (has(U.MAP)) {
@@ -360,8 +362,8 @@ function offlineGains() {
   }
   checkUnlocks();
   const i = S.news.indexOf(newsBefore), fresh = (i < 0 ? S.news : S.news.slice(0, i)).slice(0, 4);
-  if (g < 1 && !days) return null;
-  return { secs, real, capped: real > OFFLINE_CAP, g, days, news: fresh };
+  if (g < 1 && !days && !trib) return null;
+  return { secs, real, capped: real > OFFLINE_CAP, g, days, news: fresh, trib };
 }
 
 // ---------- progression ----------

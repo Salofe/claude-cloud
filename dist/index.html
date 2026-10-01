@@ -440,6 +440,21 @@ body.mining #warHud { top: 62px; }
 .meter.dayclock i { background: var(--cyan); transition: width .3s linear; }
 .wb-news { text-align: left; font-size: 12px; color: var(--dim); background: rgba(255,255,255,.04); border-radius: 8px; padding: 6px 10px; margin-top: 6px; }
 .wb-news div { padding: 2px 0; }
+/* ---- galaxy ---- */
+#galPanel { width: 360px; }
+body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy #locPanel { display: none !important; }
+.gal-trib { display: flex; align-items: center; gap: 12px; background: rgba(217,179,255,.08); border: 1px solid rgba(217,179,255,.3); border-radius: 10px; padding: 8px 12px; margin: 8px 0; }
+.gal-trib small { display: block; font-size: 10px; letter-spacing: 1.5px; color: #d9b3ff; }
+.gal-trib b { font-size: 26px; color: #f0e0ff; font-family: var(--fh); }
+.gal-trib span { font-size: 12px; color: var(--dim); }
+.legacy { display: flex; flex-direction: column; gap: 6px; }
+.lg-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 13px; }
+.lg-row small.good { color: var(--good); }
+@media (max-width: 520px) {
+  .topbar .tbtns { gap: 4px; }
+  .topbar .tbtns button { padding: 5px 6px; }
+  .tbtns button .ico { width: 1.15em; height: 1.15em; }
+}
 </style>
 </head>
 <body>
@@ -471,6 +486,7 @@ body.mining #warHud { top: 62px; }
       <button id="bNews" title="News" data-need="4">📰<span>News</span></button>
       <button id="bFac" title="Empire" data-need="1">🤖<span>Empire</span></button>
       <button id="bProj" title="Megaprojects" data-need="2">🌌<span>Projects</span></button>
+      <button id="bGal" title="Galaxy" class="hidden">🌀<span>Galaxy</span></button>
       <button id="bSnd" title="Sound">🔊</button>
       <button id="bMenu" title="Menu">☰</button>
     </div>
@@ -484,6 +500,7 @@ body.mining #warHud { top: 62px; }
   <button id="zIn">＋</button><button id="zOut">－</button><button id="zHome" title="My ship">◎</button><button id="zAll" title="Whole system">✺</button>
 </div>
 <div id="locPanel" class="ui panel hidden"></div>
+<div id="galPanel" class="ui panel hidden"></div>
 <div id="travelBanner" class="hidden"></div>
 
 <div id="mineUI" class="hidden">
@@ -714,7 +731,9 @@ const ENEMIES = {
   frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
   carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
   warlord: { n: 'Pirate Warlord',  hp: 520, sp: 230, dmg: 5, rate: 1.3, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 5, boss: 1 },
-  sentinel: { n: 'Alien Sentinel',  hp: 650, sp: 500, dmg: 2.5, rate: 1.0, spd: 70, size: 3.2, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, alien: 1 },
+  sentinel: { n: 'Alien Sentinel',  hp: 650, sp: 500, dmg: 2.5, rate: 1.0, spd: 70, size: 3.2, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, alien: 1 },
+  queen:   { n: 'Hive Queen',      hp: 760, sp: 260, dmg: 2.5, rate: 1.2, spd: 60, size: 3.4, loot: 20000, pow: 30, burst: 4, boss: 1, final: 1, hive: 1, summon: 'swarmer' },
+  swarmer: { n: 'Swarmer',         hp: 26,  sp: 0,   dmg: 2,  rate: 0.9, spd: 270, size: 0.55, loot: 150,  pow: 1, hive: 1 },
   adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };
@@ -922,6 +941,31 @@ function planetTex(loc) {
         if (heart > 0.58) col = mixc(col, [250, 240, 230], 0.75);
         break;
       }
+      // generic worlds coloured by loc.col (used by other star systems)
+      case 'ocean': {
+        const land = fbm(u * 4 / 6, v * 4 / 6, seed + 5, 4, 5);
+        col = land > 0.6 ? mixc(L, [235, 225, 190], clamp((land - 0.6) * 3 + (n - 0.5) * 0.6, 0, 1)) : mixc(D, mixc(D, L, 0.5), land * 1.4);
+        if (lat > 0.84 + n * 0.08) col = [235, 245, 250];
+        break;
+      }
+      case 'gas': {
+        const turb = fbm(u * 1.5, v * 3, seed + 7, P * 1.5, 4);
+        const band = Math.sin((j / TH) * 18 + turb * 3.4);
+        col = mixc(D, L, clamp(0.5 + band * 0.42 + (n - 0.5) * 0.3, 0, 1));
+        break;
+      }
+      case 'ice': {
+        const ridge = Math.abs(fbm(u * 8 / 6, v * 8 / 6, seed + 4, 8, 5) - 0.5);
+        col = mixc(D, L, clamp(0.4 + n * 0.8, 0, 1));
+        if (ridge < 0.03) col = mixc(D, [40, 60, 110], 0.5);
+        break;
+      }
+      case 'lava': {
+        const crack = Math.abs(fbm(u * 6 / 6, v * 6 / 6, seed + 6, 6, 5) - 0.5);
+        col = mixc([30, 22, 20], D, n);
+        if (crack < 0.04) col = mixc(L, [255, 240, 180], 1 - crack / 0.04);
+        break;
+      }
       default: col = mixc(D, L, n);
     }
     const k = (j * TW + i) * 4;
@@ -1010,28 +1054,37 @@ function drawRing(ctx, x, y, r, c, back) {
   ctx.restore();
 }
 
-function drawSun(ctx, x, y, r, t) {
-  glow(ctx, x, y, r * 9, '#ff7a1a33', 0.7);
-  glow(ctx, x, y, r * 4, '#ffb04a88', 0.7);
+// star palettes: Sol is yellow; other systems bring white, orange, red and blue stars
+const STAR_PAL = {
+  sol:    { g1: '#ff7a1a33', g2: '#ffb04a88', r0: 'rgba(255,210,120,0.35)', r1: 'rgba(255,150,60,0)', core: ['#ffffff', '#fff4c2', '#ffd060', '#ff9a2a'], f0: 'rgba(255,220,160,0)', f1: 'rgba(255,240,200,0.45)' },
+  white:  { g1: '#9fd0ff33', g2: '#e8f4ff88', r0: 'rgba(230,240,255,0.35)', r1: 'rgba(160,200,255,0)', core: ['#ffffff', '#f4f8ff', '#d6e8ff', '#9cc4ff'], f0: 'rgba(210,230,255,0)', f1: 'rgba(235,245,255,0.45)' },
+  orange: { g1: '#ff5a1a33', g2: '#ff8a3a88', r0: 'rgba(255,170,90,0.35)', r1: 'rgba(255,110,40,0)', core: ['#ffffff', '#ffe0b0', '#ffa050', '#ff6a1a'], f0: 'rgba(255,190,140,0)', f1: 'rgba(255,215,170,0.45)' },
+  red:    { g1: '#ff2a1a33', g2: '#ff5a3a88', r0: 'rgba(255,120,90,0.35)', r1: 'rgba(255,60,40,0)', core: ['#ffe6e0', '#ffb09a', '#ff5a3a', '#c41a10'], f0: 'rgba(255,140,120,0)', f1: 'rgba(255,170,150,0.4)' },
+  blue:   { g1: '#3a7aff33', g2: '#7ab0ff88', r0: 'rgba(160,200,255,0.4)', r1: 'rgba(90,140,255,0)', core: ['#ffffff', '#dff0ff', '#9cc8ff', '#4a7aff'], f0: 'rgba(160,200,255,0)', f1: 'rgba(200,225,255,0.5)' },
+};
+function drawSun(ctx, x, y, r, t, pal) {
+  const P = STAR_PAL[pal] || STAR_PAL.sol;
+  glow(ctx, x, y, r * 9, P.g1, 0.7);
+  glow(ctx, x, y, r * 4, P.g2, 0.7);
   ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < 16; i++) {
     const a = i / 16 * TAU + t * 0.04 + Math.sin(t * 0.7 + i) * 0.05;
     const l = r * (1.7 + 0.5 * Math.sin(t * 1.3 + i * 2.1));
     const g = ctx.createLinearGradient(x, y, x + Math.cos(a) * l, y + Math.sin(a) * l);
-    g.addColorStop(0, 'rgba(255,210,120,0.35)'); g.addColorStop(1, 'rgba(255,150,60,0)');
+    g.addColorStop(0, P.r0); g.addColorStop(1, P.r1);
     ctx.strokeStyle = g; ctx.lineWidth = r * (0.18 + 0.08 * Math.sin(i));
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); ctx.stroke();
   }
   ctx.globalCompositeOperation = 'source-over';
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, '#fff4c2'); g.addColorStop(0.75, '#ffd060'); g.addColorStop(1, '#ff9a2a');
+  g.addColorStop(0, P.core[0]); g.addColorStop(0.35, P.core[1]); g.addColorStop(0.75, P.core[2]); g.addColorStop(1, P.core[3]);
   ctx.fillStyle = g;
   ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
   // lens flare
   glow(ctx, x, y, r * 1.5, '#ffffffaa', 0.6);
   ctx.globalCompositeOperation = 'lighter';
   const fl = ctx.createLinearGradient(x - r * 6, y, x + r * 6, y);
-  fl.addColorStop(0, 'rgba(255,220,160,0)'); fl.addColorStop(0.5, 'rgba(255,240,200,0.45)'); fl.addColorStop(1, 'rgba(255,220,160,0)');
+  fl.addColorStop(0, P.f0); fl.addColorStop(0.5, P.f1); fl.addColorStop(1, P.f0);
   ctx.fillStyle = fl; ctx.fillRect(x - r * 6, y - 1, r * 12, 2);
   ctx.globalCompositeOperation = 'source-over';
 }
@@ -1218,9 +1271,32 @@ function drawAlienShip(ctx, type, x, y, ang, s, t) {
   ctx.fillStyle = '#e8fdff'; ctx.beginPath(); ctx.arc(0, 0, big ? 3.5 : 2, 0, TAU); ctx.fill();
   ctx.restore();
 }
+function drawHiveShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type], big = type === 'queen';
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, big ? 30 : 16, '#7aff6a33', 0.8);
+  const flap = Math.sin(t * (big ? 6 : 18)) * 0.35;
+  ctx.fillStyle = 'rgba(176,255,154,0.25)'; ctx.strokeStyle = 'rgba(176,255,154,0.6)'; ctx.lineWidth = 0.8;
+  for (const side of [-1, 1]) {
+    ctx.save(); ctx.rotate(side * (0.9 + flap));
+    ctx.beginPath(); ctx.ellipse(-4, side * 0, 14, 5, side * 0.3, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+  const g = ctx.createLinearGradient(-14, 0, 14, 0); g.addColorStop(0, '#2a1a3a'); g.addColorStop(0.6, '#5a2a6a'); g.addColorStop(1, '#8a4a9a');
+  ctx.fillStyle = g; ctx.strokeStyle = '#c08ad0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(-2, 0, big ? 16 : 11, big ? 8 : 5, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(big ? 14 : 10, 0, big ? 6 : 4, big ? 5 : 3.5, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.globalCompositeOperation = 'lighter';
+  const pulse = 0.5 + 0.5 * Math.sin(t * 4 + x);
+  ctx.fillStyle = `rgba(176,255,154,${0.5 + pulse * 0.4})`;
+  for (let i = 0; i < (big ? 4 : 2); i++) { ctx.beginPath(); ctx.arc(-10 + i * 5, (i % 2 ? 2 : -2) * (big ? 1.5 : 1), big ? 2.4 : 1.4, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#ff6a6a'; ctx.beginPath(); ctx.arc(big ? 17 : 12, -1.5, 1.2, 0, TAU); ctx.arc(big ? 17 : 12, 1.5, 1.2, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
   if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
+  if (e.hive) return drawHiveShip(ctx, type, x, y, ang, s, t);
   const mil = e.military;
   const main = mil ? PAL.military : PAL.enemyMid, dark = mil ? PAL.militaryDark : PAL.enemyDark, lit = mil ? '#d8f0a8' : PAL.enemy;
   ctx.save();
@@ -1274,7 +1350,26 @@ function makeRockShape(n, jag) {
   }
   return pts;
 }
+// crystal asteroids (other star systems): faceted, translucent, glowing with their ore
+function drawCrystalRock(ctx, a, t) {
+  const ore = ITEMS[a.ore], n = a.tier === 1 ? 5 : a.tier === 2 ? 6 : 7;
+  ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+  glow(ctx, 0, 0, a.r * 1.8, ore.c + '55', 0.6 + 0.2 * Math.sin(t * 3 + a.x));
+  const pts = Array.from({ length: n }, (_, i) => { const ang = i / n * TAU, k = i % 2 ? 0.72 : 1.05; return [Math.cos(ang) * a.r * k, Math.sin(ang) * a.r * k]; });
+  const g = ctx.createLinearGradient(-a.r, -a.r, a.r, a.r);
+  g.addColorStop(0, 'rgba(240,235,255,0.85)'); g.addColorStop(0.5, ore.c + 'aa'); g.addColorStop(1, 'rgba(60,40,110,0.85)');
+  ctx.fillStyle = g; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fill();
+  if (a.hit > 0) { ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fill(); }
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
+  ctx.beginPath(); for (const p of pts) { ctx.moveTo(0, 0); ctx.lineTo(p[0], p[1]); } ctx.stroke();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'; const gl = (t * 0.7 + a.x * 0.01) % 1;
+  ctx.beginPath(); ctx.arc(pts[0][0] * gl, pts[0][1] * gl, 1.8, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function drawRock(ctx, a, t, scanLv) {
+  if (a.crystal) return drawCrystalRock(ctx, a, t);
   const ore = ITEMS[a.ore];
   ctx.save();
   ctx.translate(a.x, a.y); ctx.rotate(a.rot);
@@ -1652,7 +1747,7 @@ function newGame() {
   };
   for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.06, 0.06); } }
   if (typeof resetLocs === 'function') resetLocs();
-  addNews('📡', 'Your old mining ship is ready at Tranquility Base. Time to get rich.', '#3de8ff');
+  addNews('📡', `Your old mining ship is ready at ${LOC.luna.station}. Time to get rich.`, '#3de8ff');
   return S;
 }
 // ---------- Clawcade leaderboard: the most credits you've ever held ----------
@@ -1711,7 +1806,7 @@ const ship = {
 };
 function incomeMult() {
   let inv = 0; for (const id in S.invest) inv += S.invest[id];
-  return ship.refinery * (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1);
+  return ship.refinery * (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1) * sysDef().value * (1 + 0.1 * legacyLv('ore'));
 }
 function cargoUsed() { let n = 0; for (const k in S.cargo) n += S.cargo[k]; return n; }
 function cargoFree() { return ship.cargoMax - cargoUsed(); }
@@ -1824,7 +1919,7 @@ function buyPrice(locId, item) {
 const fuelBase = () => Math.max(1, 0.09 * Math.pow(S.stats.earned, 0.72) * clamp(0.5 + 0.125 * (S.unlock - 2), 0.5, 1));
 function fuelPrice(locId) {
   let m = 1; for (const e of S.events) if (e.fuelPrice) m = Math.max(m, e.fuelPrice);
-  return Math.max(1, Math.round((LOC[locId].fuel || 6) / 5 * fuelBase() * m * Math.pow(0.85, spoilCount('fuel'))));
+  return Math.max(1, Math.round((LOC[locId].fuel || 6) / 5 * fuelBase() * m * Math.pow(0.85, spoilCount('fuel')) * Math.pow(0.92, legacyLv('fuel'))));
 }
 function marketClosed(locId) { return S.events.some(e => e.closed && e.closed.includes(locId)); }
 
@@ -1936,7 +2031,7 @@ function buildCost(id) { return OUTPOST.build[LOC[id].field.z]; }
 function droneCost(id, k) {
   const o = S.outposts[id]; const n = o ? o.n : 0; const z = LOC[id].field.z;
   let c = 0; for (let i = 0; i < (k || 1); i++) c += OUTPOST.drone[z] * Math.pow(OUTPOST.growth, n + i);
-  return Math.ceil(c * Math.pow(0.88, spoilCount('drones')));
+  return Math.ceil(c * Math.pow(0.88, spoilCount('drones')) * Math.pow(0.92, legacyLv('drones')));
 }
 function outpostLvCost(id) { const o = S.outposts[id]; if (!o || o.lv >= OUTPOST.maxLv) return null; return OUTPOST.build[LOC[id].field.z] * OUTPOST.lvCost[o.lv - 1]; }
 function buildOutpost(id) {
@@ -1948,7 +2043,7 @@ function buildOutpost(id) {
 function maxAffordableDrones(id) {
   const o = S.outposts[id]; if (!o) return 0;
   let n = 0, c = 0; const z = LOC[id].field.z;
-  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n) * Math.pow(0.88, spoilCount('drones')); if (c + nc > S.credits) break; c += nc; n++; }
+  while (n < outpostCap(o.lv) - o.n) { const nc = OUTPOST.drone[z] * Math.pow(OUTPOST.growth, o.n + n) * Math.pow(0.88, spoilCount('drones')) * Math.pow(0.92, legacyLv('drones')); if (c + nc > S.credits) break; c += nc; n++; }
   return n;
 }
 function buyDrones(id, k) {
@@ -1987,6 +2082,8 @@ function offlineGains() {
   if (secs < 30) return null;
   const g = totalIncome() * secs * OFFLINE_RATE;
   if (g >= 1) { S.credits += g; S.stats.earned += g; S.stats.droneEarned += g; }
+  const trib = S.galaxy && conquered() ? tributeRate() * secs / 60 : 0;
+  if (trib) S.galaxy.tribute += trib;
   // the system keeps living while you're gone
   let days = 0; const newsBefore = S.news.length && S.news[0];
   if (has(U.MAP)) {
@@ -1996,8 +2093,8 @@ function offlineGains() {
   }
   checkUnlocks();
   const i = S.news.indexOf(newsBefore), fresh = (i < 0 ? S.news : S.news.slice(0, i)).slice(0, 4);
-  if (g < 1 && !days) return null;
-  return { secs, real, capped: real > OFFLINE_CAP, g, days, news: fresh };
+  if (g < 1 && !days && !trib) return null;
+  return { secs, real, capped: real > OFFLINE_CAP, g, days, news: fresh, trib };
 }
 
 // ---------- progression ----------
@@ -2187,15 +2284,6 @@ function warlordKilled(id) {
   save();
 }
 
-// ---------- the end of the Solar System: the Sentinel and the gate ----------
-function sentinelKilled() {
-  if (S.gateOpen) return;
-  S.gateOpen = 1;
-  addNews('🌀', '<b>The Sentinel is destroyed.</b> An ancient jump gate wakes up in the Oort Cloud.', '#d9b3ff');
-  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>The Sentinel's core shatters — and deep in the Oort Cloud, a ring older than the Sun <b>lights up</b>.</p><p>It is a <b>jump gate</b>. On the other side: the stars of the galaxy, and at its heart, a black hole.</p><p class="hint">Traveling the galaxy arrives in the next update. You've finished the Solar System!</p>`, choices: [{ label: 'Incredible', cost: 0, fn: () => {} }] });
-  save();
-}
-
 // ---------- natural system events ----------
 const EVENT_GEN = [
   { kind: 'war', w: 1.1, make() {
@@ -2310,7 +2398,7 @@ const EVENT_GEN = [
   { kind: 'independence', w: 0.5, choice: 1, make() {
       const c = ['ceres', 'europa', 'titan'].filter(id => cityOpen(id) && !kindActive('free', id) && !kindActive('order', id));
       if (!c.length) return null; const l = LOC[pick(c)]; const cost = pcost(0.006, 250000);
-      return { icon: '🏴', title: `${l.n} wants independence`, text: `Separatists on ${l.n} are rising against the Earth Union's influence.`, choices: [
+      return { icon: '🏴', title: `${l.n} wants independence`, text: `Separatists on ${l.n} are rising against the ${FACTIONS.tierra.n}'s influence.`, choices: [
         { label: `Fund the separatists · ${fmt(cost)}`, cost, fn: () => { repChange(l.faction, 20); repChange('tierra', -15); addEvent({ kind: 'free', mine: 1, icon: '🎆', title: `Free ${l.n}`, text: 'The new government rewards its friends: ore sells ×1.5 there.', dur: 40, locs: [l.id], price: ORES.map(i => ({ loc: l.id, item: i, m: 1.5 })) }); } },
         { label: `Fund the government · ${fmt(cost)}`, cost, fn: () => { repChange('tierra', 20); repChange(l.faction, -10); addEvent({ kind: 'order', mine: 1, icon: '🛡️', title: `Order on ${l.n}`, text: 'Patrols everywhere: no pirates there for 40 days.', dur: 40, locs: [l.id], danger: [{ loc: l.id, add: -1 }] }); } },
         { label: 'Ignore it', cost: 0, fn: () => {} },
@@ -2576,7 +2664,9 @@ function usePower(kind, arg) {
 
 // ---------- the Nova Cannon: destroying planets ----------
 const LOC_BASE = {};
-for (const l of LOCS) LOC_BASE[l.id] = { station: l.station, market: l.market, faction: l.faction, field: l.field, depot: l.depot, desc: l.desc, danger: l.danger, black: l.black, tex: l.tex, col: l.col };
+// what a location looks like before any nukes (rebuilt whenever the star system changes)
+function snapshotLocBase() { for (const l of LOCS) LOC_BASE[l.id] = { station: l.station, market: l.market, faction: l.faction, field: l.field, depot: l.depot, desc: l.desc, danger: l.danger, black: l.black, tex: l.tex, col: l.col }; }
+snapshotLocBase();
 function resetLocs() {
   for (const l of LOCS) { Object.assign(l, LOC_BASE[l.id]); delete l.nuked; if (!LOC_BASE[l.id].field) delete l.field; if (!LOC_BASE[l.id].station) delete l.station; }
   FIELDS.splice(0, FIELDS.length, ...NODES.filter(l => l.field));
@@ -2604,7 +2694,7 @@ function destroyPlanet(id) {
   if (fac) repChange(fac, factionAlive(fac) ? -60 : -100, true);
   for (const f in FACTIONS) if (f !== fac && f !== 'piratas') repChange(f, -20, true);
   repChange('piratas', 25, true);
-  addNews('💥', `<b>${name} has been destroyed.</b> The Solar System trembles before you.`, '#ff4d6d');
+  addNews('💥', `<b>${name} has been destroyed.</b> The whole system trembles before you.`, '#ff4d6d');
   if (typeof MapScene !== 'undefined') MapScene.nukeFx = { id, t: 0 };
   sfx('boom'); setTimeout(() => sfx('boom'), 250); setTimeout(() => sfx('lose'), 600);
 }
@@ -2668,6 +2758,292 @@ function hireFreighter(from, to, g) {
   addNews('🚚', `Freighter hired: ${ITEMS[g].n} ${LOC[from].n} → ${LOC[to].n}`, '#6dffb0');
   save();
   return true;
+}
+
+// ---- galaxy.js ----
+'use strict';
+// ============ THE GALAXY: star systems, the jump gate, Tribute & Legacy ============
+// Every star system reuses the same "slots" as Sol (a starter moon field, a capital,
+// inner worlds, a belt, a gas giant with moons, a ringed giant, a black market, a frontier
+// belt and a hidden final field). Each system is hand-made by overriding names, looks,
+// ores, factions and texts on top of Sol, and gets harder: tougher rocks and pirates.
+
+// pristine copy of the Solar System, taken before anything is modified
+const SOL_SNAP = JSON.parse(JSON.stringify({ locs: LOCS, factions: FACTIONS, unlocks: UNLOCKS, projects: PROJECTS.map(p => ({ id: p.id, n: p.n, d: p.d, fx: p.fx })) }));
+
+const SYSTEMS = {
+  sol: {
+    n: 'Sol', star: 'sol', rock: 1, enemy: 1, value: 1,
+    boss: 'sentinel', bossFleet: ['sentinel', 'adrone', 'adrone', 'adrone'],
+    signal: { title: 'A signal from the dark', text: 'Your deep-space dishes caught a <b>repeating signal</b> from the <b>Oort Cloud</b>, far beyond the Kuiper Belt. It is <b>not human</b>.' },
+    gate: 'The Sentinel\'s core shatters — and deep in the Oort Cloud, a ring older than the Sun <b>lights up</b>. It is a <b>jump gate</b>.',
+  },
+  centauri: {
+    n: 'Alpha Centauri', star: 'white', companion: 'orange', rock: 1.5, enemy: 1.35, value: 1,
+    boss: 'queen', bossFleet: ['queen', 'swarmer', 'swarmer', 'swarmer'],
+    signal: { title: 'Something is nesting', text: 'Probes beyond the Proxima Drift went silent one by one. The last image shows a <b>living nebula</b> — and something huge moving inside it: <b>the Hive</b>.' },
+    gate: 'The Hive Queen bursts into glittering dust. In the heart of the nebula, a second ancient ring <b>wakes up</b>: the way deeper into the galaxy.',
+    intro: 'You arrive through the gate at <b>Alpha Centauri</b>: two suns, crystal-rich belts and pirates <b>far tougher</b> than at home. Your fortune stayed behind — but your <b>Legacy</b> came with you.',
+    factions: {
+      tierra: { n: 'Pandora Accord', c: '#4fd8c0' }, marte: { n: 'Dune Clans', c: '#e8b46a' }, cinturon: { n: 'Prism Guild', c: '#c49cff' },
+      exterior: { n: 'Typhon League', c: '#6aa8ff' }, piratas: { n: 'Red Market Cartel', c: '#ff4d6d' },
+    },
+    locs: {
+      luna: { n: 'Tethys', station: 'First Light Base', tex: 'rock', col: ['#c9d2e8', '#4a5068'], desc: 'A quiet grey moon of Pandora. Your new beginning.',
+        field: { n: 'Shepherd Rocks', ores: { iron: 4, titanium: 1.2, cobalt: 0.3, ice: 3 } } },
+      tierra: { n: 'Pandora', station: 'Haven Port', tex: 'ocean', col: ['#7fe0a8', '#0b3a5c'], desc: 'A world of warm teal oceans under two suns. Pays well for every metal.' },
+      venus: { n: 'Calypso', station: 'Orchid Spire', tex: 'gas', col: ['#f2d0ff', '#6a3a8a'], desc: 'A violet cloud world. Its floating cities crave luxury and ice.' },
+      mercurio: { n: 'Cinder', station: 'Cinder Depot', tex: 'lava', col: ['#ffb060', '#4a1a0c'], desc: 'A molten world hugging Alpha Centauri A. Sunstone everywhere — and the heat.',
+        field: { n: 'Glassfire Flats', ores: { titanium: 2, nickel: 2, sunstone: 2.5, iron: 1.5 }, crystal: 0.15 } },
+      marte: { n: 'Dune', station: 'Sandgate', tex: 'rock', col: ['#f0c890', '#7a4a20'], desc: 'An endless desert ruled by proud clans. Water is worth more than gold here.' },
+      ceres: { n: 'Halcyon', station: 'Prism Station', tex: 'rock', col: ['#d8c8ff', '#4a3a6a'], desc: 'Capital of the Shard Belt, where asteroids grow as crystals.',
+        field: { n: 'Shard Belt', ores: { nickel: 2, he3: 2, platinum: 2.5, iridium: 1.1 }, crystal: 0.5 } },
+      jupiter: { n: 'Typhon', tex: 'gas', col: ['#9ad8ff', '#1a3a8a'] },
+      europa: { n: 'Nyx', station: 'Nyx Colony', tex: 'ice', col: ['#e8f6ff', '#5a7aa8'], desc: 'An ice moon of Typhon. The League buys iridium at any price.' },
+      troyanos: { field: { n: 'Typhon Swarm', ores: { he3: 2.2, iridium: 3, ringpearl: 0.25 }, crystal: 0.2 }, station: 'Swarm Depot', desc: 'Rocks trapped in Typhon\'s gravity. Pirate nests everywhere.' },
+      saturno: { n: 'Aurelia', tex: 'gas', col: ['#ffe0a0', '#9a5a20'], station: 'Halo Depot', desc: 'A golden ringed giant. Its rings are full of Ring Pearls.',
+        field: { n: 'Aurelia Halo', ores: { ice: 2.5, he3: 3, ringpearl: 2.6, exotic: 0.6 }, crystal: 0.2 } },
+      titan: { n: 'Mist', station: 'Mistport', tex: 'titan', col: ['#e0d0b0', '#6a5a40'], desc: 'A foggy moon of Aurelia with huge refineries.' },
+      pluton: { n: 'Proxima b', station: 'Red Market', tex: 'rock', col: ['#ff9a80', '#4a1a14'], desc: 'A dim world orbiting the red dwarf Proxima. Anything is for sale.' },
+      kuiper: { n: 'Proxima Drift', station: 'Drift Depot', desc: 'Frozen rocks drifting between the stars. Exotics — and the Cartel\'s carriers.',
+        field: { n: 'Proxima Drift', ores: { ice: 1.5, iridium: 2.2, exotic: 2, voidshard: 0.1 } } },
+      oort: { n: 'The Hive', station: 'Watchpost Omega', col: ['#b0ff9a', '#1a3a20'], desc: 'A living nebula. Something enormous breeds in its depths.',
+        field: { n: 'Hive Nebula', ores: { ice: 3, ringpearl: 1.5, exotic: 2.2, voidshard: 0.42 } } },
+    },
+    unlocks: {
+      0: { title: 'Tethys' }, 3: { title: 'Cinder & Dune', text: '<b>Cinder</b> burns with <b>Sunstone</b> but the heat eats your hull — buy <b>Shields</b>. <b>Dune</b> pays a fortune for ice.' },
+      4: { title: 'The Shard Belt', text: '<b>Halcyon</b> and the <b>Shard Belt</b>: asteroids that grow as <b>crystals</b> and shatter into many shards when you break them. Catch them all! Pirates here are tougher than at home.' },
+      6: { title: 'Typhon System', text: '<b>Nyx</b> and the <b>Typhon Swarm</b>: iridium everywhere. The <b>Scanner</b> reveals rich veins.' },
+      7: { title: 'Aurelia & Influence', text: '<b>Mist</b> and the golden <b>Aurelia Halo</b>. <b>Invest</b> in stations: each level adds <b>+10% to ALL income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Alpha Centauri.' },
+      8: { title: 'Proxima', text: '<b>Proxima b</b>\'s Red Market and the <b>Proxima Drift</b>. Exotics and even <b>Void Shards</b>.' },
+    },
+    projects: {
+      driver: { n: 'Tethys Mass Driver', d: 'A magnetic rail on Tethys hurls ore straight to Pandora.', fx: 'Tethys outpost output ×3' },
+      elevator: { n: 'Pandora Space Elevator', d: 'A cable rising out of Pandora\'s oceans. Its industry is yours to supply.', fx: 'All ore sells for +25% everywhere' },
+      terraform: { n: 'Terraform Dune', d: 'Comets, mirrors and seas poured onto the desert. Dune turns blue.', fx: 'Dune pays ×2 for everything · Dune Clans reputation +50' },
+      ringstation: { n: 'Aurelia Halo Megastation', d: 'A city-sized refinery woven into Aurelia\'s golden rings.', fx: 'ALL drone income ×3' },
+    },
+  },
+};
+
+// the road to the core: 15 systems from the rim to the black hole
+const GALAXY = [
+  { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
+  { id: 'centauri', n: 'Alpha Centauri', star: 'white', x: -0.62, y: 0.66 },
+  { id: 'barnard', n: 'Barnard\'s Star', star: 'red', x: -0.30, y: 0.76 },
+  { id: 'sirius', n: 'Sirius', star: 'white', x: 0.04, y: 0.72 },
+  { id: 'tauceti', n: 'Tau Ceti', star: 'sol', x: 0.34, y: 0.56 },
+  { id: 'eridani', n: 'Epsilon Eridani', star: 'orange', x: 0.56, y: 0.28 },
+  { id: 'vega', n: 'Vega', star: 'blue', x: 0.62, y: -0.06 },
+  { id: 'altair', n: 'Altair', star: 'white', x: 0.48, y: -0.36 },
+  { id: 'kepler', n: 'Kepler', star: 'sol', x: 0.18, y: -0.52 },
+  { id: 'rigel', n: 'Rigel', star: 'blue', x: -0.16, y: -0.46 },
+  { id: 'betelgeuse', n: 'Betelgeuse', star: 'red', x: -0.38, y: -0.22 },
+  { id: 'orion', n: 'Orion Nebula', star: 'blue', x: -0.36, y: 0.08 },
+  { id: 'pulsar', n: 'The Pulsar', star: 'white', x: -0.14, y: 0.24 },
+  { id: 'rim', n: 'Core Rim', star: 'orange', x: 0.12, y: 0.12 },
+  { id: 'sgra', n: 'Sagittarius A*', star: 'hole', x: 0, y: 0 },
+];
+const sysId = () => (S && S.sys) || 'sol';
+const sysDef = () => SYSTEMS[sysId()];
+const sysName = () => sysDef().n;
+const nextSystem = () => GALAXY[GALAXY.findIndex(g => g.id === sysId()) + 1];
+
+// rebuild the world for a star system: start from Sol, then apply that system's overrides
+function applySystem(id) {
+  const D = SYSTEMS[id] || SYSTEMS.sol, base = SOL_SNAP;
+  for (const l of LOCS) {
+    const b = base.locs.find(x => x.id === l.id), o = (D.locs || {})[l.id] || {};
+    for (const k of Object.keys(l)) if (k !== 'id') delete l[k];
+    Object.assign(l, JSON.parse(JSON.stringify(b)), JSON.parse(JSON.stringify({ ...o, field: undefined })));
+    if (b.field || o.field) l.field = { ...(b.field || {}), ...(o.field || {}) };
+    if (!l.field || !Object.keys(l.field).length) delete l.field;
+  }
+  for (const f in FACTIONS) Object.assign(FACTIONS[f], base.factions[f], (D.factions || {})[f] || {});
+  UNLOCKS.forEach((u, i) => Object.assign(u, base.unlocks[i], (D.unlocks || {})[i] || {}));
+  for (const p of PROJECTS) Object.assign(p, base.projects.find(x => x.id === p.id), (D.projects || {})[p.id] || {});
+  FIELDS.splice(0, FIELDS.length, ...NODES.filter(l => l.field));
+  for (const k in TEX) delete TEX[k];
+  snapshotLocBase();
+  if (S) applyNukes();
+}
+// old saves (and new ores) may lack market entries: make sure every market item has a price state
+function ensureMarkets() {
+  for (const l of NODES) if (l.market) {
+    S.sat[l.id] = S.sat[l.id] || {}; S.drift[l.id] = S.drift[l.id] || {};
+    for (const k in l.market) { if (S.sat[l.id][k] == null) S.sat[l.id][k] = 1; if (S.drift[l.id][k] == null) S.drift[l.id][k] = 0; }
+  }
+}
+
+// ---------- Tribute & Legacy ----------
+const LEGACY = {
+  ore:       { icon: '⛏', n: 'Prospector\'s Legacy', d: '+10% ore value everywhere', cost: lv => Math.round(8 * Math.pow(1.6, lv)) },
+  drones:    { icon: '🤖', n: 'Drone Blueprints', d: 'Drones cost 8% less', cost: lv => Math.round(6 * Math.pow(1.6, lv)) },
+  fuel:      { icon: '⛽', n: 'Efficient Drives', d: 'Fuel costs 8% less', cost: lv => Math.round(4 * Math.pow(1.5, lv)) },
+  quick:     { icon: '🗺', n: 'Head Start', d: 'Start each system with the Star Map open and 50K credits', max: 1, cost: () => 15 },
+  laserPlan: { icon: '✦', n: 'Laser Plans', d: 'Start each system with +5 laser levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
+  cargoPlan: { icon: '▣', n: 'Cargo Plans', d: 'Start each system with +5 cargo bay levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
+  extrPlan:  { icon: '⚗', n: 'Extractor Plans', d: 'Start each system with +5 extractor levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
+};
+const legacyLv = k => (S && S.galaxy && S.galaxy.legacy[k]) || 0;
+const conquered = () => (S && S.galaxy ? S.galaxy.done.length : 0);
+const tributeRate = () => conquered();   // per minute: each conquered system pays 1 Tribute a minute
+function tributeTick(dt) { if (S && S.galaxy && conquered()) S.galaxy.tribute += tributeRate() * dt / 60; }
+function buyLegacy(k) {
+  const L = LEGACY[k], G = S.galaxy, lv = G.legacy[k] || 0;
+  if (L.max && lv >= L.max) return false;
+  const c = L.cost(lv); if (G.tribute < c) return false;
+  G.tribute -= c; G.legacy[k] = lv + 1; save(); return true;
+}
+// one-off Tribute for leaving a system: the more you achieved there, the more it pays
+function jumpBonus() {
+  let b = 10, why = ['base 10'];
+  if (S.gateOpen) { b += 5; why.push('final boss +5'); }
+  const st = Object.values(S.allies || {}).reduce((a, x) => a + x, 0); if (st) { b += 3 * st; why.push(`ally stars +${3 * st}`); }
+  const pj = Object.keys(S.projects || {}).length; if (pj) { b += 2 * pj; why.push(`megaprojects +${2 * pj}`); }
+  return { b, why };
+}
+function jumpTo(id) {
+  const D = SYSTEMS[id]; if (!D || !S.gateOpen) return false;
+  const G = S.galaxy || { tribute: 0, legacy: {}, done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 } };
+  const from = sysId(), bonus = jumpBonus().b;
+  if (!G.done.includes(from)) G.done.push(from);
+  G.tribute += bonus;
+  G.life.earned += S.stats.earned; G.life.mined += S.stats.mined; G.life.kills += S.stats.kills; G.life.days += S.day;
+  const peak = S.stats.peak || 0, muted = S.muted;
+  S = null;
+  applySystem(id);
+  newGame();
+  Object.assign(S, { sys: id, galaxy: G, muted }); S.stats.peak = peak;
+  // Legacy start bonuses
+  S.lv.laser += 5 * (G.legacy.laserPlan || 0); S.lv.cargo += 5 * (G.legacy.cargoPlan || 0); S.lv.extractor += 5 * (G.legacy.extrPlan || 0);
+  if (G.legacy.quick) { S.credits = 50000; S.stats.earned = UNLOCKS[U.MAP].at; checkUnlocks(); pendingUnlocks = []; }
+  S.fuel = ship.fuelMax; S.hull = ship.hpMax;
+  S.news = []; addNews('🌀', `You came through the gate to <b>${D.n}</b>. A new system to conquer.`, '#d9b3ff');
+  save();
+  shownCredits = S.credits;
+  setScene(MineScene, 'luna');
+  updateHUD(); updateTicker();
+  setTimeout(() => showModal({ icon: '🌀', title: `Welcome to ${D.n}`, cls: 'unlock', html: `<div class="unl-tag">SYSTEM ${GALAXY.findIndex(g => g.id === id) + 1} / ${GALAXY.length}</div><p>${D.intro || ''}</p><p class="hint">+${bonus} Tribute for leaving ${SYSTEMS[from].n}. Conquered systems keep paying Tribute every minute — spend it on Legacy in the <b>Galaxy</b> map.</p>`, buttons: [{ label: 'Let\'s mine', cls: 'primary', fn: () => {} }] }), 400);
+  return true;
+}
+
+// ---------- the final boss of each system opens its gate ----------
+function finalBossKilled() {
+  if (S.gateOpen) return;
+  S.gateOpen = 1;
+  const nx = nextSystem();
+  addNews('🌀', `<b>The guardian is destroyed.</b> An ancient jump gate wakes up in ${LOC.oort.n}.`, '#d9b3ff');
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>${sysDef().gate}</p><p>Open the <b>Galaxy</b> map to see where it leads${nx ? ` — next stop: <b>${nx.n}</b>` : ''}. You can stay as long as you like: the more you achieve here, the more <b>Tribute</b> you take with you.</p>`, choices: [{ label: 'Open the Galaxy map', cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }, { label: 'Later', cost: 0, fn: () => {} }] });
+  save();
+}
+
+// ---------- the Galaxy map ----------
+const GalaxyScene = {
+  t: 0, sel: null, dust: null, prev: null,
+  enter() {
+    this.prev = this.prev || MapScene;
+    if (!this.dust) {
+      let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+      this.dust = Array.from({ length: 1400 }, () => {
+        const arm = Math.floor(r() * 3), d = Math.pow(r(), 0.7), a = arm * TAU / 3 + d * 5.2 + (r() - 0.5) * 0.7 * (1 - d * 0.5);
+        return { a, d, s: r() * 1.6 + 0.4, c: r() < 0.15 ? '#ffd2f0' : r() < 0.4 ? '#bcd4ff' : '#ffffff', o: r() * 0.6 + 0.2 };
+      });
+    }
+    this.sel = this.sel || (nextSystem() || GALAXY[0]).id;
+    document.body.classList.add('galaxy');
+    $('galPanel').classList.remove('hidden');
+    renderGalaxyPanel();
+  },
+  exit() { document.body.classList.remove('galaxy'); $('galPanel').classList.add('hidden'); },
+  update(dt) { this.t += dt; },
+  layout() { const wide = W > 760; const R = wide ? Math.min(W * 0.72, H) * 0.46 : Math.min(W * 0.45, (H * 0.44 - 90) / 1.8); return { cx: W * (wide ? 0.36 : 0.5), cy: wide ? H * 0.52 : 82 + R * 0.8, R }; },
+  pos(g) { const { cx, cy, R } = this.layout(); return { x: cx + g.x * R, y: cy + g.y * R }; },
+  draw(ctx) {
+    const t = this.t, { cx, cy, R } = this.layout();
+    drawSpaceBg(ctx, W, H, t * 4, t * 2, t);
+    // spiral arms
+    for (const p of this.dust) {
+      const a = p.a + t * 0.01, r = p.d * R * 1.15;
+      ctx.globalAlpha = p.o * (0.4 + 0.6 * (1 - p.d)); ctx.fillStyle = p.c;
+      ctx.fillRect(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.92, p.s, p.s);
+    }
+    ctx.globalAlpha = 1;
+    glow(ctx, cx, cy, R * 0.5, '#ffb07a33', 0.9);
+    // the route
+    const done = (S.galaxy && S.galaxy.done) || [], cur = sysId();
+    for (let i = 0; i < GALAXY.length - 1; i++) {
+      const a = this.pos(GALAXY[i]), b = this.pos(GALAXY[i + 1]);
+      const lit = done.includes(GALAXY[i].id) || GALAXY[i].id === cur;
+      ctx.strokeStyle = lit ? 'rgba(217,179,255,0.55)' : 'rgba(140,160,220,0.18)'; ctx.lineWidth = lit ? 2 : 1;
+      ctx.setLineDash(lit ? [] : [4, 6]); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    // stars
+    for (const g of GALAXY) {
+      const p = this.pos(g), isDone = done.includes(g.id), isCur = g.id === cur, ready = !!SYSTEMS[g.id], sel = g.id === this.sel;
+      if (g.star === 'hole') {
+        glow(ctx, p.x, p.y, 46, '#ff9a5a55', 0.9);
+        for (let k = 0; k < 3; k++) { ctx.strokeStyle = `rgba(255,${170 - k * 30},${90 - k * 20},${0.7 - k * 0.2})`; ctx.lineWidth = 3 - k; ctx.beginPath(); ctx.ellipse(p.x, p.y, 22 + k * 7, 8 + k * 3, t * 0.2, 0, TAU); ctx.stroke(); }
+        ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(p.x, p.y, 10, 0, TAU); ctx.fill();
+      } else {
+        ctx.globalAlpha = ready || isDone ? 1 : 0.45;
+        drawSun(ctx, p.x, p.y, isCur ? 7 : 5, t, g.star);
+        ctx.globalAlpha = 1;
+      }
+      if (isDone) { ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 14, 0, TAU); ctx.stroke(); }
+      if (isCur) { const ph = (t * 0.8) % 1; ctx.globalAlpha = 1 - ph; ctx.strokeStyle = '#3de8ff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 14 + ph * 16, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
+      if (sel) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, TAU); ctx.stroke(); ctx.setLineDash([]); }
+      // on phones only the important names fit
+      if (W <= 760 && !isCur && !sel && !(nextSystem() && g.id === nextSystem().id) && g.star !== 'hole') { if (!ready && !isDone && g.star !== 'hole') drawIcon(ctx, 'lock', p.x, p.y - 12, 8, 'rgba(200,210,240,0.5)'); continue; }
+      ctx.font = `700 ${isCur || sel ? 12 : 11}px Rajdhani, sans-serif`; ctx.textAlign = 'center';
+      ctx.fillStyle = isCur ? '#3de8ff' : isDone ? '#ffd24a' : ready ? '#e8f1ff' : 'rgba(200,210,240,0.5)';
+      ctx.fillText(g.n.toUpperCase(), p.x, p.y + 30);
+      if (!ready && !isDone && g.star !== 'hole') drawIcon(ctx, 'lock', p.x, p.y - 18, 10, 'rgba(200,210,240,0.6)');
+    }
+  },
+  onDown(x, y) {
+    let best = null, bd = 30;
+    for (const g of GALAXY) { const p = this.pos(g), d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = g.id; } }
+    if (best) { this.sel = best; sfx('click'); renderGalaxyPanel(); }
+  },
+};
+function renderGalaxyPanel() {
+  const G = S.galaxy, g = GALAXY.find(x => x.id === GalaxyScene.sel), i = GALAXY.indexOf(g);
+  const done = G ? G.done : [], cur = sysId(), nx = nextSystem();
+  let h = `<div class="lp-head"><div><h3>The Galaxy</h3><small>${done.length} of ${GALAXY.length} systems conquered</small></div><button class="x" onclick="closeGalaxy()">✕</button></div>`;
+  h += `<div class="gal-trib"><div><small>TRIBUTE</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? `+${tributeRate()} / min from ${conquered()} conquered system${conquered() > 1 ? 's' : ''}` : 'Conquer a system to earn Tribute'}</span></div>`;
+  // selected star
+  h += `<div class="sub">${g.n} <small class="dim">· system ${i + 1}</small></div>`;
+  if (g.id === cur) h += `<p class="hint">You are here.${S.gateOpen ? '' : ' Rule this system and defeat its guardian to open the gate.'}</p>`;
+  else if (done.includes(g.id)) h += `<p class="hint">Conquered. It pays you Tribute every minute.</p>`;
+  else if (g.star === 'hole') h += `<p class="hint">The supermassive black hole at the heart of the galaxy. The end of the road — and maybe a door to something beyond.</p>`;
+  else if (!SYSTEMS[g.id]) h += `<p class="hint">Uncharted. Arrives in a future update.</p>`;
+  if (nx && g.id === nx.id) {
+    const jb = jumpBonus();
+    if (!SYSTEMS[nx.id]) h += `<p class="hint">The gate points here, but this system isn't charted yet — coming in a future update.</p>`;
+    else if (!S.gateOpen) h += `<p class="hint">🔒 Defeat ${sysName()}'s guardian to open the gate.</p>`;
+    else h += `<p class="hint">Jumping now gives <b>+${jb.b} Tribute</b> <small>(${jb.why.join(', ')})</small>. Your credits, ship upgrades, outposts and freighters stay behind; Tribute, Legacy and your records come with you.</p>
+      <button class="btn primary big" onclick="confirmJump('${nx.id}')">🌀 Jump to ${nx.n}</button>`;
+  }
+  // legacy shop
+  if (G) {
+    h += '<div class="sub">Legacy <small class="dim">· permanent, all systems</small></div><div class="legacy">';
+    for (const k in LEGACY) {
+      const L = LEGACY[k], lv = G.legacy[k] || 0, maxed = L.max && lv >= L.max, c = L.cost(lv);
+      h += `<div class="lg-row"><span>${L.icon} <b>${L.n}</b> ${L.max === 1 ? (lv ? '<small class="good">owned</small>' : '') : `<small>Lv ${lv}${L.max ? '/' + L.max : ''}</small>`}<br><small class="dim">${L.d}</small></span>
+        <button class="btn small-btn" ${maxed || G.tribute < c ? 'disabled' : ''} onclick="buyLegacy('${k}') && (sfx('upgrade'), renderGalaxyPanel())">${maxed ? 'Max' : `${c} ⬢`}</button></div>`;
+    }
+    h += '</div>';
+  } else h += '<p class="hint">Legacy upgrades unlock after your first jump: spend Tribute on permanent bonuses for every system.</p>';
+  $('galPanel').innerHTML = h;
+}
+function openGalaxy() { sfx('click'); closeSheet(true); GalaxyScene.prev = scene === GalaxyScene ? GalaxyScene.prev : scene === MineScene ? null : scene; setScene(GalaxyScene); }
+function closeGalaxy() { sfx('click'); setScene(has(U.MAP) ? MapScene : MineScene, has(U.MAP) ? undefined : S.loc); }
+function confirmJump(id) {
+  const D = SYSTEMS[id];
+  showModal({ icon: '🌀', title: `Jump to ${D.n}?`, html: `<p>Everything you built in <b>${sysName()}</b> stays behind and becomes part of your empire: it pays <b>Tribute</b> every minute.</p><p>You start fresh in ${D.n}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there — but ore is worth more.</p>`,
+    buttons: [{ label: 'Jump!', cls: 'primary', fn: () => { sfx('win'); jumpTo(id); } }, { label: 'Not yet', fn: () => {} }] });
 }
 
 // ---- map.js ----
@@ -2818,7 +3194,8 @@ const MapScene = {
     const tp = this.spos('troyanos', day);
     ctx.fillStyle = locOpen('troyanos') ? 'rgba(210,190,160,0.75)' : 'rgba(210,190,160,0.25)';
     for (let i = 0; i < 50; i++) { const a = i * 2.4 + t * 0.02, rr = (i % 9) * 2.6 * clamp(z, 0.8, 2.2); ctx.fillRect(tp.x + Math.cos(a) * rr, tp.y + Math.sin(a) * rr * 0.8, 1.6, 1.6); }
-    drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36), t);
+    drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36), t, sysDef().star);
+    if (sysDef().companion) { const a = t * 0.05, d = clamp(15 * z, 10, 36) * 3.2; drawSun(ctx, sun.x + Math.cos(a) * d, sun.y + Math.sin(a) * d * 0.6, clamp(9 * z, 6, 20), t, sysDef().companion); }
     if (built('dyson')) {
       const R = clamp(15 * z, 10, 36) * 2.6;
       ctx.strokeStyle = 'rgba(255,210,74,0.35)'; ctx.lineWidth = 1;
@@ -3227,7 +3604,7 @@ const MineScene = {
     this.ambush = null;
     if (!this.space) {
       const dg = locDanger(this.loc.id) * (1 - ship.avoid);
-      if (this.loc.id === 'oort' && !S.gateOpen) this.ambush = { at: rand(16, 24), warned: false, boss: 'sentinel' };
+      if (this.loc.id === 'oort' && !S.gateOpen) this.ambush = { at: rand(16, 24), warned: false, boss: 'final' };
       else if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
       else if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
     }
@@ -3248,9 +3625,10 @@ const MineScene = {
     const isRich = Math.random() < (rich ? 0.3 : 0.06) + depth * 0.2;
     const gold = !this.space && Math.random() < 0.006 + depth * 0.02;
     const nv = 2 + Math.floor(tier * 1.5);
-    const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * (gold ? 2 : 1);
+    const crystal = !this.space && !!this.loc.field.crystal && Math.random() < this.loc.field.crystal;
+    const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -3265,7 +3643,7 @@ const MineScene = {
     const dir = Math.random() < 0.5 ? 1 : -1, p = this.p;
     const c = this.spawnRock(dir > 0 ? -40 : MW + 40, clamp(p.y + rand(-450, 250), 300, DOCK_Y - 500), 2, 'ice');
     Object.assign(c, { comet: 1, core: best, vx: dir * rand(150, 200), vy: rand(-25, 25), vr: rand(1.5, 3) * dir, rich: false, gold: false, cold: 1 });
-    c.hp = c.maxhp = c.r * 0.7 * ITEMS[best].h * Z_HP[this.z] * 1.3;
+    c.hp = c.maxhp = c.r * 0.7 * ITEMS[best].h * Z_HP[this.z] * sysDef().rock * 1.3; c.crystal = false;
     toast('☄ A comet is crossing the field — break it before it escapes!', 'good'); sfx('event');
   },
   breakComet(r) {
@@ -3291,7 +3669,16 @@ const MineScene = {
       this.floaters.push({ x: r.x, y: r.y - 30, txt: 'JACKPOT!', col: '#ffd24a', life: 2, big: 1 });
       S.stats.jackpots++; sfx('win');
     }
-    if (r.tier > 1) {
+    if (r.crystal && r.tier > 1) {
+      // crystals shatter into a spray of fast shards you have to chase
+      const n = r.tier === 3 ? 5 : 3;
+      this.parts.burst(r.x, r.y, 30, '#e8dcff', 220, 0.7, 2);
+      for (let i = 0; i < n; i++) {
+        const c = this.spawnRock(r.x, r.y, 1, r.ore), a = i / n * TAU + rand(-0.3, 0.3), v = rand(170, 240);
+        Object.assign(c, { crystal: true, shard: true, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vr: rand(-4, 4), rich: r.rich, gold: false });
+        c.hp = c.maxhp = c.maxhp * 0.75;
+      }
+    } else if (r.tier > 1) {
       for (let i = 0; i < 2; i++) {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
@@ -3397,6 +3784,7 @@ const MineScene = {
         if (r.x < -80 || r.x > MW + 80) r.gone = 1;
         r.y = clamp(r.y, r.r, maxY);
       } else {
+        if (r.shard) { const sp = Math.hypot(r.vx, r.vy); if (sp > 35) { const k = Math.pow(0.55, dt); r.vx *= k; r.vy *= k; } }
         if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
         if (r.y < r.r || r.y > maxY) r.vy *= -1;
         r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, maxY);
@@ -3473,10 +3861,10 @@ const MineScene = {
     // --- ambush ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss === 'sentinel' ? '📡 The signal is moving toward you…' : this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss === 'final' ? '📡 Something huge is moving toward you…' : this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
-        const boss = this.ambush.boss === 'sentinel' || (this.ambush.boss && warlordAt(this.loc.id));
-        const fleet = this.ambush.boss === 'sentinel' ? ['sentinel', 'adrone', 'adrone', 'adrone'] : boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
+        const boss = this.ambush.boss === 'final' || (this.ambush.boss && warlordAt(this.loc.id));
+        const fleet = this.ambush.boss === 'final' ? sysDef().bossFleet : boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
         this.ambush = null;
         if (boss) Combat.spawn(this, fleet, this.z, true);
         else if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
@@ -3509,7 +3897,7 @@ const MineScene = {
   coach() {
     const h = S.hints;
     let msg = '';
-    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
+    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
@@ -3569,7 +3957,7 @@ const MineScene = {
       const bx = W * 0.8 - cx * 0.03, by = H * 0.25 - (cy - MH) * 0.03;
       drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }
-    if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t);
+    if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
     ctx.save();
     ctx.translate(-cx, -cy);
     ctx.strokeStyle = 'rgba(61,232,255,0.12)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
@@ -3677,7 +4065,7 @@ const MineScene = {
       ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.5; ctx.stroke();
       drawIcon(ctx, 'skull', bx + 8, by + 8, 16, '#ffd24a');
       ctx.fillStyle = '#ffd24a'; ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(boss.k === 'sentinel' ? 'ALIEN SENTINEL · guardian of the signal' : `PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
+      ctx.fillText(ENEMIES[boss.k].final ? `${ENEMIES[boss.k].n.toUpperCase()} · guardian of ${sysName()}` : `PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
       ctx.fillStyle = '#2a1018'; ctx.fillRect(bx, by + 19, bw, 9);
       ctx.fillStyle = '#ff4d6d'; ctx.fillRect(bx, by + 19, bw * clamp(boss.hp / boss.max, 0, 1), 9);
       ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);
@@ -3787,7 +4175,7 @@ function buildFleet(danger) {
   return fleet;
 }
 function fleetThreat(fleet, z) {
-  const m = Z_ENEMY[z];
+  const m = Z_ENEMY[z] * sysDef().enemy;
   let ehp = 0, dps = 0;
   for (const k of fleet) { const e = ENEMIES[k]; ehp += (e.hp + e.sp) * m; dps += e.dmg * m * (e.burst || 1) / e.rate; }
   const mine = Math.sqrt(Math.max(1, S.hull + ship.shieldMax) * ship.weaponDps * 1.6);
@@ -3796,7 +4184,7 @@ function fleetThreat(fleet, z) {
 
 const Combat = {
   spawn(sc, fleet, z, fromTop) {
-    const m = Z_ENEMY[z];
+    const m = Z_ENEMY[z] * sysDef().enemy;
     fleet.forEach((k, i) => {
       const e = ENEMIES[k];
       let x, y;
@@ -3815,7 +4203,7 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : e.military ? '#b6ff7a' : '#ff4d6d';
     for (let i = 0; i < n; i++) {
       const b = a + (i - (n - 1) / 2) * 0.2;
       sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
@@ -3846,7 +4234,7 @@ const Combat = {
     S.stats.kills++;
     if (ENEMIES[e.k].boss && sc.loc) {
       sc.shake = 24; sc.parts.burst(e.x, e.y, 120, ENEMIES[e.k].alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
-      if (e.k === 'sentinel') sentinelKilled(); else warlordKilled(sc.loc.id);
+      if (ENEMIES[e.k].final) finalBossKilled(); else warlordKilled(sc.loc.id);
     }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
@@ -3874,6 +4262,17 @@ const Combat = {
         e.cd -= dt;
         if (e.cd <= 0) { e.burstLeft = ENEMIES[e.k].burst || 1; e.cd = e.rate * rand(0.85, 1.2); }
         if (e.burstLeft > 0) { e.burstT -= dt; if (e.burstT <= 0) { this.fireEnemy(sc, e); e.burstLeft--; e.burstT = 0.12; } }
+      }
+      const E = ENEMIES[e.k];
+      if (E.summon) {
+        e.sumT = (e.sumT == null ? 4 : e.sumT) - dt;
+        if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < 6) {
+          e.sumT = 7;
+          const m = e.max / (E.hp * 1), sw = ENEMIES[E.summon];
+          for (let i = 0; i < 2; i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: 0, spMax: 0, dmg: sw.dmg * m,
+            rate: sw.rate, spd: sw.spd, size: sw.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1, prefer: rand(160, 260), shT: 0, hitT: 0, loot: sw.loot * Z_LOOT[sc.combatZ || 0] });
+          sc.parts.burst(e.x, e.y, 20, '#b0ff9a', 150, 0.6, 2);
+        }
       }
       if (Math.random() < dt * 20) sc.parts.add(e.x - Math.cos(e.a) * 16 * e.size, e.y - Math.sin(e.a) * 16 * e.size, rand(-20, 20), rand(-20, 20), 0.3, e.military ? '#9fe0ff' : '#ff6a3a', 2);
     }
@@ -4047,8 +4446,9 @@ function updateHUD() {
     o.innerHTML = `<small>NEXT UNLOCK</small><b>${nu.icon} ${nu.title}</b><div class="meter gold"><i style="width:${pct * 100}%"></i></div><span>${fmt(S.stats.earned)} / ${fmt(nu.at)} cr earned</span>`;
   } else if (!S.won) {
     o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest & upgrade outposts</span>`;
-  } else if (!S.gateOpen) o.innerHTML = `<small>THE SIGNAL</small><b>📡 Find the source in the Oort Cloud</b><span>Mine there to draw out whatever is broadcasting. Bring good guns and shields.</span>`;
-  else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>The jump gate at the Oort Cloud is awake. Next update: travel to the stars.</span>`;
+  } else if (!S.gateOpen) o.innerHTML = `<small>FINAL GUARDIAN</small><b>📡 Find the source in ${LOC.oort.n}</b><span>Mine there to draw it out. Bring good guns and shields.</span>`;
+  else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>Open the Galaxy map to jump — or stay and earn more Tribute first.</span>`;
+  $('bGal').classList.toggle('hidden', !(S.gateOpen || (S.galaxy && S.galaxy.done.length)));
   if (!S.won && has(U.SATURN) && inf >= 100 && !isBlocking()) victory();
   if (pendingUnlocks.length && $('modal').classList.contains('hidden') && !(scene === MineScene && (MineScene.inCombat || MineScene.space)) && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
   else if (pendingChoices.length && $('modal').classList.contains('hidden') && $('sheet').classList.contains('hidden') && scene !== MineScene && !MapScene.travel) showChoice(pendingChoices.shift());
@@ -4064,7 +4464,7 @@ function showUnlock(i) {
 function victory() {
   S.won = true; save();
   sfx('win');
-  showModal({ icon: '👑', title: 'You rule the Solar System!', html: `In <b>${S.day} days</b> you went from chipping rocks on the Moon to the most powerful force in the system.<br><br>
+  showModal({ icon: '👑', title: `You rule ${sysId() === 'sol' ? 'the Solar System' : sysName()}!`, html: `In <b>${S.day} days</b> you went from chipping rocks on ${LOC.luna.n} to the most powerful force in the system.<br><br>
     Ore mined: <b>${fmt(S.stats.mined)}</b><br>Total earnings: <b>${fmt(S.stats.earned)} cr</b><br>Battles won: <b>${S.stats.won}</b><br>Contracts: <b>${S.stats.contracts}</b>`,
     buttons: [{ label: 'Keep playing', cls: 'primary', fn: () => setTimeout(revealSignal, 400) }] });
 }
@@ -4072,9 +4472,9 @@ function victory() {
 function revealSignal() {
   if (S.signal) return;
   S.signal = 1; save();
-  addNews('📡', '<b>A signal from the Oort Cloud.</b> It is not human.', '#7fdfff');
+  addNews('📡', `<b>${sysDef().signal.title}</b> — ${LOC.oort.n} appears on your map.`, '#7fdfff');
   sfx('event');
-  showModal({ icon: '📡', title: 'A signal from the dark', cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>Your deep-space dishes caught a <b>repeating signal</b> from the <b>Oort Cloud</b>, far beyond the Kuiper Belt. It is <b>not human</b>.</p><p>A new location is on your map. Mine there to find the source — and bring your best <b>guns and shields</b>.</p>`,
+  showModal({ icon: '📡', title: sysDef().signal.title, cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>${sysDef().signal.text}</p><p>A new location is on your map: <b>${LOC.oort.n}</b>. Mine there to find the source — and bring your best <b>guns and shields</b>.</p>`,
     buttons: [{ label: 'Set course', cls: 'primary', fn: () => {} }] });
 }
 
@@ -4119,6 +4519,7 @@ function selectLoc(id) {
     html += `<div class="lp-actions">`;
     if (l.station) html += `<button class="btn primary big" onclick="openDock()">🛰 Dock at ${l.station}</button>`;
     if (l.field) html += `<button class="btn ore big" onclick="enterMine()">⛏ Mine ${l.field.n}</button>`;
+    if (id === 'oort' && S.gateOpen) html += `<button class="btn primary big" onclick="openGalaxy()">🌀 Enter the gate</button>`;
     if (!l.station) {
       const stations = NODES.filter(x => x.station && locOpen(x.id));
       const reachable = stations.some(x => travelInfo(x.id).fuel <= S.fuel);
@@ -4168,7 +4569,7 @@ function updateMineHUD() {
   document.body.classList.toggle('battle', combat);
   $('battleUI').classList.toggle('hidden', !combat);
   if (combat) {
-    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
     $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
     $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
     $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
@@ -4368,7 +4769,7 @@ function dockBody(tab) {
     const pws = powersAt(id);
     let h = pws.length ? `<div class="sub">⚡ Your power on ${l.n}</div>${powerButtons(pws)}` : '';
     if (has(U.SATURN) && STATION_TIER[id]) h += dockBody('invest');
-    else if (!has(U.SATURN)) h += '<p class="hint center">🔒 Investments and politics (wars, peace deals) unlock with Saturn & Influence.</p>';
+    else if (!has(U.SATURN)) h += `<p class="hint center">🔒 Investments and politics (wars, peace deals) unlock with ${UNLOCKS[U.SATURN].title}.</p>`;
     return h;
   }
   if (tab === 'invest') {
@@ -4555,7 +4956,7 @@ function openFactions() {
 
 function openProjects() {
   sfx('click');
-  let h = '<p class="hint">Spend your fortune on projects that change the Solar System forever. Each one also adds influence.</p><div class="projs">';
+  let h = '<p class="hint">Spend your fortune on projects that change the system forever. Each one also adds influence.</p><div class="projs">';
   for (const p of PROJECTS) {
     const done = built(p.id), open = projectOpen(p), can = open && !done && S.credits >= p.cost;
     const pct = Math.min(100, S.credits / p.cost * 100);
@@ -4626,7 +5027,8 @@ function openHelp() {
     <h4>⚔ Wars</h4><p>When two factions fight, <b>back a side</b> at one of their stations. Their stations pay +30% for metals and every ore sale there <b>pushes the front</b> (see the bar). Help them win to gain a <b>permanent ally</b>: +15% ore at their stations (up to 3 stars) and spoils of war.</p>
     <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
     <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — back a side in wars and fund offensives; later incite wars or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
-    <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the Solar System.</p></div>`);
+    <h4>🌀 Galaxy</h4><p>Each system's guardian opens a jump gate. In the <b>Galaxy</b> map you jump to the next star: you start fresh there, but conquered systems pay <b>Tribute</b> forever, which buys permanent <b>Legacy</b> bonuses. 15 systems lead to the black hole at the core.</p>
+    <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the system — then defeat its guardian and jump through the gate to the next star.</p></div>`);
 }
 
 // ---- main.js ----
@@ -4750,7 +5152,7 @@ function frame(now) {
     if (!isBlocking() || scene === MapScene || scene === TitleScene) scene.update(dt);
     scene.draw(ctx);
   }
-  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); dayClock(dt); }
+  if (S && scene !== TitleScene) { incomeTick(dt); tributeTick(dt); hudTick(dt); dayClock(dt); }
   hudT += dt;
   if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); }
     // leaderboard: check the record every 5 s, send it at most once a minute
@@ -4766,7 +5168,7 @@ const TitleScene = {
     $('title').classList.remove('hidden'); $('hud').classList.add('hidden');
     const sv = hasSave();
     $('cont').classList.toggle('hidden', !sv);
-    if (sv) { const d = loadSave(); $('cont').innerHTML = `▶ Continue <small>${fmt(d.credits)} cr · ${d.unlock ? UNLOCKS[d.unlock].title : 'Moon'}</small>`; }
+    if (sv) { const d = loadSave(); $('cont').innerHTML = `▶ Continue <small>${fmt(d.credits)} cr · ${(SYSTEMS[d.sys || 'sol'] || SYSTEMS.sol).n}${d.galaxy ? ` · ${d.galaxy.done.length} system${d.galaxy.done.length > 1 ? 's' : ''} conquered` : ''}</small>`; }
     $('newg').textContent = sv ? 'New game' : '▶ PLAY';
     $('newg').classList.toggle('primary', !sv);
   },
@@ -4796,8 +5198,9 @@ const TitleScene = {
 function startGame(cont) {
   audioInit();
   if (cont) S = loadSave();
-  if (!S) { newGame(); save(); }
-  applyNukes();
+  if (!S) { applySystem('sol'); newGame(); save(); }
+  applySystem(sysId());
+  ensureMarkets();
   shownCredits = S.credits;
   pendingUnlocks = [];
   if (cont && has(U.MAP)) setScene(MapScene);
@@ -4814,7 +5217,7 @@ function startGame(cont) {
 function init() {
   startIconizer();
   setupTouchControls();
-  $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
+  $('bGal').onclick = openGalaxy; $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
   const snd = $('bSnd');
   snd.textContent = muted ? '🔇' : '🔊';
   snd.onclick = () => { audioInit(); setMuted(!muted); snd.textContent = muted ? '🔇' : '🔊'; };
@@ -4898,12 +5301,14 @@ function dayClock(dt) {
   if (S.dayT >= DAY_SEC) { S.dayT -= DAY_SEC; tickDay(); updateHUD(); }
 }
 function welcomeBack(off) {
+  const trib = off.trib >= 1 ? `<p>Your conquered systems sent <b>+${Math.floor(off.trib)} Tribute</b>.</p>` : '';
   const away = off.capped
     ? `You were away <b>${fmtTime(off.real)}</b>. Drones only work unsupervised for <b>${fmtTime(OFFLINE_CAP)}</b>, so you were paid for the <b>last 8 hours</b>.`
     : `You were away <b>${fmtTime(off.real)}</b>.`;
   const days = off.days ? `<p class="hint"><b>${off.days} day${off.days > 1 ? 's' : ''}</b> passed in the system.</p>${off.news.length ? `<div class="wb-news">${off.news.map(n => `<div>${n.icon} ${n.html}</div>`).join('')}</div>` : ''}` : '';
   showModal({ icon: '🤖', title: 'Welcome back!', html: `<p>${away}</p>${off.g >= 1 ? `<p>Your drones and freighters earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>${off.capped ? `<br><small class="dim">(${Math.round(OFFLINE_RATE * 100)}% of your income rate, max ${fmtTime(OFFLINE_CAP)})</small>` : ''}</p>` : ''}${days}`,
     buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] });
+  if (trib) $('modal').querySelector('.mbody').insertAdjacentHTML('beforeend', trib);
 }
 function fmtTime(s) { s = Math.floor(s); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return d ? `${d}d${h ? ` ${h}h` : ''}` : h ? `${h}h${m ? ` ${m}m` : ''}` : m ? `${m}m` : `${s}s`; }
 window.addEventListener('pagehide', () => { save(); postPeak(); });

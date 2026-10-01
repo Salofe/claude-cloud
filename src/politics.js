@@ -44,15 +44,6 @@ function warlordKilled(id) {
   save();
 }
 
-// ---------- the end of the Solar System: the Sentinel and the gate ----------
-function sentinelKilled() {
-  if (S.gateOpen) return;
-  S.gateOpen = 1;
-  addNews('🌀', '<b>The Sentinel is destroyed.</b> An ancient jump gate wakes up in the Oort Cloud.', '#d9b3ff');
-  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>The Sentinel's core shatters — and deep in the Oort Cloud, a ring older than the Sun <b>lights up</b>.</p><p>It is a <b>jump gate</b>. On the other side: the stars of the galaxy, and at its heart, a black hole.</p><p class="hint">Traveling the galaxy arrives in the next update. You've finished the Solar System!</p>`, choices: [{ label: 'Incredible', cost: 0, fn: () => {} }] });
-  save();
-}
-
 // ---------- natural system events ----------
 const EVENT_GEN = [
   { kind: 'war', w: 1.1, make() {
@@ -167,7 +158,7 @@ const EVENT_GEN = [
   { kind: 'independence', w: 0.5, choice: 1, make() {
       const c = ['ceres', 'europa', 'titan'].filter(id => cityOpen(id) && !kindActive('free', id) && !kindActive('order', id));
       if (!c.length) return null; const l = LOC[pick(c)]; const cost = pcost(0.006, 250000);
-      return { icon: '🏴', title: `${l.n} wants independence`, text: `Separatists on ${l.n} are rising against the Earth Union's influence.`, choices: [
+      return { icon: '🏴', title: `${l.n} wants independence`, text: `Separatists on ${l.n} are rising against the ${FACTIONS.tierra.n}'s influence.`, choices: [
         { label: `Fund the separatists · ${fmt(cost)}`, cost, fn: () => { repChange(l.faction, 20); repChange('tierra', -15); addEvent({ kind: 'free', mine: 1, icon: '🎆', title: `Free ${l.n}`, text: 'The new government rewards its friends: ore sells ×1.5 there.', dur: 40, locs: [l.id], price: ORES.map(i => ({ loc: l.id, item: i, m: 1.5 })) }); } },
         { label: `Fund the government · ${fmt(cost)}`, cost, fn: () => { repChange('tierra', 20); repChange(l.faction, -10); addEvent({ kind: 'order', mine: 1, icon: '🛡️', title: `Order on ${l.n}`, text: 'Patrols everywhere: no pirates there for 40 days.', dur: 40, locs: [l.id], danger: [{ loc: l.id, add: -1 }] }); } },
         { label: 'Ignore it', cost: 0, fn: () => {} },
@@ -433,7 +424,9 @@ function usePower(kind, arg) {
 
 // ---------- the Nova Cannon: destroying planets ----------
 const LOC_BASE = {};
-for (const l of LOCS) LOC_BASE[l.id] = { station: l.station, market: l.market, faction: l.faction, field: l.field, depot: l.depot, desc: l.desc, danger: l.danger, black: l.black, tex: l.tex, col: l.col };
+// what a location looks like before any nukes (rebuilt whenever the star system changes)
+function snapshotLocBase() { for (const l of LOCS) LOC_BASE[l.id] = { station: l.station, market: l.market, faction: l.faction, field: l.field, depot: l.depot, desc: l.desc, danger: l.danger, black: l.black, tex: l.tex, col: l.col }; }
+snapshotLocBase();
 function resetLocs() {
   for (const l of LOCS) { Object.assign(l, LOC_BASE[l.id]); delete l.nuked; if (!LOC_BASE[l.id].field) delete l.field; if (!LOC_BASE[l.id].station) delete l.station; }
   FIELDS.splice(0, FIELDS.length, ...NODES.filter(l => l.field));
@@ -461,7 +454,7 @@ function destroyPlanet(id) {
   if (fac) repChange(fac, factionAlive(fac) ? -60 : -100, true);
   for (const f in FACTIONS) if (f !== fac && f !== 'piratas') repChange(f, -20, true);
   repChange('piratas', 25, true);
-  addNews('💥', `<b>${name} has been destroyed.</b> The Solar System trembles before you.`, '#ff4d6d');
+  addNews('💥', `<b>${name} has been destroyed.</b> The whole system trembles before you.`, '#ff4d6d');
   if (typeof MapScene !== 'undefined') MapScene.nukeFx = { id, t: 0 };
   sfx('boom'); setTimeout(() => sfx('boom'), 250); setTimeout(() => sfx('lose'), 600);
 }
