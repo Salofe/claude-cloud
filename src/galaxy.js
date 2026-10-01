@@ -133,12 +133,21 @@ function buyLegacy(k) {
   G.tribute -= c; G.legacy[k] = lv + 1; save(); return true;
 }
 // one-off Tribute for leaving a system: the more you achieved there, the more it pays
+// megaprojects pay Tribute by how big they are: 2 for the Mass Driver … 15 for the Nova Cannon
+const projTribute = p => Math.round(2 + 1.5 * Math.log10(p.cost / 4e4));
+const allyFactions = () => Object.keys(FACTIONS).filter(f => f !== 'piratas' && factionAlive(f));
 function jumpBonus() {
   let b = 10, why = ['base 10'];
   if (S.gateOpen) { b += 5; why.push('final boss +5'); }
   const st = Object.values(S.allies || {}).reduce((a, x) => a + x, 0); if (st) { b += 3 * st; why.push(`ally stars +${3 * st}`); }
-  const pj = Object.keys(S.projects || {}).length; if (pj) { b += 2 * pj; why.push(`megaprojects +${2 * pj}`); }
-  return { b, why };
+  const pj = PROJECTS.filter(p => built(p.id)).reduce((a, p) => a + projTribute(p), 0); if (pj) { b += pj; why.push(`megaprojects +${pj}`); }
+  // what is still on the table in this system
+  const left = [];
+  if (!S.gateOpen) left.push({ n: 'Defeat the final guardian', t: 5 });
+  for (const p of PROJECTS) if (!built(p.id)) left.push({ n: p.n, t: projTribute(p), cost: p.cost });
+  const starsLeft = allyFactions().reduce((a, f) => a + WAR.maxStars - Math.min(WAR.maxStars, (S.allies || {})[f] || 0), 0);
+  if (starsLeft) left.push({ n: `Win wars as an ally (${starsLeft} star${starsLeft > 1 ? 's' : ''} left)`, t: 3 * starsLeft });
+  return { b, why, left, max: b + left.reduce((a, x) => a + x.t, 0) };
 }
 function jumpTo(id) {
   const D = SYSTEMS[id]; if (!D || !S.gateOpen) return false;
@@ -260,8 +269,13 @@ function renderGalaxyPanel() {
     const jb = jumpBonus();
     if (!SYSTEMS[nx.id]) h += `<p class="hint">The gate points here, but this system isn't charted yet — coming in a future update.</p>`;
     else if (!S.gateOpen) h += `<p class="hint">🔒 Defeat ${sysName()}'s guardian to open the gate.</p>`;
-    else h += `<p class="hint">Jumping now gives <b>+${jb.b} Tribute</b> <small>(${jb.why.join(', ')})</small>. Your credits, ship upgrades, outposts and freighters stay behind; Tribute, Legacy and your records come with you.</p>
+    else h += `<p class="hint">Jumping now gives <b>+${jb.b} Tribute</b> <small>(${jb.why.join(', ')})</small>.${jb.max > jb.b ? ` Up to <b>${jb.max - jb.b} more</b> is still available in ${sysName()} — select it to see how.` : ''} Your credits, ship upgrades, outposts and freighters stay behind; Tribute, Legacy and your records come with you.</p>
       <button class="btn primary big" onclick="confirmJump('${nx.id}')">🌀 Jump to ${nx.n}</button>`;
+  }
+  if (g.id === cur) {
+    const jb = jumpBonus();
+    h += `<div class="sub">Tribute for leaving ${sysName()} <small class="dim">· ${jb.b} of ${jb.max} possible</small></div><div class="meter gold"><i style="width:${Math.round(jb.b / jb.max * 100)}%"></i></div>`;
+    if (jb.left.length) h += `<div class="trib-left">${jb.left.slice(0, 8).map(x => `<div class="srow"><span>${x.n}${x.cost ? ` <small class="dim">${fmt(x.cost)} cr</small>` : ''}</span><b>+${x.t}</b></div>`).join('')}</div>`;
   }
   // legacy shop
   if (G) {

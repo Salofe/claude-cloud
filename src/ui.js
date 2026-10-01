@@ -644,7 +644,7 @@ function openProjects() {
     h += `<div class="proj ${done ? 'done' : ''} ${open ? '' : 'locked'} ${can ? 'can' : ''}">
       <div class="pj-icon">${open || done ? p.icon : '🔒'}</div>
       <div class="pj-main"><b>${p.n}</b>${p.loc ? `<small>${LOC[p.loc].n}</small>` : ''}<p>${open ? p.d : has(p.stage) && p.req ? `Requires the ${PROJ[p.req].n}` : `Unlocks with: ${UNLOCKS[p.stage].title}`}</p>
-        <div class="pj-fx">⚡ ${p.fx} · +${p.infl} influence</div>
+        <div class="pj-fx">⚡ ${p.fx} · +${p.infl} influence${S.signal || S.galaxy ? ` · <span class="trib">+${projTribute(p)} Tribute when you jump</span>` : ''}</div>
         ${done ? '<div class="pj-done">✔ BUILT</div>' : open ? `<div class="pj-bar"><i style="width:${pct}%"></i></div><button class="btn ${can ? 'primary' : ''}" ${can ? '' : 'disabled'} onclick="doProject('${p.id}')">${can ? 'Build' : 'Need'} · ${fmt(p.cost)} cr</button>` : ''}
       </div></div>`;
   }
@@ -657,7 +657,7 @@ function doProject(id) {
   const p = PROJ[id];
   sfx('win');
   closeSheet(true);
-  showModal({ icon: p.icon, title: `${p.n} complete!`, cls: 'unlock', html: `<div class="unl-tag">MEGAPROJECT</div><p>${p.d}</p><p><b class="cr">⚡ ${p.fx}</b></p><small>+${p.infl} influence</small>`,
+  showModal({ icon: p.icon, title: `${p.n} complete!`, cls: 'unlock', html: `<div class="unl-tag">MEGAPROJECT</div><p>${p.d}</p><p><b class="cr">⚡ ${p.fx}</b></p><small>+${p.infl} influence${S.signal || S.galaxy ? ` · +${projTribute(p)} Tribute when you leave this system` : ''}</small>`,
     buttons: [{ label: 'Behold!', cls: 'primary', fn: () => { if (scene === MapScene && !MapScene.travel) { showMapUI(true); if (p.loc) { selectLoc(p.loc); MapScene.focus(p.loc); } else MapScene.zoomAll(); } } }] });
 }
 function doPower(kind, arg) {

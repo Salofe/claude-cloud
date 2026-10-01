@@ -458,3 +458,5 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .tier .off { color: rgba(255,255,255,.15); font-style: normal; }
 .ore b { color: var(--gold); margin-left: 3px; }
 .srow .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); margin-right: 4px; vertical-align: 1px; }
+.trib { color: #d9b3ff; }
+.trib-left { margin-top: 6px; font-size: 13px; }
