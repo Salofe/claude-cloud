@@ -436,6 +436,10 @@ body.mining #warHud { top: 62px; }
 .fleetline { margin-top: 8px; font-size: 12px; color: var(--dim); }
 .fleetline b { color: var(--txt); }
 .fleetline.full { color: var(--warn); } .fleetline.full b { color: var(--gold); }
+.meter.dayclock { height: 3px; margin-top: 2px; width: 34px; }
+.meter.dayclock i { background: var(--cyan); transition: width .3s linear; }
+.wb-news { text-align: left; font-size: 12px; color: var(--dim); background: rgba(255,255,255,.04); border-radius: 8px; padding: 6px 10px; margin-top: 6px; }
+.wb-news div { padding: 2px 0; }
 </style>
 </head>
 <body>
@@ -457,7 +461,7 @@ body.mining #warHud { top: 62px; }
 <div id="hud" class="hidden">
   <div class="topbar ui">
     <div class="stat cr"><span class="lbl">Credits <small id="hRate" class="rate"></small></span><b id="hCr"></b></div>
-    <div class="stat day" data-need="1"><span class="lbl">Day</span><b id="hDay"></b></div>
+    <div class="stat day" data-need="1"><span class="lbl">Day</span><b id="hDay"></b><div class="meter dayclock"><i id="hDayT"></i></div></div>
     <div class="stat bar"><span class="lbl"><em class="lg">Cargo</em><em class="sh">📦</em> <small id="hCargoT"></small></span><div class="meter cargo"><i id="hCargo"></i></div></div>
     <div class="stat bar"><span class="lbl"><em class="lg">Hull</em><em class="sh">⬢</em> <small id="hHullT"></small></span><div class="meter hp"><i id="hHull"></i></div></div>
     <div class="stat bar" data-need="1"><span class="lbl"><em class="lg">Fuel</em><em class="sh">⛽</em> <small id="hFuelT"></small></span><div class="meter fuel"><i id="hFuel"></i></div></div>
@@ -1430,7 +1434,7 @@ const ICON = {
 
 // emoji / symbol → icon. Game text keeps these as keys.
 const GLYPH = {
-  '🤖': 'drone', '👑': 'crown', '⚡': 'bolt', '🛡': 'shield', '🔒': 'lock', '🔓': 'unlock', '⛏': 'pick', '☠': 'skull',
+  '🏴‍☠️': 'flag', '🏴‍☠': 'flag', '🤖': 'drone', '👑': 'crown', '⚡': 'bolt', '🛡': 'shield', '🔒': 'lock', '🔓': 'unlock', '⛏': 'pick', '☠': 'skull',
   '⛽': 'fuel', '🚚': 'freighter', '🚀': 'ship', '⚔': 'swords', '▶': 'play', '🛰': 'satellite', '🔥': 'fire', '📦': 'crate',
   '🕊': 'dove', '💥': 'blast', '🏗': 'crane', '☄': 'comet', '🏛': 'capitol', '🏦': 'bank', '🏆': 'trophy', '🔊': 'speaker',
   '🔇': 'mute', '🚨': 'siren', '🔧': 'wrench', '📜': 'contract', '🗺': 'map', '✊': 'strike', '💡': 'bulb', '🌌': 'galaxy',
@@ -1932,16 +1936,29 @@ function incomeTick(dt) {
   incomeAcc += dt;
   if (incomeAcc > 0.5) { incomeAcc = 0; checkUnlocks(); }
 }
+// ---------- time ----------
+// One day passes every DAY_SEC seconds of play (and while away, up to the offline cap).
+const DAY_SEC = 50, OFFLINE_CAP = 8 * 3600, OFFLINE_RATE = 0.6;
+let OFFLINE = false;   // true while simulating days you were away: no popups, your contracts and backed war wait for you
 function offlineGains() {
   const now = Date.now();
-  const secs = clamp((now - (S.lastSeen || now)) / 1000, 0, 8 * 3600);
+  const real = Math.max(0, (now - (S.lastSeen || now)) / 1000);
+  const secs = Math.min(real, OFFLINE_CAP);
   S.lastSeen = now;
   if (secs < 30) return null;
-  const g = totalIncome() * secs * 0.6;
-  if (g < 1) return null;
-  S.credits += g; S.stats.earned += g; S.stats.droneEarned += g;
+  const g = totalIncome() * secs * OFFLINE_RATE;
+  if (g >= 1) { S.credits += g; S.stats.earned += g; S.stats.droneEarned += g; }
+  // the system keeps living while you're gone
+  let days = 0; const newsBefore = S.news.length && S.news[0];
+  if (has(U.MAP)) {
+    S.dayT = (S.dayT || 0) + secs;
+    OFFLINE = true;
+    try { while (S.dayT >= DAY_SEC) { S.dayT -= DAY_SEC; tickDay(); days++; } } finally { OFFLINE = false; }
+  }
   checkUnlocks();
-  return { secs, g };
+  const i = S.news.indexOf(newsBefore), fresh = (i < 0 ? S.news : S.news.slice(0, i)).slice(0, 4);
+  if (g < 1 && !days) return null;
+  return { secs, real, capped: real > OFFLINE_CAP, g, days, news: fresh };
 }
 
 // ---------- progression ----------
@@ -2044,6 +2061,11 @@ function completeContract(c) {
 // ---------- one day passes ----------
 function tickDay() {
   S.day++;
+  if (OFFLINE) {
+    // you can't act while away: your contracts and the war you back wait for you
+    for (const c of S.active) c.deadline++;
+    for (const e of S.events) if (e.war && e.backed) e.end++;
+  }
   for (const id in S.sat) for (const k in S.sat[id]) {
     S.sat[id][k] += (1 - S.sat[id][k]) * 0.08;
     S.drift[id][k] = clamp(S.drift[id][k] * 0.96 + rand(-0.035, 0.035), -0.25, 0.25);
@@ -2070,7 +2092,7 @@ function tickDay() {
     }
   }
   politicsDay();
-  if (S.day % 3 === 0) save();
+  if (S.day % 3 === 0 && !OFFLINE) save();
 }
 
 function addNews(icon, html, col) {
@@ -2273,6 +2295,7 @@ function spawnEvent() {
     const ev = gen.make();
     if (!ev) continue;
     ev.kind = gen.kind;
+    if (ev.choices && OFFLINE) continue;   // decisions only come up while you're playing
     if (ev.choices) { pendingChoices.push(ev); addNews(ev.icon, `<b>${ev.title}</b> — ${ev.text}`, '#ffc857'); return; }
     if ((ev.locs || []).some(id => kindActive(ev.kind, id)) || (!ev.locs.length && kindActive(ev.kind))) continue;
     addEvent(ev);
@@ -2338,7 +2361,7 @@ function warSalePush(locId, item, value) {
   if (a >= 0.5) warPush(backedWar(), a, `${ITEMS[item].n} delivered`);
 }
 function warDay(e) {
-  if (e.resolved) return;
+  if (e.resolved || (OFFLINE && e.backed)) return;
   const [a, b] = e.war;
   e.front = clamp((e.front || 0) + (facStrength(a) - facStrength(b)) * 0.6 + rand(-4, 4), -100, 100);
   if (Math.abs(e.front) >= 100) endWar(e, e.front > 0 ? a : b);
@@ -3373,9 +3396,7 @@ const MineScene = {
       if (p.y < DOCK_Y - 250) this.armed = true;
       if (this.armed && p.y > DOCK_Y) { this.leave(); return; }
     }
-    // --- time ---
-    this.dayTimer += dt;
-    if (this.dayTimer > 40 && has(U.MAP)) { this.dayTimer = 0; tickDay(); }
+
     if (!this.space && this.rocks.length < this.target * 0.5 && Math.random() < dt * 0.4) {
       const x = rand(120, MW - 120), y = rand(120, Math.min(DOCK_Y - 400, p.y - 500));
       if (y > 100) this.spawnRock(x, y, 3);
@@ -3833,6 +3854,7 @@ const isBlocking = () => !$('modal').classList.contains('hidden') || !$('sheet')
 let dockTab = 'upg', lastDock = null, shownCredits = 0;
 
 function toast(msg, cls) {
+  if (OFFLINE) return;
   const el = document.createElement('div');
   el.className = 'toast ' + (cls || '');
   el.innerHTML = msg;
@@ -3867,6 +3889,7 @@ function showModal(o) {
 function closeModal() { $('modal').classList.add('hidden'); }
 
 function showEventBanner(ev) {
+  if (OFFLINE) return;
   const b = $('eventBanner');
   b.innerHTML = `<span class="eicon">${ev.icon}</span><div><small>SYSTEM NEWS · DAY ${S.day}</small><b>${ev.title}</b><p>${ev.text}</p></div>`;
   b.classList.add('show');
@@ -3898,6 +3921,7 @@ function updateHUD() {
   if (!S) return;
   for (const el of document.querySelectorAll('[data-need]')) el.classList.toggle('locked', S.unlock < +el.dataset.need);
   $('hDay').textContent = S.day;
+  $('hDayT').style.width = Math.min(100, (S.dayT || 0) / DAY_SEC * 100) + '%';
   updateWarBar();
   $('hFuel').style.width = (S.fuel / ship.fuelMax * 100) + '%';
   $('hFuelT').textContent = `${Math.floor(S.fuel)}/${ship.fuelMax}`;
@@ -4610,7 +4634,7 @@ function frame(now) {
     if (!isBlocking() || scene === MapScene || scene === TitleScene) scene.update(dt);
     scene.draw(ctx);
   }
-  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); }
+  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); dayClock(dt); }
   hudT += dt;
   if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); }
     // leaderboard: check the record every 5 s, send it at most once a minute
@@ -4666,7 +4690,7 @@ function startGame(cont) {
   updateHUD(); updateTicker();
   if (cont) {
     const off = offlineGains();
-    if (off) setTimeout(() => showModal({ icon: '🤖', title: 'Welcome back!', html: `While you were away (${fmtTime(off.secs)}) your drones earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>`, buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] }), 300);
+    if (off) setTimeout(() => welcomeBack(off), 300);
   }
 }
 
@@ -4749,9 +4773,25 @@ function thumbMode(kind) {
   document.body.dataset.ready = '1';
 }
 
-function fmtTime(s) { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m` : `${s}s`; }
+// one shared clock: a day every DAY_SEC seconds on any screen. It pauses while a popup
+// asks you something, during fights, and while travelling (trips count their own days).
+function dayClock(dt) {
+  if (!has(U.MAP) || !$('modal').classList.contains('hidden')) return;
+  if (MapScene.travel || (scene === MineScene && MineScene.inCombat)) return;
+  S.dayT = (S.dayT || 0) + Math.min(dt, 0.25);
+  if (S.dayT >= DAY_SEC) { S.dayT -= DAY_SEC; tickDay(); updateHUD(); }
+}
+function welcomeBack(off) {
+  const away = off.capped
+    ? `You were away <b>${fmtTime(off.real)}</b>. Drones only work unsupervised for <b>${fmtTime(OFFLINE_CAP)}</b>, so you were paid for the <b>last 8 hours</b>.`
+    : `You were away <b>${fmtTime(off.real)}</b>.`;
+  const days = off.days ? `<p class="hint"><b>${off.days} day${off.days > 1 ? 's' : ''}</b> passed in the system.</p>${off.news.length ? `<div class="wb-news">${off.news.map(n => `<div>${n.icon} ${n.html}</div>`).join('')}</div>` : ''}` : '';
+  showModal({ icon: '🤖', title: 'Welcome back!', html: `<p>${away}</p>${off.g >= 1 ? `<p>Your drones and freighters earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>${off.capped ? `<br><small class="dim">(${Math.round(OFFLINE_RATE * 100)}% of your income rate, max ${fmtTime(OFFLINE_CAP)})</small>` : ''}</p>` : ''}${days}`,
+    buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] });
+}
+function fmtTime(s) { s = Math.floor(s); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return d ? `${d}d${h ? ` ${h}h` : ''}` : h ? `${h}h${m ? ` ${m}m` : ''}` : m ? `${m}m` : `${s}s`; }
 window.addEventListener('pagehide', () => { save(); postPeak(); });
-document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) { save(); postPeak(); } else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
+document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) { save(); postPeak(); } else { const off = offlineGains(); if (!off) return; updateHUD(); if (off.real >= 300 && $('modal').classList.contains('hidden')) welcomeBack(off); else if (off.g >= 1) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
 window.addEventListener('load', init);
 </script>
 </body>

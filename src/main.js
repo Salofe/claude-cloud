@@ -118,7 +118,7 @@ function frame(now) {
     if (!isBlocking() || scene === MapScene || scene === TitleScene) scene.update(dt);
     scene.draw(ctx);
   }
-  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); }
+  if (S && scene !== TitleScene) { incomeTick(dt); hudTick(dt); dayClock(dt); }
   hudT += dt;
   if (hudT > 0.3 && S && scene !== TitleScene) { hudT = 0; updateHUD(); if ((saveT += 0.3) > 10) { saveT = 0; save(); }
     // leaderboard: check the record every 5 s, send it at most once a minute
@@ -174,7 +174,7 @@ function startGame(cont) {
   updateHUD(); updateTicker();
   if (cont) {
     const off = offlineGains();
-    if (off) setTimeout(() => showModal({ icon: '🤖', title: 'Welcome back!', html: `While you were away (${fmtTime(off.secs)}) your drones earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>`, buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] }), 300);
+    if (off) setTimeout(() => welcomeBack(off), 300);
   }
 }
 
@@ -257,7 +257,23 @@ function thumbMode(kind) {
   document.body.dataset.ready = '1';
 }
 
-function fmtTime(s) { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m` : `${s}s`; }
+// one shared clock: a day every DAY_SEC seconds on any screen. It pauses while a popup
+// asks you something, during fights, and while travelling (trips count their own days).
+function dayClock(dt) {
+  if (!has(U.MAP) || !$('modal').classList.contains('hidden')) return;
+  if (MapScene.travel || (scene === MineScene && MineScene.inCombat)) return;
+  S.dayT = (S.dayT || 0) + Math.min(dt, 0.25);
+  if (S.dayT >= DAY_SEC) { S.dayT -= DAY_SEC; tickDay(); updateHUD(); }
+}
+function welcomeBack(off) {
+  const away = off.capped
+    ? `You were away <b>${fmtTime(off.real)}</b>. Drones only work unsupervised for <b>${fmtTime(OFFLINE_CAP)}</b>, so you were paid for the <b>last 8 hours</b>.`
+    : `You were away <b>${fmtTime(off.real)}</b>.`;
+  const days = off.days ? `<p class="hint"><b>${off.days} day${off.days > 1 ? 's' : ''}</b> passed in the system.</p>${off.news.length ? `<div class="wb-news">${off.news.map(n => `<div>${n.icon} ${n.html}</div>`).join('')}</div>` : ''}` : '';
+  showModal({ icon: '🤖', title: 'Welcome back!', html: `<p>${away}</p>${off.g >= 1 ? `<p>Your drones and freighters earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>${off.capped ? `<br><small class="dim">(${Math.round(OFFLINE_RATE * 100)}% of your income rate, max ${fmtTime(OFFLINE_CAP)})</small>` : ''}</p>` : ''}${days}`,
+    buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] });
+}
+function fmtTime(s) { s = Math.floor(s); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return d ? `${d}d${h ? ` ${h}h` : ''}` : h ? `${h}h${m ? ` ${m}m` : ''}` : m ? `${m}m` : `${s}s`; }
 window.addEventListener('pagehide', () => { save(); postPeak(); });
-document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) { save(); postPeak(); } else { const off = offlineGains(); if (off && off.g > 0) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
+document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) { save(); postPeak(); } else { const off = offlineGains(); if (!off) return; updateHUD(); if (off.real >= 300 && $('modal').classList.contains('hidden')) welcomeBack(off); else if (off.g >= 1) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
 window.addEventListener('load', init);

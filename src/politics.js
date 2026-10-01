@@ -191,6 +191,7 @@ function spawnEvent() {
     const ev = gen.make();
     if (!ev) continue;
     ev.kind = gen.kind;
+    if (ev.choices && OFFLINE) continue;   // decisions only come up while you're playing
     if (ev.choices) { pendingChoices.push(ev); addNews(ev.icon, `<b>${ev.title}</b> — ${ev.text}`, '#ffc857'); return; }
     if ((ev.locs || []).some(id => kindActive(ev.kind, id)) || (!ev.locs.length && kindActive(ev.kind))) continue;
     addEvent(ev);
@@ -256,7 +257,7 @@ function warSalePush(locId, item, value) {
   if (a >= 0.5) warPush(backedWar(), a, `${ITEMS[item].n} delivered`);
 }
 function warDay(e) {
-  if (e.resolved) return;
+  if (e.resolved || (OFFLINE && e.backed)) return;
   const [a, b] = e.war;
   e.front = clamp((e.front || 0) + (facStrength(a) - facStrength(b)) * 0.6 + rand(-4, 4), -100, 100);
   if (Math.abs(e.front) >= 100) endWar(e, e.front > 0 ? a : b);

@@ -105,7 +105,7 @@ const ICON = {
 
 // emoji / symbol → icon. Game text keeps these as keys.
 const GLYPH = {
-  '🤖': 'drone', '👑': 'crown', '⚡': 'bolt', '🛡': 'shield', '🔒': 'lock', '🔓': 'unlock', '⛏': 'pick', '☠': 'skull',
+  '🏴‍☠️': 'flag', '🏴‍☠': 'flag', '🤖': 'drone', '👑': 'crown', '⚡': 'bolt', '🛡': 'shield', '🔒': 'lock', '🔓': 'unlock', '⛏': 'pick', '☠': 'skull',
   '⛽': 'fuel', '🚚': 'freighter', '🚀': 'ship', '⚔': 'swords', '▶': 'play', '🛰': 'satellite', '🔥': 'fire', '📦': 'crate',
   '🕊': 'dove', '💥': 'blast', '🏗': 'crane', '☄': 'comet', '🏛': 'capitol', '🏦': 'bank', '🏆': 'trophy', '🔊': 'speaker',
   '🔇': 'mute', '🚨': 'siren', '🔧': 'wrench', '📜': 'contract', '🗺': 'map', '✊': 'strike', '💡': 'bulb', '🌌': 'galaxy',

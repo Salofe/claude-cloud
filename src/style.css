@@ -427,3 +427,7 @@ body.mining #warHud { top: 62px; }
 .fleetline { margin-top: 8px; font-size: 12px; color: var(--dim); }
 .fleetline b { color: var(--txt); }
 .fleetline.full { color: var(--warn); } .fleetline.full b { color: var(--gold); }
+.meter.dayclock { height: 3px; margin-top: 2px; width: 34px; }
+.meter.dayclock i { background: var(--cyan); transition: width .3s linear; }
+.wb-news { text-align: left; font-size: 12px; color: var(--dim); background: rgba(255,255,255,.04); border-radius: 8px; padding: 6px 10px; margin-top: 6px; }
+.wb-news div { padding: 2px 0; }

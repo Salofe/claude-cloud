@@ -5,6 +5,7 @@ const isBlocking = () => !$('modal').classList.contains('hidden') || !$('sheet')
 let dockTab = 'upg', lastDock = null, shownCredits = 0;
 
 function toast(msg, cls) {
+  if (OFFLINE) return;
   const el = document.createElement('div');
   el.className = 'toast ' + (cls || '');
   el.innerHTML = msg;
@@ -39,6 +40,7 @@ function showModal(o) {
 function closeModal() { $('modal').classList.add('hidden'); }
 
 function showEventBanner(ev) {
+  if (OFFLINE) return;
   const b = $('eventBanner');
   b.innerHTML = `<span class="eicon">${ev.icon}</span><div><small>SYSTEM NEWS · DAY ${S.day}</small><b>${ev.title}</b><p>${ev.text}</p></div>`;
   b.classList.add('show');
@@ -70,6 +72,7 @@ function updateHUD() {
   if (!S) return;
   for (const el of document.querySelectorAll('[data-need]')) el.classList.toggle('locked', S.unlock < +el.dataset.need);
   $('hDay').textContent = S.day;
+  $('hDayT').style.width = Math.min(100, (S.dayT || 0) / DAY_SEC * 100) + '%';
   updateWarBar();
   $('hFuel').style.width = (S.fuel / ship.fuelMax * 100) + '%';
   $('hFuelT').textContent = `${Math.floor(S.fuel)}/${ship.fuelMax}`;

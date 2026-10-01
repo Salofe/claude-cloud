@@ -48,3 +48,7 @@ All art is procedural (canvas 2D, including noise-generated planet textures) and
 ## Icons
 
 All icons are hand-drawn vector paths in `src/icons.js` (24×24 grid, duotone neon style). Game text uses emoji as keys; a MutationObserver swaps them for inline SVG in the UI, and `drawIcon`/`drawIconRow` render the same paths on the canvases, so no emoji is ever shown.
+
+## Time
+
+One day passes every 50 seconds on any screen (paused during fights, while travelling — trips count their own days — and while a popup asks you something). Days also pass while you're away, up to the same 8-hour offline cap that pays your drones (60% rate); while away your accepted contracts and the war you back wait for you and no decision popups are queued. The welcome-back screen says how long you were gone, that only the last 8 hours were paid, how many days passed and the main news.

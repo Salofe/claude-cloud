@@ -281,9 +281,7 @@ const MineScene = {
       if (p.y < DOCK_Y - 250) this.armed = true;
       if (this.armed && p.y > DOCK_Y) { this.leave(); return; }
     }
-    // --- time ---
-    this.dayTimer += dt;
-    if (this.dayTimer > 40 && has(U.MAP)) { this.dayTimer = 0; tickDay(); }
+
     if (!this.space && this.rocks.length < this.target * 0.5 && Math.random() < dt * 0.4) {
       const x = rand(120, MW - 120), y = rand(120, Math.min(DOCK_Y - 400, p.y - 500));
       if (y > 100) this.spawnRock(x, y, 3);

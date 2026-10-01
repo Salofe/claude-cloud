@@ -338,16 +338,29 @@ function incomeTick(dt) {
   incomeAcc += dt;
   if (incomeAcc > 0.5) { incomeAcc = 0; checkUnlocks(); }
 }
+// ---------- time ----------
+// One day passes every DAY_SEC seconds of play (and while away, up to the offline cap).
+const DAY_SEC = 50, OFFLINE_CAP = 8 * 3600, OFFLINE_RATE = 0.6;
+let OFFLINE = false;   // true while simulating days you were away: no popups, your contracts and backed war wait for you
 function offlineGains() {
   const now = Date.now();
-  const secs = clamp((now - (S.lastSeen || now)) / 1000, 0, 8 * 3600);
+  const real = Math.max(0, (now - (S.lastSeen || now)) / 1000);
+  const secs = Math.min(real, OFFLINE_CAP);
   S.lastSeen = now;
   if (secs < 30) return null;
-  const g = totalIncome() * secs * 0.6;
-  if (g < 1) return null;
-  S.credits += g; S.stats.earned += g; S.stats.droneEarned += g;
+  const g = totalIncome() * secs * OFFLINE_RATE;
+  if (g >= 1) { S.credits += g; S.stats.earned += g; S.stats.droneEarned += g; }
+  // the system keeps living while you're gone
+  let days = 0; const newsBefore = S.news.length && S.news[0];
+  if (has(U.MAP)) {
+    S.dayT = (S.dayT || 0) + secs;
+    OFFLINE = true;
+    try { while (S.dayT >= DAY_SEC) { S.dayT -= DAY_SEC; tickDay(); days++; } } finally { OFFLINE = false; }
+  }
   checkUnlocks();
-  return { secs, g };
+  const i = S.news.indexOf(newsBefore), fresh = (i < 0 ? S.news : S.news.slice(0, i)).slice(0, 4);
+  if (g < 1 && !days) return null;
+  return { secs, real, capped: real > OFFLINE_CAP, g, days, news: fresh };
 }
 
 // ---------- progression ----------
@@ -450,6 +463,11 @@ function completeContract(c) {
 // ---------- one day passes ----------
 function tickDay() {
   S.day++;
+  if (OFFLINE) {
+    // you can't act while away: your contracts and the war you back wait for you
+    for (const c of S.active) c.deadline++;
+    for (const e of S.events) if (e.war && e.backed) e.end++;
+  }
   for (const id in S.sat) for (const k in S.sat[id]) {
     S.sat[id][k] += (1 - S.sat[id][k]) * 0.08;
     S.drift[id][k] = clamp(S.drift[id][k] * 0.96 + rand(-0.035, 0.035), -0.25, 0.25);
@@ -476,7 +494,7 @@ function tickDay() {
     }
   }
   politicsDay();
-  if (S.day % 3 === 0) save();
+  if (S.day % 3 === 0 && !OFFLINE) save();
 }
 
 function addNews(icon, html, col) {
