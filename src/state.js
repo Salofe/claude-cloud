@@ -388,7 +388,10 @@ function nextUnlock() { return S.unlock < UNLOCKS.length - 1 ? UNLOCKS[S.unlock 
 
 // ---------- megaprojects & system powers ----------
 function built(id) { return S && S.projects && S.projects[id]; }
-function projectOpen(p) { return has(p.stage) && (!p.req || built(p.req)); }
+function projectOpen(p) { return has(p.stage) && (!p.req || built(p.req)) && projHere(p); }
+// projects that belong to the current star system (signature ones only exist in their own)
+const projHere = p => !p.sys || p.sys === sysId();
+const sysProjects = () => PROJECTS.filter(projHere);
 function buildProject(id) {
   const p = PROJ[id];
   if (built(id) || !projectOpen(p) || S.credits < p.cost) return false;

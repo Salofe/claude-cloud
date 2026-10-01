@@ -470,7 +470,7 @@ const FREIGHT = {
   cost: () => Math.round(1e6 * Math.pow(3, Math.max(0, S.unlock - 5)) * Math.pow(1.35, (S.freighters || []).length)),
 };
 function routeCycle(from, to) { const days = Math.max(1, Math.round(locDist(from, to, S.day) / 22)); return 2 * (3 + days * 1.2); }
-function tradeMult() { let inv = 0; for (const id in S.invest) inv += S.invest[id]; return (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1); }
+function tradeMult() { let inv = 0; for (const id in S.invest) inv += S.invest[id]; return (1 + INVEST.bonus * inv) * (built('dyson') ? 5 : 1) * (built('exchange') ? 3 : 1); }
 function freighterIncome(f) {
   if (!cityOpen(f.from) || !cityOpen(f.to) || marketClosed(f.from) || marketClosed(f.to)) return 0;
   const bp = buyPrice(f.from, f.g), sp = sellPrice(f.to, f.g);

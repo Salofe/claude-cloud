@@ -85,7 +85,7 @@ const MineScene = {
   },
   // comets streak across the field: break one before it escapes for ice and a load of the field's best ore
   pullRadius() { return Math.max(1000, ship.magnet * 4); },
-  toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) : ship.laserRange; },
+  toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) * (built('borer') ? 1.6 : 1) : ship.laserRange; },
   toggleTool() {
     if (!hasTool('drill') || this.space) return;
     this.tool = this.tool === 'drill' ? 'laser' : 'drill'; sfx('click');
@@ -146,7 +146,7 @@ const MineScene = {
       const m = 0.5 * ship.yieldMult;
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
     } else {
-      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult;
+      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult * (r.shard && built('resonance') ? 2 : 1) * (r.armored && built('plasmaforge') ? 2 : 1);
       const n = Math.floor(m) + (Math.random() < m % 1 ? 1 : 0);
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.ore);
     }
@@ -230,7 +230,7 @@ const MineScene = {
       if (best) {
         const drill = this.tool === 'drill';
         // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range
-        best.hp -= ship.laserDps * (drill ? 3 : 1) * (best.armored && !drill ? 0.15 : 1) * dt; best.hit = 0.05;
+        best.hp -= ship.laserDps * (drill ? (built('borer') ? 4.5 : 3) : 1) * (best.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * dt; best.hit = 0.05;
         if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? 'ARMORED — switch to the Drill (Q)' : 'ARMORED — your laser barely scratches it', col: '#c8d0e0', life: 2.5, big: 1 }); }
         if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
         if (best.hp <= 0) this.breakRock(best);

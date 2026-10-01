@@ -6,7 +6,7 @@
 // ores, factions and texts on top of Sol, and gets harder: tougher rocks and pirates.
 
 // pristine copy of the Solar System, taken before anything is modified
-const SOL_SNAP = JSON.parse(JSON.stringify({ locs: LOCS, factions: FACTIONS, unlocks: UNLOCKS, projects: PROJECTS.map(p => ({ id: p.id, n: p.n, d: p.d, fx: p.fx })) }));
+const SOL_SNAP = JSON.parse(JSON.stringify({ locs: LOCS, factions: FACTIONS, unlocks: UNLOCKS, projects: PROJECTS.map(p => ({ id: p.id, icon: p.icon, n: p.n, d: p.d, fx: p.fx })) }));
 
 const SYSTEMS = {
   sol: {
@@ -55,10 +55,15 @@ const SYSTEMS = {
       8: { title: 'Proxima', text: '<b>Proxima b</b>\'s Red Market and the <b>Proxima Drift</b>. Exotics and even <b>Void Shards</b>.' },
     },
     projects: {
-      driver: { n: 'Tethys Mass Driver', d: 'A magnetic rail on Tethys hurls ore straight to Pandora.', fx: 'Tethys outpost output ×3' },
-      elevator: { n: 'Pandora Space Elevator', d: 'A cable rising out of Pandora\'s oceans. Its industry is yours to supply.', fx: 'All ore sells for +25% everywhere' },
-      terraform: { n: 'Terraform Dune', d: 'Comets, mirrors and seas poured onto the desert. Dune turns blue.', fx: 'Dune pays ×2 for everything · Dune Clans reputation +50' },
-      ringstation: { n: 'Aurelia Halo Megastation', d: 'A city-sized refinery woven into Aurelia\'s golden rings.', fx: 'ALL drone income ×3' },
+      driver: { icon: "🚀", n: "Tethys Railgun Highway", d: "A railgun that fires ore crates in a perfect arc straight into Pandora's orbit.", fx: "Tethys outpost output ×3" },
+      beacons: { n: "Binary Slingshot Lanes", d: "Navigation buoys that slingshot ships around both suns at once.", fx: "Travel 50% faster · fuel −30%" },
+      fleet: { icon: "💎", n: "Crystal Drone Armada", d: "Self-repairing gunships grown from living crystal. They fly with you into every fight.", fx: "Pirate danger −50% · 2 escort gunships in every fight" },
+      elevator: { icon: "💫", n: "Pandora Orbital Ring", d: "Not one cable — a whole ring around the planet, with a hundred elevators hanging from it.", fx: "All ore sells for +25% everywhere" },
+      terraform: { icon: "🌱", n: "Dune Ocean Seeding", d: "Ice comets from the Proxima Drift rain onto Dune for a decade. The desert becomes an archipelago.", fx: "Dune pays ×2 for everything · Dune Clans reputation +50" },
+      gates: { n: "Shard Gate Web", d: "Wormhole gates cut from giant crystals that resonate across the whole system.", fx: "Instant, free travel anywhere" },
+      ringstation: { n: "Aurelia Halo Foundry", d: "A refinery that orbits inside the golden halo, sipping Ring Pearls like nectar.", fx: "ALL drone income ×3" },
+      dyson: { n: "Twin-Star Dyson Lattice", d: "Mirrors woven between both suns. The power bounces back and forth and keeps growing.", fx: "ALL income ×5" },
+      nova: { icon: "⚡", n: "Binary Nova Lance", d: "Both suns fire through a single crystal lens. Planets do not survive it.", fx: "Lets you DESTROY planets (from the Star Map)" },
     },
   },
 };
@@ -99,10 +104,15 @@ Object.assign(SYSTEMS, {
       8: { title: 'Coalsack', text: '<b>Coalsack</b>\'s black market and the <b>Barnard Drift</b>.' },
     },
     projects: {
-      driver: { n: 'Cinderling Mass Driver', d: 'A magnetic rail on Cinderling hurls ore straight to Forge.', fx: 'Cinderling outpost output ×3' },
-      elevator: { n: 'Forge Space Elevator', d: 'A cable rising from the frozen side of Forge.', fx: 'All ore sells for +25% everywhere' },
-      terraform: { n: 'Terraform Rustfall', d: 'Comets and mirrors turn the red canyons into lakes.', fx: 'Rustfall pays ×2 for everything · Rust Brotherhood reputation +50' },
-      ringstation: { n: 'Halo Ring Megastation', d: 'A refinery city woven into Halo\'s rings.', fx: 'ALL drone income ×3' },
+      driver: { icon: "🏗", n: "Cinderling Gravity Catapult", d: "A gravity sling built from old mine elevators throws ore uphill to Forge.", fx: "Cinderling outpost output ×3" },
+      beacons: { icon: "🔥", n: "Red Dwarf Lighthouses", d: "Giant flare-lamps that light safe lanes through the dim red system.", fx: "Travel 50% faster · fuel −30%" },
+      fleet: { icon: "🤖", n: "Iron Golem Legion", d: "Retired mining mechs, re-armed and hungry for pirates. Two of them fly beside you in every fight.", fx: "Pirate danger −50% · 2 escort gunships in every fight" },
+      elevator: { icon: "🔧", n: "Forge Skyhook", d: "A spinning tether that snatches cargo off Forge's frozen side and flings it into orbit.", fx: "All ore sells for +25% everywhere" },
+      terraform: { icon: "🏭", n: "Rustfall Atmosphere Factories", d: "Thousand-kilometre chimneys pump air into Rustfall's canyons until it rains.", fx: "Rustfall pays ×2 for everything · Rust Brotherhood reputation +50" },
+      gates: { icon: "⛏", n: "Mine-Shaft Wormholes", d: "The old miners dug so deep they punched through space-time. You just put up signs.", fx: "Instant, free travel anywhere" },
+      ringstation: { icon: "⚗", n: "Halo Nanoforge", d: "Trillions of nanobots in Halo's rings build drones out of ring dust.", fx: "ALL drone income ×3" },
+      dyson: { n: "Red Sun Harvester", d: "A dim star, a dense swarm: you squeeze every last photon out of Barnard's Star.", fx: "ALL income ×5" },
+      nova: { n: "Core Breaker", d: "The biggest drill ever made. It does not mine planets — it opens them.", fx: "Lets you DESTROY planets (from the Star Map)" },
     },
   },
   sirius: {
@@ -139,10 +149,15 @@ Object.assign(SYSTEMS, {
       8: { title: 'Dogstar', text: '<b>Dogstar</b>\'s Raider Bazaar and the <b>Sirius Drift</b>.' },
     },
     projects: {
-      driver: { n: 'Glint Mass Driver', d: 'A magnetic rail on Glint hurls ore straight to Lumen.', fx: 'Glint outpost output ×3' },
-      elevator: { n: 'Lumen Space Elevator', d: 'A cable rising out of Lumen\'s bright seas.', fx: 'All ore sells for +25% everywhere' },
-      terraform: { n: 'Terraform Canis', d: 'Seas poured onto the dry plains of Canis.', fx: 'Canis pays ×2 for everything · Canis Clans reputation +50' },
-      ringstation: { n: 'Corona Ring Megastation', d: 'A refinery city in Corona\'s golden rings.', fx: 'ALL drone income ×3' },
+      driver: { icon: "☀", n: "Glint Photon Sails", d: "Ore crates with mirror sails, pushed home by the light of Sirius itself.", fx: "Glint outpost output ×3" },
+      beacons: { icon: "⚡", n: "Starlight Highways", d: "Laser-lit lanes that ships surf at impossible speeds.", fx: "Travel 50% faster · fuel −30%" },
+      fleet: { icon: "🛡", n: "Mirror Knight Squadron", d: "Chrome gunships that bounce pirate fire right back at them.", fx: "Pirate danger −50% · 2 escort gunships in every fight" },
+      elevator: { icon: "💡", n: "Lumen Light Fountain", d: "A column of solid light lifts cargo from the sea straight to orbit.", fx: "All ore sells for +25% everywhere" },
+      terraform: { icon: "🌍", n: "Canis Sky-Seas", d: "Floating oceans hang in the sky above Canis, held up by magnetic fields.", fx: "Canis pays ×2 for everything · Canis Clans reputation +50" },
+      gates: { n: "Light-Speed Mirror Gates", d: "Step into a mirror on one world, step out of another.", fx: "Instant, free travel anywhere" },
+      ringstation: { icon: "🔥", n: "Corona Plasma Crown", d: "A crown of plasma refineries ringing Corona, hot enough to forge stars.", fx: "ALL drone income ×3" },
+      dyson: { n: "Sirius Starlift", d: "You don't just catch starlight — you lift matter straight out of Sirius.", fx: "ALL income ×5" },
+      nova: { icon: "☄", n: "White Dwarf Hammer", d: "You fling a chunk of white-dwarf matter at a planet. One teaspoon weighs as much as a mountain.", fx: "Lets you DESTROY planets (from the Star Map)" },
     },
   },
   tauceti: {
@@ -179,10 +194,15 @@ Object.assign(SYSTEMS, {
       8: { title: 'Freeport', text: '<b>Freeport</b>\'s Smugglers\' Den and the <b>Ceti Drift</b>.' },
     },
     projects: {
-      driver: { n: 'Penny Mass Driver', d: 'A magnetic rail on Penny hurls ore straight to Aurum.', fx: 'Penny outpost output ×3' },
-      elevator: { n: 'Aurum Space Elevator', d: 'A golden cable rising from the Grand Exchange.', fx: 'All ore sells for +25% everywhere' },
-      terraform: { n: 'Terraform Bazaar', d: 'The desert market world gets seas and forests.', fx: 'Bazaar pays ×2 for everything · Free Port Guild reputation +50' },
-      ringstation: { n: 'Crown Ring Megastation', d: 'A refinery city in Crown\'s lilac rings.', fx: 'ALL drone income ×3' },
+      driver: { icon: "🤑", n: "Penny Coin Cannon", d: "Ore is minted into coins on Penny and fired straight into the Grand Exchange vault.", fx: "Penny outpost output ×3" },
+      beacons: { icon: "📈", n: "Hyperlane Toll Network", d: "Faster lanes for everyone — and you collect every toll.", fx: "Travel 50% faster · fuel −30%" },
+      fleet: { icon: "💼", n: "Mercenary Guild Armada", d: "The best pirates money can buy, now hunting the rest. Two ride with you in every fight.", fx: "Pirate danger −50% · 2 escort gunships in every fight" },
+      elevator: { icon: "🏦", n: "Aurum Elevator Mall", d: "A space elevator with ten thousand shops. Shoppers ride it all the way to orbit.", fx: "All ore sells for +25% everywhere" },
+      terraform: { icon: "🎉", n: "Bazaar Paradise Resort", d: "Seas, palm forests and casinos poured onto the desert. Tourists pay double for everything.", fx: "Bazaar pays ×2 for everything · Free Port Guild reputation +50" },
+      gates: { n: "Instant Commerce Portals", d: "Order anything, anywhere — it arrives before you finish paying.", fx: "Instant, free travel anywhere" },
+      ringstation: { icon: "🎆", n: "Crown Casino-Refinery", d: "A refinery hidden inside the galaxy's biggest casino. The drones never stop and neither do the slots.", fx: "ALL drone income ×3" },
+      dyson: { icon: "🏦", n: "Ceti Star Bank", d: "You buy the star. Every photon it makes pays you interest.", fx: "ALL income ×5" },
+      nova: { icon: "🤑", n: "Planetary Repossession Beam", d: "If a planet can't pay its debts, you take it. All of it.", fx: "Lets you DESTROY planets (from the Star Map)" },
     },
   },
 });
@@ -266,11 +286,11 @@ function jumpBonus() {
   let b = 10, why = ['base 10'];
   if (S.gateOpen) { b += 5; why.push('final boss +5'); }
   const st = Object.values(S.allies || {}).reduce((a, x) => a + x, 0); if (st) { b += 3 * st; why.push(`ally stars +${3 * st}`); }
-  const pj = PROJECTS.filter(p => built(p.id)).reduce((a, p) => a + projTribute(p), 0); if (pj) { b += pj; why.push(`megaprojects +${pj}`); }
+  const pj = sysProjects().filter(p => built(p.id)).reduce((a, p) => a + projTribute(p), 0); if (pj) { b += pj; why.push(`megaprojects +${pj}`); }
   // what is still on the table in this system
   const left = [];
   if (!S.gateOpen) left.push({ n: 'Defeat the final guardian', t: 5 });
-  for (const p of PROJECTS) if (!built(p.id)) left.push({ n: p.n, t: projTribute(p), cost: p.cost });
+  for (const p of sysProjects()) if (!built(p.id)) left.push({ n: p.n, t: projTribute(p), cost: p.cost });
   const starsLeft = allyFactions().reduce((a, f) => a + WAR.maxStars - Math.min(WAR.maxStars, (S.allies || {})[f] || 0), 0);
   if (starsLeft) left.push({ n: `Win wars as an ally (${starsLeft} star${starsLeft > 1 ? 's' : ''} left)`, t: 3 * starsLeft });
   return { b, why, left, max: b + left.reduce((a, x) => a + x.t, 0) };

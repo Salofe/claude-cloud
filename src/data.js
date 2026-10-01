@@ -188,6 +188,17 @@ const PROJECTS = [
   { id: 'nova', icon: '💥', n: 'Nova Cannon', loc: null, stage: 8, cost: 2e13, infl: 10, req: 'dyson',
     d: 'A beam that channels the Dyson Swarm into a single point. Nothing can stand against it.', fx: 'Lets you DESTROY planets (from the Star Map)' },
 ];
+// signature megaprojects: each star system has one of its own (sys = where it can be built)
+PROJECTS.push(
+  { id: 'resonance', sys: 'centauri', icon: '💎', n: 'Crystal Resonance Array', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Tuned sonic emitters make every crystal sing as it breaks — the shards split along their richest veins.', fx: 'Crystal shards drop ×2 ore' },
+  { id: 'borer', sys: 'barnard', icon: '⛏', n: 'Deep Core Borer', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'A planet-cracking drill head, shrunk down and bolted onto your ship.', fx: 'Drill reach +60% and drill power ×1.5' },
+  { id: 'plasmaforge', sys: 'sirius', icon: '🔥', n: 'Plasma Forge', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Star-hot plasma melts the armor off asteroids before your beam even arrives.', fx: 'Laser does 60% to armored rocks · armored rocks drop ×2 ore' },
+  { id: 'exchange', sys: 'tauceti', icon: '📈', n: 'Galactic Stock Exchange', loc: 'tierra', stage: 5, cost: 300e6, infl: 8,
+    d: 'You list the entire star system on the galactic market. Everyone wants a share.', fx: 'Freighter & trade income ×3' },
+);
 const PROJ = Object.fromEntries(PROJECTS.map(p => [p.id, p]));
 
 // ============ INVESTMENTS ============

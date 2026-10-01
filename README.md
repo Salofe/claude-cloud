@@ -60,6 +60,8 @@ Defeating a system's final guardian opens its **jump gate**. The **Galaxy** map 
 - **Sirius** (blazing white + white dwarf): **armored asteroids** — metal shells the laser barely scratches (15%); drill them. Guardian: the **Solar Serpent**, a fast ribbon of fire.
 - **Tau Ceti** (trade empire): you receive the **Tractor Pulse** (E / PULL button, 14 s cooldown) that pulls every ore chunk within 1,000 px. Guardian: the **Merchant Dreadnought**, with spread volleys and pirate escorts it keeps calling in.
 
+Every system reinvents the nine megaprojects with its own (ever crazier) tech — e.g. Centauri's Twin-Star Dyson Lattice, Barnard's Mine-Shaft Wormholes, Sirius' White Dwarf Hammer, Tau Ceti's Planetary Repossession Beam — and adds one **signature project** with a unique effect: Crystal Resonance Array (crystal shards ×2 ore), Deep Core Borer (drill reach +60%, power ×1.5), Plasma Forge (laser 60% vs armor, armored rocks ×2 ore), Galactic Stock Exchange (trade & freighter income ×3).
+
 Each system gets tougher (rocks ×1.5, pirate toughness ×1.35 per system; pirate damage grows only with the square root so fights stay short). With the Legacy you'd typically have by then, the simulator puts each system at ~110–125 minutes, with normal fights at 8–15 s and guardians at ~40–65 s and well under your hull + shields.
 
 ## Fields & comets

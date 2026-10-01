@@ -636,7 +636,7 @@ function openFactions() {
 function openProjects() {
   sfx('click');
   let h = '<p class="hint">Spend your fortune on projects that change the system forever. Each one also adds influence.</p><div class="projs">';
-  for (const p of PROJECTS) {
+  for (const p of sysProjects()) {
     const done = built(p.id), open = projectOpen(p), can = open && !done && S.credits >= p.cost;
     const pct = Math.min(100, S.credits / p.cost * 100);
     h += `<div class="proj ${done ? 'done' : ''} ${open ? '' : 'locked'} ${can ? 'can' : ''}">
