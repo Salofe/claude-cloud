@@ -487,6 +487,9 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .tbtn { position: absolute; right: 136px; width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--fh); font-size: 11px; color: #fff; pointer-events: auto; border: 2px solid #ffb030; background: rgba(255,160,40,.25); }
 #toolBtn { bottom: 150px; } #pullBtn { bottom: 76px; border-color: #9fe0ff; background: rgba(120,200,255,.2); }
 #pullBtn.cd { opacity: .5; }
+#boostBtn { right: 40px; bottom: 200px; border-color: #ffe14a; background: rgba(255,225,74,.2); }
+#bombBtn { right: 206px; bottom: 112px; border-color: #ff5a2a; background: rgba(255,90,42,.2); }
+#boostBtn.cd, #bombBtn.cd { opacity: .5; }
 </style>
 </head>
 <body>
@@ -549,6 +552,8 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
   <div id="fireBtn">FIRE</div>
   <div id="toolBtn" class="tbtn hidden">DRILL</div>
   <div id="pullBtn" class="tbtn hidden">PULL</div>
+  <div id="boostBtn" class="tbtn hidden">BOOST</div>
+  <div id="bombBtn" class="tbtn hidden">BOMB</div>
 </div>
 
 <div id="battleUI" class="ui hidden">
@@ -762,6 +767,12 @@ PROJECTS.push(
     d: 'Star-hot plasma melts the armor off asteroids before your beam even arrives.', fx: 'Laser does 60% to armored rocks · armored rocks drop ×2 ore' },
   { id: 'exchange', sys: 'tauceti', icon: '📈', n: 'Galactic Stock Exchange', loc: 'tierra', stage: 5, cost: 300e6, infl: 8,
     d: 'You list the entire star system on the galactic market. Everyone wants a share.', fx: 'Freighter & trade income ×3' },
+  { id: 'chainlab', sys: 'eridani', icon: '💥', n: 'Chain Reaction Lab', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Blasting Guild scientists tune every volatile rock in the system to go off just right.', fx: 'Explosive rocks blast 60% wider' },
+  { id: 'herding', sys: 'vega', icon: '☄', n: 'Comet Herding Array', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Gravity shepherds steer the system\'s comets straight through your mining fields.', fx: 'Comets come 3× as often and drop ×2 ore' },
+  { id: 'bounty', sys: 'altair', icon: '☠', n: 'Bounty Exchange', loc: 'tierra', stage: 4, cost: 50e6, infl: 6,
+    d: 'Every free city in Altair pays you for every pirate you blow up.', fx: 'Pirate loot ×3' },
 );
 const PROJ = Object.fromEntries(PROJECTS.map(p => [p.id, p]));
 
@@ -781,6 +792,9 @@ const ENEMIES = {
   colossus: { n: 'Mining Colossus', hp: 900, sp: 200, dmg: 3, rate: 2.4, spd: 45, size: 3.6, loot: 20000, pow: 30, burst: 1, radial: 12, boss: 1, final: 1, mech: 1 },
   serpent: { n: 'Solar Serpent',   hp: 600, sp: 250, dmg: 2, rate: 0.9, spd: 210, size: 3.0, loot: 20000, pow: 30, burst: 6, boss: 1, final: 1, serpent: 1 },
   dreadnought: { n: 'Merchant Dreadnought', hp: 680, sp: 400, dmg: 1.6, rate: 1.4, spd: 55, size: 3.8, loot: 20000, pow: 30, burst: 2, spread: 5, boss: 1, final: 1, summon: 'corsair', summonMax: 3 },
+  citadel: { n: 'Dust Citadel',    hp: 1000, sp: 300, dmg: 1.4, rate: 0.22, spd: 0, size: 4.2, loot: 20000, pow: 30, burst: 1, spiral: 4, boss: 1, final: 1, fort: 1 },
+  leviathan: { n: 'Ice Leviathan', hp: 760, sp: 300, dmg: 2.5, rate: 1.6, spd: 80, size: 3.8, loot: 20000, pow: 30, burst: 3, spread: 3, dash: 1, boss: 1, final: 1, whale: 1 },
+  pirateking: { n: 'Pirate King',  hp: 720, sp: 420, dmg: 2.2, rate: 1.2, spd: 90, size: 3.4, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, summon: 'raider', summonMax: 4 },
   swarmer: { n: 'Swarmer',         hp: 26,  sp: 0,   dmg: 2,  rate: 0.9, spd: 270, size: 0.55, loot: 150,  pow: 1, hive: 1 },
   adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
@@ -1388,9 +1402,40 @@ function drawSerpentBody(ctx, e, t) {
   }
   ctx.globalCompositeOperation = 'source-over';
 }
+// Dust Citadel: a pirate fortress hidden in the dust, with a spinning turret ring
+function drawFortShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 26, '#ffa86033', 0.8);
+  ctx.save(); ctx.rotate(t * 0.9);
+  for (let i = 0; i < 4; i++) { ctx.rotate(TAU / 4); ctx.fillStyle = '#5a4a3a'; ctx.fillRect(9, -2.5, 9, 5); ctx.fillStyle = '#ffa860'; ctx.fillRect(16, -1.2, 4, 2.4); }
+  ctx.restore();
+  ctx.fillStyle = '#3a3228'; ctx.strokeStyle = '#ffa860'; ctx.lineWidth = 1;
+  ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i * TAU / 6; ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * 12, Math.sin(a) * 12); } ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#6a5440'; ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + TAU / 12; ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * 7, Math.sin(a) * 7); } ctx.closePath(); ctx.fill();
+  const pulse = 0.6 + 0.4 * Math.sin(t * 5);
+  glow(ctx, 0, 0, 6, '#ff6a2a', pulse); ctx.fillStyle = `rgba(255,120,60,${pulse})`; ctx.beginPath(); ctx.arc(0, 0, 2.6, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+// Ice Leviathan: a whale of living ice
+function drawWhaleShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 24, '#bfefff33', 0.8);
+  const tail = Math.sin(t * 4) * 4;
+  const g = ctx.createLinearGradient(0, -8, 0, 8); g.addColorStop(0, '#e8faff'); g.addColorStop(0.5, '#7fc8e8'); g.addColorStop(1, '#2a5a7a');
+  ctx.fillStyle = g; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(16, 0); ctx.quadraticCurveTo(12, -8, 0, -8); ctx.quadraticCurveTo(-10, -7, -15, tail * 0.3); ctx.quadraticCurveTo(-10, 7, 0, 7); ctx.quadraticCurveTo(12, 8, 16, 0); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-14, tail * 0.3); ctx.lineTo(-21, -6 + tail); ctx.lineTo(-19, tail * 0.3); ctx.lineTo(-21, 6 + tail); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-6 + i * 4, -7.5); ctx.lineTo(-5 + i * 4, -11); ctx.lineTo(-4 + i * 4, -7.5); ctx.fill(); }
+  ctx.fillStyle = '#0a2a4a'; ctx.beginPath(); ctx.arc(10, -2.5, 1.4, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
   if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
+  if (e.fort) return drawFortShip(ctx, type, x, y, ang, s, t);
+  if (e.whale) return drawWhaleShip(ctx, type, x, y, ang, s, t);
   if (e.hive) return drawHiveShip(ctx, type, x, y, ang, s, t);
   if (e.mech) return drawMechShip(ctx, type, x, y, ang, s, t);
   if (e.serpent) return drawSerpentHead(ctx, type, x, y, ang, s, t);
@@ -1415,13 +1460,13 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   ctx.strokeStyle = dark; ctx.lineWidth = 1; ctx.stroke();
   ctx.fillStyle = lit;
   ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(4, -2.5); ctx.lineTo(4, 2.5); ctx.fill();
-  if (type === 'warlord') {
+  if (type === 'warlord' || type === 'pirateking') {
     ctx.fillStyle = dark;
     ctx.beginPath(); ctx.moveTo(2, -6); ctx.lineTo(-14, -22); ctx.lineTo(-20, -20); ctx.lineTo(-10, -5); ctx.closePath(); ctx.fill();
     ctx.beginPath(); ctx.moveTo(2, 6); ctx.lineTo(-14, 22); ctx.lineTo(-20, 20); ctx.lineTo(-10, 5); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#ffd24a'; ctx.fillRect(-18, -21, 5, 2); ctx.fillRect(-18, 19, 5, 2);
   }
-  if (type === 'frigate' || type === 'carrier' || type === 'warlord' || type === 'dreadnought') {
+  if (type === 'frigate' || type === 'carrier' || type === 'warlord' || type === 'dreadnought' || type === 'pirateking') {
     ctx.fillStyle = dark;
     ctx.fillRect(-12, -11, 12, 4); ctx.fillRect(-12, 7, 12, 4);
     ctx.fillStyle = lit;
@@ -1429,6 +1474,9 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   }
   if (type === 'warlord') {
     ctx.save(); ctx.rotate(Math.PI / 2); drawIcon(ctx, 'skull', 0, 2, 9, '#ffd24a'); ctx.restore();
+  }
+  if (type === 'pirateking') {
+    ctx.save(); ctx.rotate(Math.PI / 2); drawIcon(ctx, 'crown', 0, 2, 11, '#ffd24a'); ctx.restore();
   }
   if (type === 'dreadnought') {
     ctx.fillStyle = dark; ctx.fillRect(-16, -14, 26, 5); ctx.fillRect(-16, 9, 26, 5);
@@ -1493,6 +1541,11 @@ function drawArmoredRock(ctx, a, t) {
   ctx.restore();
 }
 function drawRock(ctx, a, t, scanLv) {
+  if (a.volatile) {
+    // a normal rock with glowing magma cracks that pulse faster as it is damaged
+    const k = 1 - a.hp / a.maxhp, pulse = 0.5 + 0.5 * Math.sin(t * (4 + k * 14) + a.x);
+    glow(ctx, a.x, a.y, a.r * 1.9, '#ff5a2a', 0.25 + pulse * 0.3);
+  }
   if (a.crystal) return drawCrystalRock(ctx, a, t);
   if (a.armored) return drawArmoredRock(ctx, a, t);
   const ore = ITEMS[a.ore];
@@ -1518,6 +1571,10 @@ function drawRock(ctx, a, t, scanLv) {
     ctx.beginPath(); ctx.arc(v[0] * a.r, v[1] * a.r, v[2] * a.r, 0, TAU); ctx.fill();
   }
   ctx.globalAlpha = 1;
+  if (a.volatile) {
+    ctx.strokeStyle = `rgba(255,${150 + Math.round(80 * Math.sin(t * 6 + a.x))},60,0.95)`; ctx.lineWidth = 1.6 + a.tier * 0.4;
+    ctx.beginPath(); ctx.moveTo(-a.r * 0.7, -a.r * 0.2); ctx.lineTo(-a.r * 0.1, a.r * 0.1); ctx.lineTo(a.r * 0.5, -a.r * 0.4); ctx.moveTo(-a.r * 0.1, a.r * 0.1); ctx.lineTo(a.r * 0.2, a.r * 0.6); ctx.stroke();
+  }
   // cráteres
   ctx.fillStyle = 'rgba(0,0,0,0.25)';
   for (const c of a.craters) { ctx.beginPath(); ctx.arc(c[0] * a.r, c[1] * a.r, c[2] * a.r, 0, TAU); ctx.fill(); }
@@ -3105,6 +3162,958 @@ Object.assign(SYSTEMS, {
   },
 });
 
+// systems 6–8
+Object.assign(SYSTEMS, {
+ "eridani": {
+  "n": "Epsilon Eridani",
+  "star": "orange",
+  "rock": 4.48,
+  "enemy": 3.4,
+  "value": 1,
+  "boss": "citadel",
+  "bossFleet": [
+   "citadel",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "A fortress in the dust",
+   "text": "Deep inside the <b>Dust Veil</b> a pirate warlord built the <b>Dust Citadel</b> — a fortress that sprays fire in every direction. It sits right on top of an ancient gate."
+  },
+  "gate": "The Citadel cracks open and the dust settles. Beneath its foundations, an ancient ring <b>flickers to life</b>.",
+  "intro": "Epsilon Eridani hides inside a huge <b>dust disk</b>. Many of its asteroids are <b>volatile</b>: they glow with magma cracks and <b>explode</b> when broken — cracking every rock around them. Set off chain reactions, but keep your distance!",
+  "factions": {
+   "tierra": {
+    "n": "Veil Assembly",
+    "c": "#ffb070"
+   },
+   "marte": {
+    "n": "Ash Nomads",
+    "c": "#e09060"
+   },
+   "cinturon": {
+    "n": "Blasting Guild",
+    "c": "#ffd060"
+   },
+   "exterior": {
+    "n": "Haze Compact",
+    "c": "#a0c0ff"
+   },
+   "piratas": {
+    "n": "Dust Corsairs",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Kindle",
+    "station": "Spark Base",
+    "tex": "rock",
+    "col": [
+     "#c8b090",
+     "#40342a"
+    ],
+    "desc": "A dusty moon of Hearth, glittering with volatile rocks.",
+    "field": {
+     "n": "Spark Fields",
+     "ores": {
+      "iron": 4,
+      "ice": 2.5,
+      "cobalt": 0.34,
+      "titanium": 1
+     },
+     "explosive": 0.12
+    }
+   },
+   "tierra": {
+    "n": "Hearth",
+    "station": "Veil Port",
+    "tex": "ocean",
+    "col": [
+     "#e0c080",
+     "#2a4a5a"
+    ],
+    "desc": "A warm, hazy ocean world under an amber sun."
+   },
+   "venus": {
+    "n": "Sable",
+    "station": "Velvet Spire",
+    "tex": "gas",
+    "col": [
+     "#d0a0c0",
+     "#4a2a40"
+    ],
+    "desc": "A dark velvet cloud world of wealthy nomads."
+   },
+   "mercurio": {
+    "n": "Fuse",
+    "station": "Fuse Depot",
+    "tex": "lava",
+    "col": [
+     "#ffa040",
+     "#3a1004"
+    ],
+    "desc": "A world that crackles with heat and volatile ore.",
+    "field": {
+     "n": "Fuse Flats",
+     "ores": {
+      "iron": 2,
+      "nickel": 2,
+      "sunstone": 2.69,
+      "titanium": 1.5
+     },
+     "explosive": 0.25
+    }
+   },
+   "marte": {
+    "n": "Ashland",
+    "station": "Cinder Gate",
+    "tex": "rock",
+    "col": [
+     "#c89070",
+     "#4a2818"
+    ],
+    "desc": "Grey ash deserts and proud nomads. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Powderkeg",
+    "station": "Blasting Hall",
+    "tex": "rock",
+    "col": [
+     "#b09878",
+     "#3a3026"
+    ],
+    "desc": "The Blasting Guild's capital. Everything here goes boom.",
+    "field": {
+     "n": "Powder Belt",
+     "ores": {
+      "titanium": 1.5,
+      "he3": 2.5,
+      "platinum": 2.5,
+      "iridium": 1.18
+     },
+     "explosive": 0.35
+    }
+   },
+   "jupiter": {
+    "n": "Smolder",
+    "tex": "gas",
+    "col": [
+     "#ffb880",
+     "#7a3a20"
+    ]
+   },
+   "europa": {
+    "n": "Cinderglass",
+    "station": "Glass Colony",
+    "tex": "ice",
+    "col": [
+     "#ffe8d8",
+     "#8a5a48"
+    ],
+    "desc": "An ice moon dusted with soot. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Smolder Depot",
+    "desc": "Smolder's Trojan rocks, many of them volatile.",
+    "field": {
+     "n": "Smolder Swarm",
+     "ores": {
+      "platinum": 4.13,
+      "iridium": 3,
+      "ringpearl": 0.3
+     },
+     "explosive": 0.25
+    }
+   },
+   "saturno": {
+    "n": "Veil",
+    "station": "Veil Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e8d0b0",
+     "#6a5038"
+    ],
+    "desc": "A ringed giant half hidden in the dust disk.",
+    "field": {
+     "n": "Veil Rings",
+     "ores": {
+      "ice": 2,
+      "he3": 3.42,
+      "ringpearl": 3,
+      "exotic": 0.5
+     },
+     "explosive": 0.2
+    }
+   },
+   "titan": {
+    "n": "Murk",
+    "station": "Murkworks",
+    "tex": "titan",
+    "col": [
+     "#c0b090",
+     "#504430"
+    ],
+    "desc": "A murky moon of Veil with vast refineries."
+   },
+   "pluton": {
+    "n": "Snuff",
+    "station": "Corsair Den",
+    "tex": "rock",
+    "col": [
+     "#908070",
+     "#201814"
+    ],
+    "desc": "A soot-black rock where the Dust Corsairs trade."
+   },
+   "kuiper": {
+    "n": "The Dust Veil",
+    "station": "Veil Depot",
+    "desc": "The thick outer dust disk. Volatile rocks drift everywhere.",
+    "field": {
+     "n": "The Dust Veil",
+     "ores": {
+      "ice": 2.91,
+      "ringpearl": 2,
+      "exotic": 1.8,
+      "voidshard": 0.1
+     },
+     "explosive": 0.25
+    }
+   },
+   "oort": {
+    "n": "Citadel Reach",
+    "station": "Last Spark Outpost",
+    "col": [
+     "#ffa860",
+     "#3a1a08"
+    ],
+    "desc": "The heart of the dust, where the Citadel stands guard.",
+    "field": {
+     "n": "Citadel Reach",
+     "ores": {
+      "ice": 3,
+      "iridium": 2,
+      "exotic": 2,
+      "voidshard": 0.81
+     },
+     "explosive": 0.2
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Kindle"
+   },
+   "3": {
+    "title": "Fuse & Ashland",
+    "text": "<b>Fuse</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Ashland</b> pays a fortune for ice. Watch for <b>volatile rocks</b>: they explode when broken!"
+   },
+   "4": {
+    "title": "The Powder Belt",
+    "text": "<b>Powderkeg</b> and the <b>Powder Belt</b>: a third of the rocks are volatile. Break one in a cluster and watch the chain reaction."
+   },
+   "6": {
+    "title": "Smolder System",
+    "text": "<b>Cinderglass</b> and the <b>Smolder Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Veil & Influence",
+    "text": "<b>Murk</b> and the <b>Veil Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Epsilon Eridani."
+   },
+   "8": {
+    "title": "Snuff",
+    "text": "<b>Snuff</b>'s Corsair Den and <b>the Dust Veil</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🏗",
+    "n": "Dustline Conveyor",
+    "d": "A conveyor belt 400,000 km long, running through the dust disk straight to Hearth.",
+    "fx": "Kindle outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Dust-Piercing Lanterns",
+    "d": "Neutrino lamps that see straight through the dust clouds.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🏴",
+    "n": "Sandstorm Corsairs",
+    "d": "Ex-pirates in dust-camouflaged gunships, now on your payroll. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Gravity-Free Zone",
+    "d": "You switch off gravity over a whole city. Cargo just floats up to orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Planet Wash",
+    "d": "A thousand comets scrub the ash off Ashland and leave a blue world behind.",
+    "fx": "Ashland pays ×2 for everything · Ash Nomads reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Dust Tunnels",
+    "d": "Wormholes hidden inside the dust clouds — only your pilots know the way.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "🏭",
+    "n": "Disk Harvester Wheel",
+    "d": "A wheel the size of a moon rolls through the dust disk, scooping up ore.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Dusty Dyson Veil",
+    "d": "You turn the entire dust disk into one giant solar panel.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Gravity Grenade",
+    "d": "A pocket black hole, thrown like a grenade. Planets fold in on themselves.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "vega": {
+  "n": "Vega",
+  "star": "blue",
+  "rock": 6.05,
+  "enemy": 4.1,
+  "value": 1,
+  "gift": "overdrive",
+  "comets": 3,
+  "boss": "leviathan",
+  "bossFleet": [
+   "leviathan",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Something huge in the ice",
+   "text": "Comet herders swear a creature the size of a station swims between the frozen moons — the <b>Ice Leviathan</b>. It rams ships. It guards the gate."
+  },
+  "gate": "The Leviathan shatters into a blizzard of ice. Where it lived, an ancient ring <b>thaws and opens</b>.",
+  "intro": "Vega: a blue star spinning so fast it's squashed flat. <b>Comets</b> rain through every field (3× as many). The comet herders give you <b>Overdrive</b>: press <b>R</b> (or BOOST) for 8 s of triple cutting power and speed — perfect for catching comets. You keep it forever.",
+  "factions": {
+   "tierra": {
+    "n": "Azure Directorate",
+    "c": "#7ab8ff"
+   },
+   "marte": {
+    "n": "Frost Clans",
+    "c": "#a8e0ff"
+   },
+   "cinturon": {
+    "n": "Comet Herders",
+    "c": "#bff6ff"
+   },
+   "exterior": {
+    "n": "Glacier League",
+    "c": "#9a9aff"
+   },
+   "piratas": {
+    "n": "Icebreakers",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Sleet",
+    "station": "Snowcap Base",
+    "tex": "ice",
+    "col": [
+     "#e8f4ff",
+     "#5a7090"
+    ],
+    "desc": "A frozen moon of Azure, swept by comets.",
+    "field": {
+     "n": "Sleet Drifts",
+     "ores": {
+      "iron": 3.5,
+      "ice": 4,
+      "titanium": 1,
+      "he3": 0.31
+     }
+    }
+   },
+   "tierra": {
+    "n": "Azure",
+    "station": "Blue Harbor",
+    "tex": "ocean",
+    "col": [
+     "#b0e0ff",
+     "#0a3a7a"
+    ],
+    "desc": "A deep blue ocean world under a blinding blue sun."
+   },
+   "venus": {
+    "n": "Opal",
+    "station": "Opal Spire",
+    "tex": "gas",
+    "col": [
+     "#e8e0ff",
+     "#5a5a9a"
+    ],
+    "desc": "An iridescent cloud world of wealthy collectors."
+   },
+   "mercurio": {
+    "n": "Glare",
+    "station": "Glare Depot",
+    "tex": "lava",
+    "col": [
+     "#a0d0ff",
+     "#101a3a"
+    ],
+    "desc": "A world melted by blue starlight. Platinum lies everywhere.",
+    "field": {
+     "n": "Glare Plains",
+     "ores": {
+      "ice": 1,
+      "titanium": 2,
+      "cobalt": 2,
+      "platinum": 6
+     }
+    }
+   },
+   "marte": {
+    "n": "Rime",
+    "station": "Frostgate",
+    "tex": "ice",
+    "col": [
+     "#d0e8ff",
+     "#3a5070"
+    ],
+    "desc": "A frozen desert. Strangely, it still pays well for ice."
+   },
+   "ceres": {
+    "n": "Herdstone",
+    "station": "Comet Ranch",
+    "tex": "rock",
+    "col": [
+     "#a8b8c8",
+     "#303844"
+    ],
+    "desc": "The comet herders' capital.",
+    "field": {
+     "n": "Herd Belt",
+     "ores": {
+      "ice": 2,
+      "nickel": 2,
+      "he3": 2.5,
+      "iridium": 1.59
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Frostmaw",
+    "tex": "gas",
+    "col": [
+     "#c0e8ff",
+     "#2a4a8a"
+    ]
+   },
+   "europa": {
+    "n": "Shiver",
+    "station": "Shiver Colony",
+    "tex": "ice",
+    "col": [
+     "#f0fbff",
+     "#7090b0"
+    ],
+    "desc": "An ice moon of Frostmaw. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Frostmaw Depot",
+    "desc": "Frostmaw's Trojans, glittering with ice.",
+    "field": {
+     "n": "Frostmaw Swarm",
+     "ores": {
+      "ice": 2,
+      "he3": 2,
+      "iridium": 7.27
+     }
+    }
+   },
+   "saturno": {
+    "n": "Halcyon Ice",
+    "station": "Glacier Depot",
+    "tex": "gas",
+    "col": [
+     "#e0f0ff",
+     "#4a6aa0"
+    ],
+    "desc": "A pale blue ringed giant whose rings are mostly comets.",
+    "field": {
+     "n": "Comet Rings",
+     "ores": {
+      "ice": 4,
+      "he3": 2,
+      "ringpearl": 3,
+      "exotic": 0.47
+     }
+    }
+   },
+   "titan": {
+    "n": "Slush",
+    "station": "Slushworks",
+    "tex": "titan",
+    "col": [
+     "#d0e0f0",
+     "#506070"
+    ],
+    "desc": "A slushy moon with enormous refineries."
+   },
+   "pluton": {
+    "n": "Breakwater",
+    "station": "Icebreaker Market",
+    "tex": "ice",
+    "col": [
+     "#ffffff",
+     "#6070a0"
+    ],
+    "desc": "Where the Icebreakers sell what they steal."
+   },
+   "kuiper": {
+    "n": "Vega Drift",
+    "station": "Drift Depot",
+    "desc": "Endless frozen comets at the edge of Vega's glare.",
+    "field": {
+     "n": "Vega Drift",
+     "ores": {
+      "ice": 3.34,
+      "ringpearl": 2,
+      "exotic": 2,
+      "voidshard": 0.1
+     }
+    }
+   },
+   "oort": {
+    "n": "The Deep Freeze",
+    "station": "Thaw Outpost",
+    "col": [
+     "#bfefff",
+     "#0a2a4a"
+    ],
+    "desc": "A frozen sea of comets where the Leviathan hunts.",
+    "field": {
+     "n": "The Deep Freeze",
+     "ores": {
+      "ice": 4,
+      "ringpearl": 2,
+      "exotic": 2,
+      "voidshard": 0.87
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Sleet"
+   },
+   "3": {
+    "title": "Glare & Rime",
+    "text": "<b>Glare</b> is covered in <b>Platinum</b> — buy <b>Shields</b>. <b>Rime</b> pays well for ice. Comets everywhere: use <b>Overdrive (R)</b> to catch them!"
+   },
+   "4": {
+    "title": "The Herd Belt",
+    "text": "<b>Herdstone</b> and the <b>Herd Belt</b>, where the comet herders live. The Icebreaker pirates are fierce."
+   },
+   "6": {
+    "title": "Frostmaw System",
+    "text": "<b>Shiver</b> and the <b>Frostmaw Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Halcyon Ice & Influence",
+    "text": "<b>Slush</b> and the <b>Comet Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Vega."
+   },
+   "8": {
+    "title": "Breakwater",
+    "text": "<b>Breakwater</b>'s Icebreaker Market and the <b>Vega Drift</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "☄",
+    "n": "Comet Express",
+    "d": "You hitch ore containers to passing comets and let them deliver.",
+    "fx": "Sleet outpost output ×3"
+   },
+   "beacons": {
+    "icon": "🌀",
+    "n": "Hyperspin Lanes",
+    "d": "Vega spins so fast its gravity flings ships along these lanes.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🛡",
+    "n": "Ice Phantom Wing",
+    "d": "Gunships cloaked in ice. Pirates never see them coming — two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🚀",
+    "n": "Cryo Cannon",
+    "d": "Cargo is frozen into ice bullets and shot straight into orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🔥",
+    "n": "Thaw Engine",
+    "d": "You melt a frozen world into a garden in a single afternoon.",
+    "fx": "Rime pays ×2 for everything · Frost Clans reputation +50"
+   },
+   "gates": {
+    "icon": "⚛",
+    "n": "Frozen-Time Gates",
+    "d": "Gates that freeze time during the trip: you arrive before you left.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Comet Ring Ranch",
+    "d": "You herd comets into the giant's rings and farm them for ore.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Blue Star Siphon",
+    "d": "Vega's light is so fierce you just put up a straw.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "☄",
+    "n": "Comet Bombardment",
+    "d": "You redirect every comet in the system at a single planet.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "altair": {
+  "n": "Altair",
+  "star": "white",
+  "rock": 8.17,
+  "enemy": 4.9,
+  "value": 1,
+  "gift": "charges",
+  "boss": "pirateking",
+  "bossFleet": [
+   "pirateking",
+   "corsair",
+   "corsair"
+  ],
+  "signal": {
+   "title": "The Pirate King",
+   "text": "Every pirate in Altair answers to one captain: the <b>Pirate King</b>. His flagship guards the old gate at <b>Skull Harbor</b> — and he calls his raiders the moment you show up."
+  },
+  "gate": "The King's flagship goes down in flames and his fleet scatters. The gate at Skull Harbor is <b>yours</b>.",
+  "intro": "Altair is a <b>pirate empire</b>: raids everywhere, and loot to match. A defector gives you <b>Mining Charges</b>: press <b>F</b> (or BOMB) to drop a charge that blows up 1.2 s later, cracking every rock around it — and hurting pirates too. You keep them forever.",
+  "factions": {
+   "tierra": {
+    "n": "Altair Free Cities",
+    "c": "#9ad8ff"
+   },
+   "marte": {
+    "n": "Iron Wardens",
+    "c": "#c8a070"
+   },
+   "cinturon": {
+    "n": "Salvage Brotherhood",
+    "c": "#b0d080"
+   },
+   "exterior": {
+    "n": "Far Reach Alliance",
+    "c": "#c0a0ff"
+   },
+   "piratas": {
+    "n": "The Pirate Crown",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Driftwood",
+    "station": "Last Chance Base",
+    "tex": "rock",
+    "col": [
+     "#b8b0a0",
+     "#3a3630"
+    ],
+    "desc": "A battered moon of Haven, scarred by raids.",
+    "field": {
+     "n": "Driftwood Scrap",
+     "ores": {
+      "iron": 4.5,
+      "titanium": 1.5,
+      "ice": 2,
+      "nickel": 0.59
+     }
+    },
+    "danger": 0.1
+   },
+   "tierra": {
+    "n": "Haven",
+    "station": "Free Harbor",
+    "tex": "ocean",
+    "col": [
+     "#90d8c0",
+     "#0a3a4a"
+    ],
+    "desc": "The last free capital in a pirate system.",
+    "danger": 0.08
+   },
+   "venus": {
+    "n": "Gilded",
+    "station": "Treasure Spire",
+    "tex": "gas",
+    "col": [
+     "#ffe0a0",
+     "#7a5020"
+    ],
+    "desc": "A golden cloud world where pirates spend their loot."
+   },
+   "mercurio": {
+    "n": "Brimstone Reef",
+    "station": "Reef Depot",
+    "tex": "lava",
+    "col": [
+     "#ff9050",
+     "#300a04"
+    ],
+    "desc": "A burning reef of rock. Sunstone and pirates.",
+    "field": {
+     "n": "Burning Reef",
+     "ores": {
+      "iron": 1.5,
+      "cobalt": 2,
+      "platinum": 1.5,
+      "sunstone": 0.91
+     }
+    }
+   },
+   "marte": {
+    "n": "Bulwark",
+    "station": "Warden Fort",
+    "tex": "rock",
+    "col": [
+     "#c09878",
+     "#3a2a1a"
+    ],
+    "desc": "A fortress world that has never fallen to the pirates. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Scrapheap",
+    "station": "Salvage Hall",
+    "tex": "rock",
+    "col": [
+     "#a0a088",
+     "#30302a"
+    ],
+    "desc": "Salvagers live on what the pirates leave behind.",
+    "field": {
+     "n": "Wreck Belt",
+     "ores": {
+      "cobalt": 2,
+      "platinum": 2,
+      "sunstone": 1.5,
+      "iridium": 0.53
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Leviathan's Eye",
+    "tex": "gas",
+    "col": [
+     "#d0c0ff",
+     "#3a2a7a"
+    ]
+   },
+   "europa": {
+    "n": "Cove",
+    "station": "Cove Colony",
+    "tex": "ice",
+    "col": [
+     "#e8f0ff",
+     "#607090"
+    ],
+    "desc": "A hidden ice moon. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Ambush Depot",
+    "desc": "Trojan rocks crawling with pirate nests.",
+    "field": {
+     "n": "Ambush Alley",
+     "ores": {
+      "sunstone": 4.36,
+      "iridium": 3,
+      "ringpearl": 0.2
+     }
+    }
+   },
+   "saturno": {
+    "n": "Skullring",
+    "station": "Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e0c8c8",
+     "#6a3a3a"
+    ],
+    "desc": "A ringed giant whose rings hide a thousand pirate bases.",
+    "field": {
+     "n": "Skull Rings",
+     "ores": {
+      "he3": 3,
+      "ringpearl": 2.5,
+      "ice": 2,
+      "exotic": 0.47
+     }
+    }
+   },
+   "titan": {
+    "n": "Rumhaze",
+    "station": "Rum Refinery",
+    "tex": "titan",
+    "col": [
+     "#e0b080",
+     "#6a4020"
+    ],
+    "desc": "A boozy, foggy moon with huge refineries."
+   },
+   "pluton": {
+    "n": "Tortuga",
+    "station": "Crown Market",
+    "tex": "rock",
+    "col": [
+     "#d08080",
+     "#301010"
+    ],
+    "desc": "The capital of the Pirate Crown. Everything is for sale."
+   },
+   "kuiper": {
+    "n": "Plunder Drift",
+    "station": "Drift Depot",
+    "desc": "Where pirates hide their stolen ore.",
+    "field": {
+     "n": "Plunder Drift",
+     "ores": {
+      "iridium": 4.99,
+      "exotic": 2,
+      "ringpearl": 1.5,
+      "voidshard": 0.1
+     }
+    }
+   },
+   "oort": {
+    "n": "Skull Harbor",
+    "station": "Lookout Post",
+    "col": [
+     "#ff8080",
+     "#3a0a0a"
+    ],
+    "desc": "The Pirate King's harbor, built around an ancient gate.",
+    "field": {
+     "n": "Skull Harbor",
+     "ores": {
+      "ice": 3,
+      "exotic": 2.5,
+      "ringpearl": 1.5,
+      "voidshard": 0.44
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Driftwood"
+   },
+   "3": {
+    "title": "Brimstone Reef & Bulwark",
+    "text": "<b>Brimstone Reef</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Bulwark</b> pays a fortune for ice. Use your <b>Mining Charges (F)</b> on big clusters!"
+   },
+   "4": {
+    "title": "The Wreck Belt",
+    "text": "<b>Scrapheap</b> and the <b>Wreck Belt</b>. Pirates everywhere — and their loot is worth it."
+   },
+   "6": {
+    "title": "Leviathan's Eye",
+    "text": "<b>Cove</b> and <b>Ambush Alley</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Skullring & Influence",
+    "text": "<b>Rumhaze</b> and the <b>Skull Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Altair."
+   },
+   "8": {
+    "title": "Tortuga",
+    "text": "<b>Tortuga</b>, capital of the Pirate Crown, and the <b>Plunder Drift</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🏴",
+    "n": "Smuggler's Chute",
+    "d": "A secret railgun the pirates built to move loot. Now it moves your ore.",
+    "fx": "Driftwood outpost output ×3"
+   },
+   "beacons": {
+    "icon": "📡",
+    "n": "Black Flag Network",
+    "d": "Pirate radio towers that know every lane — and every ambush.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "⚔",
+    "n": "Turncoat Armada",
+    "d": "Half the pirate fleet switches sides for the right price. Two ships fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🏗",
+    "n": "Plunder Lift",
+    "d": "A cargo lift made of captured pirate ships welded end to end.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Hideout Gardens",
+    "d": "You turn Bulwark's grim fortress plains into a jungle resort.",
+    "fx": "Bulwark pays ×2 for everything · Iron Wardens reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Ghost Gates",
+    "d": "Stolen gates hidden in nebula pockets. Nobody knows where they lead — except you.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "☠",
+    "n": "Skull Ring Shipyard",
+    "d": "A pirate shipyard in the rings, now building mining drones for you.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "👑",
+    "n": "Crown of Altair",
+    "d": "A Dyson swarm shaped like a pirate crown. Very subtle.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Doomsday Broadside",
+    "d": "Every captured pirate cannon in the system, firing at once.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ }
+});
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
@@ -3883,7 +4892,7 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0;
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = [];
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -3929,9 +4938,10 @@ const MineScene = {
     const nv = 2 + Math.floor(tier * 1.5);
     const crystal = !this.space && !!this.loc.field.crystal && Math.random() < this.loc.field.crystal;
     const armored = !crystal && !this.space && !!this.loc.field.armored && Math.random() < this.loc.field.armored;
+    const volatile = !crystal && !armored && !this.space && !!this.loc.field.explosive && Math.random() < this.loc.field.explosive;
     const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -3941,6 +4951,16 @@ const MineScene = {
     return rock;
   },
   // comets streak across the field: break one before it escapes for ice and a load of the field's best ore
+  // Overdrive (Vega): 8 s of triple cutting power and a faster ship
+  boost() {
+    if (!hasTool('overdrive') || this.space || this.boostCd > 0) return;
+    this.boostT = 8; this.boostCd = 45; sfx('upgrade'); toast('⚡ OVERDRIVE!', 'good');
+  },
+  // Mining charge (Altair): drop it, it blows 1.2 s later
+  bomb() {
+    if (!hasTool('charges') || this.space || this.bombCd > 0) return;
+    this.bombCd = 10; this.bombs = this.bombs || []; this.bombs.push({ x: this.p.x, y: this.p.y, t: 1.2 }); sfx('click');
+  },
   pullRadius() { return Math.max(1000, ship.magnet * 4); },
   toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) * (built('borer') ? 1.6 : 1) : ship.laserRange; },
   toggleTool() {
@@ -3966,15 +4986,29 @@ const MineScene = {
     this.parts.burst(r.x, r.y, 60, '#bff6ff', 260, 1.1, 3);
     this.parts.burst(r.x, r.y, 24, ITEMS[r.core].c, 160, 1, 3);
     sfx('win'); this.shake = Math.max(this.shake, 10);
-    const n = Math.round(6 * ship.yieldMult);
+    const n = Math.round(6 * ship.yieldMult * (built('herding') ? 2 : 1));
     for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.core);
     for (let i = 0; i < 5; i++) this.dropChunk(r.x, r.y, 'ice');
     this.floaters.push({ x: r.x, y: r.y - 30, txt: `COMET! ${n} ${ITEMS[r.core].n}`, col: '#bff6ff', life: 2, big: 1 });
     S.stats.comets = (S.stats.comets || 0) + 1;
   },
+  // volatile rocks (Epsilon Eridani) blow up: they crack every rock nearby — chain reactions! — and singe you if you're close
+  explode(x, y, R, power, hurt) {
+    this.parts.burst(x, y, 60, '#ffb347', 340, 0.9, 4); this.parts.burst(x, y, 30, '#ff5a2a', 220, 0.7, 3);
+    sfx('boom'); this.shake = Math.max(this.shake, 14);
+    this.blasts = this.blasts || []; this.blasts.push({ x, y, R, t: 0 });
+    for (const o of [...this.rocks]) {
+      const d = Math.hypot(o.x - x, o.y - y) - o.r; if (d > R || o.comet) continue;
+      o.hp -= (o.tier >= 3 ? o.maxhp * power : o.maxhp * 1.2) + ship.laserDps * 2; o.hit = 0.1;   // small & medium rocks shatter, big ones crack
+      if (o.hp <= 0 && this.rocks.includes(o)) setTimeout(() => { if (this.rocks.includes(o)) this.breakRock(o); }, 90 + Math.random() * 120);
+    }
+    for (const e of this.enemies) if (Math.hypot(e.x - x, e.y - y) < R) Combat.hitEnemy(this, e, ship.weaponDps * 6);
+    if (hurt && Math.hypot(this.p.x - x, this.p.y - y) < R * 0.8) this.damage(ship.hpMax * 0.05);
+  },
   breakRock(r) {
     this.rocks = this.rocks.filter(x => x !== r);
     if (r.comet) return this.breakComet(r);
+    if (r.volatile) this.explode(r.x, r.y, 140 + r.tier * 50 * (built('chainlab') ? 1.6 : 1), 0.7, true);
     this.parts.burst(r.x, r.y, 14 + r.tier * 8, r.gold ? '#ffd24a' : '#c9b8a6', 120 + r.tier * 40, 0.8, 2.5);
     this.parts.burst(r.x, r.y, 6 + r.tier * 3, ITEMS[r.ore].c, 90, 1, 2.5);
     sfx('break'); this.shake = Math.max(this.shake, r.tier * 3);
@@ -3999,11 +5033,13 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
+        c.volatile = false;
       }
       const m = 0.5 * ship.yieldMult;
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
     } else {
-      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult * (r.shard && built('resonance') ? 2 : 1) * (r.armored && built('plasmaforge') ? 2 : 1);
+      // crystal shards reward the chase (+20%), armored rocks reward the drill (×1.5)
+      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult * (r.shard ? 1.2 : 1) * (r.shard && built('resonance') ? 2 : 1) * (r.armored ? 1.5 : 1) * (r.armored && built('plasmaforge') ? 2 : 1) * (r.volatile ? 1.2 : 1);
       const n = Math.floor(m) + (Math.random() < m % 1 ? 1 : 0);
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.ore);
     }
@@ -4043,7 +5079,7 @@ const MineScene = {
     p.vx += ax * acc * dt; p.vy += ay * acc * dt;
     const drag = Math.pow(0.4, dt);
     p.vx *= drag; p.vy *= drag;
-    const maxV = 360 * ship.thrust;
+    const maxV = 360 * ship.thrust * (this.boostT > 0 ? 1.5 : 1);
     const v = Math.hypot(p.vx, p.vy);
     if (v > maxV) { p.vx *= maxV / v; p.vy *= maxV / v; }
     p.x = clamp(p.x + p.vx * dt, 40, MW - 40); p.y = clamp(p.y + p.vy * dt, 40, MH - 40);
@@ -4087,7 +5123,7 @@ const MineScene = {
       if (best) {
         const drill = this.tool === 'drill';
         // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range
-        best.hp -= ship.laserDps * (drill ? (built('borer') ? 4.5 : 3) : 1) * (best.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * dt; best.hit = 0.05;
+        best.hp -= ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (best.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * dt; best.hit = 0.05;
         if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? 'ARMORED — switch to the Drill (Q)' : 'ARMORED — your laser barely scratches it', col: '#c8d0e0', life: 2.5, big: 1 }); }
         if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
         if (best.hp <= 0) this.breakRock(best);
@@ -4122,10 +5158,15 @@ const MineScene = {
       }
     }
     if (this.rocks.some(r => r.gone)) { this.rocks = this.rocks.filter(r => !r.gone); toast('The comet escaped…'); }
-    if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
+    if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80) / ((sysDef().comets || 1) * (built('herding') ? 3 : 1)); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
     // --- chunks & loot ---
     const cfree = cargoFree();
     this.pullT = Math.max(0, this.pullT - dt); this.pullCd = Math.max(0, this.pullCd - dt);
+    this.boostT = Math.max(0, this.boostT - dt); this.boostCd = Math.max(0, this.boostCd - dt); this.bombCd = Math.max(0, this.bombCd - dt);
+    for (const b of this.bombs) { b.t -= dt; if (b.t <= 0) { b.done = 1; this.explode(b.x, b.y, 230, 0.6, false); } }
+    this.bombs = this.bombs.filter(b => !b.done);
+    for (const b of this.blasts) b.t += dt; this.blasts = this.blasts.filter(b => b.t < 0.5);
+    if (this.boostT > 0 && Math.random() < dt * 40) this.parts.add(this.p.x + rand(-14, 14), this.p.y + rand(-14, 14), -this.p.vx * 0.3, -this.p.vy * 0.3, 0.4, '#ffe14a', 2.5, true);
     for (const c of this.chunks) {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
@@ -4218,7 +5259,7 @@ const MineScene = {
   coach() {
     const h = S.hints;
     let msg = '';
-    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
+    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
     else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = `☠ ${this.ambush.boss === 'final' ? `The ${ENEMIES[sysDef().boss].n}` : 'The warlord\'s flagship'} arrives in <b>${Math.ceil(this.ambush.at)} s</b> — get ready, or fly <b>down</b> to escape`;
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
@@ -4286,6 +5327,9 @@ const MineScene = {
     ctx.strokeRect(20, 20, MW - 40, MH - 40); ctx.setLineDash([]);
     if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
+    for (const b of this.bombs) { const k = 1 - b.t / 1.2; glow(ctx, b.x, b.y, 18 + k * 20, '#ff5a2a', 0.5 + k * 0.5); ctx.fillStyle = Math.sin(b.t * 30) > 0 ? '#ffffff' : '#ff3a2a'; ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, TAU); ctx.fill(); }
+    for (const b of this.blasts) { const k = b.t / 0.5; ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke(); }
+    if (this.boostT > 0) glow(ctx, p.x, p.y, 70, '#ffe14a', 0.25 + 0.1 * Math.sin(t * 20));
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
     for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
@@ -4529,9 +5573,10 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : e.military ? '#b6ff7a' : '#ff4d6d';
+    if (E.spiral) e.spin = (e.spin || 0) + 0.32;
     for (let i = 0; i < n; i++) {
-      const b = E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
+      const b = E.spiral ? e.spin + i * TAU / n : E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
       sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
     }
     sfx('eshoot');
@@ -4566,7 +5611,7 @@ const Combat = {
     const orbs = randi(3, 6);
     for (let i = 0; i < orbs; i++) {
       const a = rand(0, TAU), v = rand(40, 140);
-      sc.chunks.push({ x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, cr: e.loot * incomeMult() / orbs, rot: rand(0, TAU), life: 40 });
+      sc.chunks.push({ x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, cr: e.loot * incomeMult() * (built('bounty') ? 3 : 1) / orbs, rot: rand(0, TAU), life: 40 });
     }
     if (!e.military && sc.loc && sc.loc.field) for (let i = 0; i < randi(1, 4); i++) sc.dropChunk(e.x, e.y, sc.pickOre(0.8));
   },
@@ -4578,7 +5623,14 @@ const Combat = {
       const nx = dx / d, ny = dy / d;
       const radial = clamp((d - e.prefer) / 150, -1, 1);
       const tvx = (nx * radial + -ny * e.strafe * 0.8) * e.spd, tvy = (ny * radial + nx * e.strafe * 0.8) * e.spd;
-      e.vx = lerp(e.vx, tvx, dt * 2); e.vy = lerp(e.vy, tvy, dt * 2);
+      if (ENEMIES[e.k].dash) {
+        e.dashCd = (e.dashCd == null ? 4 : e.dashCd) - dt;
+        if (e.dashCd <= 0 && d < 750) { e.dashCd = 5; e.dashT = 0.9; e.dvx = nx * 650; e.dvy = ny * 650; sfx('alarm'); }
+      }
+      if (e.dashT > 0) {
+        e.dashT -= dt; e.vx = e.dvx; e.vy = e.dvy;
+        if (d < 30 * e.size) { e.dashT = 0; sc.damage(e.dmg * 10); p.vx += nx * 500; p.vy += ny * 500; sc.shake = 16; sfx('hit'); }
+      } else { e.vx = lerp(e.vx, tvx, dt * 2); e.vy = lerp(e.vy, tvy, dt * 2); }
       e.x = clamp(e.x + e.vx * dt, 40, MW - 40); e.y = clamp(e.y + e.vy * dt, 40, MH - 40);
       if (Math.random() < dt * 0.3) e.strafe *= -1;
       e.a = Math.atan2(dy, dx);
@@ -4913,7 +5965,10 @@ function updateMineHUD() {
   const val = LOC[S.loc].market ? oreValueAt(S.loc) : 0;
   $('mineCargo').innerHTML = (rows || '<div class="crow dim">Cargo hold empty</div>') + (val ? `<div class="crow val">Worth<b class="cr">${fmt(val)} cr</b></div>` : '');
   const depth = sc.space ? '' : `<span class="depth">Depth ${Math.round(sc.depthOf(sc.p.y) * 100)}% · richness ×${(1 + sc.depthOf(sc.p.y) * 4).toFixed(1)}</span>`;
-  const tools = sc.space ? '' : (hasTool('drill') ? `<span class="tool">${sc.tool === 'drill' ? '⛏ Drill' : '✦ Laser'} <small>[Q]</small></span>` : '') + (hasTool('tractor') ? `<span class="tool">${sc.pullCd > 0 ? `Pulse ${Math.ceil(sc.pullCd)}s` : '🧲 Pulse ready'} <small>[E]</small></span>` : '');
+  const tools = sc.space ? '' : (hasTool('drill') ? `<span class="tool">${sc.tool === 'drill' ? '⛏ Drill' : '✦ Laser'} <small>[Q]</small></span>` : '') + (hasTool('tractor') ? `<span class="tool">${sc.pullCd > 0 ? `Pulse ${Math.ceil(sc.pullCd)}s` : '🧲 Pulse ready'} <small>[E]</small></span>` : '')
+    + (hasTool('overdrive') ? `<span class="tool">${sc.boostT > 0 ? `⚡ OVERDRIVE ${Math.ceil(sc.boostT)}s` : sc.boostCd > 0 ? `Overdrive ${Math.ceil(sc.boostCd)}s` : '⚡ Overdrive ready'} <small>[R]</small></span>` : '')
+    + (hasTool('charges') ? `<span class="tool">${sc.bombCd > 0 ? `Charge ${Math.ceil(sc.bombCd)}s` : '💥 Charge ready'} <small>[F]</small></span>` : '');
+  for (const [id, k, cd, lbl] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST'], ['bombBtn', 'charges', sc.bombCd, 'BOMB']]) { $(id).classList.toggle('hidden', !hasTool(k) || sc.space); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); }
   $('toolBtn').classList.toggle('hidden', !hasTool('drill') || sc.space); $('toolBtn').textContent = sc.tool === 'drill' ? 'LASER' : 'DRILL';
   $('pullBtn').classList.toggle('hidden', !hasTool('tractor') || sc.space); $('pullBtn').textContent = sc.pullCd > 0 ? Math.ceil(sc.pullCd) + 's' : 'PULL'; $('pullBtn').classList.toggle('cd', sc.pullCd > 0);
   $('mineInfo').innerHTML = tools + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
@@ -4922,7 +5977,7 @@ function updateMineHUD() {
   document.body.classList.toggle('battle', combat);
   $('battleUI').classList.toggle('hidden', !combat);
   if (combat) {
-    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
     $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
     $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
     $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
@@ -5387,7 +6442,7 @@ function openHelp() {
     <h4>⚔ Wars</h4><p>When two factions fight, <b>back a side</b> at one of their stations. Their stations pay +30% for metals and every ore sale there <b>pushes the front</b> (see the bar). Help them win to gain a <b>permanent ally</b>: +15% ore at their stations (up to 3 stars) and spoils of war.</p>
     <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
     <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — back a side in wars and fund offensives; later incite wars or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
-    <h4>⛏ Tools</h4><p>Some star systems give you new tools that you keep forever: the <b>Drill</b> (press <b>Q</b>: 3× power at short range, cracks <b>armored</b> rocks) and the <b>Tractor Pulse</b> (press <b>E</b>: pulls every ore chunk around you).</p>
+    <h4>⛏ Tools</h4><p>Some star systems give you tools you keep forever: the <b>Drill</b> (<b>Q</b>: 3× power at short range, cracks <b>armored</b> rocks), the <b>Tractor Pulse</b> (<b>E</b>: pulls every ore chunk around you), <b>Overdrive</b> (<b>R</b>: 8 s of triple power and speed) and <b>Mining Charges</b> (<b>F</b>: a bomb that cracks every rock around it). <b>Volatile</b> rocks explode when broken — chain them!</p>
     <h4>🌀 Galaxy</h4><p>Each system's guardian opens a jump gate. In the <b>Galaxy</b> map you jump to the next star: you start fresh there, but conquered systems pay <b>Tribute</b> forever, which buys permanent <b>Legacy</b> bonuses. 15 systems lead to the black hole at the core.</p>
     <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the system — then defeat its guardian and jump through the gate to the next star.</p></div>`);
 }
@@ -5427,7 +6482,7 @@ window.addEventListener('keydown', e => {
   keys.add(e.code);
   audioInit();
   if (e.code === 'Space' && scene === MineScene) e.preventDefault();
-  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); }
+  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); if (e.code === 'KeyR') MineScene.boost(); if (e.code === 'KeyF') MineScene.bomb(); }
   if (e.code === 'Escape') {
     if (!$('sheet').classList.contains('hidden')) closeSheet();
     else if (scene === MineScene && !isBlocking()) MineScene.leave();
@@ -5503,6 +6558,8 @@ function setupTouchControls() {
   fire.addEventListener('touchstart', e => { e.preventDefault(); touchFire = true; fire.classList.add('on'); }, { passive: false });
   $('toolBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.toggleTool(); }, { passive: false });
   $('pullBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.pulse(); }, { passive: false });
+  $('boostBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.boost(); }, { passive: false });
+  $('bombBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.bomb(); }, { passive: false });
   const fe = e => { e.preventDefault(); touchFire = false; fire.classList.remove('on'); };
   fire.addEventListener('touchend', fe); fire.addEventListener('touchcancel', fe);
 }

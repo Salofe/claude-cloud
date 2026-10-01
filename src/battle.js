@@ -44,9 +44,10 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : e.military ? '#b6ff7a' : '#ff4d6d';
+    if (E.spiral) e.spin = (e.spin || 0) + 0.32;
     for (let i = 0; i < n; i++) {
-      const b = E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
+      const b = E.spiral ? e.spin + i * TAU / n : E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
       sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
     }
     sfx('eshoot');
@@ -81,7 +82,7 @@ const Combat = {
     const orbs = randi(3, 6);
     for (let i = 0; i < orbs; i++) {
       const a = rand(0, TAU), v = rand(40, 140);
-      sc.chunks.push({ x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, cr: e.loot * incomeMult() / orbs, rot: rand(0, TAU), life: 40 });
+      sc.chunks.push({ x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, cr: e.loot * incomeMult() * (built('bounty') ? 3 : 1) / orbs, rot: rand(0, TAU), life: 40 });
     }
     if (!e.military && sc.loc && sc.loc.field) for (let i = 0; i < randi(1, 4); i++) sc.dropChunk(e.x, e.y, sc.pickOre(0.8));
   },
@@ -93,7 +94,14 @@ const Combat = {
       const nx = dx / d, ny = dy / d;
       const radial = clamp((d - e.prefer) / 150, -1, 1);
       const tvx = (nx * radial + -ny * e.strafe * 0.8) * e.spd, tvy = (ny * radial + nx * e.strafe * 0.8) * e.spd;
-      e.vx = lerp(e.vx, tvx, dt * 2); e.vy = lerp(e.vy, tvy, dt * 2);
+      if (ENEMIES[e.k].dash) {
+        e.dashCd = (e.dashCd == null ? 4 : e.dashCd) - dt;
+        if (e.dashCd <= 0 && d < 750) { e.dashCd = 5; e.dashT = 0.9; e.dvx = nx * 650; e.dvy = ny * 650; sfx('alarm'); }
+      }
+      if (e.dashT > 0) {
+        e.dashT -= dt; e.vx = e.dvx; e.vy = e.dvy;
+        if (d < 30 * e.size) { e.dashT = 0; sc.damage(e.dmg * 10); p.vx += nx * 500; p.vy += ny * 500; sc.shake = 16; sfx('hit'); }
+      } else { e.vx = lerp(e.vx, tvx, dt * 2); e.vy = lerp(e.vy, tvy, dt * 2); }
       e.x = clamp(e.x + e.vx * dt, 40, MW - 40); e.y = clamp(e.y + e.vy * dt, 40, MH - 40);
       if (Math.random() < dt * 0.3) e.strafe *= -1;
       e.a = Math.atan2(dy, dx);

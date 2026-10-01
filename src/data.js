@@ -198,6 +198,12 @@ PROJECTS.push(
     d: 'Star-hot plasma melts the armor off asteroids before your beam even arrives.', fx: 'Laser does 60% to armored rocks · armored rocks drop ×2 ore' },
   { id: 'exchange', sys: 'tauceti', icon: '📈', n: 'Galactic Stock Exchange', loc: 'tierra', stage: 5, cost: 300e6, infl: 8,
     d: 'You list the entire star system on the galactic market. Everyone wants a share.', fx: 'Freighter & trade income ×3' },
+  { id: 'chainlab', sys: 'eridani', icon: '💥', n: 'Chain Reaction Lab', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Blasting Guild scientists tune every volatile rock in the system to go off just right.', fx: 'Explosive rocks blast 60% wider' },
+  { id: 'herding', sys: 'vega', icon: '☄', n: 'Comet Herding Array', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Gravity shepherds steer the system\'s comets straight through your mining fields.', fx: 'Comets come 3× as often and drop ×2 ore' },
+  { id: 'bounty', sys: 'altair', icon: '☠', n: 'Bounty Exchange', loc: 'tierra', stage: 4, cost: 50e6, infl: 6,
+    d: 'Every free city in Altair pays you for every pirate you blow up.', fx: 'Pirate loot ×3' },
 );
 const PROJ = Object.fromEntries(PROJECTS.map(p => [p.id, p]));
 
@@ -217,6 +223,9 @@ const ENEMIES = {
   colossus: { n: 'Mining Colossus', hp: 900, sp: 200, dmg: 3, rate: 2.4, spd: 45, size: 3.6, loot: 20000, pow: 30, burst: 1, radial: 12, boss: 1, final: 1, mech: 1 },
   serpent: { n: 'Solar Serpent',   hp: 600, sp: 250, dmg: 2, rate: 0.9, spd: 210, size: 3.0, loot: 20000, pow: 30, burst: 6, boss: 1, final: 1, serpent: 1 },
   dreadnought: { n: 'Merchant Dreadnought', hp: 680, sp: 400, dmg: 1.6, rate: 1.4, spd: 55, size: 3.8, loot: 20000, pow: 30, burst: 2, spread: 5, boss: 1, final: 1, summon: 'corsair', summonMax: 3 },
+  citadel: { n: 'Dust Citadel',    hp: 1000, sp: 300, dmg: 1.4, rate: 0.22, spd: 0, size: 4.2, loot: 20000, pow: 30, burst: 1, spiral: 4, boss: 1, final: 1, fort: 1 },
+  leviathan: { n: 'Ice Leviathan', hp: 760, sp: 300, dmg: 2.5, rate: 1.6, spd: 80, size: 3.8, loot: 20000, pow: 30, burst: 3, spread: 3, dash: 1, boss: 1, final: 1, whale: 1 },
+  pirateking: { n: 'Pirate King',  hp: 720, sp: 420, dmg: 2.2, rate: 1.2, spd: 90, size: 3.4, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, summon: 'raider', summonMax: 4 },
   swarmer: { n: 'Swarmer',         hp: 26,  sp: 0,   dmg: 2,  rate: 0.9, spd: 270, size: 0.55, loot: 150,  pow: 1, hive: 1 },
   adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },

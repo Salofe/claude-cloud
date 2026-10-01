@@ -207,6 +207,958 @@ Object.assign(SYSTEMS, {
   },
 });
 
+// systems 6–8
+Object.assign(SYSTEMS, {
+ "eridani": {
+  "n": "Epsilon Eridani",
+  "star": "orange",
+  "rock": 4.48,
+  "enemy": 3.4,
+  "value": 1,
+  "boss": "citadel",
+  "bossFleet": [
+   "citadel",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "A fortress in the dust",
+   "text": "Deep inside the <b>Dust Veil</b> a pirate warlord built the <b>Dust Citadel</b> — a fortress that sprays fire in every direction. It sits right on top of an ancient gate."
+  },
+  "gate": "The Citadel cracks open and the dust settles. Beneath its foundations, an ancient ring <b>flickers to life</b>.",
+  "intro": "Epsilon Eridani hides inside a huge <b>dust disk</b>. Many of its asteroids are <b>volatile</b>: they glow with magma cracks and <b>explode</b> when broken — cracking every rock around them. Set off chain reactions, but keep your distance!",
+  "factions": {
+   "tierra": {
+    "n": "Veil Assembly",
+    "c": "#ffb070"
+   },
+   "marte": {
+    "n": "Ash Nomads",
+    "c": "#e09060"
+   },
+   "cinturon": {
+    "n": "Blasting Guild",
+    "c": "#ffd060"
+   },
+   "exterior": {
+    "n": "Haze Compact",
+    "c": "#a0c0ff"
+   },
+   "piratas": {
+    "n": "Dust Corsairs",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Kindle",
+    "station": "Spark Base",
+    "tex": "rock",
+    "col": [
+     "#c8b090",
+     "#40342a"
+    ],
+    "desc": "A dusty moon of Hearth, glittering with volatile rocks.",
+    "field": {
+     "n": "Spark Fields",
+     "ores": {
+      "iron": 4,
+      "ice": 2.5,
+      "cobalt": 0.34,
+      "titanium": 1
+     },
+     "explosive": 0.12
+    }
+   },
+   "tierra": {
+    "n": "Hearth",
+    "station": "Veil Port",
+    "tex": "ocean",
+    "col": [
+     "#e0c080",
+     "#2a4a5a"
+    ],
+    "desc": "A warm, hazy ocean world under an amber sun."
+   },
+   "venus": {
+    "n": "Sable",
+    "station": "Velvet Spire",
+    "tex": "gas",
+    "col": [
+     "#d0a0c0",
+     "#4a2a40"
+    ],
+    "desc": "A dark velvet cloud world of wealthy nomads."
+   },
+   "mercurio": {
+    "n": "Fuse",
+    "station": "Fuse Depot",
+    "tex": "lava",
+    "col": [
+     "#ffa040",
+     "#3a1004"
+    ],
+    "desc": "A world that crackles with heat and volatile ore.",
+    "field": {
+     "n": "Fuse Flats",
+     "ores": {
+      "iron": 2,
+      "nickel": 2,
+      "sunstone": 2.69,
+      "titanium": 1.5
+     },
+     "explosive": 0.25
+    }
+   },
+   "marte": {
+    "n": "Ashland",
+    "station": "Cinder Gate",
+    "tex": "rock",
+    "col": [
+     "#c89070",
+     "#4a2818"
+    ],
+    "desc": "Grey ash deserts and proud nomads. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Powderkeg",
+    "station": "Blasting Hall",
+    "tex": "rock",
+    "col": [
+     "#b09878",
+     "#3a3026"
+    ],
+    "desc": "The Blasting Guild's capital. Everything here goes boom.",
+    "field": {
+     "n": "Powder Belt",
+     "ores": {
+      "titanium": 1.5,
+      "he3": 2.5,
+      "platinum": 2.5,
+      "iridium": 1.18
+     },
+     "explosive": 0.35
+    }
+   },
+   "jupiter": {
+    "n": "Smolder",
+    "tex": "gas",
+    "col": [
+     "#ffb880",
+     "#7a3a20"
+    ]
+   },
+   "europa": {
+    "n": "Cinderglass",
+    "station": "Glass Colony",
+    "tex": "ice",
+    "col": [
+     "#ffe8d8",
+     "#8a5a48"
+    ],
+    "desc": "An ice moon dusted with soot. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Smolder Depot",
+    "desc": "Smolder's Trojan rocks, many of them volatile.",
+    "field": {
+     "n": "Smolder Swarm",
+     "ores": {
+      "platinum": 4.13,
+      "iridium": 3,
+      "ringpearl": 0.3
+     },
+     "explosive": 0.25
+    }
+   },
+   "saturno": {
+    "n": "Veil",
+    "station": "Veil Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e8d0b0",
+     "#6a5038"
+    ],
+    "desc": "A ringed giant half hidden in the dust disk.",
+    "field": {
+     "n": "Veil Rings",
+     "ores": {
+      "ice": 2,
+      "he3": 3.42,
+      "ringpearl": 3,
+      "exotic": 0.5
+     },
+     "explosive": 0.2
+    }
+   },
+   "titan": {
+    "n": "Murk",
+    "station": "Murkworks",
+    "tex": "titan",
+    "col": [
+     "#c0b090",
+     "#504430"
+    ],
+    "desc": "A murky moon of Veil with vast refineries."
+   },
+   "pluton": {
+    "n": "Snuff",
+    "station": "Corsair Den",
+    "tex": "rock",
+    "col": [
+     "#908070",
+     "#201814"
+    ],
+    "desc": "A soot-black rock where the Dust Corsairs trade."
+   },
+   "kuiper": {
+    "n": "The Dust Veil",
+    "station": "Veil Depot",
+    "desc": "The thick outer dust disk. Volatile rocks drift everywhere.",
+    "field": {
+     "n": "The Dust Veil",
+     "ores": {
+      "ice": 2.91,
+      "ringpearl": 2,
+      "exotic": 1.8,
+      "voidshard": 0.1
+     },
+     "explosive": 0.25
+    }
+   },
+   "oort": {
+    "n": "Citadel Reach",
+    "station": "Last Spark Outpost",
+    "col": [
+     "#ffa860",
+     "#3a1a08"
+    ],
+    "desc": "The heart of the dust, where the Citadel stands guard.",
+    "field": {
+     "n": "Citadel Reach",
+     "ores": {
+      "ice": 3,
+      "iridium": 2,
+      "exotic": 2,
+      "voidshard": 0.81
+     },
+     "explosive": 0.2
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Kindle"
+   },
+   "3": {
+    "title": "Fuse & Ashland",
+    "text": "<b>Fuse</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Ashland</b> pays a fortune for ice. Watch for <b>volatile rocks</b>: they explode when broken!"
+   },
+   "4": {
+    "title": "The Powder Belt",
+    "text": "<b>Powderkeg</b> and the <b>Powder Belt</b>: a third of the rocks are volatile. Break one in a cluster and watch the chain reaction."
+   },
+   "6": {
+    "title": "Smolder System",
+    "text": "<b>Cinderglass</b> and the <b>Smolder Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Veil & Influence",
+    "text": "<b>Murk</b> and the <b>Veil Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Epsilon Eridani."
+   },
+   "8": {
+    "title": "Snuff",
+    "text": "<b>Snuff</b>'s Corsair Den and <b>the Dust Veil</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🏗",
+    "n": "Dustline Conveyor",
+    "d": "A conveyor belt 400,000 km long, running through the dust disk straight to Hearth.",
+    "fx": "Kindle outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Dust-Piercing Lanterns",
+    "d": "Neutrino lamps that see straight through the dust clouds.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🏴",
+    "n": "Sandstorm Corsairs",
+    "d": "Ex-pirates in dust-camouflaged gunships, now on your payroll. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Gravity-Free Zone",
+    "d": "You switch off gravity over a whole city. Cargo just floats up to orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Planet Wash",
+    "d": "A thousand comets scrub the ash off Ashland and leave a blue world behind.",
+    "fx": "Ashland pays ×2 for everything · Ash Nomads reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Dust Tunnels",
+    "d": "Wormholes hidden inside the dust clouds — only your pilots know the way.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "🏭",
+    "n": "Disk Harvester Wheel",
+    "d": "A wheel the size of a moon rolls through the dust disk, scooping up ore.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Dusty Dyson Veil",
+    "d": "You turn the entire dust disk into one giant solar panel.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Gravity Grenade",
+    "d": "A pocket black hole, thrown like a grenade. Planets fold in on themselves.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "vega": {
+  "n": "Vega",
+  "star": "blue",
+  "rock": 6.05,
+  "enemy": 4.1,
+  "value": 1,
+  "gift": "overdrive",
+  "comets": 3,
+  "boss": "leviathan",
+  "bossFleet": [
+   "leviathan",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Something huge in the ice",
+   "text": "Comet herders swear a creature the size of a station swims between the frozen moons — the <b>Ice Leviathan</b>. It rams ships. It guards the gate."
+  },
+  "gate": "The Leviathan shatters into a blizzard of ice. Where it lived, an ancient ring <b>thaws and opens</b>.",
+  "intro": "Vega: a blue star spinning so fast it's squashed flat. <b>Comets</b> rain through every field (3× as many). The comet herders give you <b>Overdrive</b>: press <b>R</b> (or BOOST) for 8 s of triple cutting power and speed — perfect for catching comets. You keep it forever.",
+  "factions": {
+   "tierra": {
+    "n": "Azure Directorate",
+    "c": "#7ab8ff"
+   },
+   "marte": {
+    "n": "Frost Clans",
+    "c": "#a8e0ff"
+   },
+   "cinturon": {
+    "n": "Comet Herders",
+    "c": "#bff6ff"
+   },
+   "exterior": {
+    "n": "Glacier League",
+    "c": "#9a9aff"
+   },
+   "piratas": {
+    "n": "Icebreakers",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Sleet",
+    "station": "Snowcap Base",
+    "tex": "ice",
+    "col": [
+     "#e8f4ff",
+     "#5a7090"
+    ],
+    "desc": "A frozen moon of Azure, swept by comets.",
+    "field": {
+     "n": "Sleet Drifts",
+     "ores": {
+      "iron": 3.5,
+      "ice": 4,
+      "titanium": 1,
+      "he3": 0.31
+     }
+    }
+   },
+   "tierra": {
+    "n": "Azure",
+    "station": "Blue Harbor",
+    "tex": "ocean",
+    "col": [
+     "#b0e0ff",
+     "#0a3a7a"
+    ],
+    "desc": "A deep blue ocean world under a blinding blue sun."
+   },
+   "venus": {
+    "n": "Opal",
+    "station": "Opal Spire",
+    "tex": "gas",
+    "col": [
+     "#e8e0ff",
+     "#5a5a9a"
+    ],
+    "desc": "An iridescent cloud world of wealthy collectors."
+   },
+   "mercurio": {
+    "n": "Glare",
+    "station": "Glare Depot",
+    "tex": "lava",
+    "col": [
+     "#a0d0ff",
+     "#101a3a"
+    ],
+    "desc": "A world melted by blue starlight. Platinum lies everywhere.",
+    "field": {
+     "n": "Glare Plains",
+     "ores": {
+      "ice": 1,
+      "titanium": 2,
+      "cobalt": 2,
+      "platinum": 6
+     }
+    }
+   },
+   "marte": {
+    "n": "Rime",
+    "station": "Frostgate",
+    "tex": "ice",
+    "col": [
+     "#d0e8ff",
+     "#3a5070"
+    ],
+    "desc": "A frozen desert. Strangely, it still pays well for ice."
+   },
+   "ceres": {
+    "n": "Herdstone",
+    "station": "Comet Ranch",
+    "tex": "rock",
+    "col": [
+     "#a8b8c8",
+     "#303844"
+    ],
+    "desc": "The comet herders' capital.",
+    "field": {
+     "n": "Herd Belt",
+     "ores": {
+      "ice": 2,
+      "nickel": 2,
+      "he3": 2.5,
+      "iridium": 1.59
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Frostmaw",
+    "tex": "gas",
+    "col": [
+     "#c0e8ff",
+     "#2a4a8a"
+    ]
+   },
+   "europa": {
+    "n": "Shiver",
+    "station": "Shiver Colony",
+    "tex": "ice",
+    "col": [
+     "#f0fbff",
+     "#7090b0"
+    ],
+    "desc": "An ice moon of Frostmaw. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Frostmaw Depot",
+    "desc": "Frostmaw's Trojans, glittering with ice.",
+    "field": {
+     "n": "Frostmaw Swarm",
+     "ores": {
+      "ice": 2,
+      "he3": 2,
+      "iridium": 7.27
+     }
+    }
+   },
+   "saturno": {
+    "n": "Halcyon Ice",
+    "station": "Glacier Depot",
+    "tex": "gas",
+    "col": [
+     "#e0f0ff",
+     "#4a6aa0"
+    ],
+    "desc": "A pale blue ringed giant whose rings are mostly comets.",
+    "field": {
+     "n": "Comet Rings",
+     "ores": {
+      "ice": 4,
+      "he3": 2,
+      "ringpearl": 3,
+      "exotic": 0.47
+     }
+    }
+   },
+   "titan": {
+    "n": "Slush",
+    "station": "Slushworks",
+    "tex": "titan",
+    "col": [
+     "#d0e0f0",
+     "#506070"
+    ],
+    "desc": "A slushy moon with enormous refineries."
+   },
+   "pluton": {
+    "n": "Breakwater",
+    "station": "Icebreaker Market",
+    "tex": "ice",
+    "col": [
+     "#ffffff",
+     "#6070a0"
+    ],
+    "desc": "Where the Icebreakers sell what they steal."
+   },
+   "kuiper": {
+    "n": "Vega Drift",
+    "station": "Drift Depot",
+    "desc": "Endless frozen comets at the edge of Vega's glare.",
+    "field": {
+     "n": "Vega Drift",
+     "ores": {
+      "ice": 3.34,
+      "ringpearl": 2,
+      "exotic": 2,
+      "voidshard": 0.1
+     }
+    }
+   },
+   "oort": {
+    "n": "The Deep Freeze",
+    "station": "Thaw Outpost",
+    "col": [
+     "#bfefff",
+     "#0a2a4a"
+    ],
+    "desc": "A frozen sea of comets where the Leviathan hunts.",
+    "field": {
+     "n": "The Deep Freeze",
+     "ores": {
+      "ice": 4,
+      "ringpearl": 2,
+      "exotic": 2,
+      "voidshard": 0.87
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Sleet"
+   },
+   "3": {
+    "title": "Glare & Rime",
+    "text": "<b>Glare</b> is covered in <b>Platinum</b> — buy <b>Shields</b>. <b>Rime</b> pays well for ice. Comets everywhere: use <b>Overdrive (R)</b> to catch them!"
+   },
+   "4": {
+    "title": "The Herd Belt",
+    "text": "<b>Herdstone</b> and the <b>Herd Belt</b>, where the comet herders live. The Icebreaker pirates are fierce."
+   },
+   "6": {
+    "title": "Frostmaw System",
+    "text": "<b>Shiver</b> and the <b>Frostmaw Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Halcyon Ice & Influence",
+    "text": "<b>Slush</b> and the <b>Comet Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Vega."
+   },
+   "8": {
+    "title": "Breakwater",
+    "text": "<b>Breakwater</b>'s Icebreaker Market and the <b>Vega Drift</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "☄",
+    "n": "Comet Express",
+    "d": "You hitch ore containers to passing comets and let them deliver.",
+    "fx": "Sleet outpost output ×3"
+   },
+   "beacons": {
+    "icon": "🌀",
+    "n": "Hyperspin Lanes",
+    "d": "Vega spins so fast its gravity flings ships along these lanes.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🛡",
+    "n": "Ice Phantom Wing",
+    "d": "Gunships cloaked in ice. Pirates never see them coming — two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🚀",
+    "n": "Cryo Cannon",
+    "d": "Cargo is frozen into ice bullets and shot straight into orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🔥",
+    "n": "Thaw Engine",
+    "d": "You melt a frozen world into a garden in a single afternoon.",
+    "fx": "Rime pays ×2 for everything · Frost Clans reputation +50"
+   },
+   "gates": {
+    "icon": "⚛",
+    "n": "Frozen-Time Gates",
+    "d": "Gates that freeze time during the trip: you arrive before you left.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Comet Ring Ranch",
+    "d": "You herd comets into the giant's rings and farm them for ore.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Blue Star Siphon",
+    "d": "Vega's light is so fierce you just put up a straw.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "☄",
+    "n": "Comet Bombardment",
+    "d": "You redirect every comet in the system at a single planet.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "altair": {
+  "n": "Altair",
+  "star": "white",
+  "rock": 8.17,
+  "enemy": 4.9,
+  "value": 1,
+  "gift": "charges",
+  "boss": "pirateking",
+  "bossFleet": [
+   "pirateking",
+   "corsair",
+   "corsair"
+  ],
+  "signal": {
+   "title": "The Pirate King",
+   "text": "Every pirate in Altair answers to one captain: the <b>Pirate King</b>. His flagship guards the old gate at <b>Skull Harbor</b> — and he calls his raiders the moment you show up."
+  },
+  "gate": "The King's flagship goes down in flames and his fleet scatters. The gate at Skull Harbor is <b>yours</b>.",
+  "intro": "Altair is a <b>pirate empire</b>: raids everywhere, and loot to match. A defector gives you <b>Mining Charges</b>: press <b>F</b> (or BOMB) to drop a charge that blows up 1.2 s later, cracking every rock around it — and hurting pirates too. You keep them forever.",
+  "factions": {
+   "tierra": {
+    "n": "Altair Free Cities",
+    "c": "#9ad8ff"
+   },
+   "marte": {
+    "n": "Iron Wardens",
+    "c": "#c8a070"
+   },
+   "cinturon": {
+    "n": "Salvage Brotherhood",
+    "c": "#b0d080"
+   },
+   "exterior": {
+    "n": "Far Reach Alliance",
+    "c": "#c0a0ff"
+   },
+   "piratas": {
+    "n": "The Pirate Crown",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Driftwood",
+    "station": "Last Chance Base",
+    "tex": "rock",
+    "col": [
+     "#b8b0a0",
+     "#3a3630"
+    ],
+    "desc": "A battered moon of Haven, scarred by raids.",
+    "field": {
+     "n": "Driftwood Scrap",
+     "ores": {
+      "iron": 4.5,
+      "titanium": 1.5,
+      "ice": 2,
+      "nickel": 0.59
+     }
+    },
+    "danger": 0.1
+   },
+   "tierra": {
+    "n": "Haven",
+    "station": "Free Harbor",
+    "tex": "ocean",
+    "col": [
+     "#90d8c0",
+     "#0a3a4a"
+    ],
+    "desc": "The last free capital in a pirate system.",
+    "danger": 0.08
+   },
+   "venus": {
+    "n": "Gilded",
+    "station": "Treasure Spire",
+    "tex": "gas",
+    "col": [
+     "#ffe0a0",
+     "#7a5020"
+    ],
+    "desc": "A golden cloud world where pirates spend their loot."
+   },
+   "mercurio": {
+    "n": "Brimstone Reef",
+    "station": "Reef Depot",
+    "tex": "lava",
+    "col": [
+     "#ff9050",
+     "#300a04"
+    ],
+    "desc": "A burning reef of rock. Sunstone and pirates.",
+    "field": {
+     "n": "Burning Reef",
+     "ores": {
+      "iron": 1.5,
+      "cobalt": 2,
+      "platinum": 1.5,
+      "sunstone": 0.91
+     }
+    }
+   },
+   "marte": {
+    "n": "Bulwark",
+    "station": "Warden Fort",
+    "tex": "rock",
+    "col": [
+     "#c09878",
+     "#3a2a1a"
+    ],
+    "desc": "A fortress world that has never fallen to the pirates. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Scrapheap",
+    "station": "Salvage Hall",
+    "tex": "rock",
+    "col": [
+     "#a0a088",
+     "#30302a"
+    ],
+    "desc": "Salvagers live on what the pirates leave behind.",
+    "field": {
+     "n": "Wreck Belt",
+     "ores": {
+      "cobalt": 2,
+      "platinum": 2,
+      "sunstone": 1.5,
+      "iridium": 0.53
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Leviathan's Eye",
+    "tex": "gas",
+    "col": [
+     "#d0c0ff",
+     "#3a2a7a"
+    ]
+   },
+   "europa": {
+    "n": "Cove",
+    "station": "Cove Colony",
+    "tex": "ice",
+    "col": [
+     "#e8f0ff",
+     "#607090"
+    ],
+    "desc": "A hidden ice moon. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Ambush Depot",
+    "desc": "Trojan rocks crawling with pirate nests.",
+    "field": {
+     "n": "Ambush Alley",
+     "ores": {
+      "sunstone": 4.36,
+      "iridium": 3,
+      "ringpearl": 0.2
+     }
+    }
+   },
+   "saturno": {
+    "n": "Skullring",
+    "station": "Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e0c8c8",
+     "#6a3a3a"
+    ],
+    "desc": "A ringed giant whose rings hide a thousand pirate bases.",
+    "field": {
+     "n": "Skull Rings",
+     "ores": {
+      "he3": 3,
+      "ringpearl": 2.5,
+      "ice": 2,
+      "exotic": 0.47
+     }
+    }
+   },
+   "titan": {
+    "n": "Rumhaze",
+    "station": "Rum Refinery",
+    "tex": "titan",
+    "col": [
+     "#e0b080",
+     "#6a4020"
+    ],
+    "desc": "A boozy, foggy moon with huge refineries."
+   },
+   "pluton": {
+    "n": "Tortuga",
+    "station": "Crown Market",
+    "tex": "rock",
+    "col": [
+     "#d08080",
+     "#301010"
+    ],
+    "desc": "The capital of the Pirate Crown. Everything is for sale."
+   },
+   "kuiper": {
+    "n": "Plunder Drift",
+    "station": "Drift Depot",
+    "desc": "Where pirates hide their stolen ore.",
+    "field": {
+     "n": "Plunder Drift",
+     "ores": {
+      "iridium": 4.99,
+      "exotic": 2,
+      "ringpearl": 1.5,
+      "voidshard": 0.1
+     }
+    }
+   },
+   "oort": {
+    "n": "Skull Harbor",
+    "station": "Lookout Post",
+    "col": [
+     "#ff8080",
+     "#3a0a0a"
+    ],
+    "desc": "The Pirate King's harbor, built around an ancient gate.",
+    "field": {
+     "n": "Skull Harbor",
+     "ores": {
+      "ice": 3,
+      "exotic": 2.5,
+      "ringpearl": 1.5,
+      "voidshard": 0.44
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Driftwood"
+   },
+   "3": {
+    "title": "Brimstone Reef & Bulwark",
+    "text": "<b>Brimstone Reef</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Bulwark</b> pays a fortune for ice. Use your <b>Mining Charges (F)</b> on big clusters!"
+   },
+   "4": {
+    "title": "The Wreck Belt",
+    "text": "<b>Scrapheap</b> and the <b>Wreck Belt</b>. Pirates everywhere — and their loot is worth it."
+   },
+   "6": {
+    "title": "Leviathan's Eye",
+    "text": "<b>Cove</b> and <b>Ambush Alley</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Skullring & Influence",
+    "text": "<b>Rumhaze</b> and the <b>Skull Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Altair."
+   },
+   "8": {
+    "title": "Tortuga",
+    "text": "<b>Tortuga</b>, capital of the Pirate Crown, and the <b>Plunder Drift</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🏴",
+    "n": "Smuggler's Chute",
+    "d": "A secret railgun the pirates built to move loot. Now it moves your ore.",
+    "fx": "Driftwood outpost output ×3"
+   },
+   "beacons": {
+    "icon": "📡",
+    "n": "Black Flag Network",
+    "d": "Pirate radio towers that know every lane — and every ambush.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "⚔",
+    "n": "Turncoat Armada",
+    "d": "Half the pirate fleet switches sides for the right price. Two ships fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🏗",
+    "n": "Plunder Lift",
+    "d": "A cargo lift made of captured pirate ships welded end to end.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Hideout Gardens",
+    "d": "You turn Bulwark's grim fortress plains into a jungle resort.",
+    "fx": "Bulwark pays ×2 for everything · Iron Wardens reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Ghost Gates",
+    "d": "Stolen gates hidden in nebula pockets. Nobody knows where they lead — except you.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "☠",
+    "n": "Skull Ring Shipyard",
+    "d": "A pirate shipyard in the rings, now building mining drones for you.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "👑",
+    "n": "Crown of Altair",
+    "d": "A Dyson swarm shaped like a pirate crown. Very subtle.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Doomsday Broadside",
+    "d": "Every captured pirate cannon in the system, firing at once.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ }
+});
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },

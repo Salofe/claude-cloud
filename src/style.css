@@ -478,3 +478,6 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .tbtn { position: absolute; right: 136px; width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--fh); font-size: 11px; color: #fff; pointer-events: auto; border: 2px solid #ffb030; background: rgba(255,160,40,.25); }
 #toolBtn { bottom: 150px; } #pullBtn { bottom: 76px; border-color: #9fe0ff; background: rgba(120,200,255,.2); }
 #pullBtn.cd { opacity: .5; }
+#boostBtn { right: 40px; bottom: 200px; border-color: #ffe14a; background: rgba(255,225,74,.2); }
+#bombBtn { right: 206px; bottom: 112px; border-color: #ff5a2a; background: rgba(255,90,42,.2); }
+#boostBtn.cd, #bombBtn.cd { opacity: .5; }

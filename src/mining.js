@@ -26,7 +26,7 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0;
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = [];
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -72,9 +72,10 @@ const MineScene = {
     const nv = 2 + Math.floor(tier * 1.5);
     const crystal = !this.space && !!this.loc.field.crystal && Math.random() < this.loc.field.crystal;
     const armored = !crystal && !this.space && !!this.loc.field.armored && Math.random() < this.loc.field.armored;
+    const volatile = !crystal && !armored && !this.space && !!this.loc.field.explosive && Math.random() < this.loc.field.explosive;
     const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -84,6 +85,16 @@ const MineScene = {
     return rock;
   },
   // comets streak across the field: break one before it escapes for ice and a load of the field's best ore
+  // Overdrive (Vega): 8 s of triple cutting power and a faster ship
+  boost() {
+    if (!hasTool('overdrive') || this.space || this.boostCd > 0) return;
+    this.boostT = 8; this.boostCd = 45; sfx('upgrade'); toast('⚡ OVERDRIVE!', 'good');
+  },
+  // Mining charge (Altair): drop it, it blows 1.2 s later
+  bomb() {
+    if (!hasTool('charges') || this.space || this.bombCd > 0) return;
+    this.bombCd = 10; this.bombs = this.bombs || []; this.bombs.push({ x: this.p.x, y: this.p.y, t: 1.2 }); sfx('click');
+  },
   pullRadius() { return Math.max(1000, ship.magnet * 4); },
   toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) * (built('borer') ? 1.6 : 1) : ship.laserRange; },
   toggleTool() {
@@ -109,15 +120,29 @@ const MineScene = {
     this.parts.burst(r.x, r.y, 60, '#bff6ff', 260, 1.1, 3);
     this.parts.burst(r.x, r.y, 24, ITEMS[r.core].c, 160, 1, 3);
     sfx('win'); this.shake = Math.max(this.shake, 10);
-    const n = Math.round(6 * ship.yieldMult);
+    const n = Math.round(6 * ship.yieldMult * (built('herding') ? 2 : 1));
     for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.core);
     for (let i = 0; i < 5; i++) this.dropChunk(r.x, r.y, 'ice');
     this.floaters.push({ x: r.x, y: r.y - 30, txt: `COMET! ${n} ${ITEMS[r.core].n}`, col: '#bff6ff', life: 2, big: 1 });
     S.stats.comets = (S.stats.comets || 0) + 1;
   },
+  // volatile rocks (Epsilon Eridani) blow up: they crack every rock nearby — chain reactions! — and singe you if you're close
+  explode(x, y, R, power, hurt) {
+    this.parts.burst(x, y, 60, '#ffb347', 340, 0.9, 4); this.parts.burst(x, y, 30, '#ff5a2a', 220, 0.7, 3);
+    sfx('boom'); this.shake = Math.max(this.shake, 14);
+    this.blasts = this.blasts || []; this.blasts.push({ x, y, R, t: 0 });
+    for (const o of [...this.rocks]) {
+      const d = Math.hypot(o.x - x, o.y - y) - o.r; if (d > R || o.comet) continue;
+      o.hp -= (o.tier >= 3 ? o.maxhp * power : o.maxhp * 1.2) + ship.laserDps * 2; o.hit = 0.1;   // small & medium rocks shatter, big ones crack
+      if (o.hp <= 0 && this.rocks.includes(o)) setTimeout(() => { if (this.rocks.includes(o)) this.breakRock(o); }, 90 + Math.random() * 120);
+    }
+    for (const e of this.enemies) if (Math.hypot(e.x - x, e.y - y) < R) Combat.hitEnemy(this, e, ship.weaponDps * 6);
+    if (hurt && Math.hypot(this.p.x - x, this.p.y - y) < R * 0.8) this.damage(ship.hpMax * 0.05);
+  },
   breakRock(r) {
     this.rocks = this.rocks.filter(x => x !== r);
     if (r.comet) return this.breakComet(r);
+    if (r.volatile) this.explode(r.x, r.y, 140 + r.tier * 50 * (built('chainlab') ? 1.6 : 1), 0.7, true);
     this.parts.burst(r.x, r.y, 14 + r.tier * 8, r.gold ? '#ffd24a' : '#c9b8a6', 120 + r.tier * 40, 0.8, 2.5);
     this.parts.burst(r.x, r.y, 6 + r.tier * 3, ITEMS[r.ore].c, 90, 1, 2.5);
     sfx('break'); this.shake = Math.max(this.shake, r.tier * 3);
@@ -142,11 +167,13 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
+        c.volatile = false;
       }
       const m = 0.5 * ship.yieldMult;
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
     } else {
-      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult * (r.shard && built('resonance') ? 2 : 1) * (r.armored && built('plasmaforge') ? 2 : 1);
+      // crystal shards reward the chase (+20%), armored rocks reward the drill (×1.5)
+      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult * (r.shard ? 1.2 : 1) * (r.shard && built('resonance') ? 2 : 1) * (r.armored ? 1.5 : 1) * (r.armored && built('plasmaforge') ? 2 : 1) * (r.volatile ? 1.2 : 1);
       const n = Math.floor(m) + (Math.random() < m % 1 ? 1 : 0);
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.ore);
     }
@@ -186,7 +213,7 @@ const MineScene = {
     p.vx += ax * acc * dt; p.vy += ay * acc * dt;
     const drag = Math.pow(0.4, dt);
     p.vx *= drag; p.vy *= drag;
-    const maxV = 360 * ship.thrust;
+    const maxV = 360 * ship.thrust * (this.boostT > 0 ? 1.5 : 1);
     const v = Math.hypot(p.vx, p.vy);
     if (v > maxV) { p.vx *= maxV / v; p.vy *= maxV / v; }
     p.x = clamp(p.x + p.vx * dt, 40, MW - 40); p.y = clamp(p.y + p.vy * dt, 40, MH - 40);
@@ -230,7 +257,7 @@ const MineScene = {
       if (best) {
         const drill = this.tool === 'drill';
         // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range
-        best.hp -= ship.laserDps * (drill ? (built('borer') ? 4.5 : 3) : 1) * (best.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * dt; best.hit = 0.05;
+        best.hp -= ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (best.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * dt; best.hit = 0.05;
         if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? 'ARMORED — switch to the Drill (Q)' : 'ARMORED — your laser barely scratches it', col: '#c8d0e0', life: 2.5, big: 1 }); }
         if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
         if (best.hp <= 0) this.breakRock(best);
@@ -265,10 +292,15 @@ const MineScene = {
       }
     }
     if (this.rocks.some(r => r.gone)) { this.rocks = this.rocks.filter(r => !r.gone); toast('The comet escaped…'); }
-    if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
+    if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80) / ((sysDef().comets || 1) * (built('herding') ? 3 : 1)); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
     // --- chunks & loot ---
     const cfree = cargoFree();
     this.pullT = Math.max(0, this.pullT - dt); this.pullCd = Math.max(0, this.pullCd - dt);
+    this.boostT = Math.max(0, this.boostT - dt); this.boostCd = Math.max(0, this.boostCd - dt); this.bombCd = Math.max(0, this.bombCd - dt);
+    for (const b of this.bombs) { b.t -= dt; if (b.t <= 0) { b.done = 1; this.explode(b.x, b.y, 230, 0.6, false); } }
+    this.bombs = this.bombs.filter(b => !b.done);
+    for (const b of this.blasts) b.t += dt; this.blasts = this.blasts.filter(b => b.t < 0.5);
+    if (this.boostT > 0 && Math.random() < dt * 40) this.parts.add(this.p.x + rand(-14, 14), this.p.y + rand(-14, 14), -this.p.vx * 0.3, -this.p.vy * 0.3, 0.4, '#ffe14a', 2.5, true);
     for (const c of this.chunks) {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
@@ -361,7 +393,7 @@ const MineScene = {
   coach() {
     const h = S.hints;
     let msg = '';
-    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
+    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
     else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = `☠ ${this.ambush.boss === 'final' ? `The ${ENEMIES[sysDef().boss].n}` : 'The warlord\'s flagship'} arrives in <b>${Math.ceil(this.ambush.at)} s</b> — get ready, or fly <b>down</b> to escape`;
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
@@ -429,6 +461,9 @@ const MineScene = {
     ctx.strokeRect(20, 20, MW - 40, MH - 40); ctx.setLineDash([]);
     if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
+    for (const b of this.bombs) { const k = 1 - b.t / 1.2; glow(ctx, b.x, b.y, 18 + k * 20, '#ff5a2a', 0.5 + k * 0.5); ctx.fillStyle = Math.sin(b.t * 30) > 0 ? '#ffffff' : '#ff3a2a'; ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, TAU); ctx.fill(); }
+    for (const b of this.blasts) { const k = b.t / 0.5; ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke(); }
+    if (this.boostT > 0) glow(ctx, p.x, p.y, 70, '#ffe14a', 0.25 + 0.1 * Math.sin(t * 20));
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
     for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
