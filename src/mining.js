@@ -26,7 +26,7 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {};
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40);
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -81,8 +81,28 @@ const MineScene = {
     this.rocks.push(rock);
     return rock;
   },
+  // comets streak across the field: break one before it escapes for ice and a load of the field's best ore
+  spawnComet() {
+    const ores = Object.keys(this.loc.field.ores), best = ores.sort((a, b) => ITEMS[b].b - ITEMS[a].b)[0];
+    const dir = Math.random() < 0.5 ? 1 : -1, p = this.p;
+    const c = this.spawnRock(dir > 0 ? -40 : MW + 40, clamp(p.y + rand(-450, 250), 300, DOCK_Y - 500), 2, 'ice');
+    Object.assign(c, { comet: 1, core: best, vx: dir * rand(150, 200), vy: rand(-25, 25), vr: rand(1.5, 3) * dir, rich: false, gold: false, cold: 1 });
+    c.hp = c.maxhp = c.r * 0.7 * ITEMS[best].h * Z_HP[this.z] * 1.3;
+    toast('☄ A comet is crossing the field — break it before it escapes!', 'good'); sfx('event');
+  },
+  breakComet(r) {
+    this.parts.burst(r.x, r.y, 60, '#bff6ff', 260, 1.1, 3);
+    this.parts.burst(r.x, r.y, 24, ITEMS[r.core].c, 160, 1, 3);
+    sfx('win'); this.shake = Math.max(this.shake, 10);
+    const n = Math.round(6 * ship.yieldMult);
+    for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.core);
+    for (let i = 0; i < 5; i++) this.dropChunk(r.x, r.y, 'ice');
+    this.floaters.push({ x: r.x, y: r.y - 30, txt: `COMET! ${n} ${ITEMS[r.core].n}`, col: '#bff6ff', life: 2, big: 1 });
+    S.stats.comets = (S.stats.comets || 0) + 1;
+  },
   breakRock(r) {
     this.rocks = this.rocks.filter(x => x !== r);
+    if (r.comet) return this.breakComet(r);
     this.parts.burst(r.x, r.y, 14 + r.tier * 8, r.gold ? '#ffd24a' : '#c9b8a6', 120 + r.tier * 40, 0.8, 2.5);
     this.parts.burst(r.x, r.y, 6 + r.tier * 3, ITEMS[r.ore].c, 90, 1, 2.5);
     sfx('break'); this.shake = Math.max(this.shake, r.tier * 3);
@@ -194,9 +214,15 @@ const MineScene = {
     for (const r of this.rocks) {
       r.x += r.vx * dt; r.y += r.vy * dt; r.rot += r.vr * dt; r.hit = Math.max(0, r.hit - dt);
       const maxY = this.space ? MH - r.r : DOCK_Y - 120;
-      if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
-      if (r.y < r.r || r.y > maxY) r.vy *= -1;
-      r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, maxY);
+      if (r.comet) {
+        if (Math.random() < dt * 40) this.parts.add(r.x - r.vx * 0.08 + rand(-6, 6), r.y - r.vy * 0.08 + rand(-6, 6), -r.vx * 0.3 + rand(-20, 20), -r.vy * 0.3 + rand(-20, 20), 0.9, Math.random() < 0.6 ? '#bff6ff' : '#ffffff', 2.5, true);
+        if (r.x < -80 || r.x > MW + 80) r.gone = 1;
+        r.y = clamp(r.y, r.r, maxY);
+      } else {
+        if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
+        if (r.y < r.r || r.y > maxY) r.vy *= -1;
+        r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, maxY);
+      }
       const dx = p.x - r.x, dy = p.y - r.y, d = Math.hypot(dx, dy), md = r.r + shipR() * 0.4;
       if (d < md && d > 0) {
         const nx = dx / d, ny = dy / d;
@@ -209,6 +235,8 @@ const MineScene = {
         }
       }
     }
+    if (this.rocks.some(r => r.gone)) { this.rocks = this.rocks.filter(r => !r.gone); toast('The comet escaped…'); }
+    if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
     // --- chunks & loot ---
     const cfree = cargoFree();
     for (const c of this.chunks) {
@@ -371,7 +399,13 @@ const MineScene = {
     if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
-    for (const r of this.rocks) if (r.x > cx - 100 && r.x < cx + W + 100 && r.y > cy - 100 && r.y < cy + H + 100) {
+    for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
+      if (r.comet) {
+        const sp = Math.hypot(r.vx, r.vy) || 1, ux = r.vx / sp, uy = r.vy / sp, L = r.r * 5;
+        const g = ctx.createLinearGradient(r.x, r.y, r.x - ux * L, r.y - uy * L); g.addColorStop(0, 'rgba(191,246,255,0.55)'); g.addColorStop(1, 'rgba(191,246,255,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(r.x - uy * r.r, r.y + ux * r.r); ctx.lineTo(r.x - ux * L, r.y - uy * L); ctx.lineTo(r.x + uy * r.r, r.y - ux * r.r); ctx.closePath(); ctx.fill();
+        glow(ctx, r.x, r.y, r.r * 2.6, '#bff6ff', 0.55 + 0.15 * Math.sin(t * 8));
+      }
       drawRock(ctx, r, t, S.lv.scanner);
       if (r.gold) { glow(ctx, r.x, r.y, r.r * 2.4, '#ffd24a', 0.35 + 0.2 * Math.sin(t * 5)); if (Math.random() < 0.1) this.parts.add(r.x + rand(-r.r, r.r), r.y + rand(-r.r, r.r), 0, -20, 0.8, '#fff3b0', 2); }
     }
@@ -448,12 +482,12 @@ const MineScene = {
       ctx.fillText(`▼ STATION ${dist} m ▼`, bx, by);
       ctx.globalAlpha = 1;
     }
-    for (const e of this.enemies) {
+    for (const e of [...this.enemies, ...this.rocks.filter(r => r.comet)]) {
       const ex = e.x - cx, ey = e.y - cy;
       if (ex > 0 && ex < W && ey > 0 && ey < H) continue;
       const a = Math.atan2(ey - H / 2, ex - W / 2);
       const ix = W / 2 + Math.cos(a) * (Math.min(W, H) / 2 - 30), iy = H / 2 + Math.sin(a) * (Math.min(W, H) / 2 - 30);
-      ctx.fillStyle = '#ff4d6d';
+      ctx.fillStyle = e.comet ? '#bff6ff' : '#ff4d6d';
       ctx.save(); ctx.translate(ix, iy); ctx.rotate(a);
       ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-6, -7); ctx.lineTo(-6, 7); ctx.closePath(); ctx.fill(); ctx.restore();
     }
@@ -476,7 +510,7 @@ const MineScene = {
     ctx.fillStyle = 'rgba(8,14,34,0.75)'; ctx.strokeStyle = 'rgba(61,232,255,0.35)'; ctx.lineWidth = 1;
     ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh);
     if (!this.space) { ctx.fillStyle = 'rgba(61,232,255,0.35)'; ctx.fillRect(mx, my + DOCK_Y / MH * mh, mw, mh - DOCK_Y / MH * mh); }
-    for (const r of this.rocks) { ctx.fillStyle = r.gold ? '#ffd24a' : r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mw - 1, my + r.y / MH * mh - 1, r.tier * 0.8 + 0.6, r.tier * 0.8 + 0.6); }
+    for (const r of this.rocks) { ctx.fillStyle = r.comet ? '#bff6ff' : r.gold ? '#ffd24a' : r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mw - 1, my + r.y / MH * mh - 1, r.tier * 0.8 + 0.6, r.tier * 0.8 + 0.6); }
     ctx.fillStyle = '#ff4d6d'; for (const e of this.enemies) ctx.fillRect(mx + e.x / MW * mw - 1.5, my + e.y / MH * mh - 1.5, 3, 3);
     ctx.fillStyle = '#3de8ff'; ctx.fillRect(mx + p.x / MW * mw - 2, my + p.y / MH * mh - 2, 4, 4);
     if (this.loc.field.hazard === 'heat' && ship.shieldMax <= 0) { ctx.fillStyle = `rgba(255,120,40,${0.08 + 0.05 * Math.sin(t * 4)})`; ctx.fillRect(0, 0, W, H); }

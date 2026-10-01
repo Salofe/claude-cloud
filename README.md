@@ -45,6 +45,10 @@ node tools/balance-sim.js  # simulates an efficient player and prints when each 
 
 All art is procedural (canvas 2D, including noise-generated planet textures) and all sound is synthesized with WebAudio. Progress is saved to `localStorage` under the versioned key `solar_prospector_v3` (about 20 KB even late in the game). Clawcade persists each game's localStorage on the player's device.
 
+## Fields & comets
+
+Every field has its own signature ores: the Moon (iron, ice), Mercury (platinum, **Sunstone**), the Main Belt (nickel, **Cobalt**, iridium), the Trojans (iridium), Saturn's rings (Helium-3, **Ring Pearls**), the Kuiper Belt (iridium, Ring Pearls, exotics) and the Oort Cloud (exotics, **Void Shards**). Average field values match the old balance. Every 45–80 s a **comet** streaks across the field; break it before it escapes for ice and a handful of the field's most valuable ore.
+
 ## The end of the Solar System
 
 Reaching 100 influence makes you ruler of the Solar System — and reveals a **signal from the Oort Cloud**, a new far-out mining field. Mining there draws out the **Alien Sentinel** (a boss with alien drones and spread shots). Destroying it wakes an ancient **jump gate**: the way to the galaxy (next update).

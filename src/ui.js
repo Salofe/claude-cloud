@@ -663,7 +663,7 @@ function confirmNew() {
 }
 function openHelp() {
   openSheet('📖 How to play', `<div class="help">
-    <h4>⛏ Mine</h4><p>Fly with <b>WASD</b> or arrows, <b>hold the mouse</b> to fire your laser (or Space). Big rocks break into smaller ones and drop glowing ore. On mobile: drag on the left, hold LASER. Glowing veins give double ore.</p>
+    <h4>⛏ Mine</h4><p>Fly with <b>WASD</b> or arrows, <b>hold the mouse</b> to fire your laser (or Space). Big rocks break into smaller ones and drop glowing ore. On mobile: drag on the left, hold LASER. Glowing veins give double ore. Watch for <b>comets</b> streaking across the field: break one before it escapes for a load of the field's best ore.</p>
     <h4>🛰 Dock</h4><p>The station is at the <b>bottom</b> of every field. Fly back down into the docking zone to sell your ore, refuel and repair. Rocks get richer the <b>higher</b> you fly.</p>
     <h4>🤖 Drones</h4><p>Build an outpost in each field and buy drones. They earn credits every second — even while you're offline.</p>
     <h4>⚔ Pirates</h4><p>In dangerous zones pirates attack. <b>Hold the mouse</b> to fire your guns. Destroyed ships drop credits.</p>
