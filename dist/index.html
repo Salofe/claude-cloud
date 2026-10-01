@@ -492,6 +492,7 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 #pullBtn.cd { opacity: .5; }
 #boostBtn { right: 40px; bottom: 200px; border-color: #ffe14a; background: rgba(255,225,74,.2); }
 #bombBtn { right: 206px; bottom: 112px; border-color: #ff5a2a; background: rgba(255,90,42,.2); }
+#phaseBtn { right: 40px; bottom: 274px; border-color: #9ff3ff; background: rgba(160,240,255,.2); }
 #scanBtn { right: 206px; bottom: 186px; border-color: #7fe0ff; background: rgba(127,224,255,.2); }
 #boostBtn.cd, #bombBtn.cd, #scanBtn.cd { opacity: .5; }
 /* touch buttons: press feedback and a cooldown ring that fills back up */
@@ -509,10 +510,15 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
   #fireBtn { right: 18px; bottom: 28px; width: 84px; height: 84px; }
   .tbtn { width: 50px; height: 50px; font-size: 10px; }
   #toolBtn { right: 114px; bottom: 20px; } #pullBtn { right: 114px; bottom: 78px; }
-  #boostBtn { right: 34px; bottom: 124px; } #bombBtn { right: 172px; bottom: 36px; } #scanBtn { right: 172px; bottom: 94px; }
+  #boostBtn { right: 34px; bottom: 124px; } #phaseBtn { right: 34px; bottom: 180px; } #bombBtn { right: 172px; bottom: 36px; } #scanBtn { right: 172px; bottom: 94px; }
   #coach { top: auto; bottom: 14px; font-size: 14px; padding: 6px 14px; max-width: 55%; }
   .bt-title { top: 60px; }
 }
+
+.ending-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.ending-stats div { background: rgba(255,210,74,.08); border: 1px solid rgba(255,210,74,.3); border-radius: 10px; padding: 8px; }
+.ending-stats b { display: block; font-family: var(--fh); color: var(--gold); font-size: 18px; }
+.ending-stats small { color: var(--dim); }
 </style>
 </head>
 <body>
@@ -578,6 +584,7 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
   <div id="boostBtn" class="tbtn hidden">BOOST</div>
   <div id="bombBtn" class="tbtn hidden">BOMB</div>
   <div id="scanBtn" class="tbtn hidden">SCAN</div>
+  <div id="phaseBtn" class="tbtn hidden">PHASE</div>
 </div>
 
 <div id="battleUI" class="ui hidden">
@@ -801,6 +808,14 @@ PROJECTS.push(
     d: 'Singers of the Reef Keepers teach your ship the song living rocks love. They swim right up to your laser.', fx: 'Living rocks stop fleeing and drop ×2 ore' },
   { id: 'sonar', sys: 'rigel', icon: '◈', n: 'Quantum Sonar Array', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
     d: 'A sonar that hears the echo of every geode in the system — even the ones that haven\'t formed yet.', fx: 'Deep Scan recharges 2× faster · geodes drop ×2 ore' },
+  { id: 'polarity', sys: 'orion', icon: '🧲', n: 'Polarity Engine', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'You flip the poles of the whole nebula. Magnetic rocks rush together like old friends.', fx: 'Magnetic rocks clump 2× faster and drop ×2 ore' },
+  { id: 'beamharvest', sys: 'pulsar', icon: '⚡', n: 'Beam Harvester', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Collectors that drink the pulsar\'s beam before it reaches you — and pour it into the rocks.', fx: 'The beam no longer hurts you · charged rocks drop ×3 ore' },
+  { id: 'archive', sys: 'rim', icon: '📖', n: 'Relic Archive', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'The Glyph Diggers finally read the instructions on the relics.', fx: 'Relic powers last twice as long' },
+  { id: 'hawking', sys: 'sgra', icon: '🌀', n: 'Hawking Refinery', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Whatever falls into the black hole comes back out as a tiny glow of radiation — and you bill for it.', fx: 'Rocks swallowed by the black hole pay you · gravity pulls half as hard' },
   { id: 'starheart', sys: 'betelgeuse', icon: '☀', n: 'Starheart Tap', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
     d: 'You drill a pipe into the heart of a dying star. It pulses more often, and you are ready every time.', fx: 'Stellar pulses come 2× as often and last 50% longer' },
 );
@@ -828,6 +843,12 @@ const ENEMIES = {
   kraken:  { n: 'Space Kraken',    hp: 800, sp: 280, dmg: 2.2, rate: 1.3, spd: 70, size: 3.8, loot: 20000, pow: 30, burst: 2, spread: 4, boss: 1, final: 1, kraken: 1, ink: 1 },
   radiant: { n: 'Radiant Titan',   hp: 860, sp: 340, dmg: 2.0, rate: 2.0, spd: 50, size: 3.8, loot: 20000, pow: 30, burst: 1, radial: 10, boss: 1, final: 1, radiant: 1, beam: 1 },
   phoenix: { n: 'Stellar Phoenix', hp: 540, sp: 260, dmg: 2.2, rate: 1.1, spd: 150, size: 3.4, loot: 20000, pow: 30, burst: 3, spread: 3, dash: 1, rebirth: 1, boss: 1, final: 1, phoenix: 1 },
+  hydra:   { n: 'Nebula Hydra',    hp: 760, sp: 280, dmg: 2.2, rate: 1.2, spd: 75, size: 3.8, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, hydra: 1, split: 'hydrahead' },
+  hydrahead: { n: 'Hydra Head',    hp: 300, sp: 100, dmg: 1.8, rate: 1.0, spd: 150, size: 2.0, loot: 8000, pow: 10, burst: 2, spread: 2, boss: 1, final: 1, hydra: 1, head: 1 },
+  warden:  { n: 'Pulsar Warden',   hp: 900, sp: 360, dmg: 2.0, rate: 1.6, spd: 40, size: 3.8, loot: 20000, pow: 30, burst: 1, radial: 6, boss: 1, final: 1, warden: 1, arms: 2 },
+  archon:  { n: 'The Archon',      hp: 900, sp: 300, dmg: 2.2, rate: 1.4, spd: 60, size: 3.8, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, archon: 1, summon: 'shard', summonMax: 3, ward: 1 },
+  shard:   { n: 'Shield Shard',    hp: 60,  sp: 30,  dmg: 2,  rate: 1.2, spd: 200, size: 0.8, loot: 500, pow: 1, archon: 1 },
+  devourer: { n: 'The Devourer',   hp: 900, sp: 400, dmg: 2.0, rate: 0.3, spd: 45, size: 4.2, loot: 50000, pow: 30, burst: 1, spiral: 5, boss: 1, final: 1, devourer: 1, well: 1 },
   swarmer: { n: 'Swarmer',         hp: 26,  sp: 0,   dmg: 2,  rate: 0.9, spd: 270, size: 0.55, loot: 150,  pow: 1, hive: 1 },
   adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
@@ -1015,6 +1036,7 @@ function drawDust(ctx, W, H, camX, camY, vx, vy, col) {
 }
 // soft light from the system's star washing over the scene, tinted to its color
 function starWash(ctx, W, H, pal, t) {
+  if (pal === 'hole') return glow(ctx, W * 0.5, -H * 0.3, Math.max(W, H) * 0.9, '#ff8a3a55', 0.35);
   const P = STAR_PAL[pal] || STAR_PAL.sol;
   glow(ctx, -W * 0.05, -H * 0.1, Math.max(W, H) * 0.95, P.g2, 0.22 + 0.03 * Math.sin(t * 0.3));
 }
@@ -1229,7 +1251,44 @@ const STAR_PAL = {
   red:    { g1: '#ff2a1a33', g2: '#ff5a3a88', r0: 'rgba(255,120,90,0.35)', r1: 'rgba(255,60,40,0)', core: ['#ffe6e0', '#ffb09a', '#ff5a3a', '#c41a10'], f0: 'rgba(255,140,120,0)', f1: 'rgba(255,170,150,0.4)' },
   blue:   { g1: '#3a7aff33', g2: '#7ab0ff88', r0: 'rgba(160,200,255,0.4)', r1: 'rgba(90,140,255,0)', core: ['#ffffff', '#dff0ff', '#9cc8ff', '#4a7aff'], f0: 'rgba(160,200,255,0)', f1: 'rgba(200,225,255,0.5)' },
 };
+// a black hole: a dark disk inside a bright, tilted accretion disk and a thin photon ring
+function drawBlackHole(ctx, x, y, r, t) {
+  glow(ctx, x, y, r * 7, '#ff8a3a22', 0.8);
+  const disk = (front) => {
+    ctx.save(); ctx.translate(x, y); ctx.scale(1, 0.28);
+    const g = ctx.createRadialGradient(0, 0, r * 1.15, 0, 0, r * 3.6);
+    g.addColorStop(0, 'rgba(255,245,215,0.95)'); g.addColorStop(0.25, 'rgba(255,170,70,0.85)'); g.addColorStop(0.65, 'rgba(210,70,40,0.35)'); g.addColorStop(1, 'rgba(120,20,60,0)');
+    ctx.beginPath(); ctx.rect(-r * 4, front ? 0 : -r * 4, r * 8, r * 4); ctx.clip();
+    ctx.fillStyle = g; ctx.globalAlpha = front ? 0.9 : 1;
+    ctx.beginPath(); ctx.arc(0, 0, r * 3.6, 0, TAU); ctx.arc(0, 0, r * 1.15, 0, TAU, true); ctx.fill();
+    // hot clumps orbiting in the disk
+    ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,230,180,0.7)';
+    for (let i = 0; i < 18; i++) { const a = i * 2.4 + t * (0.6 + (i % 4) * 0.15), rr = r * (1.3 + (i % 6) * 0.35); ctx.beginPath(); ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, r * 0.06, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  };
+  disk(false);
+  // light from the far side of the disk, bent over the top by gravity
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = 'rgba(255,190,110,0.55)'; ctx.lineWidth = r * 0.32; ctx.beginPath(); ctx.arc(x, y, r * 1.3, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,240,210,0.6)'; ctx.lineWidth = r * 0.1; ctx.beginPath(); ctx.arc(x, y, r * 1.2, Math.PI * 1.02, Math.PI * 1.98); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,225,180,0.95)'; ctx.lineWidth = Math.max(1, r * 0.06); ctx.beginPath(); ctx.arc(x, y, r * 1.04, 0, TAU); ctx.stroke();
+  disk(true);
+}
+// Sagittarius A* seen from a mining field: the bottom of a vast black hole hangs over the top of the field
+function drawEventHorizon(ctx, x, y, R, t) {
+  const g = ctx.createRadialGradient(x, y, R * 0.9, x, y, R * 1.6);
+  g.addColorStop(0, 'rgba(255,170,80,0.55)'); g.addColorStop(0.25, 'rgba(255,90,40,0.25)'); g.addColorStop(1, 'rgba(80,0,40,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R * 1.6, 0, TAU); ctx.fill();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 40; i++) { const a = Math.PI * (0.15 + 0.7 * ((i * 0.618 + t * 0.03) % 1)), rr = R * (1.03 + (i % 5) * 0.06); ctx.fillStyle = i % 3 ? 'rgba(255,190,110,0.6)' : 'rgba(255,240,210,0.8)'; ctx.fillRect(x + Math.cos(a) * rr, y + Math.sin(a) * rr, 3, 3); }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,230,190,0.9)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(x, y, R + 4, 0, TAU); ctx.stroke();
+}
 function drawSun(ctx, x, y, r, t, pal) {
+  if (pal === 'hole') return drawBlackHole(ctx, x, y, r, t);
   const P = STAR_PAL[pal] || STAR_PAL.sol;
   glow(ctx, x, y, r * 9, P.g1, 0.7);
   glow(ctx, x, y, r * 4, P.g2, 0.7);
@@ -1622,8 +1681,80 @@ function drawPhoenix(ctx, type, x, y, ang, s, t, ent) {
   ctx.fillStyle = '#3a0a00'; ctx.beginPath(); ctx.arc(8, -1.4, 0.9, 0, TAU); ctx.fill();
   ctx.restore();
 }
+// Nebula Hydra (Orion): a cloud body with three glowing heads; its heads fight on alone
+function drawHydra(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type], heads = e.head ? 1 : 3;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, -4, 0, 30, '#ff9ad855', 0.9);
+  if (!e.head) for (let i = 0; i < 6; i++) { const a = i * 1.05 + t * 0.4; const g = ctx.createRadialGradient(-6 + Math.cos(a) * 4, Math.sin(a) * 5, 0, -6 + Math.cos(a) * 4, Math.sin(a) * 5, 10); g.addColorStop(0, 'rgba(255,150,220,0.5)'); g.addColorStop(1, 'rgba(120,40,160,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(-6 + Math.cos(a) * 4, Math.sin(a) * 5, 10, 0, TAU); ctx.fill(); }
+  for (let h = 0; h < heads; h++) {
+    const off = heads === 1 ? 0 : (h - 1) * 9, sw = Math.sin(t * 3 + h * 2) * 3;
+    const hx = heads === 1 ? 8 : 14, hy = off + sw;
+    if (heads > 1) { ctx.strokeStyle = '#b060c0'; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-2, off * 0.3); ctx.quadraticCurveTo(6, off + sw * -0.5, hx - 3, hy); ctx.stroke(); ctx.lineCap = 'butt'; }
+    const g = ctx.createRadialGradient(hx + 1, hy - 1, 0.5, hx, hy, 6); g.addColorStop(0, '#ffe0f4'); g.addColorStop(0.5, '#ff7ac8'); g.addColorStop(1, '#6a1a6a');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(hx, hy, 6.5, 4.5, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(hx + 2.5, hy - 1.6, 1.1, 0, TAU); ctx.arc(hx + 2.5, hy + 1.6, 1.1, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#ffe0f4'; ctx.beginPath(); ctx.moveTo(hx - 3, hy - 3.5); ctx.lineTo(hx - 7, hy - 7); ctx.lineTo(hx - 1, hy - 4); ctx.fill(); ctx.beginPath(); ctx.moveTo(hx - 3, hy + 3.5); ctx.lineTo(hx - 7, hy + 7); ctx.lineTo(hx - 1, hy + 4); ctx.fill();
+  }
+  ctx.restore();
+}
+// Pulsar Warden: a spinning neutron core inside a clockwork ring
+function drawWarden(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 30, '#bfe8ff66', 0.9);
+  ctx.rotate(t * 2);
+  ctx.strokeStyle = '#8aa0c8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 14, 0, TAU); ctx.stroke();
+  ctx.fillStyle = '#c8d4f0'; for (let i = 0; i < 12; i++) { const a = i * TAU / 12; ctx.save(); ctx.rotate(a); ctx.fillRect(13, -1.6, 4, 3.2); ctx.restore(); }
+  ctx.rotate(-t * 5);
+  ctx.strokeStyle = 'rgba(200,235,255,0.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(0, 0, 10, 3.5, 0, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.ellipse(0, 0, 3.5, 10, 0, 0, TAU); ctx.stroke();
+  glow(ctx, 0, 0, 10, '#ffffff', 1); ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+// The Archon (Core Rim): an ancient machine of nested golden rings; its shards orbit as shields
+function drawArchon(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * e.size, s * e.size);
+  if (type === 'shard') {
+    ctx.rotate(t * 3); glow(ctx, 0, 0, 14, '#ffe08088', 0.8);
+    ctx.fillStyle = '#ffe080'; ctx.strokeStyle = '#fff6d0'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(6, 0); ctx.lineTo(0, 10); ctx.lineTo(-6, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore(); return;
+  }
+  glow(ctx, 0, 0, 32, '#ffd08055', 0.9);
+  for (let i = 0; i < 3; i++) {
+    ctx.save(); ctx.rotate(t * (0.5 - i * 0.4) + i);
+    ctx.strokeStyle = ['#ffe080', '#d0a050', '#fff2c0'][i]; ctx.lineWidth = 2 - i * 0.4;
+    ctx.beginPath(); ctx.arc(0, 0, 18 - i * 5, 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#ffe080'; for (let k = 0; k < 6; k++) { const a = k * TAU / 6; ctx.fillRect(Math.cos(a) * (18 - i * 5) - 1.3, Math.sin(a) * (18 - i * 5) - 1.3, 2.6, 2.6); }
+    ctx.restore();
+  }
+  ctx.fillStyle = '#2a1a08'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, TAU); ctx.fill();
+  glow(ctx, Math.cos(ang) * 1.5, Math.sin(ang) * 1.5, 6, '#ffe080', 1);
+  ctx.fillStyle = '#fff6d0'; ctx.beginPath(); ctx.arc(Math.cos(ang) * 1.5, Math.sin(ang) * 1.5, 2, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+// The Devourer (Sagittarius A*): a living black hole with a burning mouth of light
+function drawDevourer(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type], k = s * e.size;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k);
+  glow(ctx, 0, 0, 40, '#c080ff44', 0.9);
+  ctx.save(); ctx.scale(1, 0.38); ctx.rotate(t * 0.8);
+  const g = ctx.createRadialGradient(0, 0, 12, 0, 0, 34); g.addColorStop(0, 'rgba(255,240,200,0.9)'); g.addColorStop(0.4, 'rgba(255,140,60,0.7)'); g.addColorStop(1, 'rgba(160,40,120,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 34, 0, TAU); ctx.arc(0, 0, 12, 0, TAU, true); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 12, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,220,180,0.9)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, 12.6, 0, TAU); ctx.stroke();
+  ctx.rotate(ang);
+  for (const sy of [-4, 4]) { glow(ctx, 4, sy, 5, '#ff4040', 1); ctx.fillStyle = '#ffd0d0'; ctx.beginPath(); ctx.ellipse(4, sy, 2, 1, 0, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t, ent) {
   const e = ENEMIES[type];
+  if (e.hydra) return drawHydra(ctx, type, x, y, ang, s, t);
+  if (e.warden) return drawWarden(ctx, type, x, y, ang, s, t);
+  if (e.archon) return drawArchon(ctx, type, x, y, ang, s, t);
+  if (e.devourer) return drawDevourer(ctx, type, x, y, ang, s, t);
   if (e.kraken) return drawKraken(ctx, type, x, y, ang, s, t);
   if (e.radiant) return drawRadiant(ctx, type, x, y, ang, s, t);
   if (e.phoenix) return drawPhoenix(ctx, type, x, y, ang, s, t, ent);
@@ -1828,6 +1959,30 @@ function drawRockFx(ctx, a, t) {
     ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
     ctx.beginPath(); ctx.moveTo(-a.r * 0.6, a.r * 0.3); ctx.lineTo(0, -a.r * 0.1); ctx.lineTo(a.r * 0.55, a.r * 0.35); ctx.moveTo(0, -a.r * 0.1); ctx.lineTo(-a.r * 0.15, -a.r * 0.6); ctx.stroke();
     ctx.restore();
+  }
+  if (a.magnetic) {   // red/blue poles and a humming glow
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+    glow(ctx, 0, 0, a.r * 1.5, '#7fb8ff44', 0.6 + 0.2 * Math.sin(t * 3 + a.x));
+    ctx.lineWidth = 2 + a.tier; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#ff5a6a'; ctx.beginPath(); ctx.arc(0, 0, a.r * 0.82, -2.4, -0.7); ctx.stroke();
+    ctx.strokeStyle = '#5a9aff'; ctx.beginPath(); ctx.arc(0, 0, a.r * 0.82, 0.74, 2.4); ctx.stroke();
+    ctx.lineCap = 'butt'; ctx.restore();
+  }
+  if (a.relic) {   // ancient glyph circuits
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+    glow(ctx, 0, 0, a.r * 1.6, '#ffe08055', 0.7 + 0.3 * Math.sin(t * 2 + a.x));
+    ctx.strokeStyle = `rgba(255,224,128,${0.7 + 0.3 * Math.sin(t * 3 + a.y)})`; ctx.lineWidth = 1.5;
+    const q = a.r * 0.45;
+    ctx.beginPath(); ctx.moveTo(-q, -q); ctx.lineTo(q, -q); ctx.lineTo(q, 0); ctx.lineTo(0, 0); ctx.lineTo(0, q); ctx.lineTo(-q, q); ctx.moveTo(-q * 1.4, 0); ctx.lineTo(-q * 0.5, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, a.r * 0.68, 0, TAU); ctx.setLineDash([3, 5]); ctx.lineDashOffset = t * 8; ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#fff2c0'; for (const [qx, qy] of [[-q, -q], [q, 0], [-q, q]]) { ctx.beginPath(); ctx.arc(qx, qy, 1.8, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
+  if (a.charged > 0) {   // charged by the pulsar beam
+    const k = Math.min(1, a.charged / 2);
+    glow(ctx, a.x, a.y, a.r * 1.5, '#9ff3ff', 0.35 * k);
+    ctx.strokeStyle = `rgba(200,245,255,${0.8 * k})`; ctx.lineWidth = 1.4;
+    for (let i = 0; i < 2; i++) { const an = t * 7 + i * 3 + a.x; ctx.beginPath(); ctx.moveTo(a.x + Math.cos(an) * a.r * 0.3, a.y + Math.sin(an) * a.r * 0.3); for (let j = 1; j <= 3; j++) ctx.lineTo(a.x + Math.cos(an + j * 0.4) * a.r * (0.3 + j * 0.25) + rand(-3, 3), a.y + Math.sin(an + j * 0.4) * a.r * (0.3 + j * 0.25) + rand(-3, 3)); ctx.stroke(); }
   }
   if (a.geode && a.seen > 0 && !(a.seenD > 0)) {
     const col = ITEMS[a.geode].c, k = Math.min(1, a.seen / 1.5), pr = a.r + 10 + Math.sin(t * 5) * 3;
@@ -5557,6 +5712,1258 @@ Object.assign(SYSTEMS, {
  }
 });
 
+// systems 12–15
+Object.assign(SYSTEMS, {
+ "orion": {
+  "n": "Orion Nebula",
+  "star": "blue",
+  "rock": 13.6,
+  "enemy": 7.3,
+  "value": 1,
+  "boss": "hydra",
+  "bossFleet": [
+   "hydra",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Three heads in the cloud",
+   "text": "Deep in the nebula something with <b>three glowing heads</b> guards the old gate at <b>Hydra's Cradle</b>. The Lodestone Union warns: <b>cut it down and it splits in two</b>."
+  },
+  "gate": "The last Hydra head dissolves into glowing gas. From the newborn stars, an ancient ring <b>takes shape</b>.",
+  "intro": "The <b>Orion Nebula</b> is a nursery where new stars are born. Many asteroids here are <b>magnetic</b>: they slowly <b>pull together into clusters</b> — perfect for your Charges and Wide Beam. When a magnetic rock breaks, it sends out a <b>magnetic burst</b> that pulls every ore chunk nearby straight to your ship.",
+  "factions": {
+   "tierra": {
+    "n": "Nursery Council",
+    "c": "#ff9ad8"
+   },
+   "marte": {
+    "n": "Trapezium Guard",
+    "c": "#c0a0ff"
+   },
+   "cinturon": {
+    "n": "Lodestone Union",
+    "c": "#7fb8ff"
+   },
+   "exterior": {
+    "n": "Nebula Drifters",
+    "c": "#a0ffd8"
+   },
+   "piratas": {
+    "n": "Veil Wolves",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Cradle",
+    "station": "Cradle Base",
+    "tex": "ice",
+    "col": [
+     "#f0d8ff",
+     "#4a3a7a"
+    ],
+    "desc": "A frosty moon wrapped in pink nebula gas.",
+    "field": {
+     "n": "Cradle Drift",
+     "ores": {
+      "iron": 3,
+      "ice": 2,
+      "titanium": 1,
+      "nickel": 0.53
+     },
+     "magnetic": 0.1
+    }
+   },
+   "tierra": {
+    "n": "Bloom",
+    "station": "Bloom Harbor",
+    "tex": "ocean",
+    "col": [
+     "#ff9ad8",
+     "#2a1a6a"
+    ],
+    "desc": "An ocean world under skies full of baby stars."
+   },
+   "venus": {
+    "n": "Rosette",
+    "station": "Rosette Spire",
+    "tex": "gas",
+    "col": [
+     "#ffb0d0",
+     "#6a2a5a"
+    ],
+    "desc": "A rose-colored cloud world. Very fancy."
+   },
+   "mercurio": {
+    "n": "Protostar",
+    "station": "Ignition Depot",
+    "tex": "lava",
+    "col": [
+     "#ffd0a0",
+     "#4a1a3a"
+    ],
+    "desc": "A planet orbiting a star that is still being born.",
+    "field": {
+     "n": "Ignition Plains",
+     "ores": {
+      "titanium": 2,
+      "cobalt": 2,
+      "platinum": 1,
+      "sunstone": 1.08
+     },
+     "magnetic": 0.15
+    }
+   },
+   "marte": {
+    "n": "Trapezium",
+    "station": "Trapezium Gate",
+    "tex": "rock",
+    "col": [
+     "#c8b0e0",
+     "#3a2a4a"
+    ],
+    "desc": "A fortress world lit by four bright young stars. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Lodestone",
+    "station": "Magnet Hall",
+    "tex": "rock",
+    "col": [
+     "#9ab0d0",
+     "#2a3048"
+    ],
+    "desc": "A giant magnet in space. Compasses here just spin.",
+    "field": {
+     "n": "The Lodestone Belt",
+     "ores": {
+      "nickel": 1,
+      "cobalt": 2,
+      "platinum": 2,
+      "iridium": 0.95
+     },
+     "magnetic": 0.3
+    }
+   },
+   "jupiter": {
+    "n": "Horsehead",
+    "tex": "gas",
+    "col": [
+     "#c08070",
+     "#2a1018"
+    ]
+   },
+   "europa": {
+    "n": "Mane",
+    "station": "Mane Colony",
+    "tex": "ice",
+    "col": [
+     "#f0e0ff",
+     "#7a5a9a"
+    ],
+    "desc": "An ice moon in the shadow of the Horsehead. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Horsehead Depot",
+    "desc": "Magnetic rocks tumbling in the Horsehead's shadow.",
+    "field": {
+     "n": "Horsehead Swarm",
+     "ores": {
+      "he3": 2,
+      "platinum": 2,
+      "iridium": 2,
+      "ringpearl": 0.61
+     },
+     "magnetic": 0.2
+    }
+   },
+   "saturno": {
+    "n": "Pillar",
+    "station": "Pillar Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e0c0e0",
+     "#5a3a6a"
+    ],
+    "desc": "A giant inside a pillar of glowing gas.",
+    "field": {
+     "n": "Pillar Rings",
+     "ores": {
+      "ice": 2,
+      "he3": 2,
+      "ringpearl": 2,
+      "exotic": 0.35
+     },
+     "magnetic": 0.2
+    }
+   },
+   "titan": {
+    "n": "Glowworm",
+    "station": "Glowworks",
+    "tex": "titan",
+    "col": [
+     "#d0f0c0",
+     "#3a5a3a"
+    ],
+    "desc": "A moon that glows faintly green at night."
+   },
+   "pluton": {
+    "n": "Shadowveil",
+    "station": "Wolf Den",
+    "tex": "rock",
+    "col": [
+     "#6a5a7a",
+     "#14101a"
+    ],
+    "desc": "Hidden in a dark cloud. The Veil Wolves live here."
+   },
+   "kuiper": {
+    "n": "The Nursery Edge",
+    "station": "Edge Depot",
+    "desc": "Where the nebula thins out into dark space.",
+    "field": {
+     "n": "The Nursery Edge",
+     "ores": {
+      "iridium": 2,
+      "ringpearl": 2,
+      "exotic": 1.28
+     },
+     "magnetic": 0.2
+    }
+   },
+   "oort": {
+    "n": "Hydra's Cradle",
+    "station": "Starlight Outpost",
+    "col": [
+     "#ff9ad8",
+     "#2a0a3a"
+    ],
+    "desc": "A cloud of newborn stars — and a three-headed guardian.",
+    "field": {
+     "n": "Hydra's Cradle",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 1,
+      "exotic": 2,
+      "voidshard": 0.23
+     },
+     "magnetic": 0.15
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Cradle"
+   },
+   "3": {
+    "title": "Protostar & Trapezium",
+    "text": "<b>Protostar</b> burns hot — buy <b>Shields</b>. <b>Trapezium</b> pays a fortune for ice. <b>Magnetic rocks</b> pull together into clusters: blast them with Charges!"
+   },
+   "4": {
+    "title": "The Lodestone Belt",
+    "text": "<b>Lodestone</b> and its belt: a third of the rocks are magnetic. Break one and every ore chunk nearby flies to you."
+   },
+   "6": {
+    "title": "Horsehead System",
+    "text": "<b>Mane</b> and the <b>Horsehead Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Pillar & Influence",
+    "text": "<b>Glowworm</b> and the <b>Pillar Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the Orion Nebula."
+   },
+   "8": {
+    "title": "Shadowveil",
+    "text": "<b>Shadowveil</b>'s Wolf Den and <b>the Nursery Edge</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🧲",
+    "n": "Magnetic Railway",
+    "d": "A track of magnets so strong your ore just slides home on its own.",
+    "fx": "Cradle outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Starbirth Beacons",
+    "d": "You light the lanes with baby stars. They are very bright and a bit loud.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🛡",
+    "n": "Nebula Wolfpack",
+    "d": "You tame the Veil Wolves' fastest ships. Two hunt with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🗼",
+    "n": "Magnet Lift",
+    "d": "Two giant magnets, one on the ground and one in orbit. Flip the switch and cargo goes up.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Star Nursery Garden",
+    "d": "You plant a baby star next to Trapezium. Now it has seasons, rain and flowers.",
+    "fx": "Trapezium pays ×2 for everything · Trapezium Guard reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Nebula Folds",
+    "d": "You fold the nebula like a map so any two places touch.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Lodestone Halo",
+    "d": "A ring-shaped magnet around Pillar pulls ore out of the whole nebula.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Starbirth Farm",
+    "d": "Why use one star? You grow a whole field of them and harvest their light.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Star Seed Cannon",
+    "d": "You fire a baby star at a planet. It grows up very fast.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "pulsar": {
+  "n": "The Pulsar",
+  "star": "white",
+  "rock": 14.9,
+  "enemy": 8,
+  "value": 1,
+  "gift": "phase",
+  "sweeps": 1,
+  "boss": "warden",
+  "bossFleet": [
+   "warden",
+   "corsair",
+   "corsair"
+  ],
+  "signal": {
+   "title": "The lighthouse keeper",
+   "text": "At the heart of the Pulsar's beam stands the <b>Pulsar Warden</b> — a spinning station with two arms of pure light. <b>Stay out of its arms</b>, or phase right through them."
+  },
+  "gate": "The Warden stops spinning and goes dark. In the sudden silence, an ancient ring <b>starts to tick</b>.",
+  "intro": "<b>The Pulsar</b> is a dead star spinning hundreds of times a second. Every few seconds its <b>beam sweeps across your field</b>: rocks it touches get <b>charged</b> (×2 ore for a while), but it also burns your hull. The Beam Riders give you the <b>Phase Shift</b>: press <b>X</b> (or PHASE) to become a ghost for 3 s — no damage, and you fly straight through rocks. Ride the beam! You keep it forever.",
+  "factions": {
+   "tierra": {
+    "n": "Lighthouse Assembly",
+    "c": "#b0c8ff"
+   },
+   "marte": {
+    "n": "Tick Clans",
+    "c": "#e0c0a0"
+   },
+   "cinturon": {
+    "n": "Beam Riders",
+    "c": "#9ff3ff"
+   },
+   "exterior": {
+    "n": "Silent Choir",
+    "c": "#c0a0ff"
+   },
+   "piratas": {
+    "n": "Static Raiders",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Tick",
+    "station": "Tick Base",
+    "tex": "rock",
+    "col": [
+     "#c0c8d8",
+     "#30364a"
+    ],
+    "desc": "A moon that flashes every time the beam goes by.",
+    "field": {
+     "n": "Tick Fields",
+     "ores": {
+      "iron": 4,
+      "ice": 2,
+      "titanium": 2.77
+     }
+    }
+   },
+   "tierra": {
+    "n": "Metronome",
+    "station": "Beacon Harbor",
+    "tex": "ocean",
+    "col": [
+     "#a0c0ff",
+     "#0a1a4a"
+    ],
+    "desc": "A world where everyone lives by the beam. Very punctual people."
+   },
+   "venus": {
+    "n": "Chime",
+    "station": "Chime Spire",
+    "tex": "gas",
+    "col": [
+     "#e0e8ff",
+     "#4a4a8a"
+    ],
+    "desc": "Its clouds ring like bells when the beam hits them."
+   },
+   "mercurio": {
+    "n": "Flash",
+    "station": "Flash Depot",
+    "tex": "lava",
+    "col": [
+     "#ffffff",
+     "#2a2a5a"
+    ],
+    "desc": "Right next to the beam. Bring shields.",
+    "field": {
+     "n": "Flash Plains",
+     "ores": {
+      "nickel": 2,
+      "platinum": 2,
+      "sunstone": 0.23
+     }
+    }
+   },
+   "marte": {
+    "n": "Echo",
+    "station": "Echo Gate",
+    "tex": "rock",
+    "col": [
+     "#c0a890",
+     "#3a2a20"
+    ],
+    "desc": "A silent desert that echoes every pulse. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Strobe",
+    "station": "Beam Hall",
+    "tex": "rock",
+    "col": [
+     "#a8b8d0",
+     "#283040"
+    ],
+    "desc": "The Beam Riders' home. They time everything to the pulse.",
+    "field": {
+     "n": "The Strobe Belt",
+     "ores": {
+      "platinum": 2,
+      "sunstone": 2,
+      "iridium": 0.17
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Gyre",
+    "tex": "gas",
+    "col": [
+     "#c0d8ff",
+     "#2a3a7a"
+    ]
+   },
+   "europa": {
+    "n": "Hush",
+    "station": "Hush Colony",
+    "tex": "ice",
+    "col": [
+     "#f0f8ff",
+     "#6a7aa0"
+    ],
+    "desc": "The only quiet place in the system. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Gyre Depot",
+    "desc": "Gyre's Trojans, crackling with static.",
+    "field": {
+     "n": "Gyre Swarm",
+     "ores": {
+      "platinum": 2,
+      "sunstone": 2,
+      "iridium": 5.06
+     }
+    }
+   },
+   "saturno": {
+    "n": "Spindle",
+    "station": "Spindle Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e0e8f8",
+     "#4a5a8a"
+    ],
+    "desc": "A giant whose rings spin in time with the pulsar.",
+    "field": {
+     "n": "Spindle Rings",
+     "ores": {
+      "ice": 2,
+      "iridium": 2,
+      "ringpearl": 1,
+      "exotic": 0.24
+     }
+    }
+   },
+   "titan": {
+    "n": "Cog",
+    "station": "Cogworks",
+    "tex": "titan",
+    "col": [
+     "#c8c0b0",
+     "#4a4030"
+    ],
+    "desc": "A moon of clockwork factories."
+   },
+   "pluton": {
+    "n": "Static",
+    "station": "Static Market",
+    "tex": "rock",
+    "col": [
+     "#7a7a9a",
+     "#14141f"
+    ],
+    "desc": "Where the Static Raiders sell what they steal."
+   },
+   "kuiper": {
+    "n": "The Silent Reach",
+    "station": "Reach Depot",
+    "desc": "Far from the beam, but never quite out of it.",
+    "field": {
+     "n": "The Silent Reach",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 2,
+      "exotic": 1.45
+     }
+    }
+   },
+   "oort": {
+    "n": "The Warden's Lighthouse",
+    "station": "Blind Spot Outpost",
+    "col": [
+     "#e0f0ff",
+     "#101a3a"
+    ],
+    "desc": "The center of the beam, where the Warden spins.",
+    "field": {
+     "n": "The Warden's Lighthouse",
+     "ores": {
+      "ice": 2,
+      "exotic": 1,
+      "voidshard": 0.24
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Tick"
+   },
+   "3": {
+    "title": "Flash & Echo",
+    "text": "<b>Flash</b> sits in the beam — buy <b>Shields</b>. <b>Echo</b> pays a fortune for ice. When the beam sweeps by, press <b>X</b> to <b>Phase</b> through it and mine the charged rocks!"
+   },
+   "4": {
+    "title": "The Strobe Belt",
+    "text": "<b>Strobe</b> and the <b>Strobe Belt</b>. Charged rocks drop double ore — time your mining to the pulse."
+   },
+   "6": {
+    "title": "Gyre System",
+    "text": "<b>Hush</b> and the <b>Gyre Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Spindle & Influence",
+    "text": "<b>Cog</b> and the <b>Spindle Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the Pulsar."
+   },
+   "8": {
+    "title": "Static",
+    "text": "<b>Static</b>'s market and <b>the Silent Reach</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "⚡",
+    "n": "Pulse Catapult",
+    "d": "Cargo launches on every pulse — 700 times a second.",
+    "fx": "Tick outpost output ×3"
+   },
+   "beacons": {
+    "icon": "📡",
+    "n": "Clockwork Lanes",
+    "d": "Every ship moves exactly in time with the pulsar. Nobody is ever late again.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "⚔",
+    "n": "Strobe Squadron",
+    "d": "Gunships that only exist between pulses. Pirates can't hit what isn't there. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Beam Lift",
+    "d": "You park cargo in the pulsar's beam and it gets flicked into orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Planet Clock",
+    "d": "You slow Echo's spin to a perfect 24 hours. Turns out that's all it needed.",
+    "fx": "Echo pays ×2 for everything · Tick Clans reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Time-Slice Gates",
+    "d": "You step out of one pulse and into the next — somewhere else.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Spinning Ring Foundry",
+    "d": "Spindle's rings spin so fast they sort ore by weight all by themselves.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Neutron Dynamo",
+    "d": "You put a generator on the fastest-spinning thing in the galaxy.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Pulsar Lance",
+    "d": "You aim the pulsar. Just once. Just a little.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "rim": {
+  "n": "Core Rim",
+  "star": "orange",
+  "rock": 16.3,
+  "enemy": 8.8,
+  "value": 1,
+  "boss": "archon",
+  "bossFleet": [
+   "archon"
+  ],
+  "signal": {
+   "title": "The last guardian",
+   "text": "At <b>Archon's Gate</b> an ancient machine still stands watch: <b>the Archon</b>. It hides behind <b>shield shards</b> — destroy the shards first, then strike."
+  },
+  "gate": "The Archon bows, and its light goes out. The oldest gate in the galaxy <b>opens</b> — and it points straight at the black hole.",
+  "intro": "The <b>Core Rim</b> is the edge of the galaxy's center, full of ruins from a lost civilization. Some asteroids are <b>ancient relics</b>, covered in glowing glyphs. Break one to release a <b>relic power</b> for 25 s: double ore, a giant magnet, a super laser, or all your tools recharged at once.",
+  "factions": {
+   "tierra": {
+    "n": "Rim Concordat",
+    "c": "#ffc080"
+   },
+   "marte": {
+    "n": "Relic Wardens",
+    "c": "#d0b070"
+   },
+   "cinturon": {
+    "n": "Glyph Diggers",
+    "c": "#ffe080"
+   },
+   "exterior": {
+    "n": "Old Light Pilgrims",
+    "c": "#c0a0ff"
+   },
+   "piratas": {
+    "n": "Tomb Raiders",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Shard",
+    "station": "Dig Site One",
+    "tex": "rock",
+    "col": [
+     "#d0b890",
+     "#3a2a18"
+    ],
+    "desc": "A moon covered in old ruins. Every rock might be a relic.",
+    "field": {
+     "n": "First Dig",
+     "ores": {
+      "iron": 3,
+      "ice": 3,
+      "cobalt": 0.51
+     },
+     "relics": 0.08
+    }
+   },
+   "tierra": {
+    "n": "Elder",
+    "station": "Elder Harbor",
+    "tex": "ocean",
+    "col": [
+     "#e0c090",
+     "#2a3a5a"
+    ],
+    "desc": "A gentle ocean world built on top of ancient cities."
+   },
+   "venus": {
+    "n": "Gilt",
+    "station": "Gilt Spire",
+    "tex": "gas",
+    "col": [
+     "#ffe0a0",
+     "#7a5a20"
+    ],
+    "desc": "A golden cloud world. The rich collect relics here."
+   },
+   "mercurio": {
+    "n": "Kiln",
+    "station": "Kiln Depot",
+    "tex": "lava",
+    "col": [
+     "#ffa050",
+     "#3a1404"
+    ],
+    "desc": "A burning world where the ancients forged their machines.",
+    "field": {
+     "n": "Kiln Flats",
+     "ores": {
+      "titanium": 2,
+      "cobalt": 2,
+      "platinum": 1,
+      "iridium": 0.21
+     },
+     "relics": 0.12
+    }
+   },
+   "marte": {
+    "n": "Obelisk",
+    "station": "Obelisk Gate",
+    "tex": "rock",
+    "col": [
+     "#c0a070",
+     "#3a2a14"
+    ],
+    "desc": "A desert of giant black obelisks. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Vault",
+    "station": "Glyph Hall",
+    "tex": "rock",
+    "col": [
+     "#b8a080",
+     "#30281c"
+    ],
+    "desc": "The Glyph Diggers' city, carved inside an ancient vault.",
+    "field": {
+     "n": "The Vault Belt",
+     "ores": {
+      "cobalt": 2,
+      "he3": 2,
+      "ringpearl": 0.29
+     },
+     "relics": 0.25
+    }
+   },
+   "jupiter": {
+    "n": "Colossus Prime",
+    "tex": "gas",
+    "col": [
+     "#ffc890",
+     "#7a3a1a"
+    ]
+   },
+   "europa": {
+    "n": "Rune",
+    "station": "Rune Colony",
+    "tex": "ice",
+    "col": [
+     "#fff0d8",
+     "#7a6a4a"
+    ],
+    "desc": "Glyphs glow under the ice. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Prime Depot",
+    "desc": "Trojan rocks full of old machinery.",
+    "field": {
+     "n": "Ruin Swarm",
+     "ores": {
+      "he3": 2,
+      "platinum": 2,
+      "iridium": 2,
+      "exotic": 0.12
+     },
+     "relics": 0.18
+    }
+   },
+   "saturno": {
+    "n": "Ringwork",
+    "station": "Ringwork Depot",
+    "tex": "gas",
+    "col": [
+     "#f0d8a8",
+     "#6a4a2a"
+    ],
+    "desc": "Its rings are not natural. Somebody built them.",
+    "field": {
+     "n": "Ringwork Rings",
+     "ores": {
+      "he3": 2,
+      "iridium": 2,
+      "voidshard": 0.16
+     },
+     "relics": 0.18
+    }
+   },
+   "titan": {
+    "n": "Archive",
+    "station": "Archiveworks",
+    "tex": "titan",
+    "col": [
+     "#d8c090",
+     "#4a3a20"
+    ],
+    "desc": "A moon-sized library, now a refinery."
+   },
+   "pluton": {
+    "n": "Crypt",
+    "station": "Tomb Market",
+    "tex": "rock",
+    "col": [
+     "#7a6a5a",
+     "#1a140e"
+    ],
+    "desc": "The Tomb Raiders sell stolen relics here."
+   },
+   "kuiper": {
+    "n": "The Boneyard",
+    "station": "Boneyard Depot",
+    "desc": "A graveyard of ancient ships, picked clean — almost.",
+    "field": {
+     "n": "The Boneyard",
+     "ores": {
+      "ice": 2,
+      "iridium": 2,
+      "exotic": 1.86
+     },
+     "relics": 0.18
+    }
+   },
+   "oort": {
+    "n": "Archon's Gate",
+    "station": "Last Lamp Outpost",
+    "col": [
+     "#ffd080",
+     "#2a1a04"
+    ],
+    "desc": "The oldest gate in the galaxy, and its last guardian.",
+    "field": {
+     "n": "Archon's Gate",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 2,
+      "voidshard": 0.96
+     },
+     "relics": 0.12
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Shard"
+   },
+   "3": {
+    "title": "Kiln & Obelisk",
+    "text": "<b>Kiln</b> burns hot — buy <b>Shields</b>. <b>Obelisk</b> pays a fortune for ice. Rocks with glowing glyphs are <b>relics</b>: break them for a power-up!"
+   },
+   "4": {
+    "title": "The Vault Belt",
+    "text": "<b>Vault</b> and the <b>Vault Belt</b>: one rock in four is a relic."
+   },
+   "6": {
+    "title": "Colossus Prime System",
+    "text": "<b>Rune</b> and the <b>Ruin Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Ringwork & Influence",
+    "text": "<b>Archive</b> and the <b>Ringwork Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the Core Rim."
+   },
+   "8": {
+    "title": "Crypt",
+    "text": "<b>Crypt</b>'s Tomb Market and <b>the Boneyard</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🏛",
+    "n": "Ancient Conveyor",
+    "d": "You find the ancients' cargo system. It still works. It was waiting for you.",
+    "fx": "Shard outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Glyph Lanes",
+    "d": "You switch on the old glyphs. They glow along every lane, showing the way.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🤖",
+    "n": "Reawakened Sentinels",
+    "d": "Two ancient guardian machines decide they like you. They fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🗼",
+    "n": "Obelisk Lift",
+    "d": "Turns out the obelisks are elevators. Who knew?",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Garden Machine",
+    "d": "An ancient machine that turns deserts into jungles. You press the big button.",
+    "fx": "Obelisk pays ×2 for everything · Relic Wardens reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "The Old Network",
+    "d": "You reconnect the ancients' gate network. It goes everywhere.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Ringwork Restart",
+    "d": "You restart Ringwork's artificial rings. They were mining machines all along.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "The Ancients' Sphere",
+    "d": "You finish the Dyson sphere the ancients left half-built a million years ago.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "World Eraser",
+    "d": "The reason the ancients disappeared. Please be careful with it.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "sgra": {
+  "n": "Sagittarius A*",
+  "star": "hole",
+  "rock": 17.8,
+  "enemy": 9.6,
+  "value": 1,
+  "gravity": 1,
+  "boss": "devourer",
+  "bossFleet": [
+   "devourer",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Something is eating the light",
+   "text": "At the <b>Event Horizon</b> lives the <b>Devourer</b> — a creature that feeds on the black hole itself. Its gravity <b>pulls you in</b>. This is the last fight in the galaxy."
+  },
+  "gate": "The Devourer falls into the black hole it fed on. The center of the galaxy is quiet. <b>You made it.</b>",
+  "intro": "<b>Sagittarius A*</b>: the supermassive black hole at the center of the Milky Way. Its <b>gravity pulls on everything</b> — your ship, the rocks, the ore. Rocks drift up toward the black hole and get swallowed, so mine fast and don't fly too close to the <b>event horizon</b> at the top of every field. This is the last system. Finish it, and you've crossed the galaxy.",
+  "factions": {
+   "tierra": {
+    "n": "Core Republic",
+    "c": "#ffd0a0"
+   },
+   "marte": {
+    "n": "Horizon Monks",
+    "c": "#c0a0ff"
+   },
+   "cinturon": {
+    "n": "Spiral Miners",
+    "c": "#ffb070"
+   },
+   "exterior": {
+    "n": "Last Frontier",
+    "c": "#a0c0ff"
+   },
+   "piratas": {
+    "n": "Void Reavers",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Spark",
+    "station": "Brink Base",
+    "tex": "rock",
+    "col": [
+     "#d0a080",
+     "#2a1a10"
+    ],
+    "desc": "A small moon right on the brink of the deep.",
+    "field": {
+     "n": "Brink Fields",
+     "ores": {
+      "iron": 4,
+      "ice": 2,
+      "platinum": 0.14
+     }
+    }
+   },
+   "tierra": {
+    "n": "Haven Core",
+    "station": "Core Harbor",
+    "tex": "ocean",
+    "col": [
+     "#90b0ff",
+     "#101a4a"
+    ],
+    "desc": "The capital of the galaxy's center. The sky is all stars."
+   },
+   "venus": {
+    "n": "Radiance",
+    "station": "Radiance Spire",
+    "tex": "gas",
+    "col": [
+     "#ffe0b0",
+     "#7a4a2a"
+    ],
+    "desc": "A cloud world lit by the glowing accretion disk."
+   },
+   "mercurio": {
+    "n": "Swirl",
+    "station": "Swirl Depot",
+    "tex": "lava",
+    "col": [
+     "#ffa060",
+     "#3a0a04"
+    ],
+    "desc": "A planet slowly spiraling inward. Hot and rich.",
+    "field": {
+     "n": "Swirl Flats",
+     "ores": {
+      "iron": 2,
+      "titanium": 2,
+      "sunstone": 1.88
+     }
+    }
+   },
+   "marte": {
+    "n": "Stillness",
+    "station": "Monk Gate",
+    "tex": "rock",
+    "col": [
+     "#a090c0",
+     "#2a2040"
+    ],
+    "desc": "The Horizon Monks meditate here, watching the black hole. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Spiral",
+    "station": "Spiral Hall",
+    "tex": "rock",
+    "col": [
+     "#c09070",
+     "#3a2418"
+    ],
+    "desc": "The Spiral Miners chase ore as it falls inward.",
+    "field": {
+     "n": "The Spiral Belt",
+     "ores": {
+      "nickel": 2,
+      "sunstone": 2,
+      "iridium": 0.33
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Maw",
+    "tex": "gas",
+    "col": [
+     "#ff9a60",
+     "#4a0a10"
+    ]
+   },
+   "europa": {
+    "n": "Drift",
+    "station": "Drift Colony",
+    "tex": "ice",
+    "col": [
+     "#e0e8ff",
+     "#4a4a7a"
+    ],
+    "desc": "An ice moon stretched into an egg by gravity. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Maw Depot",
+    "desc": "Rocks falling in a long, slow spiral.",
+    "field": {
+     "n": "Maw Swarm",
+     "ores": {
+      "ice": 2,
+      "iridium": 2,
+      "voidshard": 0.02
+     }
+    }
+   },
+   "saturno": {
+    "n": "Disk",
+    "station": "Disk Depot",
+    "tex": "gas",
+    "col": [
+     "#ffd0a0",
+     "#6a2a10"
+    ],
+    "desc": "A giant skimming the edge of the accretion disk.",
+    "field": {
+     "n": "The Accretion Rings",
+     "ores": {
+      "ice": 3,
+      "iridium": 2,
+      "voidshard": 0.21
+     }
+    }
+   },
+   "titan": {
+    "n": "Lantern",
+    "station": "Lanternworks",
+    "tex": "titan",
+    "col": [
+     "#ffe0a0",
+     "#5a3a10"
+    ],
+    "desc": "A moon that glows in the disk's light."
+   },
+   "pluton": {
+    "n": "Edge",
+    "station": "Last Market",
+    "tex": "rock",
+    "col": [
+     "#7a6a8a",
+     "#14101a"
+    ],
+    "desc": "The last market before the deep. The Void Reavers trade here."
+   },
+   "kuiper": {
+    "n": "The Accretion Disk",
+    "station": "Disk Edge Depot",
+    "desc": "A river of glowing rock pouring into the black hole.",
+    "field": {
+     "n": "The Accretion Disk",
+     "ores": {
+      "ice": 2,
+      "exotic": 1,
+      "voidshard": 0.02
+     }
+    }
+   },
+   "oort": {
+    "n": "Event Horizon",
+    "station": "Point of No Return",
+    "col": [
+     "#ffb060",
+     "#000000"
+    ],
+    "desc": "The edge of the black hole. The Devourer feeds here.",
+    "field": {
+     "n": "Event Horizon",
+     "ores": {
+      "ice": 2,
+      "exotic": 2,
+      "voidshard": 0.07
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Spark"
+   },
+   "3": {
+    "title": "Swirl & Stillness",
+    "text": "<b>Swirl</b> burns hot — buy <b>Shields</b>. <b>Stillness</b> pays a fortune for ice. Mind the <b>gravity</b>: everything drifts toward the black hole."
+   },
+   "4": {
+    "title": "The Spiral Belt",
+    "text": "<b>Spiral</b> and the <b>Spiral Belt</b>. Rocks that reach the event horizon are gone for good — catch them first."
+   },
+   "6": {
+    "title": "Maw System",
+    "text": "<b>Drift</b> and the <b>Maw Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Disk & Influence",
+    "text": "<b>Lantern</b> and the <b>Accretion Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the center of the galaxy."
+   },
+   "8": {
+    "title": "Edge",
+    "text": "<b>Edge</b>'s Last Market and <b>the Accretion Disk</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🌀",
+    "n": "Gravity Slingshot",
+    "d": "You just drop the ore and let the black hole throw it home. Physics!",
+    "fx": "Spark outpost output ×3"
+   },
+   "beacons": {
+    "icon": "📡",
+    "n": "Time-Dilation Lanes",
+    "d": "Near the black hole, time slows down. Your trips take ages — for everyone else.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🛡",
+    "n": "Horizon Guard",
+    "d": "Monks in gunships, perfectly calm, perfectly accurate. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Frame-Drag Lift",
+    "d": "The black hole spins space itself. Your cargo rides the spin up into orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Hawking Greenhouse",
+    "d": "Warm black-hole glow turns Stillness into a garden. The monks approve.",
+    "fx": "Stillness pays ×2 for everything · Horizon Monks reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Wormhole Web",
+    "d": "You tie wormholes to the black hole's spin. They go anywhere in the galaxy.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Accretion Mill",
+    "d": "A wheel in the accretion disk catches falling ore before it's gone.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Penrose Engine",
+    "d": "You throw junk at a spinning black hole and catch it coming back with more energy. Infinite power.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Pocket Singularity",
+    "d": "A tiny black hole in a box. Open with care.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ }
+});
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
@@ -5677,9 +7084,25 @@ function finalBossKilled() {
   if (S.gateOpen) return;
   S.gateOpen = 1;
   const nx = nextSystem();
+  if (!nx) return showEnding();
   addNews('🌀', `<b>The guardian is destroyed.</b> An ancient jump gate wakes up in ${LOC.oort.n}.`, '#d9b3ff');
   if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>${sysDef().gate}</p><p>Open the <b>Galaxy</b> map to see where it leads${nx ? ` — next stop: <b>${nx.n}</b>` : ''}. You can stay as long as you like: the more you achieve here, the more <b>Tribute</b> you take with you.</p>`, choices: [{ label: 'Open the Galaxy map', cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }, { label: 'Later', cost: 0, fn: () => {} }] });
   save();
+}
+
+// ---------- the end of the road: the heart of the galaxy ----------
+function showEnding() {
+  const G = S.galaxy || { done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 }, tribute: 0 };
+  G.finished = 1; if (!G.done.includes(sysId())) G.done.push(sysId());
+  const L = G.life, earned = L.earned + S.stats.earned, mined = L.mined + S.stats.mined, kills = L.kills + S.stats.kills, days = L.days + S.day;
+  addNews('🌌', '<b>The Devourer is gone.</b> You crossed the whole Milky Way, from the rim to its heart.', '#ffd24a');
+  save();
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌌', title: 'The heart of the galaxy', html: `<p>${sysDef().gate}</p>
+    <p>From a little moon in the Solar System to the black hole at the center of the Milky Way: <b>15 star systems</b>, all yours.</p>
+    <div class="ending-stats"><div><b>${fmt(earned)}</b><small>credits earned</small></div><div><b>${fmt(mined)}</b><small>ore mined</small></div><div><b>${fmt(kills)}</b><small>pirates defeated</small></div><div><b>${fmt(days)}</b><small>days in space</small></div></div>
+    <p class="hint">Far beyond the galaxy's edge, your dishes catch a new signal… from <b>Andromeda</b>. A new galaxy is coming in a future update.</p>
+    <p>You can keep playing here as long as you like — your Tribute keeps flowing.</p>`,
+    choices: [{ label: 'Keep playing', cost: 0, fn: () => {} }, { label: 'Open the Galaxy map', cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }] });
 }
 
 // ---------- the Galaxy map ----------
@@ -6329,6 +7752,7 @@ const MineScene = {
   },
   exit() { showMineUI(false); laserSound(false); this.laserOn = false; },
   get z() { return this.loc.field.z; },
+  get gravity() { return !!sysDef().gravity && !this.space; },
   setup() {
     const f = this.loc.field;
     this.rocks = []; this.chunks = []; this.parts = new Particles(); this.floaters = []; this.enemies = []; this.bolts = [];
@@ -6338,6 +7762,7 @@ const MineScene = {
     this.cam = { x: this.p.x, y: this.p.y - 120 };
     this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = []; this.etrail = []; this.scanCd = this.scanCd || 0; this.scanT = -1; this.moltenT = 0; this.waveT = -1; this.inks = []; this.forks = null;
     this.pulseIn = sysDef().pulses ? rand(20, 30) : 0;
+    this.phaseCd = this.phaseCd || 0; this.phaseT = 0; this.relic = null; this.sweep = null; this.sweepIn = rand(8, 12); this.swallowed = 0;
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -6385,11 +7810,14 @@ const MineScene = {
     const armored = !crystal && !this.space && !!this.loc.field.armored && Math.random() < this.loc.field.armored;
     const volatile = !crystal && !armored && !this.space && !!this.loc.field.explosive && Math.random() < this.loc.field.explosive;
     const living = !crystal && !armored && !volatile && !this.space && !!this.loc.field.living && Math.random() < this.loc.field.living;
+    const plain = !crystal && !armored && !volatile && !living && !this.space;
+    const magnetic = plain && !!this.loc.field.magnetic && Math.random() < this.loc.field.magnetic;
+    const relic = plain && !magnetic && !!this.loc.field.relics && Math.random() < this.loc.field.relics;
     // geodes (Rigel onward) hide a big load of the field's best ore — the Deep Scanner shows where they are
     const geode = !this.space && tier >= 2 && !!this.loc.field.geodes && Math.random() < this.loc.field.geodes ? this.bestOre() : null;
     const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile, living, geode,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile, living, geode, magnetic, relic,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -6419,6 +7847,12 @@ const MineScene = {
     for (const r of this.rocks) { const d = Math.hypot(r.x - this.p.x, r.y - this.p.y); if (d < 1800) { r.seen = 14; r.seenD = d / 2000; if (r.geode) n++; } }
     tone(300, 0.6, 'sine', 0.08, 1500); tone(1500, 0.5, 'sine', 0.04, null, 0.55);
     toast(n ? `◈ Deep Scan: ${n} geode${n > 1 ? 's' : ''} nearby!` : '◈ Deep Scan: no geodes nearby', n ? 'good' : '');
+  },
+  // Phase Shift (the Pulsar): 3 s as a ghost — no damage, and you fly through rocks
+  phase() {
+    if (!hasTool('phase') || this.space || this.phaseCd > 0) return;
+    this.phaseT = 3; this.phaseCd = 20; tone(900, 0.4, 'sine', 0.06, 300); haptic(20);
+    this.parts.burst(this.p.x, this.p.y, 30, '#9ff3ff', 200, 0.5, 2);
   },
   pullRadius() { return Math.max(1000, ship.magnet * 4); },
   toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) * (built('borer') ? 1.6 : 1) : ship.laserRange; },
@@ -6489,6 +7923,12 @@ const MineScene = {
       this.floaters.push({ x: r.x, y: r.y - 30, txt: `GEODE! ${n} ${ITEMS[r.geode].n}`, col: ITEMS[r.geode].c, life: 2.2, big: 1 });
       S.stats.geodes = (S.stats.geodes || 0) + 1; sfx('win'); this.shake = Math.max(this.shake, 8);
     }
+    if (r.magnetic) {   // magnetic burst: every ore chunk nearby flies to you
+      for (const c of this.chunks) if (Math.hypot(c.x - r.x, c.y - r.y) < 800) c.home = 2;
+      this.blasts.push({ x: r.x, y: r.y, R: 260, t: 0, col: '#7fb8ff' }); this.homeAt = { x: r.x, y: r.y };
+      tone(220, 0.4, 'sine', 0.06, 880);
+    }
+    if (r.relic) this.grantRelic(r);
     if (r.crystal && r.tier > 1) {
       // crystals shatter into a spray of fast shards you have to chase
       const n = r.tier === 3 ? 5 : 3;
@@ -6503,7 +7943,7 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
-        c.volatile = false; c.geode = null; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; }
+        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; }
       }
       const m = 0.5 * ship.yieldMult * this.oreBonus(r);
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
@@ -6515,7 +7955,16 @@ const MineScene = {
     }
   },
   // living rocks (Kepler) and molten rocks (Betelgeuse pulses) are worth more
-  oreBonus(r) { return (r.living ? 1.6 * (built('whisperer') ? 2 : 1) : 1) * (this.moltenT > 0 ? 1.5 : 1); },
+  oreBonus(r) { return (r.living ? 1.6 * (built('whisperer') ? 2 : 1) : 1) * (this.moltenT > 0 ? 1.5 : 1) * (r.magnetic && built('polarity') ? 2 : 1) * (r.charged > 0 ? (built('beamharvest') ? 3 : 2) : 1) * (this.relic && this.relic.k === 'gold' ? 2 : 1); },
+  // ancient relics (Core Rim): break one for a 25 s power
+  grantRelic(r) {
+    const k = pick(['gold', 'lens', 'beam', 'recharge']), L = { gold: 'GOLDEN TOUCH: ×2 ore', lens: 'GRAVITY LENS: giant magnet', beam: 'ANCIENT BEAM: ×2 laser', recharge: 'RECHARGE: all tools ready!' }[k];
+    if (k === 'recharge') { this.pullCd = this.boostCd = this.bombCd = this.scanCd = this.phaseCd = 0; }
+    else this.relic = { k, t: 25 * (built('archive') ? 2 : 1), n: L.split(':')[0] };
+    this.floaters.push({ x: r.x, y: r.y - 40, txt: L, col: '#ffe080', life: 2.6, big: 1 });
+    this.parts.burst(r.x, r.y, 50, '#ffe080', 260, 1, 3); sfx('win');
+    S.stats.relics = (S.stats.relics || 0) + 1;
+  },
   dropChunk(x, y, ore) {
     const a = rand(0, TAU), v = rand(20, 60);
     this.chunks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, ore, rot: rand(0, TAU), life: 45 });
@@ -6535,7 +7984,7 @@ const MineScene = {
     return true;
   },
   // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range; molten rocks melt twice as fast
-  laserDmg(r, drill) { return ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (r.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * (this.moltenT > 0 ? 2 : 1); },
+  laserDmg(r, drill) { return (this.relic && this.relic.k === 'beam' ? 2 : 1) * ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (r.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * (this.moltenT > 0 ? 2 : 1); },
   get inCombat() { return this.enemies.length > 0; },
   update(dt) {
     this.t += dt;
@@ -6554,6 +8003,12 @@ const MineScene = {
     const drag = Math.pow(0.4, dt);
     p.vx *= drag; p.vy *= drag;
     const inInk = (this.inks || []).some(k => Math.hypot(p.x - k.x, p.y - k.y) < k.r * 0.8);
+    // Sagittarius A*: the black hole above every field pulls on you; its event horizon burns
+    if (this.gravity) {
+      const g = (built('hawking') ? 35 : 70) * (1 + clamp(1 - p.y / 900, 0, 1) * 2);
+      p.vy -= g * dt;
+      if (p.y < 300) { this.damage(ship.hpMax * 0.06 * dt, true); if (!this.horizonHint) { this.horizonHint = 1; toast('Too close to the event horizon! Fly down!', 'bad'); } }
+    }
     const maxV = 360 * ship.thrust * (this.boostT > 0 ? 1.5 : 1) * (inInk ? 0.55 : 1);
     const v = Math.hypot(p.vx, p.vy);
     if (v > maxV) { p.vx *= maxV / v; p.vy *= maxV / v; }
@@ -6638,13 +8093,26 @@ const MineScene = {
           r.swim = (r.swim || 0) + dt * (3 + Math.hypot(r.vx, r.vy) / 25);
         }
         if (r.seen > 0) { r.seen -= dt; if (r.seenD > 0) r.seenD -= dt; }
+        if (r.charged > 0) r.charged -= dt;
+        if (r.magnetic) {   // magnetic rocks drift toward each other and clump into clusters
+          let mb = null, bd = 650;
+          for (const o of this.rocks) if (o !== r && o.magnetic && !o.comet) { const d2 = Math.hypot(o.x - r.x, o.y - r.y); if (d2 < bd) { bd = d2; mb = o; } }
+          r.near = mb;
+          if (mb) {
+            const ux = (mb.x - r.x) / (bd || 1), uy = (mb.y - r.y) / (bd || 1), gap = bd - r.r - mb.r;
+            if (gap > 4) { const f = (built('polarity') ? 40 : 20) / r.tier; r.vx += ux * f * dt; r.vy += uy * f * dt; }
+            else { r.x += ux * gap * 0.5; r.y += uy * gap * 0.5; const k = Math.pow(0.2, dt); r.vx *= k; r.vy *= k; }
+            const sp = Math.hypot(r.vx, r.vy); if (sp > 70) { r.vx *= 70 / sp; r.vy *= 70 / sp; }
+          }
+        }
+        if (this.gravity) { r.vy -= 7 * dt; if (r.vy < -32) r.vy = -32; if (r.y < r.r + 60) { r.gone = 1; r.swallowed = 1; } }
         if (r.shard) { const sp = Math.hypot(r.vx, r.vy); if (sp > 35) { const k = Math.pow(0.55, dt); r.vx *= k; r.vy *= k; } }
         if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
         if (r.y < r.r || r.y > maxY) r.vy *= -1;
         r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, maxY);
       }
       const dx = p.x - r.x, dy = p.y - r.y, d = Math.hypot(dx, dy), md = r.r + shipR() * 0.4;
-      if (d < md && d > 0) {
+      if (d < md && d > 0 && !(this.phaseT > 0)) {
         const nx = dx / d, ny = dy / d;
         p.x = r.x + nx * md; p.y = r.y + ny * md;
         const rel = (p.vx - r.vx) * nx + (p.vy - r.vy) * ny;
@@ -6655,7 +8123,15 @@ const MineScene = {
         }
       }
     }
-    if (this.rocks.some(r => r.gone)) { this.rocks = this.rocks.filter(r => !r.gone); toast('The comet escaped…'); }
+    if (this.rocks.some(r => r.gone)) {
+      for (const r of this.rocks) if (r.swallowed) {
+        this.parts.burst(r.x, r.y, 20, '#ffb060', 120, 0.8, 2.5); this.swallowed++;
+        if (built('hawking')) { const v = ITEMS[r.ore].b * r.tier * 2 * incomeMult(); earn(v); this.floaters.push({ x: r.x, y: r.y + 40, txt: `+${fmt(v)} cr (Hawking)`, col: '#ffd24a', life: 1.4 }); }
+        else if (this.swallowed === 1) toast('A rock fell into the black hole — mine them before they drift up!');
+      }
+      if (this.rocks.some(r => r.gone && !r.swallowed)) toast('The comet escaped…');
+      this.rocks = this.rocks.filter(r => !r.gone);
+    }
     if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80) / ((sysDef().comets || 1) * (built('herding') ? 3 : 1)); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
     // --- chunks & loot ---
     const cfree = cargoFree();
@@ -6663,6 +8139,21 @@ const MineScene = {
     this.boostT = Math.max(0, this.boostT - dt); this.boostCd = Math.max(0, this.boostCd - dt); this.bombCd = Math.max(0, this.bombCd - dt);
     for (const b of this.bombs) { b.t -= dt; if (b.t <= 0) { b.done = 1; this.explode(b.x, b.y, 230, 0.6, false); } }
     this.bombs = this.bombs.filter(b => !b.done);
+    this.phaseCd = Math.max(0, this.phaseCd - dt); this.phaseT = Math.max(0, this.phaseT - dt);
+    if (this.relic) { this.relic.t -= dt; if (this.relic.t <= 0) this.relic = null; }
+    // the Pulsar's beam sweeps across the field: it charges rocks (×2 ore) and burns your hull
+    if (sysDef().sweeps && !this.space) {
+      this.sweepIn -= dt;
+      if (this.sweepIn < 2 && !this.sweepWarned) { this.sweepWarned = 1; toast(hasTool('phase') ? '⚡ Pulsar beam incoming — Phase (X) to ride it!' : '⚡ Pulsar beam incoming!', 'bad'); tone(1200, 0.15, 'square', 0.04); tone(1200, 0.15, 'square', 0.04, null, 0.3); }
+      if (this.sweepIn <= 0 && !this.sweep) { const dir = Math.random() < 0.5 ? 1 : -1; this.sweep = { t: 0, dur: 3, a0: Math.PI / 2 - 0.26 * dir, a1: Math.PI / 2 + 0.26 * dir, a: 0 }; sfx('warp'); }
+      if (this.sweep) {
+        const B = this.sweep; B.t += dt; B.a = lerp(B.a0, B.a1, B.t / B.dur);
+        const ox = MW / 2, oy = -2400, ux = Math.cos(B.a), uy = Math.sin(B.a), lineD = (x, y) => Math.abs((x - ox) * uy - (y - oy) * ux);
+        for (const r of this.rocks) if (lineD(r.x, r.y) < 70 + r.r) { if (!(r.charged > 0)) this.parts.burst(r.x, r.y, 6, '#bfe8ff', 80, 0.4, 2); r.charged = 15; }
+        if (lineD(p.x, p.y) < 70 && !built('beamharvest')) { this.damage(ship.hpMax * 0.1 * dt, true); if (Math.random() < dt * 10) sfx('hit'); }
+        if (B.t >= B.dur) { this.sweep = null; this.sweepIn = rand(12, 16); this.sweepWarned = 0; }
+      }
+    }
     this.scanCd = Math.max(0, this.scanCd - dt); if (this.scanT >= 0) { this.scanT += dt; if (this.scanT > 1) this.scanT = -1; }
     // Betelgeuse pulses: a heat wave washes over the field and every rock turns molten for a while
     if (sysDef().pulses && !this.space) {
@@ -6681,7 +8172,9 @@ const MineScene = {
     for (const c of this.chunks) {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
-      const mag = this.pullT > 0 ? this.pullRadius() : c.cr ? ship.magnet * 1.5 : ship.magnet;
+      const mag = (this.pullT > 0 ? this.pullRadius() : c.cr ? ship.magnet * 1.5 : ship.magnet) * (this.relic && this.relic.k === 'lens' ? 3 : 1);
+      if (c.home > 0) { c.home -= dt; if (cfree > 0 || c.cr) { c.vx += dx / (d || 1) * 900 * dt; c.vy += dy / (d || 1) * 900 * dt; } }
+      if (this.gravity) { c.vy -= 25 * dt; if (c.y < 30) c.dead = true; }
       if (d < mag && (cfree > 0 || c.cr)) { const f = 650 * (1 - d / mag) + 140; c.vx += dx / d * f * dt; c.vy += dy / d * f * dt; }
       if (d < 24 && this.collect(c)) c.dead = true;
       if (c.life <= 0) c.dead = true;
@@ -6750,6 +8243,7 @@ const MineScene = {
       if (this.armed && p.y > DOCK_Y) { this.leave(); return; }
     }
 
+    if (this.gravity && !this.space && this.rocks.length < this.target * 0.8 && Math.random() < dt * 1.2) this.spawnRock(rand(120, MW - 120), rand(DOCK_Y * 0.55, DOCK_Y - 420), pick([3, 3, 2]));
     if (!this.space && this.rocks.length < this.target * 0.5 && Math.random() < dt * 0.4) {
       const x = rand(120, MW - 120), y = rand(120, Math.min(DOCK_Y - 400, p.y - 500));
       if (y > 100) this.spawnRock(x, y, 3);
@@ -6790,6 +8284,7 @@ const MineScene = {
   },
   damage(n, heat) {
     const p = this.p;
+    if (this.phaseT > 0) return;
     if (p.shield > 0) { const a = Math.min(p.shield, n); p.shield -= a; n -= a; if (!heat) p.shT = 2.5; }
     if (n > 0) {
       S.hull -= n;
@@ -6841,6 +8336,14 @@ const MineScene = {
       drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
+    if (sysDef().gravity) drawBlackHole(ctx, W * 0.3 - cx * 0.015, H * 0.16 - (cy - MH) * 0.012, Math.min(W, H) * 0.07, t);
+    if (sysDef().sweeps) {   // the pulsar itself, far away, its beams spinning
+      const px = W * 0.22 - cx * 0.015, py = H * 0.14 - (cy - MH) * 0.012, a = t * 2.2;
+      glow(ctx, px, py, 60, '#bfe8ff', 0.6);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const k of [0, Math.PI]) { const g = ctx.createLinearGradient(px, py, px + Math.cos(a + k) * 420, py + Math.sin(a + k) * 420 * 0.4); g.addColorStop(0, 'rgba(200,235,255,0.5)'); g.addColorStop(1, 'rgba(200,235,255,0)'); ctx.strokeStyle = g; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(a + k) * 420, py + Math.sin(a + k) * 420 * 0.4); ctx.stroke(); }
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(px, py, 4, 0, TAU); ctx.fill();
+    }
     starWash(ctx, W, H, sysDef().star, t);
     ctx.save();
     ctx.scale(vz, vz); ctx.translate(-cx, -cy);
@@ -6851,6 +8354,7 @@ const MineScene = {
     for (const b of this.bombs) { const k = 1 - b.t / 1.2; glow(ctx, b.x, b.y, 18 + k * 20, '#ff5a2a', 0.5 + k * 0.5); ctx.fillStyle = Math.sin(b.t * 30) > 0 ? '#ffffff' : '#ff3a2a'; ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, TAU); ctx.fill(); }
     for (const b of this.blasts) {
       const k = b.t / 0.5;
+      if (b.col) { ctx.strokeStyle = b.col; ctx.globalAlpha = 1 - k; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.2 + k), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; continue; }
       if (k < 0.5) glow(ctx, b.x, b.y, b.R * (0.5 + k), '#fff0c0', (1 - k * 2) * 0.9);
       glow(ctx, b.x, b.y, b.R * 0.8, '#ff6a2a', (1 - k) * 0.5);
       ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke();
@@ -6858,6 +8362,21 @@ const MineScene = {
     }
     if (this.boostT > 0) glow(ctx, p.x, p.y, 70, '#ffe14a', 0.25 + 0.1 * Math.sin(t * 20));
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
+    if (this.gravity) drawEventHorizon(ctx, MW / 2, -1400, 1300, t);
+    if (this.sweep) {
+      const B = this.sweep, ox = MW / 2, oy = -2400, L = 7000, x2 = ox + Math.cos(B.a) * L, y2 = oy + Math.sin(B.a) * L, f = Math.sin(Math.PI * B.t / B.dur);
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      ctx.strokeStyle = `rgba(150,210,255,${0.22 * f})`; ctx.lineWidth = 220; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.strokeStyle = `rgba(200,235,255,${0.45 * f})`; ctx.lineWidth = 120; ctx.stroke();
+      ctx.strokeStyle = `rgba(255,255,255,${0.8 * f})`; ctx.lineWidth = 26; ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over'; ctx.lineCap = 'butt';
+    }
+    // magnetic field lines between clumping rocks
+    ctx.lineWidth = 1.2;
+    for (const r of this.rocks) if (r.magnetic && r.near && (r.near.near !== r || r.x < r.near.x) && Math.hypot(r.x - r.near.x, r.y - r.near.y) < r.r + r.near.r + 260) {
+      const o = r.near, mx = (r.x + o.x) / 2, my = (r.y + o.y) / 2, nx = -(o.y - r.y) * 0.25, ny = (o.x - r.x) * 0.25;
+      for (const k of [-1, 1]) { ctx.strokeStyle = `rgba(127,184,255,${0.25 + 0.15 * Math.sin(t * 4 + k)})`; ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.quadraticCurveTo(mx + nx * k, my + ny * k, o.x, o.y); ctx.stroke(); }
+    }
     if (this.scanT >= 0) { const k = this.scanT, R = k * 2000; ctx.strokeStyle = `rgba(127,224,255,${(1 - k) * 0.8})`; ctx.lineWidth = 3 + (1 - k) * 6; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R, 0, TAU); ctx.stroke(); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R * 0.92, 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
     for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + VW + 160 && r.y > cy - 100 && r.y < cy + VH + 100) {
@@ -6927,7 +8446,9 @@ const MineScene = {
       ctx.globalAlpha = 1; ctx.lineCap = 'butt'; ctx.globalCompositeOperation = 'source-over';
     }
     const lv = shipLv();
+    if (this.phaseT > 0) { ctx.globalAlpha = 0.4 + 0.15 * Math.sin(t * 20); glow(ctx, p.x, p.y, shipR() * 2.2, '#9ff3ff', 0.6); }
     drawPlayerShip(ctx, lv, p.x, p.y, p.a, mineScale(), this.thrusting, t);
+    ctx.globalAlpha = 1;
     if (ship.shieldMax > 0 && p.shT > 1.8) {
       ctx.strokeStyle = `rgba(61,232,255,${(p.shT - 1.8) * 1.3})`; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(p.x, p.y, shipR() + 8, 0, TAU); ctx.stroke();
@@ -6951,7 +8472,7 @@ const MineScene = {
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     }
     if (this.moltenT > 0) { ctx.fillStyle = `rgba(255,80,20,${Math.min(0.08, this.moltenT * 0.02)})`; ctx.fillRect(0, 0, W, H); }
-    drawDust(ctx, W, H, cx, cy, p.vx, p.vy, this.loc.field.cold ? '#d8f0ff' : this.loc.field.hazard === 'heat' ? '#ffd0a0' : '#cfdcff');
+    drawDust(ctx, W, H, cx, cy, p.vx, p.vy - (this.gravity ? 420 : 0), this.loc.field.cold ? '#d8f0ff' : this.loc.field.hazard === 'heat' ? '#ffd0a0' : '#cfdcff');
     // crosshair
     if (!isTouch && !mouse.onUI) {
       ctx.strokeStyle = this.inCombat ? 'rgba(255,90,120,0.9)' : 'rgba(61,232,255,0.8)'; ctx.lineWidth = 1.5;
@@ -7128,7 +8649,7 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : E.kraken ? '#d090ff' : E.radiant ? '#bfe8ff' : E.phoenix ? (e.reborn ? '#90c8ff' : '#ffb040') : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : E.kraken ? '#d090ff' : E.radiant ? '#bfe8ff' : E.phoenix ? (e.reborn ? '#90c8ff' : '#ffb040') : E.hydra ? '#ff9ad8' : E.warden ? '#bfe8ff' : E.archon ? '#ffe080' : E.devourer ? '#d080ff' : e.military ? '#b6ff7a' : '#ff4d6d';
     if (E.spiral) e.spin = (e.spin || 0) + 0.32;
     for (let i = 0; i < n; i++) {
       const b = E.spiral ? e.spin + i * TAU / n : E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
@@ -7148,6 +8669,10 @@ const Combat = {
   },
   hitEnemy(sc, e, dmg) {
     e.shT = 2.2;
+    if (ENEMIES[e.k].ward && sc.enemies.some(o => !o.dead && o.k === ENEMIES[e.k].summon)) {   // the Archon hides behind its shield shards
+      dmg *= 0.1; e.wardFlash = 0.3;
+      if (!sc.wardHint) { sc.wardHint = 1; sc.floaters.push({ x: e.x, y: e.y - 90, txt: 'SHIELDED — destroy the shards first!', col: '#ffe080', life: 2.5, big: 1 }); }
+    }
     if (e.sp > 0) { const a = Math.min(e.sp, dmg); e.sp -= a; dmg -= a; e.shieldFlash = 0.25; }
     if (dmg > 0) { e.hp -= dmg; e.hitT = 0.08; }
     if (e.hp <= 0 && !e.dead && ENEMIES[e.k].rebirth && !e.reborn) {   // the Phoenix rises once from its ashes
@@ -7165,9 +8690,17 @@ const Combat = {
     sc.parts.burst(e.x, e.y, 25, '#ffffff', 190, 0.6, 3);
     sfx('boom'); sc.shake = Math.max(sc.shake, 10);
     S.stats.kills++;
-    if (ENEMIES[e.k].boss && sc.loc) {
-      sc.shake = 24; sc.parts.burst(e.x, e.y, 120, ENEMIES[e.k].alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
-      if (ENEMIES[e.k].final) finalBossKilled(); else warlordKilled(sc.loc.id);
+    const KE = ENEMIES[e.k];
+    if (KE.split) {   // the Hydra splits into two fast heads
+      const m = e.max / KE.hp, H = ENEMIES[KE.split];
+      for (const side of [-1, 1]) sc.enemies.push({ k: KE.split, x: e.x + side * 60, y: e.y, vx: side * 200, vy: 0, a: 0, hp: H.hp * m, max: H.hp * m, sp: H.sp * m, spMax: H.sp * m, dmg: H.dmg * e.dmg / KE.dmg,
+        rate: H.rate, spd: H.spd, size: H.size, cd: rand(0.8, 1.6), burstLeft: 0, burstT: 0, strafe: side, prefer: rand(200, 300), shT: 0, hitT: 0, loot: H.loot * Z_LOOT[sc.combatZ || 0] });
+      sc.floaters.push({ x: e.x, y: e.y - 80, txt: 'THE HYDRA SPLITS IN TWO!', col: '#ff9ad8', life: 2.5, big: 1 });
+      sc.parts.burst(e.x, e.y, 80, '#ff9ad8', 300, 1.2, 4);
+    } else if (KE.boss && sc.loc) {
+      sc.shake = 24; sc.parts.burst(e.x, e.y, 120, KE.alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
+      if (KE.final) { if (!sc.enemies.some(o => o !== e && !o.dead && ENEMIES[o.k].final)) finalBossKilled(); }
+      else warlordKilled(sc.loc.id);
     }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
@@ -7190,6 +8723,20 @@ const Combat = {
         if (e.dashCd <= 0 && d < 750) { e.dashCd = 5; e.dashT = 0.9; e.dvx = nx * 650; e.dvy = ny * 650; sfx('alarm'); }
       }
       // Kraken: squirts ink clouds that slow you down and hide the field
+      // Pulsar Warden: two arms of light rotate around it — they burn while lit
+      if (ENEMIES[e.k].arms) {
+        e.armA = (e.armA || 0) + 0.55 * dt; e.armT = ((e.armT || 0) + dt) % 5.5;
+        if (e.armT > 0.8 && e.armT < 3.8) for (let k = 0; k < ENEMIES[e.k].arms; k++) {
+          const a = e.armA + k * Math.PI, ux = Math.cos(a), uy = Math.sin(a), along = dx * ux + dy * uy, perp = Math.abs(dx * uy - dy * ux);
+          if (along > 0 && along < 760 && perp < 26 + shipR() * 0.4) { sc.damage(e.dmg * 9 * dt); if (Math.random() < dt * 8) sfx('hit'); }
+        }
+      }
+      // the Devourer: its gravity drags you in, and touching it hurts
+      if (ENEMIES[e.k].well && d < 1100) {
+        p.vx -= nx * 170 * dt; p.vy -= ny * 170 * dt;
+        if (d < 34 * e.size) sc.damage(e.dmg * 8 * dt);
+        if (Math.random() < dt * 30) { const a = rand(0, TAU), r0 = rand(200, 500); sc.parts.add(e.x + Math.cos(a) * r0, e.y + Math.sin(a) * r0, -Math.cos(a) * r0 * 1.5, -Math.sin(a) * r0 * 1.5, 0.6, Math.random() < 0.5 ? '#ffb060' : '#c080ff', 2); }
+      }
       if (ENEMIES[e.k].ink) {
         e.inkCd = (e.inkCd == null ? 5 : e.inkCd) - dt;
         if (e.inkCd <= 0 && d < 850) {
@@ -7219,7 +8766,7 @@ const Combat = {
       e.x = clamp(e.x + e.vx * dt, 40, MW - 40); e.y = clamp(e.y + e.vy * dt, 40, MH - 40);
       if (Math.random() < dt * 0.3) e.strafe *= -1;
       e.a = Math.atan2(dy, dx);
-      e.shT -= dt; e.hitT -= dt; if (e.shieldFlash) e.shieldFlash -= dt;
+      e.shT -= dt; e.hitT -= dt; if (e.shieldFlash) e.shieldFlash -= dt; if (e.wardFlash) e.wardFlash -= dt;
       if (e.shT <= 0 && e.spMax) e.sp = Math.min(e.spMax, e.sp + e.spMax * 0.15 * dt);
       if (d < 750 && !(e.beam && e.beam.t > 0)) {
         e.cd -= dt;
@@ -7228,11 +8775,11 @@ const Combat = {
       }
       const E = ENEMIES[e.k];
       if (E.summon) {
-        e.sumT = (e.sumT == null ? 4 : e.sumT) - dt;
+        e.sumT = (e.sumT == null ? (E.ward ? 0.5 : 4) : e.sumT) - dt;
         if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < (E.summonMax || 6)) {
-          e.sumT = E.summonMax ? 10 : 7;
+          e.sumT = E.ward ? 14 : E.summonMax ? 10 : 7;
           const m = e.max / (E.hp * 1), sw = ENEMIES[E.summon];
-          for (let i = 0; i < (E.summonMax ? 1 : 2); i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: sw.sp * m, spMax: sw.sp * m, dmg: sw.dmg * e.dmg / E.dmg,
+          for (let i = 0; i < (E.ward ? E.summonMax - sc.enemies.filter(x => !x.dead && x.k === E.summon).length : E.summonMax ? 1 : 2); i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: sw.sp * m, spMax: sw.sp * m, dmg: sw.dmg * e.dmg / E.dmg,
             rate: sw.rate, spd: sw.spd, size: sw.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1, prefer: rand(160, 260), shT: 0, hitT: 0, loot: sw.loot * Z_LOOT[sc.combatZ || 0] });
           sc.parts.burst(e.x, e.y, 20, E.hive ? '#b0ff9a' : '#ff8a4a', 150, 0.6, 2);
         }
@@ -7303,6 +8850,16 @@ const Combat = {
     }
     ctx.globalCompositeOperation = 'source-over';
     for (const es of sc.escorts || []) if (es.x) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, es.x, es.y, es.a, 0.8, 0.6, t);
+    for (const e of sc.enemies) if (ENEMIES[e.k].arms) {
+      const lit = e.armT > 0.8 && e.armT < 3.8, warm = e.armT > 0.3 && e.armT <= 0.8;
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      for (let k = 0; k < ENEMIES[e.k].arms; k++) {
+        const a = (e.armA || 0) + k * Math.PI, x2 = e.x + Math.cos(a) * 760, y2 = e.y + Math.sin(a) * 760;
+        if (lit) { ctx.strokeStyle = 'rgba(160,220,255,0.35)'; ctx.lineWidth = 46; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(x2, y2); ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 9; ctx.stroke(); }
+        else { ctx.strokeStyle = `rgba(160,220,255,${warm ? 0.5 + 0.4 * Math.sin(t * 40) : 0.12})`; ctx.lineWidth = 2; ctx.setLineDash([12, 10]); ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]); }
+      }
+      ctx.globalCompositeOperation = 'source-over'; ctx.lineCap = 'butt';
+    }
     for (const e of sc.enemies) if (e.beam) {
       const B = e.beam, L = 1600, x2 = e.x + Math.cos(B.a) * L, y2 = e.y + Math.sin(B.a) * L;
       ctx.globalCompositeOperation = 'lighter';
@@ -7316,6 +8873,7 @@ const Combat = {
       if (e.trail) drawSerpentBody(ctx, e, t);
       drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t, e);
       if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);
+      if (ENEMIES[e.k].ward && sc.enemies.some(o => !o.dead && o.k === ENEMIES[e.k].summon)) { ctx.strokeStyle = `rgba(255,224,128,${0.5 + 0.3 * Math.sin(t * 6) + (e.wardFlash > 0 ? 0.3 : 0)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, 34 * e.size, 0, TAU); ctx.stroke(); }
       if (e.shieldFlash > 0) { ctx.strokeStyle = `rgba(255,120,160,${e.shieldFlash * 3})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, 30 * e.size, 0, TAU); ctx.stroke(); }
       const w = 50 * e.size, y = e.y - 32 * e.size - 8;
       ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(e.x - w / 2 - 1, y - 1, w + 2, e.spMax ? 9 : 6);
@@ -7573,9 +9131,12 @@ function updateMineHUD() {
     + (hasTool('overdrive') ? `<span class="tool">${sc.boostT > 0 ? `⚡ OVERDRIVE ${Math.ceil(sc.boostT)}s` : sc.boostCd > 0 ? `Overdrive ${Math.ceil(sc.boostCd)}s` : '⚡ Overdrive ready'} <small>[R]</small></span>` : '')
     + (hasTool('charges') ? `<span class="tool">${sc.bombCd > 0 ? `Charge ${Math.ceil(sc.bombCd)}s` : '💥 Charge ready'} <small>[F]</small></span>` : '')
     + (hasTool('deepscan') ? `<span class="tool">${sc.scanCd > 0 ? `Scan ${Math.ceil(sc.scanCd)}s` : '◈ Deep Scan ready'} <small>[C]</small></span>` : '')
-    + (hasTool('widebeam') ? '<span class="tool">✦ Wide Beam</span>' : ''))
+    + (hasTool('widebeam') ? '<span class="tool">✦ Wide Beam</span>' : '')
+    + (hasTool('phase') ? `<span class="tool">${sc.phaseT > 0 ? `PHASED ${Math.ceil(sc.phaseT)}s` : sc.phaseCd > 0 ? `Phase ${Math.ceil(sc.phaseCd)}s` : '◎ Phase ready'} <small>[X]</small></span>` : ''))
+    + (sc.relic ? `<span class="tool" style="color:#ffe080">🏛 ${sc.relic.n} ${Math.ceil(sc.relic.t)}s</span>` : '')
+    + (sysDef().sweeps && !sc.space && sc.sweepIn < 4 && !sc.sweep ? `<span class="tool" style="color:#9ff3ff">⚡ Beam in ${Math.ceil(sc.sweepIn)}s</span>` : '')
     + (sc.moltenT > 0 ? `<span class="tool" style="color:#ffb040">☀ MOLTEN ${Math.ceil(sc.moltenT)}s</span>` : sysDef().pulses && !sc.space && sc.pulseIn < 10 ? `<span class="tool">☀ Pulse in ${Math.ceil(sc.pulseIn)}s</span>` : '');
-  for (const [id, k, cd, lbl, mx] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST', 45], ['bombBtn', 'charges', sc.bombCd, 'BOMB', 10], ['scanBtn', 'deepscan', sc.scanCd, 'SCAN', built('sonar') ? 7 : 14], ['pullBtn', 'tractor', sc.pullCd, 'PULL', 14]]) { const ok = !hasTool(k) || sc.space; $(id).classList.toggle('hidden', ok); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); $(id).style.setProperty('--p', cd > 0 ? (1 - cd / mx).toFixed(3) : 1); }
+  for (const [id, k, cd, lbl, mx] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST', 45], ['bombBtn', 'charges', sc.bombCd, 'BOMB', 10], ['scanBtn', 'deepscan', sc.scanCd, 'SCAN', built('sonar') ? 7 : 14], ['pullBtn', 'tractor', sc.pullCd, 'PULL', 14], ['phaseBtn', 'phase', sc.phaseCd, 'PHASE', 20]]) { const ok = !hasTool(k) || sc.space; $(id).classList.toggle('hidden', ok); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); $(id).style.setProperty('--p', cd > 0 ? (1 - cd / mx).toFixed(3) : 1); }
   $('toolBtn').classList.toggle('hidden', !hasTool('drill') || sc.space); $('toolBtn').textContent = sc.tool === 'drill' ? 'LASER' : 'DRILL';
 
   $('mineInfo').innerHTML = tools + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
@@ -7584,7 +9145,7 @@ function updateMineHUD() {
   document.body.classList.toggle('battle', combat);
   $('battleUI').classList.toggle('hidden', !combat);
   if (combat) {
-    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale || ENEMIES[e.k].kraken || ENEMIES[e.k].radiant || ENEMIES[e.k].phoenix) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale || ENEMIES[e.k].kraken || ENEMIES[e.k].radiant || ENEMIES[e.k].phoenix || ENEMIES[e.k].hydra || ENEMIES[e.k].warden || ENEMIES[e.k].archon || ENEMIES[e.k].devourer) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
     $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
     $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
     $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
@@ -8054,7 +9615,7 @@ function openHelp() {
     <h4>⚔ Wars</h4><p>When two factions fight, <b>back a side</b> at one of their stations. Their stations pay +30% for metals and every ore sale there <b>pushes the front</b> (see the bar). Help them win to gain a <b>permanent ally</b>: +15% ore at their stations (up to 3 stars) and spoils of war.</p>
     <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
     <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — back a side in wars and fund offensives; later incite wars or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
-    <h4>⛏ Tools</h4><p>Some star systems give you tools you keep forever: the <b>Drill</b> (<b>Q</b>: 3× power at short range, cracks <b>armored</b> rocks), the <b>Tractor Pulse</b> (<b>E</b>: pulls every ore chunk around you), <b>Overdrive</b> (<b>R</b>: 8 s of triple power and speed) and <b>Mining Charges</b> (<b>F</b>: a bomb that cracks every rock around it), the <b>Deep Scanner</b> (<b>C</b>: shows hidden <b>geodes</b> — break one for a huge load of the field's best ore) and the <b>Wide Beam</b> (your laser forks into two more rocks). <b>Volatile</b> rocks explode when broken — chain them! <b>Living</b> rocks flee from your laser but drop 60% more ore — calm them with the Tractor Pulse.</p>
+    <h4>⛏ Tools</h4><p>Some star systems give you tools you keep forever: the <b>Drill</b> (<b>Q</b>: 3× power at short range, cracks <b>armored</b> rocks), the <b>Tractor Pulse</b> (<b>E</b>: pulls every ore chunk around you), <b>Overdrive</b> (<b>R</b>: 8 s of triple power and speed) and <b>Mining Charges</b> (<b>F</b>: a bomb that cracks every rock around it), the <b>Deep Scanner</b> (<b>C</b>: shows hidden <b>geodes</b> — break one for a huge load of the field's best ore) and the <b>Wide Beam</b> (your laser forks into two more rocks). <b>Volatile</b> rocks explode when broken — chain them! <b>Living</b> rocks flee from your laser but drop 60% more ore — calm them with the Tractor Pulse. The <b>Phase Shift</b> (<b>X</b>) makes you a ghost for 3 s: no damage, and you fly through rocks. <b>Magnetic</b> rocks clump together and pull loose ore to you when they break; <b>relic</b> rocks give a 25 s power when broken.</p>
     <h4>🌀 Galaxy</h4><p>Each system's guardian opens a jump gate. In the <b>Galaxy</b> map you jump to the next star: you start fresh there, but conquered systems pay <b>Tribute</b> forever, which buys permanent <b>Legacy</b> bonuses. 15 systems lead to the black hole at the core.</p>
     <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the system — then defeat its guardian and jump through the gate to the next star.</p></div>`);
 }
@@ -8094,7 +9655,7 @@ window.addEventListener('keydown', e => {
   keys.add(e.code);
   audioInit();
   if (e.code === 'Space' && scene === MineScene) e.preventDefault();
-  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); if (e.code === 'KeyR') MineScene.boost(); if (e.code === 'KeyF') MineScene.bomb(); if (e.code === 'KeyC') MineScene.scan(); }
+  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); if (e.code === 'KeyR') MineScene.boost(); if (e.code === 'KeyF') MineScene.bomb(); if (e.code === 'KeyC') MineScene.scan(); if (e.code === 'KeyX') MineScene.phase(); }
   if (e.code === 'Escape') {
     if (!$('sheet').classList.contains('hidden')) closeSheet();
     else if (scene === MineScene && !isBlocking()) MineScene.leave();
@@ -8203,6 +9764,7 @@ function setupTouchControls() {
   $('boostBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.boost(); }, { passive: false });
   $('bombBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.bomb(); }, { passive: false });
   $('scanBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.scan(); }, { passive: false });
+  $('phaseBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.phase(); }, { passive: false });
   for (const el of document.querySelectorAll('.tbtn')) { el.addEventListener('touchstart', () => el.classList.add('on'), { passive: true }); for (const ev of ['touchend', 'touchcancel']) el.addEventListener(ev, () => el.classList.remove('on')); }
   const fe = e => { e.preventDefault(); touchFire = false; fire.classList.remove('on'); };
   fire.addEventListener('touchend', fe); fire.addEventListener('touchcancel', fe);

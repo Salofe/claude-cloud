@@ -44,7 +44,7 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : E.kraken ? '#d090ff' : E.radiant ? '#bfe8ff' : E.phoenix ? (e.reborn ? '#90c8ff' : '#ffb040') : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : E.kraken ? '#d090ff' : E.radiant ? '#bfe8ff' : E.phoenix ? (e.reborn ? '#90c8ff' : '#ffb040') : E.hydra ? '#ff9ad8' : E.warden ? '#bfe8ff' : E.archon ? '#ffe080' : E.devourer ? '#d080ff' : e.military ? '#b6ff7a' : '#ff4d6d';
     if (E.spiral) e.spin = (e.spin || 0) + 0.32;
     for (let i = 0; i < n; i++) {
       const b = E.spiral ? e.spin + i * TAU / n : E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
@@ -64,6 +64,10 @@ const Combat = {
   },
   hitEnemy(sc, e, dmg) {
     e.shT = 2.2;
+    if (ENEMIES[e.k].ward && sc.enemies.some(o => !o.dead && o.k === ENEMIES[e.k].summon)) {   // the Archon hides behind its shield shards
+      dmg *= 0.1; e.wardFlash = 0.3;
+      if (!sc.wardHint) { sc.wardHint = 1; sc.floaters.push({ x: e.x, y: e.y - 90, txt: 'SHIELDED — destroy the shards first!', col: '#ffe080', life: 2.5, big: 1 }); }
+    }
     if (e.sp > 0) { const a = Math.min(e.sp, dmg); e.sp -= a; dmg -= a; e.shieldFlash = 0.25; }
     if (dmg > 0) { e.hp -= dmg; e.hitT = 0.08; }
     if (e.hp <= 0 && !e.dead && ENEMIES[e.k].rebirth && !e.reborn) {   // the Phoenix rises once from its ashes
@@ -81,9 +85,17 @@ const Combat = {
     sc.parts.burst(e.x, e.y, 25, '#ffffff', 190, 0.6, 3);
     sfx('boom'); sc.shake = Math.max(sc.shake, 10);
     S.stats.kills++;
-    if (ENEMIES[e.k].boss && sc.loc) {
-      sc.shake = 24; sc.parts.burst(e.x, e.y, 120, ENEMIES[e.k].alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
-      if (ENEMIES[e.k].final) finalBossKilled(); else warlordKilled(sc.loc.id);
+    const KE = ENEMIES[e.k];
+    if (KE.split) {   // the Hydra splits into two fast heads
+      const m = e.max / KE.hp, H = ENEMIES[KE.split];
+      for (const side of [-1, 1]) sc.enemies.push({ k: KE.split, x: e.x + side * 60, y: e.y, vx: side * 200, vy: 0, a: 0, hp: H.hp * m, max: H.hp * m, sp: H.sp * m, spMax: H.sp * m, dmg: H.dmg * e.dmg / KE.dmg,
+        rate: H.rate, spd: H.spd, size: H.size, cd: rand(0.8, 1.6), burstLeft: 0, burstT: 0, strafe: side, prefer: rand(200, 300), shT: 0, hitT: 0, loot: H.loot * Z_LOOT[sc.combatZ || 0] });
+      sc.floaters.push({ x: e.x, y: e.y - 80, txt: 'THE HYDRA SPLITS IN TWO!', col: '#ff9ad8', life: 2.5, big: 1 });
+      sc.parts.burst(e.x, e.y, 80, '#ff9ad8', 300, 1.2, 4);
+    } else if (KE.boss && sc.loc) {
+      sc.shake = 24; sc.parts.burst(e.x, e.y, 120, KE.alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
+      if (KE.final) { if (!sc.enemies.some(o => o !== e && !o.dead && ENEMIES[o.k].final)) finalBossKilled(); }
+      else warlordKilled(sc.loc.id);
     }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
@@ -106,6 +118,20 @@ const Combat = {
         if (e.dashCd <= 0 && d < 750) { e.dashCd = 5; e.dashT = 0.9; e.dvx = nx * 650; e.dvy = ny * 650; sfx('alarm'); }
       }
       // Kraken: squirts ink clouds that slow you down and hide the field
+      // Pulsar Warden: two arms of light rotate around it — they burn while lit
+      if (ENEMIES[e.k].arms) {
+        e.armA = (e.armA || 0) + 0.55 * dt; e.armT = ((e.armT || 0) + dt) % 5.5;
+        if (e.armT > 0.8 && e.armT < 3.8) for (let k = 0; k < ENEMIES[e.k].arms; k++) {
+          const a = e.armA + k * Math.PI, ux = Math.cos(a), uy = Math.sin(a), along = dx * ux + dy * uy, perp = Math.abs(dx * uy - dy * ux);
+          if (along > 0 && along < 760 && perp < 26 + shipR() * 0.4) { sc.damage(e.dmg * 9 * dt); if (Math.random() < dt * 8) sfx('hit'); }
+        }
+      }
+      // the Devourer: its gravity drags you in, and touching it hurts
+      if (ENEMIES[e.k].well && d < 1100) {
+        p.vx -= nx * 170 * dt; p.vy -= ny * 170 * dt;
+        if (d < 34 * e.size) sc.damage(e.dmg * 8 * dt);
+        if (Math.random() < dt * 30) { const a = rand(0, TAU), r0 = rand(200, 500); sc.parts.add(e.x + Math.cos(a) * r0, e.y + Math.sin(a) * r0, -Math.cos(a) * r0 * 1.5, -Math.sin(a) * r0 * 1.5, 0.6, Math.random() < 0.5 ? '#ffb060' : '#c080ff', 2); }
+      }
       if (ENEMIES[e.k].ink) {
         e.inkCd = (e.inkCd == null ? 5 : e.inkCd) - dt;
         if (e.inkCd <= 0 && d < 850) {
@@ -135,7 +161,7 @@ const Combat = {
       e.x = clamp(e.x + e.vx * dt, 40, MW - 40); e.y = clamp(e.y + e.vy * dt, 40, MH - 40);
       if (Math.random() < dt * 0.3) e.strafe *= -1;
       e.a = Math.atan2(dy, dx);
-      e.shT -= dt; e.hitT -= dt; if (e.shieldFlash) e.shieldFlash -= dt;
+      e.shT -= dt; e.hitT -= dt; if (e.shieldFlash) e.shieldFlash -= dt; if (e.wardFlash) e.wardFlash -= dt;
       if (e.shT <= 0 && e.spMax) e.sp = Math.min(e.spMax, e.sp + e.spMax * 0.15 * dt);
       if (d < 750 && !(e.beam && e.beam.t > 0)) {
         e.cd -= dt;
@@ -144,11 +170,11 @@ const Combat = {
       }
       const E = ENEMIES[e.k];
       if (E.summon) {
-        e.sumT = (e.sumT == null ? 4 : e.sumT) - dt;
+        e.sumT = (e.sumT == null ? (E.ward ? 0.5 : 4) : e.sumT) - dt;
         if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < (E.summonMax || 6)) {
-          e.sumT = E.summonMax ? 10 : 7;
+          e.sumT = E.ward ? 14 : E.summonMax ? 10 : 7;
           const m = e.max / (E.hp * 1), sw = ENEMIES[E.summon];
-          for (let i = 0; i < (E.summonMax ? 1 : 2); i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: sw.sp * m, spMax: sw.sp * m, dmg: sw.dmg * e.dmg / E.dmg,
+          for (let i = 0; i < (E.ward ? E.summonMax - sc.enemies.filter(x => !x.dead && x.k === E.summon).length : E.summonMax ? 1 : 2); i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: sw.sp * m, spMax: sw.sp * m, dmg: sw.dmg * e.dmg / E.dmg,
             rate: sw.rate, spd: sw.spd, size: sw.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1, prefer: rand(160, 260), shT: 0, hitT: 0, loot: sw.loot * Z_LOOT[sc.combatZ || 0] });
           sc.parts.burst(e.x, e.y, 20, E.hive ? '#b0ff9a' : '#ff8a4a', 150, 0.6, 2);
         }
@@ -219,6 +245,16 @@ const Combat = {
     }
     ctx.globalCompositeOperation = 'source-over';
     for (const es of sc.escorts || []) if (es.x) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, es.x, es.y, es.a, 0.8, 0.6, t);
+    for (const e of sc.enemies) if (ENEMIES[e.k].arms) {
+      const lit = e.armT > 0.8 && e.armT < 3.8, warm = e.armT > 0.3 && e.armT <= 0.8;
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      for (let k = 0; k < ENEMIES[e.k].arms; k++) {
+        const a = (e.armA || 0) + k * Math.PI, x2 = e.x + Math.cos(a) * 760, y2 = e.y + Math.sin(a) * 760;
+        if (lit) { ctx.strokeStyle = 'rgba(160,220,255,0.35)'; ctx.lineWidth = 46; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(x2, y2); ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 9; ctx.stroke(); }
+        else { ctx.strokeStyle = `rgba(160,220,255,${warm ? 0.5 + 0.4 * Math.sin(t * 40) : 0.12})`; ctx.lineWidth = 2; ctx.setLineDash([12, 10]); ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]); }
+      }
+      ctx.globalCompositeOperation = 'source-over'; ctx.lineCap = 'butt';
+    }
     for (const e of sc.enemies) if (e.beam) {
       const B = e.beam, L = 1600, x2 = e.x + Math.cos(B.a) * L, y2 = e.y + Math.sin(B.a) * L;
       ctx.globalCompositeOperation = 'lighter';
@@ -232,6 +268,7 @@ const Combat = {
       if (e.trail) drawSerpentBody(ctx, e, t);
       drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t, e);
       if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);
+      if (ENEMIES[e.k].ward && sc.enemies.some(o => !o.dead && o.k === ENEMIES[e.k].summon)) { ctx.strokeStyle = `rgba(255,224,128,${0.5 + 0.3 * Math.sin(t * 6) + (e.wardFlash > 0 ? 0.3 : 0)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, 34 * e.size, 0, TAU); ctx.stroke(); }
       if (e.shieldFlash > 0) { ctx.strokeStyle = `rgba(255,120,160,${e.shieldFlash * 3})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, 30 * e.size, 0, TAU); ctx.stroke(); }
       const w = 50 * e.size, y = e.y - 32 * e.size - 8;
       ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(e.x - w / 2 - 1, y - 1, w + 2, e.spMax ? 9 : 6);

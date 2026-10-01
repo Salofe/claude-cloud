@@ -172,6 +172,7 @@ function drawDust(ctx, W, H, camX, camY, vx, vy, col) {
 }
 // soft light from the system's star washing over the scene, tinted to its color
 function starWash(ctx, W, H, pal, t) {
+  if (pal === 'hole') return glow(ctx, W * 0.5, -H * 0.3, Math.max(W, H) * 0.9, '#ff8a3a55', 0.35);
   const P = STAR_PAL[pal] || STAR_PAL.sol;
   glow(ctx, -W * 0.05, -H * 0.1, Math.max(W, H) * 0.95, P.g2, 0.22 + 0.03 * Math.sin(t * 0.3));
 }
@@ -386,7 +387,44 @@ const STAR_PAL = {
   red:    { g1: '#ff2a1a33', g2: '#ff5a3a88', r0: 'rgba(255,120,90,0.35)', r1: 'rgba(255,60,40,0)', core: ['#ffe6e0', '#ffb09a', '#ff5a3a', '#c41a10'], f0: 'rgba(255,140,120,0)', f1: 'rgba(255,170,150,0.4)' },
   blue:   { g1: '#3a7aff33', g2: '#7ab0ff88', r0: 'rgba(160,200,255,0.4)', r1: 'rgba(90,140,255,0)', core: ['#ffffff', '#dff0ff', '#9cc8ff', '#4a7aff'], f0: 'rgba(160,200,255,0)', f1: 'rgba(200,225,255,0.5)' },
 };
+// a black hole: a dark disk inside a bright, tilted accretion disk and a thin photon ring
+function drawBlackHole(ctx, x, y, r, t) {
+  glow(ctx, x, y, r * 7, '#ff8a3a22', 0.8);
+  const disk = (front) => {
+    ctx.save(); ctx.translate(x, y); ctx.scale(1, 0.28);
+    const g = ctx.createRadialGradient(0, 0, r * 1.15, 0, 0, r * 3.6);
+    g.addColorStop(0, 'rgba(255,245,215,0.95)'); g.addColorStop(0.25, 'rgba(255,170,70,0.85)'); g.addColorStop(0.65, 'rgba(210,70,40,0.35)'); g.addColorStop(1, 'rgba(120,20,60,0)');
+    ctx.beginPath(); ctx.rect(-r * 4, front ? 0 : -r * 4, r * 8, r * 4); ctx.clip();
+    ctx.fillStyle = g; ctx.globalAlpha = front ? 0.9 : 1;
+    ctx.beginPath(); ctx.arc(0, 0, r * 3.6, 0, TAU); ctx.arc(0, 0, r * 1.15, 0, TAU, true); ctx.fill();
+    // hot clumps orbiting in the disk
+    ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,230,180,0.7)';
+    for (let i = 0; i < 18; i++) { const a = i * 2.4 + t * (0.6 + (i % 4) * 0.15), rr = r * (1.3 + (i % 6) * 0.35); ctx.beginPath(); ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, r * 0.06, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  };
+  disk(false);
+  // light from the far side of the disk, bent over the top by gravity
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = 'rgba(255,190,110,0.55)'; ctx.lineWidth = r * 0.32; ctx.beginPath(); ctx.arc(x, y, r * 1.3, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,240,210,0.6)'; ctx.lineWidth = r * 0.1; ctx.beginPath(); ctx.arc(x, y, r * 1.2, Math.PI * 1.02, Math.PI * 1.98); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,225,180,0.95)'; ctx.lineWidth = Math.max(1, r * 0.06); ctx.beginPath(); ctx.arc(x, y, r * 1.04, 0, TAU); ctx.stroke();
+  disk(true);
+}
+// Sagittarius A* seen from a mining field: the bottom of a vast black hole hangs over the top of the field
+function drawEventHorizon(ctx, x, y, R, t) {
+  const g = ctx.createRadialGradient(x, y, R * 0.9, x, y, R * 1.6);
+  g.addColorStop(0, 'rgba(255,170,80,0.55)'); g.addColorStop(0.25, 'rgba(255,90,40,0.25)'); g.addColorStop(1, 'rgba(80,0,40,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R * 1.6, 0, TAU); ctx.fill();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 40; i++) { const a = Math.PI * (0.15 + 0.7 * ((i * 0.618 + t * 0.03) % 1)), rr = R * (1.03 + (i % 5) * 0.06); ctx.fillStyle = i % 3 ? 'rgba(255,190,110,0.6)' : 'rgba(255,240,210,0.8)'; ctx.fillRect(x + Math.cos(a) * rr, y + Math.sin(a) * rr, 3, 3); }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,230,190,0.9)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(x, y, R + 4, 0, TAU); ctx.stroke();
+}
 function drawSun(ctx, x, y, r, t, pal) {
+  if (pal === 'hole') return drawBlackHole(ctx, x, y, r, t);
   const P = STAR_PAL[pal] || STAR_PAL.sol;
   glow(ctx, x, y, r * 9, P.g1, 0.7);
   glow(ctx, x, y, r * 4, P.g2, 0.7);
@@ -779,8 +817,80 @@ function drawPhoenix(ctx, type, x, y, ang, s, t, ent) {
   ctx.fillStyle = '#3a0a00'; ctx.beginPath(); ctx.arc(8, -1.4, 0.9, 0, TAU); ctx.fill();
   ctx.restore();
 }
+// Nebula Hydra (Orion): a cloud body with three glowing heads; its heads fight on alone
+function drawHydra(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type], heads = e.head ? 1 : 3;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, -4, 0, 30, '#ff9ad855', 0.9);
+  if (!e.head) for (let i = 0; i < 6; i++) { const a = i * 1.05 + t * 0.4; const g = ctx.createRadialGradient(-6 + Math.cos(a) * 4, Math.sin(a) * 5, 0, -6 + Math.cos(a) * 4, Math.sin(a) * 5, 10); g.addColorStop(0, 'rgba(255,150,220,0.5)'); g.addColorStop(1, 'rgba(120,40,160,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(-6 + Math.cos(a) * 4, Math.sin(a) * 5, 10, 0, TAU); ctx.fill(); }
+  for (let h = 0; h < heads; h++) {
+    const off = heads === 1 ? 0 : (h - 1) * 9, sw = Math.sin(t * 3 + h * 2) * 3;
+    const hx = heads === 1 ? 8 : 14, hy = off + sw;
+    if (heads > 1) { ctx.strokeStyle = '#b060c0'; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-2, off * 0.3); ctx.quadraticCurveTo(6, off + sw * -0.5, hx - 3, hy); ctx.stroke(); ctx.lineCap = 'butt'; }
+    const g = ctx.createRadialGradient(hx + 1, hy - 1, 0.5, hx, hy, 6); g.addColorStop(0, '#ffe0f4'); g.addColorStop(0.5, '#ff7ac8'); g.addColorStop(1, '#6a1a6a');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(hx, hy, 6.5, 4.5, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(hx + 2.5, hy - 1.6, 1.1, 0, TAU); ctx.arc(hx + 2.5, hy + 1.6, 1.1, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#ffe0f4'; ctx.beginPath(); ctx.moveTo(hx - 3, hy - 3.5); ctx.lineTo(hx - 7, hy - 7); ctx.lineTo(hx - 1, hy - 4); ctx.fill(); ctx.beginPath(); ctx.moveTo(hx - 3, hy + 3.5); ctx.lineTo(hx - 7, hy + 7); ctx.lineTo(hx - 1, hy + 4); ctx.fill();
+  }
+  ctx.restore();
+}
+// Pulsar Warden: a spinning neutron core inside a clockwork ring
+function drawWarden(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 30, '#bfe8ff66', 0.9);
+  ctx.rotate(t * 2);
+  ctx.strokeStyle = '#8aa0c8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 14, 0, TAU); ctx.stroke();
+  ctx.fillStyle = '#c8d4f0'; for (let i = 0; i < 12; i++) { const a = i * TAU / 12; ctx.save(); ctx.rotate(a); ctx.fillRect(13, -1.6, 4, 3.2); ctx.restore(); }
+  ctx.rotate(-t * 5);
+  ctx.strokeStyle = 'rgba(200,235,255,0.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(0, 0, 10, 3.5, 0, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.ellipse(0, 0, 3.5, 10, 0, 0, TAU); ctx.stroke();
+  glow(ctx, 0, 0, 10, '#ffffff', 1); ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+// The Archon (Core Rim): an ancient machine of nested golden rings; its shards orbit as shields
+function drawArchon(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * e.size, s * e.size);
+  if (type === 'shard') {
+    ctx.rotate(t * 3); glow(ctx, 0, 0, 14, '#ffe08088', 0.8);
+    ctx.fillStyle = '#ffe080'; ctx.strokeStyle = '#fff6d0'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(6, 0); ctx.lineTo(0, 10); ctx.lineTo(-6, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore(); return;
+  }
+  glow(ctx, 0, 0, 32, '#ffd08055', 0.9);
+  for (let i = 0; i < 3; i++) {
+    ctx.save(); ctx.rotate(t * (0.5 - i * 0.4) + i);
+    ctx.strokeStyle = ['#ffe080', '#d0a050', '#fff2c0'][i]; ctx.lineWidth = 2 - i * 0.4;
+    ctx.beginPath(); ctx.arc(0, 0, 18 - i * 5, 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#ffe080'; for (let k = 0; k < 6; k++) { const a = k * TAU / 6; ctx.fillRect(Math.cos(a) * (18 - i * 5) - 1.3, Math.sin(a) * (18 - i * 5) - 1.3, 2.6, 2.6); }
+    ctx.restore();
+  }
+  ctx.fillStyle = '#2a1a08'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, TAU); ctx.fill();
+  glow(ctx, Math.cos(ang) * 1.5, Math.sin(ang) * 1.5, 6, '#ffe080', 1);
+  ctx.fillStyle = '#fff6d0'; ctx.beginPath(); ctx.arc(Math.cos(ang) * 1.5, Math.sin(ang) * 1.5, 2, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+// The Devourer (Sagittarius A*): a living black hole with a burning mouth of light
+function drawDevourer(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type], k = s * e.size;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k);
+  glow(ctx, 0, 0, 40, '#c080ff44', 0.9);
+  ctx.save(); ctx.scale(1, 0.38); ctx.rotate(t * 0.8);
+  const g = ctx.createRadialGradient(0, 0, 12, 0, 0, 34); g.addColorStop(0, 'rgba(255,240,200,0.9)'); g.addColorStop(0.4, 'rgba(255,140,60,0.7)'); g.addColorStop(1, 'rgba(160,40,120,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 34, 0, TAU); ctx.arc(0, 0, 12, 0, TAU, true); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 12, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,220,180,0.9)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, 12.6, 0, TAU); ctx.stroke();
+  ctx.rotate(ang);
+  for (const sy of [-4, 4]) { glow(ctx, 4, sy, 5, '#ff4040', 1); ctx.fillStyle = '#ffd0d0'; ctx.beginPath(); ctx.ellipse(4, sy, 2, 1, 0, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t, ent) {
   const e = ENEMIES[type];
+  if (e.hydra) return drawHydra(ctx, type, x, y, ang, s, t);
+  if (e.warden) return drawWarden(ctx, type, x, y, ang, s, t);
+  if (e.archon) return drawArchon(ctx, type, x, y, ang, s, t);
+  if (e.devourer) return drawDevourer(ctx, type, x, y, ang, s, t);
   if (e.kraken) return drawKraken(ctx, type, x, y, ang, s, t);
   if (e.radiant) return drawRadiant(ctx, type, x, y, ang, s, t);
   if (e.phoenix) return drawPhoenix(ctx, type, x, y, ang, s, t, ent);
@@ -985,6 +1095,30 @@ function drawRockFx(ctx, a, t) {
     ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
     ctx.beginPath(); ctx.moveTo(-a.r * 0.6, a.r * 0.3); ctx.lineTo(0, -a.r * 0.1); ctx.lineTo(a.r * 0.55, a.r * 0.35); ctx.moveTo(0, -a.r * 0.1); ctx.lineTo(-a.r * 0.15, -a.r * 0.6); ctx.stroke();
     ctx.restore();
+  }
+  if (a.magnetic) {   // red/blue poles and a humming glow
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+    glow(ctx, 0, 0, a.r * 1.5, '#7fb8ff44', 0.6 + 0.2 * Math.sin(t * 3 + a.x));
+    ctx.lineWidth = 2 + a.tier; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#ff5a6a'; ctx.beginPath(); ctx.arc(0, 0, a.r * 0.82, -2.4, -0.7); ctx.stroke();
+    ctx.strokeStyle = '#5a9aff'; ctx.beginPath(); ctx.arc(0, 0, a.r * 0.82, 0.74, 2.4); ctx.stroke();
+    ctx.lineCap = 'butt'; ctx.restore();
+  }
+  if (a.relic) {   // ancient glyph circuits
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+    glow(ctx, 0, 0, a.r * 1.6, '#ffe08055', 0.7 + 0.3 * Math.sin(t * 2 + a.x));
+    ctx.strokeStyle = `rgba(255,224,128,${0.7 + 0.3 * Math.sin(t * 3 + a.y)})`; ctx.lineWidth = 1.5;
+    const q = a.r * 0.45;
+    ctx.beginPath(); ctx.moveTo(-q, -q); ctx.lineTo(q, -q); ctx.lineTo(q, 0); ctx.lineTo(0, 0); ctx.lineTo(0, q); ctx.lineTo(-q, q); ctx.moveTo(-q * 1.4, 0); ctx.lineTo(-q * 0.5, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, a.r * 0.68, 0, TAU); ctx.setLineDash([3, 5]); ctx.lineDashOffset = t * 8; ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#fff2c0'; for (const [qx, qy] of [[-q, -q], [q, 0], [-q, q]]) { ctx.beginPath(); ctx.arc(qx, qy, 1.8, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
+  if (a.charged > 0) {   // charged by the pulsar beam
+    const k = Math.min(1, a.charged / 2);
+    glow(ctx, a.x, a.y, a.r * 1.5, '#9ff3ff', 0.35 * k);
+    ctx.strokeStyle = `rgba(200,245,255,${0.8 * k})`; ctx.lineWidth = 1.4;
+    for (let i = 0; i < 2; i++) { const an = t * 7 + i * 3 + a.x; ctx.beginPath(); ctx.moveTo(a.x + Math.cos(an) * a.r * 0.3, a.y + Math.sin(an) * a.r * 0.3); for (let j = 1; j <= 3; j++) ctx.lineTo(a.x + Math.cos(an + j * 0.4) * a.r * (0.3 + j * 0.25) + rand(-3, 3), a.y + Math.sin(an + j * 0.4) * a.r * (0.3 + j * 0.25) + rand(-3, 3)); ctx.stroke(); }
   }
   if (a.geode && a.seen > 0 && !(a.seenD > 0)) {
     const col = ITEMS[a.geode].c, k = Math.min(1, a.seen / 1.5), pr = a.r + 10 + Math.sin(t * 5) * 3;

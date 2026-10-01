@@ -2119,6 +2119,1258 @@ Object.assign(SYSTEMS, {
  }
 });
 
+// systems 12–15
+Object.assign(SYSTEMS, {
+ "orion": {
+  "n": "Orion Nebula",
+  "star": "blue",
+  "rock": 13.6,
+  "enemy": 7.3,
+  "value": 1,
+  "boss": "hydra",
+  "bossFleet": [
+   "hydra",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Three heads in the cloud",
+   "text": "Deep in the nebula something with <b>three glowing heads</b> guards the old gate at <b>Hydra's Cradle</b>. The Lodestone Union warns: <b>cut it down and it splits in two</b>."
+  },
+  "gate": "The last Hydra head dissolves into glowing gas. From the newborn stars, an ancient ring <b>takes shape</b>.",
+  "intro": "The <b>Orion Nebula</b> is a nursery where new stars are born. Many asteroids here are <b>magnetic</b>: they slowly <b>pull together into clusters</b> — perfect for your Charges and Wide Beam. When a magnetic rock breaks, it sends out a <b>magnetic burst</b> that pulls every ore chunk nearby straight to your ship.",
+  "factions": {
+   "tierra": {
+    "n": "Nursery Council",
+    "c": "#ff9ad8"
+   },
+   "marte": {
+    "n": "Trapezium Guard",
+    "c": "#c0a0ff"
+   },
+   "cinturon": {
+    "n": "Lodestone Union",
+    "c": "#7fb8ff"
+   },
+   "exterior": {
+    "n": "Nebula Drifters",
+    "c": "#a0ffd8"
+   },
+   "piratas": {
+    "n": "Veil Wolves",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Cradle",
+    "station": "Cradle Base",
+    "tex": "ice",
+    "col": [
+     "#f0d8ff",
+     "#4a3a7a"
+    ],
+    "desc": "A frosty moon wrapped in pink nebula gas.",
+    "field": {
+     "n": "Cradle Drift",
+     "ores": {
+      "iron": 3,
+      "ice": 2,
+      "titanium": 1,
+      "nickel": 0.53
+     },
+     "magnetic": 0.1
+    }
+   },
+   "tierra": {
+    "n": "Bloom",
+    "station": "Bloom Harbor",
+    "tex": "ocean",
+    "col": [
+     "#ff9ad8",
+     "#2a1a6a"
+    ],
+    "desc": "An ocean world under skies full of baby stars."
+   },
+   "venus": {
+    "n": "Rosette",
+    "station": "Rosette Spire",
+    "tex": "gas",
+    "col": [
+     "#ffb0d0",
+     "#6a2a5a"
+    ],
+    "desc": "A rose-colored cloud world. Very fancy."
+   },
+   "mercurio": {
+    "n": "Protostar",
+    "station": "Ignition Depot",
+    "tex": "lava",
+    "col": [
+     "#ffd0a0",
+     "#4a1a3a"
+    ],
+    "desc": "A planet orbiting a star that is still being born.",
+    "field": {
+     "n": "Ignition Plains",
+     "ores": {
+      "titanium": 2,
+      "cobalt": 2,
+      "platinum": 1,
+      "sunstone": 1.08
+     },
+     "magnetic": 0.15
+    }
+   },
+   "marte": {
+    "n": "Trapezium",
+    "station": "Trapezium Gate",
+    "tex": "rock",
+    "col": [
+     "#c8b0e0",
+     "#3a2a4a"
+    ],
+    "desc": "A fortress world lit by four bright young stars. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Lodestone",
+    "station": "Magnet Hall",
+    "tex": "rock",
+    "col": [
+     "#9ab0d0",
+     "#2a3048"
+    ],
+    "desc": "A giant magnet in space. Compasses here just spin.",
+    "field": {
+     "n": "The Lodestone Belt",
+     "ores": {
+      "nickel": 1,
+      "cobalt": 2,
+      "platinum": 2,
+      "iridium": 0.95
+     },
+     "magnetic": 0.3
+    }
+   },
+   "jupiter": {
+    "n": "Horsehead",
+    "tex": "gas",
+    "col": [
+     "#c08070",
+     "#2a1018"
+    ]
+   },
+   "europa": {
+    "n": "Mane",
+    "station": "Mane Colony",
+    "tex": "ice",
+    "col": [
+     "#f0e0ff",
+     "#7a5a9a"
+    ],
+    "desc": "An ice moon in the shadow of the Horsehead. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Horsehead Depot",
+    "desc": "Magnetic rocks tumbling in the Horsehead's shadow.",
+    "field": {
+     "n": "Horsehead Swarm",
+     "ores": {
+      "he3": 2,
+      "platinum": 2,
+      "iridium": 2,
+      "ringpearl": 0.61
+     },
+     "magnetic": 0.2
+    }
+   },
+   "saturno": {
+    "n": "Pillar",
+    "station": "Pillar Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e0c0e0",
+     "#5a3a6a"
+    ],
+    "desc": "A giant inside a pillar of glowing gas.",
+    "field": {
+     "n": "Pillar Rings",
+     "ores": {
+      "ice": 2,
+      "he3": 2,
+      "ringpearl": 2,
+      "exotic": 0.35
+     },
+     "magnetic": 0.2
+    }
+   },
+   "titan": {
+    "n": "Glowworm",
+    "station": "Glowworks",
+    "tex": "titan",
+    "col": [
+     "#d0f0c0",
+     "#3a5a3a"
+    ],
+    "desc": "A moon that glows faintly green at night."
+   },
+   "pluton": {
+    "n": "Shadowveil",
+    "station": "Wolf Den",
+    "tex": "rock",
+    "col": [
+     "#6a5a7a",
+     "#14101a"
+    ],
+    "desc": "Hidden in a dark cloud. The Veil Wolves live here."
+   },
+   "kuiper": {
+    "n": "The Nursery Edge",
+    "station": "Edge Depot",
+    "desc": "Where the nebula thins out into dark space.",
+    "field": {
+     "n": "The Nursery Edge",
+     "ores": {
+      "iridium": 2,
+      "ringpearl": 2,
+      "exotic": 1.28
+     },
+     "magnetic": 0.2
+    }
+   },
+   "oort": {
+    "n": "Hydra's Cradle",
+    "station": "Starlight Outpost",
+    "col": [
+     "#ff9ad8",
+     "#2a0a3a"
+    ],
+    "desc": "A cloud of newborn stars — and a three-headed guardian.",
+    "field": {
+     "n": "Hydra's Cradle",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 1,
+      "exotic": 2,
+      "voidshard": 0.23
+     },
+     "magnetic": 0.15
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Cradle"
+   },
+   "3": {
+    "title": "Protostar & Trapezium",
+    "text": "<b>Protostar</b> burns hot — buy <b>Shields</b>. <b>Trapezium</b> pays a fortune for ice. <b>Magnetic rocks</b> pull together into clusters: blast them with Charges!"
+   },
+   "4": {
+    "title": "The Lodestone Belt",
+    "text": "<b>Lodestone</b> and its belt: a third of the rocks are magnetic. Break one and every ore chunk nearby flies to you."
+   },
+   "6": {
+    "title": "Horsehead System",
+    "text": "<b>Mane</b> and the <b>Horsehead Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Pillar & Influence",
+    "text": "<b>Glowworm</b> and the <b>Pillar Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the Orion Nebula."
+   },
+   "8": {
+    "title": "Shadowveil",
+    "text": "<b>Shadowveil</b>'s Wolf Den and <b>the Nursery Edge</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🧲",
+    "n": "Magnetic Railway",
+    "d": "A track of magnets so strong your ore just slides home on its own.",
+    "fx": "Cradle outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Starbirth Beacons",
+    "d": "You light the lanes with baby stars. They are very bright and a bit loud.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🛡",
+    "n": "Nebula Wolfpack",
+    "d": "You tame the Veil Wolves' fastest ships. Two hunt with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🗼",
+    "n": "Magnet Lift",
+    "d": "Two giant magnets, one on the ground and one in orbit. Flip the switch and cargo goes up.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Star Nursery Garden",
+    "d": "You plant a baby star next to Trapezium. Now it has seasons, rain and flowers.",
+    "fx": "Trapezium pays ×2 for everything · Trapezium Guard reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Nebula Folds",
+    "d": "You fold the nebula like a map so any two places touch.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Lodestone Halo",
+    "d": "A ring-shaped magnet around Pillar pulls ore out of the whole nebula.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Starbirth Farm",
+    "d": "Why use one star? You grow a whole field of them and harvest their light.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Star Seed Cannon",
+    "d": "You fire a baby star at a planet. It grows up very fast.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "pulsar": {
+  "n": "The Pulsar",
+  "star": "white",
+  "rock": 14.9,
+  "enemy": 8,
+  "value": 1,
+  "gift": "phase",
+  "sweeps": 1,
+  "boss": "warden",
+  "bossFleet": [
+   "warden",
+   "corsair",
+   "corsair"
+  ],
+  "signal": {
+   "title": "The lighthouse keeper",
+   "text": "At the heart of the Pulsar's beam stands the <b>Pulsar Warden</b> — a spinning station with two arms of pure light. <b>Stay out of its arms</b>, or phase right through them."
+  },
+  "gate": "The Warden stops spinning and goes dark. In the sudden silence, an ancient ring <b>starts to tick</b>.",
+  "intro": "<b>The Pulsar</b> is a dead star spinning hundreds of times a second. Every few seconds its <b>beam sweeps across your field</b>: rocks it touches get <b>charged</b> (×2 ore for a while), but it also burns your hull. The Beam Riders give you the <b>Phase Shift</b>: press <b>X</b> (or PHASE) to become a ghost for 3 s — no damage, and you fly straight through rocks. Ride the beam! You keep it forever.",
+  "factions": {
+   "tierra": {
+    "n": "Lighthouse Assembly",
+    "c": "#b0c8ff"
+   },
+   "marte": {
+    "n": "Tick Clans",
+    "c": "#e0c0a0"
+   },
+   "cinturon": {
+    "n": "Beam Riders",
+    "c": "#9ff3ff"
+   },
+   "exterior": {
+    "n": "Silent Choir",
+    "c": "#c0a0ff"
+   },
+   "piratas": {
+    "n": "Static Raiders",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Tick",
+    "station": "Tick Base",
+    "tex": "rock",
+    "col": [
+     "#c0c8d8",
+     "#30364a"
+    ],
+    "desc": "A moon that flashes every time the beam goes by.",
+    "field": {
+     "n": "Tick Fields",
+     "ores": {
+      "iron": 4,
+      "ice": 2,
+      "titanium": 2.77
+     }
+    }
+   },
+   "tierra": {
+    "n": "Metronome",
+    "station": "Beacon Harbor",
+    "tex": "ocean",
+    "col": [
+     "#a0c0ff",
+     "#0a1a4a"
+    ],
+    "desc": "A world where everyone lives by the beam. Very punctual people."
+   },
+   "venus": {
+    "n": "Chime",
+    "station": "Chime Spire",
+    "tex": "gas",
+    "col": [
+     "#e0e8ff",
+     "#4a4a8a"
+    ],
+    "desc": "Its clouds ring like bells when the beam hits them."
+   },
+   "mercurio": {
+    "n": "Flash",
+    "station": "Flash Depot",
+    "tex": "lava",
+    "col": [
+     "#ffffff",
+     "#2a2a5a"
+    ],
+    "desc": "Right next to the beam. Bring shields.",
+    "field": {
+     "n": "Flash Plains",
+     "ores": {
+      "nickel": 2,
+      "platinum": 2,
+      "sunstone": 0.23
+     }
+    }
+   },
+   "marte": {
+    "n": "Echo",
+    "station": "Echo Gate",
+    "tex": "rock",
+    "col": [
+     "#c0a890",
+     "#3a2a20"
+    ],
+    "desc": "A silent desert that echoes every pulse. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Strobe",
+    "station": "Beam Hall",
+    "tex": "rock",
+    "col": [
+     "#a8b8d0",
+     "#283040"
+    ],
+    "desc": "The Beam Riders' home. They time everything to the pulse.",
+    "field": {
+     "n": "The Strobe Belt",
+     "ores": {
+      "platinum": 2,
+      "sunstone": 2,
+      "iridium": 0.17
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Gyre",
+    "tex": "gas",
+    "col": [
+     "#c0d8ff",
+     "#2a3a7a"
+    ]
+   },
+   "europa": {
+    "n": "Hush",
+    "station": "Hush Colony",
+    "tex": "ice",
+    "col": [
+     "#f0f8ff",
+     "#6a7aa0"
+    ],
+    "desc": "The only quiet place in the system. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Gyre Depot",
+    "desc": "Gyre's Trojans, crackling with static.",
+    "field": {
+     "n": "Gyre Swarm",
+     "ores": {
+      "platinum": 2,
+      "sunstone": 2,
+      "iridium": 5.06
+     }
+    }
+   },
+   "saturno": {
+    "n": "Spindle",
+    "station": "Spindle Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e0e8f8",
+     "#4a5a8a"
+    ],
+    "desc": "A giant whose rings spin in time with the pulsar.",
+    "field": {
+     "n": "Spindle Rings",
+     "ores": {
+      "ice": 2,
+      "iridium": 2,
+      "ringpearl": 1,
+      "exotic": 0.24
+     }
+    }
+   },
+   "titan": {
+    "n": "Cog",
+    "station": "Cogworks",
+    "tex": "titan",
+    "col": [
+     "#c8c0b0",
+     "#4a4030"
+    ],
+    "desc": "A moon of clockwork factories."
+   },
+   "pluton": {
+    "n": "Static",
+    "station": "Static Market",
+    "tex": "rock",
+    "col": [
+     "#7a7a9a",
+     "#14141f"
+    ],
+    "desc": "Where the Static Raiders sell what they steal."
+   },
+   "kuiper": {
+    "n": "The Silent Reach",
+    "station": "Reach Depot",
+    "desc": "Far from the beam, but never quite out of it.",
+    "field": {
+     "n": "The Silent Reach",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 2,
+      "exotic": 1.45
+     }
+    }
+   },
+   "oort": {
+    "n": "The Warden's Lighthouse",
+    "station": "Blind Spot Outpost",
+    "col": [
+     "#e0f0ff",
+     "#101a3a"
+    ],
+    "desc": "The center of the beam, where the Warden spins.",
+    "field": {
+     "n": "The Warden's Lighthouse",
+     "ores": {
+      "ice": 2,
+      "exotic": 1,
+      "voidshard": 0.24
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Tick"
+   },
+   "3": {
+    "title": "Flash & Echo",
+    "text": "<b>Flash</b> sits in the beam — buy <b>Shields</b>. <b>Echo</b> pays a fortune for ice. When the beam sweeps by, press <b>X</b> to <b>Phase</b> through it and mine the charged rocks!"
+   },
+   "4": {
+    "title": "The Strobe Belt",
+    "text": "<b>Strobe</b> and the <b>Strobe Belt</b>. Charged rocks drop double ore — time your mining to the pulse."
+   },
+   "6": {
+    "title": "Gyre System",
+    "text": "<b>Hush</b> and the <b>Gyre Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Spindle & Influence",
+    "text": "<b>Cog</b> and the <b>Spindle Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the Pulsar."
+   },
+   "8": {
+    "title": "Static",
+    "text": "<b>Static</b>'s market and <b>the Silent Reach</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "⚡",
+    "n": "Pulse Catapult",
+    "d": "Cargo launches on every pulse — 700 times a second.",
+    "fx": "Tick outpost output ×3"
+   },
+   "beacons": {
+    "icon": "📡",
+    "n": "Clockwork Lanes",
+    "d": "Every ship moves exactly in time with the pulsar. Nobody is ever late again.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "⚔",
+    "n": "Strobe Squadron",
+    "d": "Gunships that only exist between pulses. Pirates can't hit what isn't there. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Beam Lift",
+    "d": "You park cargo in the pulsar's beam and it gets flicked into orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Planet Clock",
+    "d": "You slow Echo's spin to a perfect 24 hours. Turns out that's all it needed.",
+    "fx": "Echo pays ×2 for everything · Tick Clans reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Time-Slice Gates",
+    "d": "You step out of one pulse and into the next — somewhere else.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Spinning Ring Foundry",
+    "d": "Spindle's rings spin so fast they sort ore by weight all by themselves.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Neutron Dynamo",
+    "d": "You put a generator on the fastest-spinning thing in the galaxy.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Pulsar Lance",
+    "d": "You aim the pulsar. Just once. Just a little.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "rim": {
+  "n": "Core Rim",
+  "star": "orange",
+  "rock": 16.3,
+  "enemy": 8.8,
+  "value": 1,
+  "boss": "archon",
+  "bossFleet": [
+   "archon"
+  ],
+  "signal": {
+   "title": "The last guardian",
+   "text": "At <b>Archon's Gate</b> an ancient machine still stands watch: <b>the Archon</b>. It hides behind <b>shield shards</b> — destroy the shards first, then strike."
+  },
+  "gate": "The Archon bows, and its light goes out. The oldest gate in the galaxy <b>opens</b> — and it points straight at the black hole.",
+  "intro": "The <b>Core Rim</b> is the edge of the galaxy's center, full of ruins from a lost civilization. Some asteroids are <b>ancient relics</b>, covered in glowing glyphs. Break one to release a <b>relic power</b> for 25 s: double ore, a giant magnet, a super laser, or all your tools recharged at once.",
+  "factions": {
+   "tierra": {
+    "n": "Rim Concordat",
+    "c": "#ffc080"
+   },
+   "marte": {
+    "n": "Relic Wardens",
+    "c": "#d0b070"
+   },
+   "cinturon": {
+    "n": "Glyph Diggers",
+    "c": "#ffe080"
+   },
+   "exterior": {
+    "n": "Old Light Pilgrims",
+    "c": "#c0a0ff"
+   },
+   "piratas": {
+    "n": "Tomb Raiders",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Shard",
+    "station": "Dig Site One",
+    "tex": "rock",
+    "col": [
+     "#d0b890",
+     "#3a2a18"
+    ],
+    "desc": "A moon covered in old ruins. Every rock might be a relic.",
+    "field": {
+     "n": "First Dig",
+     "ores": {
+      "iron": 3,
+      "ice": 3,
+      "cobalt": 0.51
+     },
+     "relics": 0.08
+    }
+   },
+   "tierra": {
+    "n": "Elder",
+    "station": "Elder Harbor",
+    "tex": "ocean",
+    "col": [
+     "#e0c090",
+     "#2a3a5a"
+    ],
+    "desc": "A gentle ocean world built on top of ancient cities."
+   },
+   "venus": {
+    "n": "Gilt",
+    "station": "Gilt Spire",
+    "tex": "gas",
+    "col": [
+     "#ffe0a0",
+     "#7a5a20"
+    ],
+    "desc": "A golden cloud world. The rich collect relics here."
+   },
+   "mercurio": {
+    "n": "Kiln",
+    "station": "Kiln Depot",
+    "tex": "lava",
+    "col": [
+     "#ffa050",
+     "#3a1404"
+    ],
+    "desc": "A burning world where the ancients forged their machines.",
+    "field": {
+     "n": "Kiln Flats",
+     "ores": {
+      "titanium": 2,
+      "cobalt": 2,
+      "platinum": 1,
+      "iridium": 0.21
+     },
+     "relics": 0.12
+    }
+   },
+   "marte": {
+    "n": "Obelisk",
+    "station": "Obelisk Gate",
+    "tex": "rock",
+    "col": [
+     "#c0a070",
+     "#3a2a14"
+    ],
+    "desc": "A desert of giant black obelisks. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Vault",
+    "station": "Glyph Hall",
+    "tex": "rock",
+    "col": [
+     "#b8a080",
+     "#30281c"
+    ],
+    "desc": "The Glyph Diggers' city, carved inside an ancient vault.",
+    "field": {
+     "n": "The Vault Belt",
+     "ores": {
+      "cobalt": 2,
+      "he3": 2,
+      "ringpearl": 0.29
+     },
+     "relics": 0.25
+    }
+   },
+   "jupiter": {
+    "n": "Colossus Prime",
+    "tex": "gas",
+    "col": [
+     "#ffc890",
+     "#7a3a1a"
+    ]
+   },
+   "europa": {
+    "n": "Rune",
+    "station": "Rune Colony",
+    "tex": "ice",
+    "col": [
+     "#fff0d8",
+     "#7a6a4a"
+    ],
+    "desc": "Glyphs glow under the ice. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Prime Depot",
+    "desc": "Trojan rocks full of old machinery.",
+    "field": {
+     "n": "Ruin Swarm",
+     "ores": {
+      "he3": 2,
+      "platinum": 2,
+      "iridium": 2,
+      "exotic": 0.12
+     },
+     "relics": 0.18
+    }
+   },
+   "saturno": {
+    "n": "Ringwork",
+    "station": "Ringwork Depot",
+    "tex": "gas",
+    "col": [
+     "#f0d8a8",
+     "#6a4a2a"
+    ],
+    "desc": "Its rings are not natural. Somebody built them.",
+    "field": {
+     "n": "Ringwork Rings",
+     "ores": {
+      "he3": 2,
+      "iridium": 2,
+      "voidshard": 0.16
+     },
+     "relics": 0.18
+    }
+   },
+   "titan": {
+    "n": "Archive",
+    "station": "Archiveworks",
+    "tex": "titan",
+    "col": [
+     "#d8c090",
+     "#4a3a20"
+    ],
+    "desc": "A moon-sized library, now a refinery."
+   },
+   "pluton": {
+    "n": "Crypt",
+    "station": "Tomb Market",
+    "tex": "rock",
+    "col": [
+     "#7a6a5a",
+     "#1a140e"
+    ],
+    "desc": "The Tomb Raiders sell stolen relics here."
+   },
+   "kuiper": {
+    "n": "The Boneyard",
+    "station": "Boneyard Depot",
+    "desc": "A graveyard of ancient ships, picked clean — almost.",
+    "field": {
+     "n": "The Boneyard",
+     "ores": {
+      "ice": 2,
+      "iridium": 2,
+      "exotic": 1.86
+     },
+     "relics": 0.18
+    }
+   },
+   "oort": {
+    "n": "Archon's Gate",
+    "station": "Last Lamp Outpost",
+    "col": [
+     "#ffd080",
+     "#2a1a04"
+    ],
+    "desc": "The oldest gate in the galaxy, and its last guardian.",
+    "field": {
+     "n": "Archon's Gate",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 2,
+      "voidshard": 0.96
+     },
+     "relics": 0.12
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Shard"
+   },
+   "3": {
+    "title": "Kiln & Obelisk",
+    "text": "<b>Kiln</b> burns hot — buy <b>Shields</b>. <b>Obelisk</b> pays a fortune for ice. Rocks with glowing glyphs are <b>relics</b>: break them for a power-up!"
+   },
+   "4": {
+    "title": "The Vault Belt",
+    "text": "<b>Vault</b> and the <b>Vault Belt</b>: one rock in four is a relic."
+   },
+   "6": {
+    "title": "Colossus Prime System",
+    "text": "<b>Rune</b> and the <b>Ruin Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Ringwork & Influence",
+    "text": "<b>Archive</b> and the <b>Ringwork Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the Core Rim."
+   },
+   "8": {
+    "title": "Crypt",
+    "text": "<b>Crypt</b>'s Tomb Market and <b>the Boneyard</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🏛",
+    "n": "Ancient Conveyor",
+    "d": "You find the ancients' cargo system. It still works. It was waiting for you.",
+    "fx": "Shard outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Glyph Lanes",
+    "d": "You switch on the old glyphs. They glow along every lane, showing the way.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🤖",
+    "n": "Reawakened Sentinels",
+    "d": "Two ancient guardian machines decide they like you. They fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🗼",
+    "n": "Obelisk Lift",
+    "d": "Turns out the obelisks are elevators. Who knew?",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Garden Machine",
+    "d": "An ancient machine that turns deserts into jungles. You press the big button.",
+    "fx": "Obelisk pays ×2 for everything · Relic Wardens reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "The Old Network",
+    "d": "You reconnect the ancients' gate network. It goes everywhere.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Ringwork Restart",
+    "d": "You restart Ringwork's artificial rings. They were mining machines all along.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "The Ancients' Sphere",
+    "d": "You finish the Dyson sphere the ancients left half-built a million years ago.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "World Eraser",
+    "d": "The reason the ancients disappeared. Please be careful with it.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "sgra": {
+  "n": "Sagittarius A*",
+  "star": "hole",
+  "rock": 17.8,
+  "enemy": 9.6,
+  "value": 1,
+  "gravity": 1,
+  "boss": "devourer",
+  "bossFleet": [
+   "devourer",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Something is eating the light",
+   "text": "At the <b>Event Horizon</b> lives the <b>Devourer</b> — a creature that feeds on the black hole itself. Its gravity <b>pulls you in</b>. This is the last fight in the galaxy."
+  },
+  "gate": "The Devourer falls into the black hole it fed on. The center of the galaxy is quiet. <b>You made it.</b>",
+  "intro": "<b>Sagittarius A*</b>: the supermassive black hole at the center of the Milky Way. Its <b>gravity pulls on everything</b> — your ship, the rocks, the ore. Rocks drift up toward the black hole and get swallowed, so mine fast and don't fly too close to the <b>event horizon</b> at the top of every field. This is the last system. Finish it, and you've crossed the galaxy.",
+  "factions": {
+   "tierra": {
+    "n": "Core Republic",
+    "c": "#ffd0a0"
+   },
+   "marte": {
+    "n": "Horizon Monks",
+    "c": "#c0a0ff"
+   },
+   "cinturon": {
+    "n": "Spiral Miners",
+    "c": "#ffb070"
+   },
+   "exterior": {
+    "n": "Last Frontier",
+    "c": "#a0c0ff"
+   },
+   "piratas": {
+    "n": "Void Reavers",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Spark",
+    "station": "Brink Base",
+    "tex": "rock",
+    "col": [
+     "#d0a080",
+     "#2a1a10"
+    ],
+    "desc": "A small moon right on the brink of the deep.",
+    "field": {
+     "n": "Brink Fields",
+     "ores": {
+      "iron": 4,
+      "ice": 2,
+      "platinum": 0.14
+     }
+    }
+   },
+   "tierra": {
+    "n": "Haven Core",
+    "station": "Core Harbor",
+    "tex": "ocean",
+    "col": [
+     "#90b0ff",
+     "#101a4a"
+    ],
+    "desc": "The capital of the galaxy's center. The sky is all stars."
+   },
+   "venus": {
+    "n": "Radiance",
+    "station": "Radiance Spire",
+    "tex": "gas",
+    "col": [
+     "#ffe0b0",
+     "#7a4a2a"
+    ],
+    "desc": "A cloud world lit by the glowing accretion disk."
+   },
+   "mercurio": {
+    "n": "Swirl",
+    "station": "Swirl Depot",
+    "tex": "lava",
+    "col": [
+     "#ffa060",
+     "#3a0a04"
+    ],
+    "desc": "A planet slowly spiraling inward. Hot and rich.",
+    "field": {
+     "n": "Swirl Flats",
+     "ores": {
+      "iron": 2,
+      "titanium": 2,
+      "sunstone": 1.88
+     }
+    }
+   },
+   "marte": {
+    "n": "Stillness",
+    "station": "Monk Gate",
+    "tex": "rock",
+    "col": [
+     "#a090c0",
+     "#2a2040"
+    ],
+    "desc": "The Horizon Monks meditate here, watching the black hole. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Spiral",
+    "station": "Spiral Hall",
+    "tex": "rock",
+    "col": [
+     "#c09070",
+     "#3a2418"
+    ],
+    "desc": "The Spiral Miners chase ore as it falls inward.",
+    "field": {
+     "n": "The Spiral Belt",
+     "ores": {
+      "nickel": 2,
+      "sunstone": 2,
+      "iridium": 0.33
+     }
+    }
+   },
+   "jupiter": {
+    "n": "Maw",
+    "tex": "gas",
+    "col": [
+     "#ff9a60",
+     "#4a0a10"
+    ]
+   },
+   "europa": {
+    "n": "Drift",
+    "station": "Drift Colony",
+    "tex": "ice",
+    "col": [
+     "#e0e8ff",
+     "#4a4a7a"
+    ],
+    "desc": "An ice moon stretched into an egg by gravity. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Maw Depot",
+    "desc": "Rocks falling in a long, slow spiral.",
+    "field": {
+     "n": "Maw Swarm",
+     "ores": {
+      "ice": 2,
+      "iridium": 2,
+      "voidshard": 0.02
+     }
+    }
+   },
+   "saturno": {
+    "n": "Disk",
+    "station": "Disk Depot",
+    "tex": "gas",
+    "col": [
+     "#ffd0a0",
+     "#6a2a10"
+    ],
+    "desc": "A giant skimming the edge of the accretion disk.",
+    "field": {
+     "n": "The Accretion Rings",
+     "ores": {
+      "ice": 3,
+      "iridium": 2,
+      "voidshard": 0.21
+     }
+    }
+   },
+   "titan": {
+    "n": "Lantern",
+    "station": "Lanternworks",
+    "tex": "titan",
+    "col": [
+     "#ffe0a0",
+     "#5a3a10"
+    ],
+    "desc": "A moon that glows in the disk's light."
+   },
+   "pluton": {
+    "n": "Edge",
+    "station": "Last Market",
+    "tex": "rock",
+    "col": [
+     "#7a6a8a",
+     "#14101a"
+    ],
+    "desc": "The last market before the deep. The Void Reavers trade here."
+   },
+   "kuiper": {
+    "n": "The Accretion Disk",
+    "station": "Disk Edge Depot",
+    "desc": "A river of glowing rock pouring into the black hole.",
+    "field": {
+     "n": "The Accretion Disk",
+     "ores": {
+      "ice": 2,
+      "exotic": 1,
+      "voidshard": 0.02
+     }
+    }
+   },
+   "oort": {
+    "n": "Event Horizon",
+    "station": "Point of No Return",
+    "col": [
+     "#ffb060",
+     "#000000"
+    ],
+    "desc": "The edge of the black hole. The Devourer feeds here.",
+    "field": {
+     "n": "Event Horizon",
+     "ores": {
+      "ice": 2,
+      "exotic": 2,
+      "voidshard": 0.07
+     }
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Spark"
+   },
+   "3": {
+    "title": "Swirl & Stillness",
+    "text": "<b>Swirl</b> burns hot — buy <b>Shields</b>. <b>Stillness</b> pays a fortune for ice. Mind the <b>gravity</b>: everything drifts toward the black hole."
+   },
+   "4": {
+    "title": "The Spiral Belt",
+    "text": "<b>Spiral</b> and the <b>Spiral Belt</b>. Rocks that reach the event horizon are gone for good — catch them first."
+   },
+   "6": {
+    "title": "Maw System",
+    "text": "<b>Drift</b> and the <b>Maw Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Disk & Influence",
+    "text": "<b>Lantern</b> and the <b>Accretion Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the center of the galaxy."
+   },
+   "8": {
+    "title": "Edge",
+    "text": "<b>Edge</b>'s Last Market and <b>the Accretion Disk</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🌀",
+    "n": "Gravity Slingshot",
+    "d": "You just drop the ore and let the black hole throw it home. Physics!",
+    "fx": "Spark outpost output ×3"
+   },
+   "beacons": {
+    "icon": "📡",
+    "n": "Time-Dilation Lanes",
+    "d": "Near the black hole, time slows down. Your trips take ages — for everyone else.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🛡",
+    "n": "Horizon Guard",
+    "d": "Monks in gunships, perfectly calm, perfectly accurate. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Frame-Drag Lift",
+    "d": "The black hole spins space itself. Your cargo rides the spin up into orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Hawking Greenhouse",
+    "d": "Warm black-hole glow turns Stillness into a garden. The monks approve.",
+    "fx": "Stillness pays ×2 for everything · Horizon Monks reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Wormhole Web",
+    "d": "You tie wormholes to the black hole's spin. They go anywhere in the galaxy.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Accretion Mill",
+    "d": "A wheel in the accretion disk catches falling ore before it's gone.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Penrose Engine",
+    "d": "You throw junk at a spinning black hole and catch it coming back with more energy. Infinite power.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Pocket Singularity",
+    "d": "A tiny black hole in a box. Open with care.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ }
+});
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
@@ -2239,9 +3491,25 @@ function finalBossKilled() {
   if (S.gateOpen) return;
   S.gateOpen = 1;
   const nx = nextSystem();
+  if (!nx) return showEnding();
   addNews('🌀', `<b>The guardian is destroyed.</b> An ancient jump gate wakes up in ${LOC.oort.n}.`, '#d9b3ff');
   if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>${sysDef().gate}</p><p>Open the <b>Galaxy</b> map to see where it leads${nx ? ` — next stop: <b>${nx.n}</b>` : ''}. You can stay as long as you like: the more you achieve here, the more <b>Tribute</b> you take with you.</p>`, choices: [{ label: 'Open the Galaxy map', cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }, { label: 'Later', cost: 0, fn: () => {} }] });
   save();
+}
+
+// ---------- the end of the road: the heart of the galaxy ----------
+function showEnding() {
+  const G = S.galaxy || { done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 }, tribute: 0 };
+  G.finished = 1; if (!G.done.includes(sysId())) G.done.push(sysId());
+  const L = G.life, earned = L.earned + S.stats.earned, mined = L.mined + S.stats.mined, kills = L.kills + S.stats.kills, days = L.days + S.day;
+  addNews('🌌', '<b>The Devourer is gone.</b> You crossed the whole Milky Way, from the rim to its heart.', '#ffd24a');
+  save();
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌌', title: 'The heart of the galaxy', html: `<p>${sysDef().gate}</p>
+    <p>From a little moon in the Solar System to the black hole at the center of the Milky Way: <b>15 star systems</b>, all yours.</p>
+    <div class="ending-stats"><div><b>${fmt(earned)}</b><small>credits earned</small></div><div><b>${fmt(mined)}</b><small>ore mined</small></div><div><b>${fmt(kills)}</b><small>pirates defeated</small></div><div><b>${fmt(days)}</b><small>days in space</small></div></div>
+    <p class="hint">Far beyond the galaxy's edge, your dishes catch a new signal… from <b>Andromeda</b>. A new galaxy is coming in a future update.</p>
+    <p>You can keep playing here as long as you like — your Tribute keeps flowing.</p>`,
+    choices: [{ label: 'Keep playing', cost: 0, fn: () => {} }, { label: 'Open the Galaxy map', cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }] });
 }
 
 // ---------- the Galaxy map ----------

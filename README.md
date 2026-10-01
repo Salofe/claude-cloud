@@ -72,6 +72,21 @@ Defeating a system's final guardian opens its **jump gate**. The **Galaxy** map 
 - **Rigel** (blue supergiant): some big rocks hide **geodes**; you receive the **Deep Scanner** (C / SCAN, 14 s cooldown) — a wave that marks every geode within 1,800 px (plus rich and golden rocks). Breaking a geode drops a big load of the field's best ore. Guardian: the **Radiant Titan**, which aims a thin line at you and fires a beam down it — get out of the line! Signature: Quantum Sonar Array (scan 2× faster, geodes ×2 ore).
 - **Betelgeuse** (red supergiant about to explode): about every minute the star **pulses** — a heat wave makes every rock **molten** for 10 s (2× laser damage, +50% ore). You receive the **Wide Beam**: the laser forks into two more rocks near the target at half power. Guardian: the **Stellar Phoenix**, which dashes at you and **rises once from its ashes** in blue fire. Signature: Starheart Tap (pulses 2× as often, 50% longer).
 
+### Systems 12–15: to the core
+
+- **Orion Nebula** (stellar nursery): **magnetic asteroids** drift together into clusters (great for Charges and the Wide Beam); breaking one sends a **magnetic burst** that pulls every ore chunk within 800 px to you. Guardian: the **Nebula Hydra**, which splits into two fast heads when cut down. Signature: Polarity Engine (clump 2× faster, ×2 ore).
+- **The Pulsar** (spinning neutron star): every ~15 s its **beam sweeps the field** — rocks it touches are **charged** for 15 s (×2 ore), but it burns your hull. You receive the **Phase Shift** (X / PHASE, 20 s cooldown): 3 s as a ghost, no damage, flying through rocks. Guardian: the **Pulsar Warden**, with two rotating arms of light that switch on and off. Signature: Beam Harvester (beam is harmless, charged ×3).
+- **Core Rim** (ancient ruins): **relic asteroids** covered in glyphs give a 25 s power when broken — Golden Touch (×2 ore), Gravity Lens (giant magnet), Ancient Beam (×2 laser) or Recharge (all tools ready). Guardian: **the Archon**, shielded (90% less damage) while its shield shards live. Signature: Relic Archive (powers last 2×).
+- **Sagittarius A\*** (the black hole at the center of the galaxy): **gravity** pulls your ship, the rocks and the ore toward the black hole above every field; rocks that reach it are swallowed, and its event horizon burns. Guardian: **the Devourer**, whose gravity well drags you in. Defeating it ends the journey: an ending screen with your lifetime stats and a signal from **Andromeda** (a future update). Signature: Hawking Refinery (swallowed rocks pay you, gravity halved).
+
+Difficulty keeps rising gently (rocks ~×1.09, pirates ~×1.1 per system) so that, with the Legacy you'd have by then, every system takes the simulator ~145–150 minutes.
+
+## Mobile
+
+- Menus scroll with a finger through the game's own kinetic scroller, so they also work in full screen (where the host page blocks native scrolling); a drag never presses the button it started on.
+- Phones see more of the mining field (the camera zooms out on small touch screens), the touch laser keeps its target, tool buttons show a cooldown ring, and hits, breaks and explosions vibrate.
+- Landscape phones get a one-row HUD and compact controls.
+
 Review of earlier mechanics: crystal shards now drop +20% (rewarding the chase), armored rocks ×1.5 ore (a prize for the drill, not just an obstacle).
 
 Every system reinvents the nine megaprojects with its own (ever crazier) tech — e.g. Centauri's Twin-Star Dyson Lattice, Barnard's Mine-Shaft Wormholes, Sirius' White Dwarf Hammer, Tau Ceti's Planetary Repossession Beam — and adds one **signature project** with a unique effect: Crystal Resonance Array (crystal shards ×2 ore), Deep Core Borer (drill reach +60%, power ×1.5), Plasma Forge (laser 60% vs armor, armored rocks ×2 ore), Galactic Stock Exchange (trade & freighter income ×3).

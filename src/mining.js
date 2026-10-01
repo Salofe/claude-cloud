@@ -19,6 +19,7 @@ const MineScene = {
   },
   exit() { showMineUI(false); laserSound(false); this.laserOn = false; },
   get z() { return this.loc.field.z; },
+  get gravity() { return !!sysDef().gravity && !this.space; },
   setup() {
     const f = this.loc.field;
     this.rocks = []; this.chunks = []; this.parts = new Particles(); this.floaters = []; this.enemies = []; this.bolts = [];
@@ -28,6 +29,7 @@ const MineScene = {
     this.cam = { x: this.p.x, y: this.p.y - 120 };
     this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = []; this.etrail = []; this.scanCd = this.scanCd || 0; this.scanT = -1; this.moltenT = 0; this.waveT = -1; this.inks = []; this.forks = null;
     this.pulseIn = sysDef().pulses ? rand(20, 30) : 0;
+    this.phaseCd = this.phaseCd || 0; this.phaseT = 0; this.relic = null; this.sweep = null; this.sweepIn = rand(8, 12); this.swallowed = 0;
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -75,11 +77,14 @@ const MineScene = {
     const armored = !crystal && !this.space && !!this.loc.field.armored && Math.random() < this.loc.field.armored;
     const volatile = !crystal && !armored && !this.space && !!this.loc.field.explosive && Math.random() < this.loc.field.explosive;
     const living = !crystal && !armored && !volatile && !this.space && !!this.loc.field.living && Math.random() < this.loc.field.living;
+    const plain = !crystal && !armored && !volatile && !living && !this.space;
+    const magnetic = plain && !!this.loc.field.magnetic && Math.random() < this.loc.field.magnetic;
+    const relic = plain && !magnetic && !!this.loc.field.relics && Math.random() < this.loc.field.relics;
     // geodes (Rigel onward) hide a big load of the field's best ore — the Deep Scanner shows where they are
     const geode = !this.space && tier >= 2 && !!this.loc.field.geodes && Math.random() < this.loc.field.geodes ? this.bestOre() : null;
     const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile, living, geode,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile, living, geode, magnetic, relic,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -109,6 +114,12 @@ const MineScene = {
     for (const r of this.rocks) { const d = Math.hypot(r.x - this.p.x, r.y - this.p.y); if (d < 1800) { r.seen = 14; r.seenD = d / 2000; if (r.geode) n++; } }
     tone(300, 0.6, 'sine', 0.08, 1500); tone(1500, 0.5, 'sine', 0.04, null, 0.55);
     toast(n ? `◈ Deep Scan: ${n} geode${n > 1 ? 's' : ''} nearby!` : '◈ Deep Scan: no geodes nearby', n ? 'good' : '');
+  },
+  // Phase Shift (the Pulsar): 3 s as a ghost — no damage, and you fly through rocks
+  phase() {
+    if (!hasTool('phase') || this.space || this.phaseCd > 0) return;
+    this.phaseT = 3; this.phaseCd = 20; tone(900, 0.4, 'sine', 0.06, 300); haptic(20);
+    this.parts.burst(this.p.x, this.p.y, 30, '#9ff3ff', 200, 0.5, 2);
   },
   pullRadius() { return Math.max(1000, ship.magnet * 4); },
   toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) * (built('borer') ? 1.6 : 1) : ship.laserRange; },
@@ -179,6 +190,12 @@ const MineScene = {
       this.floaters.push({ x: r.x, y: r.y - 30, txt: `GEODE! ${n} ${ITEMS[r.geode].n}`, col: ITEMS[r.geode].c, life: 2.2, big: 1 });
       S.stats.geodes = (S.stats.geodes || 0) + 1; sfx('win'); this.shake = Math.max(this.shake, 8);
     }
+    if (r.magnetic) {   // magnetic burst: every ore chunk nearby flies to you
+      for (const c of this.chunks) if (Math.hypot(c.x - r.x, c.y - r.y) < 800) c.home = 2;
+      this.blasts.push({ x: r.x, y: r.y, R: 260, t: 0, col: '#7fb8ff' }); this.homeAt = { x: r.x, y: r.y };
+      tone(220, 0.4, 'sine', 0.06, 880);
+    }
+    if (r.relic) this.grantRelic(r);
     if (r.crystal && r.tier > 1) {
       // crystals shatter into a spray of fast shards you have to chase
       const n = r.tier === 3 ? 5 : 3;
@@ -193,7 +210,7 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
-        c.volatile = false; c.geode = null; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; }
+        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; }
       }
       const m = 0.5 * ship.yieldMult * this.oreBonus(r);
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
@@ -205,7 +222,16 @@ const MineScene = {
     }
   },
   // living rocks (Kepler) and molten rocks (Betelgeuse pulses) are worth more
-  oreBonus(r) { return (r.living ? 1.6 * (built('whisperer') ? 2 : 1) : 1) * (this.moltenT > 0 ? 1.5 : 1); },
+  oreBonus(r) { return (r.living ? 1.6 * (built('whisperer') ? 2 : 1) : 1) * (this.moltenT > 0 ? 1.5 : 1) * (r.magnetic && built('polarity') ? 2 : 1) * (r.charged > 0 ? (built('beamharvest') ? 3 : 2) : 1) * (this.relic && this.relic.k === 'gold' ? 2 : 1); },
+  // ancient relics (Core Rim): break one for a 25 s power
+  grantRelic(r) {
+    const k = pick(['gold', 'lens', 'beam', 'recharge']), L = { gold: 'GOLDEN TOUCH: ×2 ore', lens: 'GRAVITY LENS: giant magnet', beam: 'ANCIENT BEAM: ×2 laser', recharge: 'RECHARGE: all tools ready!' }[k];
+    if (k === 'recharge') { this.pullCd = this.boostCd = this.bombCd = this.scanCd = this.phaseCd = 0; }
+    else this.relic = { k, t: 25 * (built('archive') ? 2 : 1), n: L.split(':')[0] };
+    this.floaters.push({ x: r.x, y: r.y - 40, txt: L, col: '#ffe080', life: 2.6, big: 1 });
+    this.parts.burst(r.x, r.y, 50, '#ffe080', 260, 1, 3); sfx('win');
+    S.stats.relics = (S.stats.relics || 0) + 1;
+  },
   dropChunk(x, y, ore) {
     const a = rand(0, TAU), v = rand(20, 60);
     this.chunks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, ore, rot: rand(0, TAU), life: 45 });
@@ -225,7 +251,7 @@ const MineScene = {
     return true;
   },
   // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range; molten rocks melt twice as fast
-  laserDmg(r, drill) { return ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (r.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * (this.moltenT > 0 ? 2 : 1); },
+  laserDmg(r, drill) { return (this.relic && this.relic.k === 'beam' ? 2 : 1) * ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (r.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * (this.moltenT > 0 ? 2 : 1); },
   get inCombat() { return this.enemies.length > 0; },
   update(dt) {
     this.t += dt;
@@ -244,6 +270,12 @@ const MineScene = {
     const drag = Math.pow(0.4, dt);
     p.vx *= drag; p.vy *= drag;
     const inInk = (this.inks || []).some(k => Math.hypot(p.x - k.x, p.y - k.y) < k.r * 0.8);
+    // Sagittarius A*: the black hole above every field pulls on you; its event horizon burns
+    if (this.gravity) {
+      const g = (built('hawking') ? 35 : 70) * (1 + clamp(1 - p.y / 900, 0, 1) * 2);
+      p.vy -= g * dt;
+      if (p.y < 300) { this.damage(ship.hpMax * 0.06 * dt, true); if (!this.horizonHint) { this.horizonHint = 1; toast('Too close to the event horizon! Fly down!', 'bad'); } }
+    }
     const maxV = 360 * ship.thrust * (this.boostT > 0 ? 1.5 : 1) * (inInk ? 0.55 : 1);
     const v = Math.hypot(p.vx, p.vy);
     if (v > maxV) { p.vx *= maxV / v; p.vy *= maxV / v; }
@@ -328,13 +360,26 @@ const MineScene = {
           r.swim = (r.swim || 0) + dt * (3 + Math.hypot(r.vx, r.vy) / 25);
         }
         if (r.seen > 0) { r.seen -= dt; if (r.seenD > 0) r.seenD -= dt; }
+        if (r.charged > 0) r.charged -= dt;
+        if (r.magnetic) {   // magnetic rocks drift toward each other and clump into clusters
+          let mb = null, bd = 650;
+          for (const o of this.rocks) if (o !== r && o.magnetic && !o.comet) { const d2 = Math.hypot(o.x - r.x, o.y - r.y); if (d2 < bd) { bd = d2; mb = o; } }
+          r.near = mb;
+          if (mb) {
+            const ux = (mb.x - r.x) / (bd || 1), uy = (mb.y - r.y) / (bd || 1), gap = bd - r.r - mb.r;
+            if (gap > 4) { const f = (built('polarity') ? 40 : 20) / r.tier; r.vx += ux * f * dt; r.vy += uy * f * dt; }
+            else { r.x += ux * gap * 0.5; r.y += uy * gap * 0.5; const k = Math.pow(0.2, dt); r.vx *= k; r.vy *= k; }
+            const sp = Math.hypot(r.vx, r.vy); if (sp > 70) { r.vx *= 70 / sp; r.vy *= 70 / sp; }
+          }
+        }
+        if (this.gravity) { r.vy -= 7 * dt; if (r.vy < -32) r.vy = -32; if (r.y < r.r + 60) { r.gone = 1; r.swallowed = 1; } }
         if (r.shard) { const sp = Math.hypot(r.vx, r.vy); if (sp > 35) { const k = Math.pow(0.55, dt); r.vx *= k; r.vy *= k; } }
         if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
         if (r.y < r.r || r.y > maxY) r.vy *= -1;
         r.x = clamp(r.x, r.r, MW - r.r); r.y = clamp(r.y, r.r, maxY);
       }
       const dx = p.x - r.x, dy = p.y - r.y, d = Math.hypot(dx, dy), md = r.r + shipR() * 0.4;
-      if (d < md && d > 0) {
+      if (d < md && d > 0 && !(this.phaseT > 0)) {
         const nx = dx / d, ny = dy / d;
         p.x = r.x + nx * md; p.y = r.y + ny * md;
         const rel = (p.vx - r.vx) * nx + (p.vy - r.vy) * ny;
@@ -345,7 +390,15 @@ const MineScene = {
         }
       }
     }
-    if (this.rocks.some(r => r.gone)) { this.rocks = this.rocks.filter(r => !r.gone); toast('The comet escaped…'); }
+    if (this.rocks.some(r => r.gone)) {
+      for (const r of this.rocks) if (r.swallowed) {
+        this.parts.burst(r.x, r.y, 20, '#ffb060', 120, 0.8, 2.5); this.swallowed++;
+        if (built('hawking')) { const v = ITEMS[r.ore].b * r.tier * 2 * incomeMult(); earn(v); this.floaters.push({ x: r.x, y: r.y + 40, txt: `+${fmt(v)} cr (Hawking)`, col: '#ffd24a', life: 1.4 }); }
+        else if (this.swallowed === 1) toast('A rock fell into the black hole — mine them before they drift up!');
+      }
+      if (this.rocks.some(r => r.gone && !r.swallowed)) toast('The comet escaped…');
+      this.rocks = this.rocks.filter(r => !r.gone);
+    }
     if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80) / ((sysDef().comets || 1) * (built('herding') ? 3 : 1)); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
     // --- chunks & loot ---
     const cfree = cargoFree();
@@ -353,6 +406,21 @@ const MineScene = {
     this.boostT = Math.max(0, this.boostT - dt); this.boostCd = Math.max(0, this.boostCd - dt); this.bombCd = Math.max(0, this.bombCd - dt);
     for (const b of this.bombs) { b.t -= dt; if (b.t <= 0) { b.done = 1; this.explode(b.x, b.y, 230, 0.6, false); } }
     this.bombs = this.bombs.filter(b => !b.done);
+    this.phaseCd = Math.max(0, this.phaseCd - dt); this.phaseT = Math.max(0, this.phaseT - dt);
+    if (this.relic) { this.relic.t -= dt; if (this.relic.t <= 0) this.relic = null; }
+    // the Pulsar's beam sweeps across the field: it charges rocks (×2 ore) and burns your hull
+    if (sysDef().sweeps && !this.space) {
+      this.sweepIn -= dt;
+      if (this.sweepIn < 2 && !this.sweepWarned) { this.sweepWarned = 1; toast(hasTool('phase') ? '⚡ Pulsar beam incoming — Phase (X) to ride it!' : '⚡ Pulsar beam incoming!', 'bad'); tone(1200, 0.15, 'square', 0.04); tone(1200, 0.15, 'square', 0.04, null, 0.3); }
+      if (this.sweepIn <= 0 && !this.sweep) { const dir = Math.random() < 0.5 ? 1 : -1; this.sweep = { t: 0, dur: 3, a0: Math.PI / 2 - 0.26 * dir, a1: Math.PI / 2 + 0.26 * dir, a: 0 }; sfx('warp'); }
+      if (this.sweep) {
+        const B = this.sweep; B.t += dt; B.a = lerp(B.a0, B.a1, B.t / B.dur);
+        const ox = MW / 2, oy = -2400, ux = Math.cos(B.a), uy = Math.sin(B.a), lineD = (x, y) => Math.abs((x - ox) * uy - (y - oy) * ux);
+        for (const r of this.rocks) if (lineD(r.x, r.y) < 70 + r.r) { if (!(r.charged > 0)) this.parts.burst(r.x, r.y, 6, '#bfe8ff', 80, 0.4, 2); r.charged = 15; }
+        if (lineD(p.x, p.y) < 70 && !built('beamharvest')) { this.damage(ship.hpMax * 0.1 * dt, true); if (Math.random() < dt * 10) sfx('hit'); }
+        if (B.t >= B.dur) { this.sweep = null; this.sweepIn = rand(12, 16); this.sweepWarned = 0; }
+      }
+    }
     this.scanCd = Math.max(0, this.scanCd - dt); if (this.scanT >= 0) { this.scanT += dt; if (this.scanT > 1) this.scanT = -1; }
     // Betelgeuse pulses: a heat wave washes over the field and every rock turns molten for a while
     if (sysDef().pulses && !this.space) {
@@ -371,7 +439,9 @@ const MineScene = {
     for (const c of this.chunks) {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
-      const mag = this.pullT > 0 ? this.pullRadius() : c.cr ? ship.magnet * 1.5 : ship.magnet;
+      const mag = (this.pullT > 0 ? this.pullRadius() : c.cr ? ship.magnet * 1.5 : ship.magnet) * (this.relic && this.relic.k === 'lens' ? 3 : 1);
+      if (c.home > 0) { c.home -= dt; if (cfree > 0 || c.cr) { c.vx += dx / (d || 1) * 900 * dt; c.vy += dy / (d || 1) * 900 * dt; } }
+      if (this.gravity) { c.vy -= 25 * dt; if (c.y < 30) c.dead = true; }
       if (d < mag && (cfree > 0 || c.cr)) { const f = 650 * (1 - d / mag) + 140; c.vx += dx / d * f * dt; c.vy += dy / d * f * dt; }
       if (d < 24 && this.collect(c)) c.dead = true;
       if (c.life <= 0) c.dead = true;
@@ -440,6 +510,7 @@ const MineScene = {
       if (this.armed && p.y > DOCK_Y) { this.leave(); return; }
     }
 
+    if (this.gravity && !this.space && this.rocks.length < this.target * 0.8 && Math.random() < dt * 1.2) this.spawnRock(rand(120, MW - 120), rand(DOCK_Y * 0.55, DOCK_Y - 420), pick([3, 3, 2]));
     if (!this.space && this.rocks.length < this.target * 0.5 && Math.random() < dt * 0.4) {
       const x = rand(120, MW - 120), y = rand(120, Math.min(DOCK_Y - 400, p.y - 500));
       if (y > 100) this.spawnRock(x, y, 3);
@@ -480,6 +551,7 @@ const MineScene = {
   },
   damage(n, heat) {
     const p = this.p;
+    if (this.phaseT > 0) return;
     if (p.shield > 0) { const a = Math.min(p.shield, n); p.shield -= a; n -= a; if (!heat) p.shT = 2.5; }
     if (n > 0) {
       S.hull -= n;
@@ -531,6 +603,14 @@ const MineScene = {
       drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
+    if (sysDef().gravity) drawBlackHole(ctx, W * 0.3 - cx * 0.015, H * 0.16 - (cy - MH) * 0.012, Math.min(W, H) * 0.07, t);
+    if (sysDef().sweeps) {   // the pulsar itself, far away, its beams spinning
+      const px = W * 0.22 - cx * 0.015, py = H * 0.14 - (cy - MH) * 0.012, a = t * 2.2;
+      glow(ctx, px, py, 60, '#bfe8ff', 0.6);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const k of [0, Math.PI]) { const g = ctx.createLinearGradient(px, py, px + Math.cos(a + k) * 420, py + Math.sin(a + k) * 420 * 0.4); g.addColorStop(0, 'rgba(200,235,255,0.5)'); g.addColorStop(1, 'rgba(200,235,255,0)'); ctx.strokeStyle = g; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(a + k) * 420, py + Math.sin(a + k) * 420 * 0.4); ctx.stroke(); }
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(px, py, 4, 0, TAU); ctx.fill();
+    }
     starWash(ctx, W, H, sysDef().star, t);
     ctx.save();
     ctx.scale(vz, vz); ctx.translate(-cx, -cy);
@@ -541,6 +621,7 @@ const MineScene = {
     for (const b of this.bombs) { const k = 1 - b.t / 1.2; glow(ctx, b.x, b.y, 18 + k * 20, '#ff5a2a', 0.5 + k * 0.5); ctx.fillStyle = Math.sin(b.t * 30) > 0 ? '#ffffff' : '#ff3a2a'; ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, TAU); ctx.fill(); }
     for (const b of this.blasts) {
       const k = b.t / 0.5;
+      if (b.col) { ctx.strokeStyle = b.col; ctx.globalAlpha = 1 - k; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.2 + k), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; continue; }
       if (k < 0.5) glow(ctx, b.x, b.y, b.R * (0.5 + k), '#fff0c0', (1 - k * 2) * 0.9);
       glow(ctx, b.x, b.y, b.R * 0.8, '#ff6a2a', (1 - k) * 0.5);
       ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke();
@@ -548,6 +629,21 @@ const MineScene = {
     }
     if (this.boostT > 0) glow(ctx, p.x, p.y, 70, '#ffe14a', 0.25 + 0.1 * Math.sin(t * 20));
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
+    if (this.gravity) drawEventHorizon(ctx, MW / 2, -1400, 1300, t);
+    if (this.sweep) {
+      const B = this.sweep, ox = MW / 2, oy = -2400, L = 7000, x2 = ox + Math.cos(B.a) * L, y2 = oy + Math.sin(B.a) * L, f = Math.sin(Math.PI * B.t / B.dur);
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      ctx.strokeStyle = `rgba(150,210,255,${0.22 * f})`; ctx.lineWidth = 220; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.strokeStyle = `rgba(200,235,255,${0.45 * f})`; ctx.lineWidth = 120; ctx.stroke();
+      ctx.strokeStyle = `rgba(255,255,255,${0.8 * f})`; ctx.lineWidth = 26; ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over'; ctx.lineCap = 'butt';
+    }
+    // magnetic field lines between clumping rocks
+    ctx.lineWidth = 1.2;
+    for (const r of this.rocks) if (r.magnetic && r.near && (r.near.near !== r || r.x < r.near.x) && Math.hypot(r.x - r.near.x, r.y - r.near.y) < r.r + r.near.r + 260) {
+      const o = r.near, mx = (r.x + o.x) / 2, my = (r.y + o.y) / 2, nx = -(o.y - r.y) * 0.25, ny = (o.x - r.x) * 0.25;
+      for (const k of [-1, 1]) { ctx.strokeStyle = `rgba(127,184,255,${0.25 + 0.15 * Math.sin(t * 4 + k)})`; ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.quadraticCurveTo(mx + nx * k, my + ny * k, o.x, o.y); ctx.stroke(); }
+    }
     if (this.scanT >= 0) { const k = this.scanT, R = k * 2000; ctx.strokeStyle = `rgba(127,224,255,${(1 - k) * 0.8})`; ctx.lineWidth = 3 + (1 - k) * 6; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R, 0, TAU); ctx.stroke(); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R * 0.92, 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
     for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + VW + 160 && r.y > cy - 100 && r.y < cy + VH + 100) {
@@ -617,7 +713,9 @@ const MineScene = {
       ctx.globalAlpha = 1; ctx.lineCap = 'butt'; ctx.globalCompositeOperation = 'source-over';
     }
     const lv = shipLv();
+    if (this.phaseT > 0) { ctx.globalAlpha = 0.4 + 0.15 * Math.sin(t * 20); glow(ctx, p.x, p.y, shipR() * 2.2, '#9ff3ff', 0.6); }
     drawPlayerShip(ctx, lv, p.x, p.y, p.a, mineScale(), this.thrusting, t);
+    ctx.globalAlpha = 1;
     if (ship.shieldMax > 0 && p.shT > 1.8) {
       ctx.strokeStyle = `rgba(61,232,255,${(p.shT - 1.8) * 1.3})`; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(p.x, p.y, shipR() + 8, 0, TAU); ctx.stroke();
@@ -641,7 +739,7 @@ const MineScene = {
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     }
     if (this.moltenT > 0) { ctx.fillStyle = `rgba(255,80,20,${Math.min(0.08, this.moltenT * 0.02)})`; ctx.fillRect(0, 0, W, H); }
-    drawDust(ctx, W, H, cx, cy, p.vx, p.vy, this.loc.field.cold ? '#d8f0ff' : this.loc.field.hazard === 'heat' ? '#ffd0a0' : '#cfdcff');
+    drawDust(ctx, W, H, cx, cy, p.vx, p.vy - (this.gravity ? 420 : 0), this.loc.field.cold ? '#d8f0ff' : this.loc.field.hazard === 'heat' ? '#ffd0a0' : '#cfdcff');
     // crosshair
     if (!isTouch && !mouse.onUI) {
       ctx.strokeStyle = this.inCombat ? 'rgba(255,90,120,0.9)' : 'rgba(61,232,255,0.8)'; ctx.lineWidth = 1.5;

@@ -483,6 +483,7 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 #pullBtn.cd { opacity: .5; }
 #boostBtn { right: 40px; bottom: 200px; border-color: #ffe14a; background: rgba(255,225,74,.2); }
 #bombBtn { right: 206px; bottom: 112px; border-color: #ff5a2a; background: rgba(255,90,42,.2); }
+#phaseBtn { right: 40px; bottom: 274px; border-color: #9ff3ff; background: rgba(160,240,255,.2); }
 #scanBtn { right: 206px; bottom: 186px; border-color: #7fe0ff; background: rgba(127,224,255,.2); }
 #boostBtn.cd, #bombBtn.cd, #scanBtn.cd { opacity: .5; }
 /* touch buttons: press feedback and a cooldown ring that fills back up */
@@ -500,7 +501,12 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
   #fireBtn { right: 18px; bottom: 28px; width: 84px; height: 84px; }
   .tbtn { width: 50px; height: 50px; font-size: 10px; }
   #toolBtn { right: 114px; bottom: 20px; } #pullBtn { right: 114px; bottom: 78px; }
-  #boostBtn { right: 34px; bottom: 124px; } #bombBtn { right: 172px; bottom: 36px; } #scanBtn { right: 172px; bottom: 94px; }
+  #boostBtn { right: 34px; bottom: 124px; } #phaseBtn { right: 34px; bottom: 180px; } #bombBtn { right: 172px; bottom: 36px; } #scanBtn { right: 172px; bottom: 94px; }
   #coach { top: auto; bottom: 14px; font-size: 14px; padding: 6px 14px; max-width: 55%; }
   .bt-title { top: 60px; }
 }
+
+.ending-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.ending-stats div { background: rgba(255,210,74,.08); border: 1px solid rgba(255,210,74,.3); border-radius: 10px; padding: 8px; }
+.ending-stats b { display: block; font-family: var(--fh); color: var(--gold); font-size: 18px; }
+.ending-stats small { color: var(--dim); }
