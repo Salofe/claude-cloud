@@ -258,6 +258,7 @@ function renderDock(fresh) {
     sellbox = `<div class="sellbox">
       <div class="sb-cargo"><small>CARGO</small><span>${ITEM_KEYS.filter(k => S.cargo[k]).map(k => `<i class="sw" style="background:${ITEMS[k].c}"></i>${fmt(S.cargo[k])} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div>
       ${warSellHint()}
+      ${l.black && !marketClosed(S.loc) ? `<div class="warhint badt">☠ Black market: selling a full hold here costs about −${Math.round(blackMarketLoss(cargoUsed()))} reputation with every faction.</div>` : ''}
       <div class="sb-row">
         ${marketClosed(S.loc) ? '<div class="badt">Market closed by a strike.</div>' : here ? `<button class="btn primary" onclick="sellHere()">Sell all here · <b>${fmt(here)} cr</b></button>` : '<small>Nothing in your hold sells well here.</small>'}
         <div class="sb-alts">${alts.length ? alts.map(a => `<span onclick="closeSheet();selectLoc('${a.id}')"><b>${LOC[a.id].n}</b> pays <b class="cr">${fmt(a.v)}</b> <em>+${Math.round((a.v / Math.max(1, here) - 1) * 100)}%</em> <small>· ${a.fuel} ⛽</small></span>`).join('') : '<small>This is the best price you can get right now.</small>'}</div>

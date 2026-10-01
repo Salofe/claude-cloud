@@ -9,7 +9,7 @@ function newGame() {
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
-    invest: {}, outposts: {}, projects: {}, stock: {}, freighters: [], cd: {}, nuked: [], loans: [], peace: 0, sat: {}, demand: {}, allies: {}, spoils: {}, drift: {}, depl: {}, bal: 2,
+    invest: {}, outposts: {}, projects: {}, stock: {}, freighters: [], cd: {}, nuked: [], loans: [], peace: 0, sat: {}, demand: {}, allies: {}, spoils: {}, drift: {}, depl: {}, bal: 3,
     events: [], news: [], contracts: {}, active: [],
     stats: { mined: 0, earned: 0, won: 0, lost: 0, dist: 0, contracts: 0, traded: 0, docks: 0, jackpots: 0, kills: 0, droneEarned: 0 },
     unlock: 0, seenUpg: {}, hints: {}, won: false, nextEvent: 0, nextContracts: {}, lastSeen: Date.now(),
@@ -37,6 +37,8 @@ function loadSave() {
     d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
     for (const e of d.events || []) if (/^Pirate warlord at/.test(e.title || '') && !e.warlord && e.locs) { e.kind = 'warlord'; e.warlord = e.locs[0]; } d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
+    // bal 3: black-market sales used to wipe reputation (−0.02 per unit); undo that once, unless a planet was nuked
+    if (d.bal < 3) { if (!(d.nuked || []).length) for (const f in d.rep) if (f !== 'piratas' && d.rep[f] < -10) d.rep[f] = -10; d.bal = 3; }
     return d;
   } catch (e) { return null; }
 }
@@ -206,13 +208,16 @@ function doSell(locId, item, n) {
   S.stats.traded += n;
   const l = LOC[locId];
   if (n > 0 && l.faction) {
+    // reputation moves per sale, scaled by how much of a hold it is (never by raw units:
+    // late-game holds carry thousands, which used to wipe reputation out in one sale)
+    const frac = Math.min(1, n / Math.max(100, ship.cargoMax));
     let gain = Math.min(3, n / 60);
-    for (const e of S.events) if (e.relief && e.relief.loc === locId && e.relief.item === item) gain += n * 0.35;
+    for (const e of S.events) if (e.relief && e.relief.loc === locId && e.relief.item === item) gain += 3 + 12 * frac;
     if (item === 'arms') for (const e of S.events) if (e.war && e.war.includes(l.faction)) {
-      const other = e.war.find(f => f !== l.faction); repChange(other, -n * 0.15, true); gain += n * 0.2;
+      const other = e.war.find(f => f !== l.faction); repChange(other, -(2 + 8 * frac)); gain += 2 + 8 * frac;
     }
     repChange(l.faction, gain, true);
-    if (l.black) for (const f in FACTIONS) if (f !== 'piratas') repChange(f, -n * 0.02, true);
+    if (l.black) { const loss = blackMarketLoss(n); for (const f in FACTIONS) if (f !== 'piratas') repChange(f, -loss, true); if (loss >= 1) toast(`Black market sale: −${Math.round(loss)} reputation with every faction`, 'bad'); }
   }
   earn(total);
   if (n > 0 && typeof warSalePush === 'function') warSalePush(locId, item, total);
@@ -235,6 +240,7 @@ function doBuy(locId, item, n) {
   S.stock[locId][item] = Math.max(0, (S.stock[locId][item] == null ? 1 : S.stock[locId][item]) - bought / stockMax());
   return bought;
 }
+const blackMarketLoss = n => 1 + 5 * Math.min(1, n / Math.max(100, ship.cargoMax));
 function repChange(f, d, silent) {
   const before = S.rep[f];
   S.rep[f] = clamp(S.rep[f] + d, -100, 100);
@@ -450,6 +456,7 @@ function tickDay() {
   }
   for (const id in S.depl) S.depl[id] = Math.max(0, S.depl[id] - 0.06);
   for (const id in S.stock) for (const k in S.stock[id]) S.stock[id][k] = Math.min(1, S.stock[id][k] + 0.1);
+  for (const f in S.rep) if (S.rep[f] < 0) S.rep[f] = Math.min(0, S.rep[f] + 1);   // grudges fade slowly
   for (const id in S.demand) for (const k in S.demand[id]) S.demand[id][k] = Math.min(1, S.demand[id][k] + DEMAND_REGEN);
   for (const f of S.freighters || []) if (freighterIncome(f) > 0) useDemand(f.to, f.g, FREIGHT.cap() / routeCycle(f.from, f.to));
   if (has(U.TRADE)) {
