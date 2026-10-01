@@ -1,12 +1,16 @@
 'use strict';
 // ============ AUDIO SINTETIZADO ============
-let AC = null, master = null, muted = false;
+let AC = null, master = null, muted = false, fxSend = null;
 try { muted = localStorage.getItem('sp_muted') === '1'; } catch (e) {}
 function audioInit() {
   if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     master = AC.createGain(); master.gain.value = muted ? 0 : 0.45; master.connect(AC.destination);
+    // a short shared reverb gives every effect a bit of space
+    const len = AC.sampleRate * 1.6, buf = AC.createBuffer(2, len, AC.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    const cv = AC.createConvolver(); cv.buffer = buf; fxSend = AC.createGain(); fxSend.gain.value = 0.22; fxSend.connect(cv); cv.connect(master);
     startAmbient();
     if (typeof MUSIC !== 'undefined') MUSIC.init();
   } catch (e) { AC = null; }
@@ -24,7 +28,7 @@ function tone(freq, dur, type, vol, slide, delay) {
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.01);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+  o.connect(g); g.connect(master); if (fxSend) g.connect(fxSend); o.start(t); o.stop(t + dur + 0.05);
 }
 function noise(dur, vol, filt, delay) {
   if (!AC) return;
@@ -35,15 +39,15 @@ function noise(dur, vol, filt, delay) {
   const s = AC.createBufferSource(); s.buffer = buf;
   const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = filt || 1200;
   const g = AC.createGain(); g.gain.value = vol || 0.3;
-  s.connect(f); f.connect(g); g.connect(master); s.start(t);
+  s.connect(f); f.connect(g); g.connect(master); if (fxSend) g.connect(fxSend); s.start(t);
 }
 function sfx(name) {
   if (!AC) return;
   switch (name) {
     case 'click': tone(880, 0.06, 'square', 0.05); break;
     case 'pickup': tone(1200 + Math.random() * 300, 0.08, 'sine', 0.08, 1800); break;
-    case 'break': noise(0.25, 0.25, 900); tone(140, 0.2, 'triangle', 0.12, 60); break;
-    case 'boom': noise(0.7, 0.5, 600); tone(90, 0.6, 'sawtooth', 0.15, 30); break;
+    case 'break': noise(0.3, 0.25, 900); tone(140, 0.2, 'triangle', 0.12, 60); tone(70, 0.3, 'sine', 0.16, 40); break;
+    case 'boom': noise(0.9, 0.5, 700); noise(0.25, 0.25, 3500); tone(90, 0.6, 'sawtooth', 0.13, 30); tone(62, 0.8, 'sine', 0.35, 26); break;
     case 'hit': noise(0.08, 0.15, 3000); break;
     case 'shoot': tone(700, 0.08, 'square', 0.04, 300); break;
     case 'eshoot': tone(420, 0.1, 'sawtooth', 0.035, 180); break;

@@ -23,6 +23,7 @@ const MUSIC = {
     const wet = AC.createGain(); wet.gain.value = 0.55; this.rev.connect(wet); wet.connect(this.bus);
     this.dry = AC.createGain(); this.dry.gain.value = 0.6; this.dry.connect(this.bus); this.dry.connect(this.rev);
     this.nextAt = AC.currentTime + 25 + Math.random() * 20;   // first piece soon after you start
+    this.ambAt = AC.currentTime + 12 + Math.random() * 15;
     this.timer = setInterval(() => this.tick(), 200);
   },
   setOn(v) { this.on = v; try { localStorage.setItem('sp_music', v ? '1' : '0'); } catch (e) {} if (this.bus) this.bus.gain.setTargetAtTime(v ? MUSIC_VOL : 0, AC.currentTime, 0.4); },
@@ -86,10 +87,50 @@ const MUSIC = {
     for (const at of rhythm) { deg = clamp(deg + pick([-2, -1, -1, 1, 1, 2, 0, 3, -3]), 0, P.scale.length - 1); notes.push({ at, deg }); }
     return notes;
   },
+  // ---- ambience: rare distant sounds between pieces (radio chatter, solar wind, space whales…) ----
+  pan(v) { const p = AC.createStereoPanner ? AC.createStereoPanner() : AC.createGain(); if (p.pan) p.pan.value = v; p.connect(this.dry); return p; },
+  ambient(kind) {
+    const t = AC.currentTime + 0.1, P = this.pan((Math.random() * 2 - 1) * 0.8);
+    const osc = (type, f, t0, dur, vol, dest, f2) => {
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t0);
+      if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + Math.min(0.02, dur / 3) + (dur > 1 ? dur * 0.3 : 0));
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); o.connect(g); g.connect(dest || P); o.start(t0); o.stop(t0 + dur + 0.05); return o;
+    };
+    const hiss = (dur, vol, type, f0, f1, q) => {
+      const buf = AC.createBuffer(1, Math.floor(AC.sampleRate * dur), AC.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = buf;
+      f.type = type; f.Q.value = q || 1; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.4); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f); f.connect(g); g.connect(P); s.start(t);
+    };
+    if (kind === 'radio') {   // a far-off transmission: crackle and a few beeps
+      hiss(1.6, 0.025, 'bandpass', 2400, 1800, 4);
+      const base = 900 + Math.random() * 700, n = 3 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < n; i++) osc('sine', base * pick([1, 1, 1.25, 1.5]), t + 0.2 + i * 0.16, 0.09, 0.02);
+    } else if (kind === 'whale') {   // something huge singing in the dark
+      const f = 140 + Math.random() * 80, o = osc('sine', f, t, 4.5, 0.05, null, f * pick([1.5, 0.66, 1.33]));
+      const v = AC.createOscillator(), vg = AC.createGain(); v.frequency.value = 5; vg.gain.value = 6; v.connect(vg); vg.connect(o.frequency); v.start(t); v.stop(t + 4.6);
+      osc('sine', f * 2.01, t + 0.4, 3.5, 0.012);
+    } else if (kind === 'wind') {   // solar wind brushing the hull
+      hiss(5, 0.03, 'bandpass', 300 + Math.random() * 300, 1400 + Math.random() * 800, 2.5);
+    } else if (kind === 'creak') {   // the hull settling
+      osc('sawtooth', 70 + Math.random() * 30, t, 0.9, 0.012, null, 50);
+      osc('triangle', 210, t + 0.5, 0.6, 0.008, null, 160);
+    } else {   // distant chimes from a station
+      const sc = [72, 74, 76, 79, 81, 84], a = pick(sc);
+      this.bell(a, t, 0.03); this.bell(pick(sc), t + 0.45, 0.022);
+    }
+  },
   tick() {
     if (!AC || !this.bus) return;
     const now = AC.currentTime;
     const pl = this.playing;
+    if (!pl && this.on && now >= this.ambAt && scene !== TitleScene && !(scene === MineScene && MineScene.inCombat)) {
+      this.ambAt = now + 35 + Math.random() * 45;
+      this.ambient(pick(['radio', 'radio', 'whale', 'wind', 'wind', 'creak', 'chime']));
+    }
     if (!pl) {
       if (scene === TitleScene) return;
       const boss = typeof MineScene !== 'undefined' && scene === MineScene && MineScene.enemies.some(e => ENEMIES[e.k].final);

@@ -499,7 +499,7 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 <div id="title" class="ui hidden">
   <div class="tbox">
     <h1><span>SOLAR</span>PROSPECTOR</h1>
-    <p class="tag">Mine · Upgrade · Rule the Solar System</p>
+    <p class="tag">Mine · Upgrade · Cross the Galaxy</p>
     <div class="tbtns">
       <button id="cont" class="btn primary big hidden">▶ Continue</button>
       <button id="newg" class="btn primary big">▶ PLAY</button>
@@ -848,35 +848,65 @@ function ramp(stops, t) {
 
 // ---------- backdrop (pre-rendered, tileable nebula) ----------
 const BD = 512;
-let backdrop = null;
-function makeBackdrop() {
+// every star system has its own sky: [base, nebula 1, nebula 2, highlights]
+const NEB = {
+  sol:        [[5, 8, 22], [58, 28, 110], [16, 78, 110], [120, 30, 90]],
+  centauri:   [[6, 10, 20], [20, 70, 100], [110, 80, 40], [150, 120, 70]],
+  barnard:    [[12, 5, 8], [90, 20, 26], [60, 22, 50], [150, 50, 30]],
+  sirius:     [[4, 9, 22], [30, 70, 140], [20, 110, 130], [150, 190, 255]],
+  tauceti:    [[6, 10, 12], [30, 80, 50], [100, 90, 30], [70, 140, 90]],
+  eridani:    [[12, 8, 6], [100, 50, 20], [70, 30, 50], [170, 90, 40]],
+  vega:       [[5, 6, 24], [50, 50, 150], [90, 30, 140], [140, 170, 255]],
+  altair:     [[8, 5, 18], [110, 30, 120], [20, 100, 120], [200, 80, 160]],
+  kepler:     [[3, 10, 16], [10, 80, 90], [20, 100, 70], [90, 200, 200]],
+  rigel:      [[3, 6, 24], [20, 60, 170], [40, 120, 200], [180, 220, 255]],
+  betelgeuse: [[14, 4, 4], [130, 30, 20], [110, 60, 20], [220, 90, 40]],
+  orion:      [[8, 4, 16], [140, 40, 120], [30, 110, 140], [230, 120, 180]],
+  pulsar:     [[4, 4, 10], [60, 60, 110], [30, 30, 60], [200, 200, 255]],
+  rim:        [[10, 8, 4], [120, 90, 30], [90, 50, 20], [240, 190, 90]],
+  sgra:       [[2, 1, 6], [70, 20, 90], [120, 50, 20], [255, 150, 60]],
+};
+const BACKDROPS = {};
+function skyKey() { try { return S && typeof sysId === 'function' ? sysId() : 'sol'; } catch (e) { return 'sol'; } }
+function makeBackdrop(key) {
+  const N = NEB[key] || NEB.sol;
   const c = document.createElement('canvas'); c.width = BD; c.height = BD;
   const x = c.getContext('2d');
   const img = x.createImageData(BD, BD);
-  const P = 4;
+  const P = 4, seed = key === 'sol' ? 0 : key.length * 7 + key.charCodeAt(0);
   for (let j = 0; j < BD; j++) for (let i = 0; i < BD; i++) {
     const u = i / BD * P, v = j / BD * P;
-    const n1 = fbm(u, v, 11, P, 5), n2 = fbm(u + 3.1, v + 1.7, 29, P, 4), n3 = fbm(u * 2, v * 2, 47, P * 2, 3);
-    let col = [5, 8, 22];
-    const purple = Math.pow(clamp((n1 - 0.45) * 2.6, 0, 1), 1.6);
-    const teal = Math.pow(clamp((n2 - 0.5) * 2.8, 0, 1), 1.7);
-    const pink = Math.pow(clamp((n3 - 0.58) * 3, 0, 1), 2);
-    col = mixc(col, [58, 28, 110], purple * 0.85);
-    col = mixc(col, [16, 78, 110], teal * 0.7);
-    col = mixc(col, [120, 30, 90], pink * 0.5);
+    const n1 = fbm(u, v, 11 + seed, P, 5), n2 = fbm(u + 3.1, v + 1.7, 29 + seed, P, 4), n3 = fbm(u * 2, v * 2, 47 + seed, P * 2, 3);
+    let col = N[0];
+    const a = Math.pow(clamp((n1 - 0.45) * 2.6, 0, 1), 1.6);
+    const b = Math.pow(clamp((n2 - 0.5) * 2.8, 0, 1), 1.7);
+    const h = Math.pow(clamp((n3 - 0.58) * 3, 0, 1), 2);
+    col = mixc(col, N[1], a * 0.85);
+    col = mixc(col, N[2], b * 0.7);
+    col = mixc(col, N[3], h * 0.5);
+    // dark dust lanes cut through the glow
+    const lane = clamp((fbm(u * 1.5 + 9, v * 1.5, 71 + seed, P * 1.5, 3) - 0.62) * 4, 0, 1);
+    col = mixc(col, [col[0] * 0.35, col[1] * 0.35, col[2] * 0.4], lane * (a + b) * 0.8);
     const k = (j * BD + i) * 4;
     img.data[k] = col[0]; img.data[k + 1] = col[1]; img.data[k + 2] = col[2]; img.data[k + 3] = 255;
   }
   x.putImageData(img, 0, 0);
-  // faint dust stars baked in
-  let s = 5; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  // faint dust stars baked in, plus a few bright ones with a halo
+  let sd = 5 + seed; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 900; i++) {
     x.globalAlpha = 0.15 + r() * 0.45;
     x.fillStyle = r() > 0.8 ? '#ffe6c8' : r() > 0.6 ? '#bcd8ff' : '#ffffff';
     x.fillRect(r() * BD, r() * BD, 1, 1);
   }
+  for (let i = 0; i < 14; i++) {
+    const px = r() * BD, py = r() * BD, rr = 1.5 + r() * 2.5;
+    const g = x.createRadialGradient(px, py, 0, px, py, rr);
+    g.addColorStop(0, 'rgba(255,255,255,0.35)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.globalAlpha = 1; x.fillStyle = g; x.fillRect(px - rr, py - rr, rr * 2, rr * 2);
+    x.fillStyle = '#ffffff'; x.fillRect(px - 0.5, py - 0.5, 1.2, 1.2);
+  }
   x.globalAlpha = 1;
-  backdrop = c;
+  return c;
 }
 function makeStars(n, w, h, seed) {
   let s = seed || 1;
@@ -888,7 +918,7 @@ function makeStars(n, w, h, seed) {
 const STARS = makeStars(260, 2000, 2000, 7);
 
 function drawSpaceBg(ctx, W, H, camX, camY, t, tint) {
-  if (!backdrop) makeBackdrop();
+  const key = skyKey(), backdrop = BACKDROPS[key] || (BACKDROPS[key] = makeBackdrop(key));
   const sc = 2.2, tw = BD * sc;
   const ox = -(((camX * 0.06) % tw) + tw) % tw, oy = -(((camY * 0.06) % tw) + tw) % tw;
   ctx.imageSmoothingEnabled = true;
@@ -912,7 +942,40 @@ function drawSpaceBg(ctx, W, H, camX, camY, t, tint) {
       } else ctx.fillRect(x, y, s.z > 0.6 ? 1.6 : 1, s.z > 0.6 ? 1.6 : 1);
     }
   }
+  // now and then a shooting star streaks across the sky
+  const per = 9, n = Math.floor(t / per), f = (t / per) % 1;
+  if (f < 0.09) {
+    const k = f / 0.09, ang = 0.35 + hash2(n, 3, 5) * 0.5, L = 120 + hash2(n, 4, 5) * 140;
+    const x0 = hash2(n, 1, 5) * W * 0.8, y0 = hash2(n, 2, 5) * H * 0.5;
+    const hx = x0 + Math.cos(ang) * L * 2.2 * k, hy = y0 + Math.sin(ang) * L * 2.2 * k;
+    const g = ctx.createLinearGradient(hx, hy, hx - Math.cos(ang) * L, hy - Math.sin(ang) * L);
+    g.addColorStop(0, 'rgba(255,255,255,0.9)'); g.addColorStop(1, 'rgba(160,200,255,0)');
+    ctx.globalAlpha = Math.sin(k * Math.PI); ctx.strokeStyle = g; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx - Math.cos(ang) * L, hy - Math.sin(ang) * L); ctx.stroke();
+  }
   ctx.globalAlpha = 1;
+}
+// foreground dust: drifts past faster than the camera, so you feel your speed
+const DUST = makeStars(70, 1600, 1600, 23);
+function drawDust(ctx, W, H, camX, camY, vx, vy, col) {
+  const sp = Math.hypot(vx, vy), L = clamp(sp * 0.035, 0, 26), ux = sp ? vx / sp : 0, uy = sp ? vy / sp : 0;
+  ctx.strokeStyle = col || '#cfe6ff'; ctx.fillStyle = col || '#cfe6ff'; ctx.lineCap = 'round';
+  for (const d of DUST) {
+    const par = 1.15 + d.z * 0.9;
+    const x = ((d.x - camX * par) % 1600 + 1600) % 1600, y = ((d.y - camY * par) % 1600 + 1600) % 1600;
+    for (let ox = 0; ox < W; ox += 1600) for (let oy = 0; oy < H; oy += 1600) {
+      const px = x + ox, py = y + oy; if (px > W || py > H) continue;
+      ctx.globalAlpha = 0.12 + d.z * 0.22;
+      if (L > 2) { ctx.lineWidth = 0.8 + d.z; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - ux * L * par, py - uy * L * par); ctx.stroke(); }
+      else ctx.fillRect(px, py, 1 + d.z, 1 + d.z);
+    }
+  }
+  ctx.globalAlpha = 1; ctx.lineCap = 'butt';
+}
+// soft light from the system's star washing over the scene, tinted to its color
+function starWash(ctx, W, H, pal, t) {
+  const P = STAR_PAL[pal] || STAR_PAL.sol;
+  glow(ctx, -W * 0.05, -H * 0.1, Math.max(W, H) * 0.95, P.g2, 0.22 + 0.03 * Math.sin(t * 0.3));
 }
 
 function glow(ctx, x, y, r, color, a) {
@@ -1539,7 +1602,19 @@ function drawArmoredRock(ctx, a, t) {
   ctx.restore();
   ctx.globalAlpha = 1; ctx.fillStyle = '#e8ecf2';
   for (let i = 0; i < 6; i++) { const an = i / 6 * TAU + 0.3; ctx.beginPath(); ctx.arc(Math.cos(an) * a.r * 0.62, Math.sin(an) * a.r * 0.62, 1.3 + a.tier * 0.3, 0, TAU); ctx.fill(); }
+  shadeRock(ctx, a, () => { ctx.beginPath(); a.shape.forEach((p, i) => { const px = p[0] * a.r * (0.85 + p[2] * 0.15), py = p[1] * a.r * (0.85 + p[2] * 0.15); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); });
   ctx.restore();
+}
+// world-fixed light from the upper left: darken the far side, rim-light the near edge
+const LIGHT_A = -2.3;
+function shadeRock(ctx, a, path) {
+  const la = LIGHT_A - a.rot, lx = Math.cos(la) * a.r, ly = Math.sin(la) * a.r;
+  const g = ctx.createLinearGradient(lx, ly, -lx, -ly);
+  g.addColorStop(0, 'rgba(255,236,210,0.16)'); g.addColorStop(0.45, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,12,0.6)');
+  path(); ctx.fillStyle = g; ctx.fill();
+  const rg = ctx.createLinearGradient(lx, ly, 0, 0);
+  rg.addColorStop(0, 'rgba(255,240,215,0.55)'); rg.addColorStop(1, 'rgba(255,240,215,0)');
+  ctx.strokeStyle = rg; ctx.lineWidth = 1.8; ctx.stroke();
 }
 function drawRock(ctx, a, t, scanLv) {
   if (a.volatile) {
@@ -1553,7 +1628,8 @@ function drawRock(ctx, a, t, scanLv) {
   ctx.save();
   ctx.translate(a.x, a.y); ctx.rotate(a.rot);
   if (a.rich) glow(ctx, 0, 0, a.r * 2.2, ore.c + '66', 0.5 + 0.25 * Math.sin(t * 3 + a.x));
-  const g = ctx.createRadialGradient(-a.r * 0.3, -a.r * 0.3, a.r * 0.1, 0, 0, a.r * 1.1);
+  const hl = LIGHT_A - a.rot;
+  const g = ctx.createRadialGradient(Math.cos(hl) * a.r * 0.4, Math.sin(hl) * a.r * 0.4, a.r * 0.1, 0, 0, a.r * 1.1);
   g.addColorStop(0, a.cold ? '#8d9bb8' : '#8a7e72');
   g.addColorStop(1, a.cold ? '#2a3348' : '#2e2924');
   ctx.fillStyle = g;
@@ -1576,9 +1652,14 @@ function drawRock(ctx, a, t, scanLv) {
     ctx.strokeStyle = `rgba(255,${150 + Math.round(80 * Math.sin(t * 6 + a.x))},60,0.95)`; ctx.lineWidth = 1.6 + a.tier * 0.4;
     ctx.beginPath(); ctx.moveTo(-a.r * 0.7, -a.r * 0.2); ctx.lineTo(-a.r * 0.1, a.r * 0.1); ctx.lineTo(a.r * 0.5, -a.r * 0.4); ctx.moveTo(-a.r * 0.1, a.r * 0.1); ctx.lineTo(a.r * 0.2, a.r * 0.6); ctx.stroke();
   }
-  // cráteres
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  for (const c of a.craters) { ctx.beginPath(); ctx.arc(c[0] * a.r, c[1] * a.r, c[2] * a.r, 0, TAU); ctx.fill(); }
+  // cráteres (with a lit lip on the side facing the light)
+  const cla = LIGHT_A - a.rot, clx = Math.cos(cla), cly = Math.sin(cla);
+  for (const c of a.craters) {
+    const cx = c[0] * a.r, cy = c[1] * a.r, cr = c[2] * a.r;
+    ctx.fillStyle = 'rgba(0,0,0,0.28)'; ctx.beginPath(); ctx.arc(cx, cy, cr, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,240,220,0.14)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, cr, cla + Math.PI - 1.1, cla + Math.PI + 1.1); ctx.stroke();
+  }
+  shadeRock(ctx, a, () => { ctx.beginPath(); a.shape.forEach((p, i) => { const px = p[0] * a.r * p[2], py = p[1] * a.r * p[2]; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); });
   ctx.restore();
   if (scanLv >= 2 && a.rich) {
     ctx.strokeStyle = ore.c; ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 4);
@@ -1597,6 +1678,8 @@ function drawOreChunk(ctx, c, t) {
   ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.7;
   ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(1.5, -1); ctx.lineTo(-1.5, -1); ctx.fill();
   ctx.restore(); ctx.globalAlpha = 1;
+  const tw = Math.sin(t * 4 + c.rot * 9);
+  if (tw > 0.85) { const k = (tw - 0.85) / 0.15 * 7; ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.fillRect(c.x - k, c.y - 0.6, k * 2, 1.2); ctx.fillRect(c.x - 0.6, c.y - k, 1.2, k * 2); ctx.globalAlpha = 1; }
 }
 
 // ---------- station icon ----------
@@ -1822,13 +1905,17 @@ function drawIconRow(ctx, glyphs, x, y, size, gap = 3) {
 // ---- audio.js ----
 'use strict';
 // ============ AUDIO SINTETIZADO ============
-let AC = null, master = null, muted = false;
+let AC = null, master = null, muted = false, fxSend = null;
 try { muted = localStorage.getItem('sp_muted') === '1'; } catch (e) {}
 function audioInit() {
   if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     master = AC.createGain(); master.gain.value = muted ? 0 : 0.45; master.connect(AC.destination);
+    // a short shared reverb gives every effect a bit of space
+    const len = AC.sampleRate * 1.6, buf = AC.createBuffer(2, len, AC.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    const cv = AC.createConvolver(); cv.buffer = buf; fxSend = AC.createGain(); fxSend.gain.value = 0.22; fxSend.connect(cv); cv.connect(master);
     startAmbient();
     if (typeof MUSIC !== 'undefined') MUSIC.init();
   } catch (e) { AC = null; }
@@ -1846,7 +1933,7 @@ function tone(freq, dur, type, vol, slide, delay) {
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.01);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+  o.connect(g); g.connect(master); if (fxSend) g.connect(fxSend); o.start(t); o.stop(t + dur + 0.05);
 }
 function noise(dur, vol, filt, delay) {
   if (!AC) return;
@@ -1857,15 +1944,15 @@ function noise(dur, vol, filt, delay) {
   const s = AC.createBufferSource(); s.buffer = buf;
   const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = filt || 1200;
   const g = AC.createGain(); g.gain.value = vol || 0.3;
-  s.connect(f); f.connect(g); g.connect(master); s.start(t);
+  s.connect(f); f.connect(g); g.connect(master); if (fxSend) g.connect(fxSend); s.start(t);
 }
 function sfx(name) {
   if (!AC) return;
   switch (name) {
     case 'click': tone(880, 0.06, 'square', 0.05); break;
     case 'pickup': tone(1200 + Math.random() * 300, 0.08, 'sine', 0.08, 1800); break;
-    case 'break': noise(0.25, 0.25, 900); tone(140, 0.2, 'triangle', 0.12, 60); break;
-    case 'boom': noise(0.7, 0.5, 600); tone(90, 0.6, 'sawtooth', 0.15, 30); break;
+    case 'break': noise(0.3, 0.25, 900); tone(140, 0.2, 'triangle', 0.12, 60); tone(70, 0.3, 'sine', 0.16, 40); break;
+    case 'boom': noise(0.9, 0.5, 700); noise(0.25, 0.25, 3500); tone(90, 0.6, 'sawtooth', 0.13, 30); tone(62, 0.8, 'sine', 0.35, 26); break;
     case 'hit': noise(0.08, 0.15, 3000); break;
     case 'shoot': tone(700, 0.08, 'square', 0.04, 300); break;
     case 'eshoot': tone(420, 0.1, 'sawtooth', 0.035, 180); break;
@@ -1939,6 +2026,7 @@ const MUSIC = {
     const wet = AC.createGain(); wet.gain.value = 0.55; this.rev.connect(wet); wet.connect(this.bus);
     this.dry = AC.createGain(); this.dry.gain.value = 0.6; this.dry.connect(this.bus); this.dry.connect(this.rev);
     this.nextAt = AC.currentTime + 25 + Math.random() * 20;   // first piece soon after you start
+    this.ambAt = AC.currentTime + 12 + Math.random() * 15;
     this.timer = setInterval(() => this.tick(), 200);
   },
   setOn(v) { this.on = v; try { localStorage.setItem('sp_music', v ? '1' : '0'); } catch (e) {} if (this.bus) this.bus.gain.setTargetAtTime(v ? MUSIC_VOL : 0, AC.currentTime, 0.4); },
@@ -2002,10 +2090,50 @@ const MUSIC = {
     for (const at of rhythm) { deg = clamp(deg + pick([-2, -1, -1, 1, 1, 2, 0, 3, -3]), 0, P.scale.length - 1); notes.push({ at, deg }); }
     return notes;
   },
+  // ---- ambience: rare distant sounds between pieces (radio chatter, solar wind, space whales…) ----
+  pan(v) { const p = AC.createStereoPanner ? AC.createStereoPanner() : AC.createGain(); if (p.pan) p.pan.value = v; p.connect(this.dry); return p; },
+  ambient(kind) {
+    const t = AC.currentTime + 0.1, P = this.pan((Math.random() * 2 - 1) * 0.8);
+    const osc = (type, f, t0, dur, vol, dest, f2) => {
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t0);
+      if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + Math.min(0.02, dur / 3) + (dur > 1 ? dur * 0.3 : 0));
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); o.connect(g); g.connect(dest || P); o.start(t0); o.stop(t0 + dur + 0.05); return o;
+    };
+    const hiss = (dur, vol, type, f0, f1, q) => {
+      const buf = AC.createBuffer(1, Math.floor(AC.sampleRate * dur), AC.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = buf;
+      f.type = type; f.Q.value = q || 1; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.4); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f); f.connect(g); g.connect(P); s.start(t);
+    };
+    if (kind === 'radio') {   // a far-off transmission: crackle and a few beeps
+      hiss(1.6, 0.025, 'bandpass', 2400, 1800, 4);
+      const base = 900 + Math.random() * 700, n = 3 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < n; i++) osc('sine', base * pick([1, 1, 1.25, 1.5]), t + 0.2 + i * 0.16, 0.09, 0.02);
+    } else if (kind === 'whale') {   // something huge singing in the dark
+      const f = 140 + Math.random() * 80, o = osc('sine', f, t, 4.5, 0.05, null, f * pick([1.5, 0.66, 1.33]));
+      const v = AC.createOscillator(), vg = AC.createGain(); v.frequency.value = 5; vg.gain.value = 6; v.connect(vg); vg.connect(o.frequency); v.start(t); v.stop(t + 4.6);
+      osc('sine', f * 2.01, t + 0.4, 3.5, 0.012);
+    } else if (kind === 'wind') {   // solar wind brushing the hull
+      hiss(5, 0.03, 'bandpass', 300 + Math.random() * 300, 1400 + Math.random() * 800, 2.5);
+    } else if (kind === 'creak') {   // the hull settling
+      osc('sawtooth', 70 + Math.random() * 30, t, 0.9, 0.012, null, 50);
+      osc('triangle', 210, t + 0.5, 0.6, 0.008, null, 160);
+    } else {   // distant chimes from a station
+      const sc = [72, 74, 76, 79, 81, 84], a = pick(sc);
+      this.bell(a, t, 0.03); this.bell(pick(sc), t + 0.45, 0.022);
+    }
+  },
   tick() {
     if (!AC || !this.bus) return;
     const now = AC.currentTime;
     const pl = this.playing;
+    if (!pl && this.on && now >= this.ambAt && scene !== TitleScene && !(scene === MineScene && MineScene.inCombat)) {
+      this.ambAt = now + 35 + Math.random() * 45;
+      this.ambient(pick(['radio', 'radio', 'whale', 'wind', 'wind', 'creak', 'chime']));
+    }
     if (!pl) {
       if (scene === TitleScene) return;
       const boss = typeof MineScene !== 'undefined' && scene === MineScene && MineScene.enemies.some(e => ENEMIES[e.k].final);
@@ -5075,7 +5203,7 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = [];
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = []; this.etrail = [];
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -5432,6 +5560,14 @@ const MineScene = {
     const k = 1 - Math.pow(0.001, dt);
     this.cam.x = lerp(this.cam.x, p.x + p.vx * 0.3, k); this.cam.y = lerp(this.cam.y, p.y + p.vy * 0.3 - 60, k);
     this.shake = Math.max(0, this.shake - dt * 20);
+    this.etrail = this.etrail || [];
+    for (const e of this.etrail) e.life -= dt;
+    while (this.etrail.length && this.etrail[0].life <= 0) this.etrail.shift();
+    {
+      const tx = p.x - Math.cos(p.a) * shipR() * 0.8, ty = p.y - Math.sin(p.a) * shipR() * 0.8, last = this.etrail[this.etrail.length - 1];
+      if (this.thrusting > 0.1) { if (!last || Math.hypot(last.x - tx, last.y - ty) > 4) this.etrail.push({ x: tx, y: ty, life: 0.6, th: Math.min(1, this.thrusting) }); }
+      else if (last && !last.gap) this.etrail.push({ x: tx, y: ty, life: 0.6, gap: 1 });
+    }
     if (this.thrusting > 0.1 && Math.random() < dt * 40) {
       const bx = p.x - Math.cos(p.a) * shipR() * 0.75, by = p.y - Math.sin(p.a) * shipR() * 0.75;
       this.parts.add(bx, by, -Math.cos(p.a) * 60 + rand(-15, 15), -Math.sin(p.a) * 60 + rand(-15, 15), 0.45, ENGINE_COL[Math.min(4, Math.floor((S.lv.engine - 1) / 4))], 2.5);
@@ -5504,6 +5640,7 @@ const MineScene = {
       drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
+    starWash(ctx, W, H, sysDef().star, t);
     ctx.save();
     ctx.translate(-cx, -cy);
     ctx.strokeStyle = 'rgba(61,232,255,0.12)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
@@ -5511,7 +5648,13 @@ const MineScene = {
     if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
     for (const b of this.bombs) { const k = 1 - b.t / 1.2; glow(ctx, b.x, b.y, 18 + k * 20, '#ff5a2a', 0.5 + k * 0.5); ctx.fillStyle = Math.sin(b.t * 30) > 0 ? '#ffffff' : '#ff3a2a'; ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, TAU); ctx.fill(); }
-    for (const b of this.blasts) { const k = b.t / 0.5; ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke(); }
+    for (const b of this.blasts) {
+      const k = b.t / 0.5;
+      if (k < 0.5) glow(ctx, b.x, b.y, b.R * (0.5 + k), '#fff0c0', (1 - k * 2) * 0.9);
+      glow(ctx, b.x, b.y, b.R * 0.8, '#ff6a2a', (1 - k) * 0.5);
+      ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke();
+      ctx.strokeStyle = `rgba(255,255,255,${(1 - k) * 0.5})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.15 + k * 0.9), 0, TAU); ctx.stroke();
+    }
     if (this.boostT > 0) glow(ctx, p.x, p.y, 70, '#ffe14a', 0.25 + 0.1 * Math.sin(t * 20));
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
@@ -5561,6 +5704,17 @@ const MineScene = {
     }
     Combat.draw(this, ctx, t);
     this.parts.draw(ctx);
+    // engine ribbon: a fading ion trail that follows your path
+    if (this.etrail && this.etrail.length > 1) {
+      const ec = ENGINE_COL[Math.min(4, Math.floor((S.lv.engine - 1) / 4))];
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.strokeStyle = ec;
+      for (let i = 1; i < this.etrail.length; i++) {
+        const a = this.etrail[i - 1], b = this.etrail[i]; if (a.gap || b.gap) continue;
+        const k = b.life / 0.6; ctx.globalAlpha = k * 0.35 * b.th; ctx.lineWidth = 1 + k * 5 * mineScale();
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      ctx.globalAlpha = 1; ctx.lineCap = 'butt'; ctx.globalCompositeOperation = 'source-over';
+    }
     const lv = shipLv();
     drawPlayerShip(ctx, lv, p.x, p.y, p.a, mineScale(), this.thrusting, t);
     if (ship.shieldMax > 0 && p.shT > 1.8) {
@@ -5580,6 +5734,7 @@ const MineScene = {
     }
     ctx.globalAlpha = 1;
     ctx.restore();
+    drawDust(ctx, W, H, cx, cy, p.vx, p.vy, this.loc.field.cold ? '#d8f0ff' : this.loc.field.hazard === 'heat' ? '#ffd0a0' : '#cfdcff');
     // crosshair
     if (!isTouch && !mouse.onUI) {
       ctx.strokeStyle = this.inCombat ? 'rgba(255,90,120,0.9)' : 'rgba(61,232,255,0.8)'; ctx.lineWidth = 1.5;
@@ -6801,6 +6956,15 @@ const TitleScene = {
     // nave que cruza
     const sx = ((t * 70) % (W + 400)) - 200, sy = H * 0.32 + Math.sin(t * 0.8) * 20;
     drawPlayerShip(ctx, { hull: 4, engine: 4, weapons: 3, laser: 3 }, sx, sy, 0.05, 1.1, 1, t);
+    // a few big asteroids tumbling past in the foreground
+    if (!this.rocks) this.rocks = [0, 1, 2, 3].map(i => ({ r: [70, 38, 54, 26][i], ore: ['iron', 'nickel', 'cobalt', 'he3'][i], tier: 3, shape: makeRockShape(11, 0.22),
+      veins: Array.from({ length: 5 }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.15)]; }),
+      craters: Array.from({ length: 3 }, () => [rand(-0.5, 0.5), rand(-0.5, 0.5), rand(0.1, 0.2)]), sp: [9, 16, 12, 22][i], y0: [0.82, 0.18, 0.62, 0.9][i], ph: i * 0.27, hit: 0, hp: 1, maxhp: 1 }));
+    for (const r of this.rocks) {
+      const span = W + 300; r.x = ((r.ph * span + t * r.sp) % span) - 150; r.y = H * r.y0 + Math.sin(t * 0.2 + r.ph * 9) * 20; r.rot = t * 0.08 * (r.sp % 2 ? 1 : -1) + r.ph;
+      drawRock(ctx, r, t, 0);
+    }
+    drawDust(ctx, W, H, t * 40, t * 6, 40, 6);
   },
 };
 
@@ -6896,7 +7060,7 @@ function thumbMode(kind) {
     ctx.shadowBlur = 0;
     ctx.font = `600 ${Math.round(30 * s)}px Rajdhani, sans-serif`;
     ctx.fillStyle = '#ffd24a';
-    ctx.fillText('MINE · TRADE · RULE THE SOLAR SYSTEM', 64 * s, 275 * s);
+    ctx.fillText('MINE · TRADE · CROSS THE GALAXY', 64 * s, 275 * s);
   }
   document.body.dataset.ready = '1';
 }

@@ -163,6 +163,15 @@ const TitleScene = {
     // nave que cruza
     const sx = ((t * 70) % (W + 400)) - 200, sy = H * 0.32 + Math.sin(t * 0.8) * 20;
     drawPlayerShip(ctx, { hull: 4, engine: 4, weapons: 3, laser: 3 }, sx, sy, 0.05, 1.1, 1, t);
+    // a few big asteroids tumbling past in the foreground
+    if (!this.rocks) this.rocks = [0, 1, 2, 3].map(i => ({ r: [70, 38, 54, 26][i], ore: ['iron', 'nickel', 'cobalt', 'he3'][i], tier: 3, shape: makeRockShape(11, 0.22),
+      veins: Array.from({ length: 5 }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.15)]; }),
+      craters: Array.from({ length: 3 }, () => [rand(-0.5, 0.5), rand(-0.5, 0.5), rand(0.1, 0.2)]), sp: [9, 16, 12, 22][i], y0: [0.82, 0.18, 0.62, 0.9][i], ph: i * 0.27, hit: 0, hp: 1, maxhp: 1 }));
+    for (const r of this.rocks) {
+      const span = W + 300; r.x = ((r.ph * span + t * r.sp) % span) - 150; r.y = H * r.y0 + Math.sin(t * 0.2 + r.ph * 9) * 20; r.rot = t * 0.08 * (r.sp % 2 ? 1 : -1) + r.ph;
+      drawRock(ctx, r, t, 0);
+    }
+    drawDust(ctx, W, H, t * 40, t * 6, 40, 6);
   },
 };
 
@@ -258,7 +267,7 @@ function thumbMode(kind) {
     ctx.shadowBlur = 0;
     ctx.font = `600 ${Math.round(30 * s)}px Rajdhani, sans-serif`;
     ctx.fillStyle = '#ffd24a';
-    ctx.fillText('MINE · TRADE · RULE THE SOLAR SYSTEM', 64 * s, 275 * s);
+    ctx.fillText('MINE · TRADE · CROSS THE GALAXY', 64 * s, 275 * s);
   }
   document.body.dataset.ready = '1';
 }

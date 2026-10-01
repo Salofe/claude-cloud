@@ -26,7 +26,7 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = [];
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = []; this.etrail = [];
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -383,6 +383,14 @@ const MineScene = {
     const k = 1 - Math.pow(0.001, dt);
     this.cam.x = lerp(this.cam.x, p.x + p.vx * 0.3, k); this.cam.y = lerp(this.cam.y, p.y + p.vy * 0.3 - 60, k);
     this.shake = Math.max(0, this.shake - dt * 20);
+    this.etrail = this.etrail || [];
+    for (const e of this.etrail) e.life -= dt;
+    while (this.etrail.length && this.etrail[0].life <= 0) this.etrail.shift();
+    {
+      const tx = p.x - Math.cos(p.a) * shipR() * 0.8, ty = p.y - Math.sin(p.a) * shipR() * 0.8, last = this.etrail[this.etrail.length - 1];
+      if (this.thrusting > 0.1) { if (!last || Math.hypot(last.x - tx, last.y - ty) > 4) this.etrail.push({ x: tx, y: ty, life: 0.6, th: Math.min(1, this.thrusting) }); }
+      else if (last && !last.gap) this.etrail.push({ x: tx, y: ty, life: 0.6, gap: 1 });
+    }
     if (this.thrusting > 0.1 && Math.random() < dt * 40) {
       const bx = p.x - Math.cos(p.a) * shipR() * 0.75, by = p.y - Math.sin(p.a) * shipR() * 0.75;
       this.parts.add(bx, by, -Math.cos(p.a) * 60 + rand(-15, 15), -Math.sin(p.a) * 60 + rand(-15, 15), 0.45, ENGINE_COL[Math.min(4, Math.floor((S.lv.engine - 1) / 4))], 2.5);
@@ -455,6 +463,7 @@ const MineScene = {
       drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
+    starWash(ctx, W, H, sysDef().star, t);
     ctx.save();
     ctx.translate(-cx, -cy);
     ctx.strokeStyle = 'rgba(61,232,255,0.12)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
@@ -462,7 +471,13 @@ const MineScene = {
     if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
     for (const b of this.bombs) { const k = 1 - b.t / 1.2; glow(ctx, b.x, b.y, 18 + k * 20, '#ff5a2a', 0.5 + k * 0.5); ctx.fillStyle = Math.sin(b.t * 30) > 0 ? '#ffffff' : '#ff3a2a'; ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, TAU); ctx.fill(); }
-    for (const b of this.blasts) { const k = b.t / 0.5; ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke(); }
+    for (const b of this.blasts) {
+      const k = b.t / 0.5;
+      if (k < 0.5) glow(ctx, b.x, b.y, b.R * (0.5 + k), '#fff0c0', (1 - k * 2) * 0.9);
+      glow(ctx, b.x, b.y, b.R * 0.8, '#ff6a2a', (1 - k) * 0.5);
+      ctx.strokeStyle = `rgba(255,180,80,${1 - k})`; ctx.lineWidth = 6 * (1 - k) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.3 + k * 0.7), 0, TAU); ctx.stroke();
+      ctx.strokeStyle = `rgba(255,255,255,${(1 - k) * 0.5})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(b.x, b.y, b.R * (0.15 + k * 0.9), 0, TAU); ctx.stroke();
+    }
     if (this.boostT > 0) glow(ctx, p.x, p.y, 70, '#ffe14a', 0.25 + 0.1 * Math.sin(t * 20));
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
@@ -512,6 +527,17 @@ const MineScene = {
     }
     Combat.draw(this, ctx, t);
     this.parts.draw(ctx);
+    // engine ribbon: a fading ion trail that follows your path
+    if (this.etrail && this.etrail.length > 1) {
+      const ec = ENGINE_COL[Math.min(4, Math.floor((S.lv.engine - 1) / 4))];
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.strokeStyle = ec;
+      for (let i = 1; i < this.etrail.length; i++) {
+        const a = this.etrail[i - 1], b = this.etrail[i]; if (a.gap || b.gap) continue;
+        const k = b.life / 0.6; ctx.globalAlpha = k * 0.35 * b.th; ctx.lineWidth = 1 + k * 5 * mineScale();
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      ctx.globalAlpha = 1; ctx.lineCap = 'butt'; ctx.globalCompositeOperation = 'source-over';
+    }
     const lv = shipLv();
     drawPlayerShip(ctx, lv, p.x, p.y, p.a, mineScale(), this.thrusting, t);
     if (ship.shieldMax > 0 && p.shT > 1.8) {
@@ -531,6 +557,7 @@ const MineScene = {
     }
     ctx.globalAlpha = 1;
     ctx.restore();
+    drawDust(ctx, W, H, cx, cy, p.vx, p.vy, this.loc.field.cold ? '#d8f0ff' : this.loc.field.hazard === 'heat' ? '#ffd0a0' : '#cfdcff');
     // crosshair
     if (!isTouch && !mouse.onUI) {
       ctx.strokeStyle = this.inCombat ? 'rgba(255,90,120,0.9)' : 'rgba(61,232,255,0.8)'; ctx.lineWidth = 1.5;

@@ -37,35 +37,65 @@ function ramp(stops, t) {
 
 // ---------- backdrop (pre-rendered, tileable nebula) ----------
 const BD = 512;
-let backdrop = null;
-function makeBackdrop() {
+// every star system has its own sky: [base, nebula 1, nebula 2, highlights]
+const NEB = {
+  sol:        [[5, 8, 22], [58, 28, 110], [16, 78, 110], [120, 30, 90]],
+  centauri:   [[6, 10, 20], [20, 70, 100], [110, 80, 40], [150, 120, 70]],
+  barnard:    [[12, 5, 8], [90, 20, 26], [60, 22, 50], [150, 50, 30]],
+  sirius:     [[4, 9, 22], [30, 70, 140], [20, 110, 130], [150, 190, 255]],
+  tauceti:    [[6, 10, 12], [30, 80, 50], [100, 90, 30], [70, 140, 90]],
+  eridani:    [[12, 8, 6], [100, 50, 20], [70, 30, 50], [170, 90, 40]],
+  vega:       [[5, 6, 24], [50, 50, 150], [90, 30, 140], [140, 170, 255]],
+  altair:     [[8, 5, 18], [110, 30, 120], [20, 100, 120], [200, 80, 160]],
+  kepler:     [[3, 10, 16], [10, 80, 90], [20, 100, 70], [90, 200, 200]],
+  rigel:      [[3, 6, 24], [20, 60, 170], [40, 120, 200], [180, 220, 255]],
+  betelgeuse: [[14, 4, 4], [130, 30, 20], [110, 60, 20], [220, 90, 40]],
+  orion:      [[8, 4, 16], [140, 40, 120], [30, 110, 140], [230, 120, 180]],
+  pulsar:     [[4, 4, 10], [60, 60, 110], [30, 30, 60], [200, 200, 255]],
+  rim:        [[10, 8, 4], [120, 90, 30], [90, 50, 20], [240, 190, 90]],
+  sgra:       [[2, 1, 6], [70, 20, 90], [120, 50, 20], [255, 150, 60]],
+};
+const BACKDROPS = {};
+function skyKey() { try { return S && typeof sysId === 'function' ? sysId() : 'sol'; } catch (e) { return 'sol'; } }
+function makeBackdrop(key) {
+  const N = NEB[key] || NEB.sol;
   const c = document.createElement('canvas'); c.width = BD; c.height = BD;
   const x = c.getContext('2d');
   const img = x.createImageData(BD, BD);
-  const P = 4;
+  const P = 4, seed = key === 'sol' ? 0 : key.length * 7 + key.charCodeAt(0);
   for (let j = 0; j < BD; j++) for (let i = 0; i < BD; i++) {
     const u = i / BD * P, v = j / BD * P;
-    const n1 = fbm(u, v, 11, P, 5), n2 = fbm(u + 3.1, v + 1.7, 29, P, 4), n3 = fbm(u * 2, v * 2, 47, P * 2, 3);
-    let col = [5, 8, 22];
-    const purple = Math.pow(clamp((n1 - 0.45) * 2.6, 0, 1), 1.6);
-    const teal = Math.pow(clamp((n2 - 0.5) * 2.8, 0, 1), 1.7);
-    const pink = Math.pow(clamp((n3 - 0.58) * 3, 0, 1), 2);
-    col = mixc(col, [58, 28, 110], purple * 0.85);
-    col = mixc(col, [16, 78, 110], teal * 0.7);
-    col = mixc(col, [120, 30, 90], pink * 0.5);
+    const n1 = fbm(u, v, 11 + seed, P, 5), n2 = fbm(u + 3.1, v + 1.7, 29 + seed, P, 4), n3 = fbm(u * 2, v * 2, 47 + seed, P * 2, 3);
+    let col = N[0];
+    const a = Math.pow(clamp((n1 - 0.45) * 2.6, 0, 1), 1.6);
+    const b = Math.pow(clamp((n2 - 0.5) * 2.8, 0, 1), 1.7);
+    const h = Math.pow(clamp((n3 - 0.58) * 3, 0, 1), 2);
+    col = mixc(col, N[1], a * 0.85);
+    col = mixc(col, N[2], b * 0.7);
+    col = mixc(col, N[3], h * 0.5);
+    // dark dust lanes cut through the glow
+    const lane = clamp((fbm(u * 1.5 + 9, v * 1.5, 71 + seed, P * 1.5, 3) - 0.62) * 4, 0, 1);
+    col = mixc(col, [col[0] * 0.35, col[1] * 0.35, col[2] * 0.4], lane * (a + b) * 0.8);
     const k = (j * BD + i) * 4;
     img.data[k] = col[0]; img.data[k + 1] = col[1]; img.data[k + 2] = col[2]; img.data[k + 3] = 255;
   }
   x.putImageData(img, 0, 0);
-  // faint dust stars baked in
-  let s = 5; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  // faint dust stars baked in, plus a few bright ones with a halo
+  let sd = 5 + seed; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 900; i++) {
     x.globalAlpha = 0.15 + r() * 0.45;
     x.fillStyle = r() > 0.8 ? '#ffe6c8' : r() > 0.6 ? '#bcd8ff' : '#ffffff';
     x.fillRect(r() * BD, r() * BD, 1, 1);
   }
+  for (let i = 0; i < 14; i++) {
+    const px = r() * BD, py = r() * BD, rr = 1.5 + r() * 2.5;
+    const g = x.createRadialGradient(px, py, 0, px, py, rr);
+    g.addColorStop(0, 'rgba(255,255,255,0.35)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.globalAlpha = 1; x.fillStyle = g; x.fillRect(px - rr, py - rr, rr * 2, rr * 2);
+    x.fillStyle = '#ffffff'; x.fillRect(px - 0.5, py - 0.5, 1.2, 1.2);
+  }
   x.globalAlpha = 1;
-  backdrop = c;
+  return c;
 }
 function makeStars(n, w, h, seed) {
   let s = seed || 1;
@@ -77,7 +107,7 @@ function makeStars(n, w, h, seed) {
 const STARS = makeStars(260, 2000, 2000, 7);
 
 function drawSpaceBg(ctx, W, H, camX, camY, t, tint) {
-  if (!backdrop) makeBackdrop();
+  const key = skyKey(), backdrop = BACKDROPS[key] || (BACKDROPS[key] = makeBackdrop(key));
   const sc = 2.2, tw = BD * sc;
   const ox = -(((camX * 0.06) % tw) + tw) % tw, oy = -(((camY * 0.06) % tw) + tw) % tw;
   ctx.imageSmoothingEnabled = true;
@@ -101,7 +131,40 @@ function drawSpaceBg(ctx, W, H, camX, camY, t, tint) {
       } else ctx.fillRect(x, y, s.z > 0.6 ? 1.6 : 1, s.z > 0.6 ? 1.6 : 1);
     }
   }
+  // now and then a shooting star streaks across the sky
+  const per = 9, n = Math.floor(t / per), f = (t / per) % 1;
+  if (f < 0.09) {
+    const k = f / 0.09, ang = 0.35 + hash2(n, 3, 5) * 0.5, L = 120 + hash2(n, 4, 5) * 140;
+    const x0 = hash2(n, 1, 5) * W * 0.8, y0 = hash2(n, 2, 5) * H * 0.5;
+    const hx = x0 + Math.cos(ang) * L * 2.2 * k, hy = y0 + Math.sin(ang) * L * 2.2 * k;
+    const g = ctx.createLinearGradient(hx, hy, hx - Math.cos(ang) * L, hy - Math.sin(ang) * L);
+    g.addColorStop(0, 'rgba(255,255,255,0.9)'); g.addColorStop(1, 'rgba(160,200,255,0)');
+    ctx.globalAlpha = Math.sin(k * Math.PI); ctx.strokeStyle = g; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx - Math.cos(ang) * L, hy - Math.sin(ang) * L); ctx.stroke();
+  }
   ctx.globalAlpha = 1;
+}
+// foreground dust: drifts past faster than the camera, so you feel your speed
+const DUST = makeStars(70, 1600, 1600, 23);
+function drawDust(ctx, W, H, camX, camY, vx, vy, col) {
+  const sp = Math.hypot(vx, vy), L = clamp(sp * 0.035, 0, 26), ux = sp ? vx / sp : 0, uy = sp ? vy / sp : 0;
+  ctx.strokeStyle = col || '#cfe6ff'; ctx.fillStyle = col || '#cfe6ff'; ctx.lineCap = 'round';
+  for (const d of DUST) {
+    const par = 1.15 + d.z * 0.9;
+    const x = ((d.x - camX * par) % 1600 + 1600) % 1600, y = ((d.y - camY * par) % 1600 + 1600) % 1600;
+    for (let ox = 0; ox < W; ox += 1600) for (let oy = 0; oy < H; oy += 1600) {
+      const px = x + ox, py = y + oy; if (px > W || py > H) continue;
+      ctx.globalAlpha = 0.12 + d.z * 0.22;
+      if (L > 2) { ctx.lineWidth = 0.8 + d.z; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - ux * L * par, py - uy * L * par); ctx.stroke(); }
+      else ctx.fillRect(px, py, 1 + d.z, 1 + d.z);
+    }
+  }
+  ctx.globalAlpha = 1; ctx.lineCap = 'butt';
+}
+// soft light from the system's star washing over the scene, tinted to its color
+function starWash(ctx, W, H, pal, t) {
+  const P = STAR_PAL[pal] || STAR_PAL.sol;
+  glow(ctx, -W * 0.05, -H * 0.1, Math.max(W, H) * 0.95, P.g2, 0.22 + 0.03 * Math.sin(t * 0.3));
 }
 
 function glow(ctx, x, y, r, color, a) {
@@ -728,7 +791,19 @@ function drawArmoredRock(ctx, a, t) {
   ctx.restore();
   ctx.globalAlpha = 1; ctx.fillStyle = '#e8ecf2';
   for (let i = 0; i < 6; i++) { const an = i / 6 * TAU + 0.3; ctx.beginPath(); ctx.arc(Math.cos(an) * a.r * 0.62, Math.sin(an) * a.r * 0.62, 1.3 + a.tier * 0.3, 0, TAU); ctx.fill(); }
+  shadeRock(ctx, a, () => { ctx.beginPath(); a.shape.forEach((p, i) => { const px = p[0] * a.r * (0.85 + p[2] * 0.15), py = p[1] * a.r * (0.85 + p[2] * 0.15); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); });
   ctx.restore();
+}
+// world-fixed light from the upper left: darken the far side, rim-light the near edge
+const LIGHT_A = -2.3;
+function shadeRock(ctx, a, path) {
+  const la = LIGHT_A - a.rot, lx = Math.cos(la) * a.r, ly = Math.sin(la) * a.r;
+  const g = ctx.createLinearGradient(lx, ly, -lx, -ly);
+  g.addColorStop(0, 'rgba(255,236,210,0.16)'); g.addColorStop(0.45, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,12,0.6)');
+  path(); ctx.fillStyle = g; ctx.fill();
+  const rg = ctx.createLinearGradient(lx, ly, 0, 0);
+  rg.addColorStop(0, 'rgba(255,240,215,0.55)'); rg.addColorStop(1, 'rgba(255,240,215,0)');
+  ctx.strokeStyle = rg; ctx.lineWidth = 1.8; ctx.stroke();
 }
 function drawRock(ctx, a, t, scanLv) {
   if (a.volatile) {
@@ -742,7 +817,8 @@ function drawRock(ctx, a, t, scanLv) {
   ctx.save();
   ctx.translate(a.x, a.y); ctx.rotate(a.rot);
   if (a.rich) glow(ctx, 0, 0, a.r * 2.2, ore.c + '66', 0.5 + 0.25 * Math.sin(t * 3 + a.x));
-  const g = ctx.createRadialGradient(-a.r * 0.3, -a.r * 0.3, a.r * 0.1, 0, 0, a.r * 1.1);
+  const hl = LIGHT_A - a.rot;
+  const g = ctx.createRadialGradient(Math.cos(hl) * a.r * 0.4, Math.sin(hl) * a.r * 0.4, a.r * 0.1, 0, 0, a.r * 1.1);
   g.addColorStop(0, a.cold ? '#8d9bb8' : '#8a7e72');
   g.addColorStop(1, a.cold ? '#2a3348' : '#2e2924');
   ctx.fillStyle = g;
@@ -765,9 +841,14 @@ function drawRock(ctx, a, t, scanLv) {
     ctx.strokeStyle = `rgba(255,${150 + Math.round(80 * Math.sin(t * 6 + a.x))},60,0.95)`; ctx.lineWidth = 1.6 + a.tier * 0.4;
     ctx.beginPath(); ctx.moveTo(-a.r * 0.7, -a.r * 0.2); ctx.lineTo(-a.r * 0.1, a.r * 0.1); ctx.lineTo(a.r * 0.5, -a.r * 0.4); ctx.moveTo(-a.r * 0.1, a.r * 0.1); ctx.lineTo(a.r * 0.2, a.r * 0.6); ctx.stroke();
   }
-  // cráteres
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  for (const c of a.craters) { ctx.beginPath(); ctx.arc(c[0] * a.r, c[1] * a.r, c[2] * a.r, 0, TAU); ctx.fill(); }
+  // cráteres (with a lit lip on the side facing the light)
+  const cla = LIGHT_A - a.rot, clx = Math.cos(cla), cly = Math.sin(cla);
+  for (const c of a.craters) {
+    const cx = c[0] * a.r, cy = c[1] * a.r, cr = c[2] * a.r;
+    ctx.fillStyle = 'rgba(0,0,0,0.28)'; ctx.beginPath(); ctx.arc(cx, cy, cr, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,240,220,0.14)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, cr, cla + Math.PI - 1.1, cla + Math.PI + 1.1); ctx.stroke();
+  }
+  shadeRock(ctx, a, () => { ctx.beginPath(); a.shape.forEach((p, i) => { const px = p[0] * a.r * p[2], py = p[1] * a.r * p[2]; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); });
   ctx.restore();
   if (scanLv >= 2 && a.rich) {
     ctx.strokeStyle = ore.c; ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 4);
@@ -786,6 +867,8 @@ function drawOreChunk(ctx, c, t) {
   ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.7;
   ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(1.5, -1); ctx.lineTo(-1.5, -1); ctx.fill();
   ctx.restore(); ctx.globalAlpha = 1;
+  const tw = Math.sin(t * 4 + c.rot * 9);
+  if (tw > 0.85) { const k = (tw - 0.85) / 0.15 * 7; ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.fillRect(c.x - k, c.y - 0.6, k * 2, 1.2); ctx.fillRect(c.x - 0.6, c.y - k, 1.2, k * 2); ctx.globalAlpha = 1; }
 }
 
 // ---------- station icon ----------
