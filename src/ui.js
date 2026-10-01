@@ -294,8 +294,20 @@ function tradeRun(g, to) {
   sfx('click'); toast(`Bought ${n} ${ITEMS[g].n} — course plotted to ${LOC[to].n}`, 'good');
   save(); closeSheet(); selectLoc(to); MapScene.focus(to);
 }
+function freighterBtn(id, r) {
+  const why = freighterBlock(id, r.to, r.g), inc = freighterIncome({ from: id, to: r.to, g: r.g }), fc = FREIGHT.cost();
+  return why ? `<button class="btn small-btn" disabled title="${why.long.replace(/<[^>]+>/g, '')}">🚚 ${why.short}</button>`
+    : `<button class="btn small-btn" onclick="doFreighter('${id}','${r.to}','${r.g}')">🚚 Freighter · ${fmt(fc)} <small>(+${fmt(inc)}/s)</small></button>`;
+}
+// fleet status, so it's clear what limits more freighters
+function fleetLine() {
+  const n = (S.freighters || []).length, max = FREIGHT.max(), nx = FREIGHT.nextSlots();
+  const full = n >= max;
+  return `<div class="fleetline ${full ? 'full' : ''}">🚚 Fleet <b>${n}/${max}</b> · max ${FREIGHT.perRoute} per route · next costs <b>${fmt(FREIGHT.cost())} cr</b>${full ? (nx ? ` · <b>full</b> — +${nx[1]} slots unlock with <b>${UNLOCKS[nx[0]].title}</b>` : ' · <b>maximum fleet reached</b>') : nx ? ` <small>(+${nx[1]} slots with ${UNLOCKS[nx[0]].title})</small>` : ''}</div>`;
+}
 function doFreighter(from, to, g) {
-  if (!hireFreighter(from, to, g)) { toast('Not enough credits (or fleet full)', 'bad'); return; }
+  const why = freighterBlock(from, to, g);
+  if (why || !hireFreighter(from, to, g)) { toast(why ? why.short : 'Cannot hire a freighter here', 'bad'); return; }
   sfx('upgrade'); toast(`🚚 Freighter now runs ${ITEMS[g].n} to ${LOC[to].n}`, 'good'); renderDock();
 }
 function warSellHint() {
@@ -350,7 +362,7 @@ function dockBody(tab) {
     let h = routes.length ? `<div class="routes"><div class="sub">💡 Best trades from here</div>${routes.slice(0, 3).map(r => `<div class="route">
       <div><i class="sw" style="background:${ITEMS[r.g].c}"></i><b>${ITEMS[r.g].n}</b> buy ${fmt(r.bp)} → <b>${LOC[r.to].n}</b> pays ${fmt(r.sp)} <em>×${(r.avg / r.bp).toFixed(1)}</em> ${demandChip(r.to, r.g)} <small>≈ +${fmt(r.profit * 0.9)} for ${r.units}</small></div>
       <div class="rt-btns"><button class="btn small-btn primary" ${r.units && S.credits >= r.bp ? '' : 'disabled'} onclick="tradeRun('${r.g}','${r.to}')">Buy ${r.units} & fly there</button>
-      ${has(U.TRADE) ? `<button class="btn small-btn" ${fn < FREIGHT.max && S.credits >= fc && routeCount(id, r.to, r.g) < FREIGHT.perRoute ? '' : 'disabled'} onclick="doFreighter('${id}','${r.to}','${r.g}')">🚚 Freighter · ${fmt(fc)} <small>(+${fmt(freighterIncome({ from: id, to: r.to, g: r.g }))}/s)</small></button>` : ''}</div></div>`).join('')}</div>` : '<p class="hint">Nothing here is worth hauling right now — the markets that want these goods are saturated. Try another station, or wait for demand to return.</p>';
+      ${has(U.TRADE) ? freighterBtn(id, r) : ''}</div></div>`).join('')}${has(U.TRADE) ? fleetLine() : ''}</div>` : '<p class="hint">Nothing here is worth hauling right now — the markets that want these goods are saturated. Try another station, or wait for demand to return.</p>';
     h += `<p class="hint">Buy where it's cheap (▼), sell where it's wanted (▲) — or hire a 🚚 freighter to run the route for you forever. Each market only wants so much: deliveries use up its <b>demand</b>, which returns slowly (~3%/day). Shortages and wars create fresh demand.</p>
       <div class="mkt"><div class="mrow mh"><span>Good</span><span>Sell</span><span>Have</span><span></span><span>Buy</span><span></span></div>`;
     for (const k of keys) {
@@ -541,7 +553,7 @@ function openFactions() {
   const tot = totalIncome();
   h += `<div class="inf-big"><div><small>PASSIVE INCOME</small><b class="cr">${fmt(tot)}</b><span>cr/s</span></div><div class="hint center">Drones ${fmt(droneIncome())}/s · Freighters ${fmt(freightIncome())}/s · ore multiplier ×${incomeMult().toFixed(2)}</div></div>`;
   if ((S.freighters || []).length) {
-    h += `<div class="sub">Freighters ${S.freighters.length}/${FREIGHT.max}</div>`;
+    h += `<div class="sub">Freighters ${S.freighters.length}/${FREIGHT.max()}</div>${fleetLine()}`;
     for (const f of S.freighters) h += `<div class="srow"><span>🚚 ${ITEMS[f.g].n}: ${LOC[f.from].n} → ${LOC[f.to].n}</span><b class="cr">+${fmt(freighterIncome(f))}/s</b></div>`;
   }
   h += '<div class="sub">Outposts</div>';

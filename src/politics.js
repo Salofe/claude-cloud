@@ -457,8 +457,12 @@ function destroyPlanet(id) {
 }
 
 // ---------- freighters: automated trade routes ----------
+// fleet size grows with progress: 10 at Trade, +4 at Saturn, +4 at the Frontier
+const FREIGHT_SLOTS = [[U.TRADE, 10], [U.SATURN, 4], [U.FRONTIER, 4]];
 const FREIGHT = {
-  max: 10, perRoute: 3,
+  max: () => FREIGHT_SLOTS.reduce((n, [st, k]) => n + (has(st) ? k : 0), 0),
+  nextSlots: () => FREIGHT_SLOTS.find(([st]) => !has(st)),
+  perRoute: 3,
   cap: () => Math.round(8 * Math.pow(1.6, Math.max(0, S.unlock - 5))),
   cost: () => Math.round(1e6 * Math.pow(3, Math.max(0, S.unlock - 5)) * Math.pow(1.35, (S.freighters || []).length)),
 };
@@ -494,10 +498,19 @@ function tradeRoutes(id, all) {
   return out.sort((a, b) => b.profit - a.profit);
 }
 const routeCount = (from, to, g) => (S.freighters || []).filter(f => f.from === from && f.to === to && f.g === g).length;
+// why a freighter can't be hired on this route right now (null = it can)
+function freighterBlock(from, to, g) {
+  const n = (S.freighters || []).length, max = FREIGHT.max(), nx = FREIGHT.nextSlots();
+  if (n >= max) return { short: `Fleet full ${n}/${max}`, long: `Your fleet is full (${n}/${max}).` + (nx ? ` <b>+${nx[1]} slots</b> unlock with <b>${UNLOCKS[nx[0]].title}</b>.` : ' That is the maximum fleet size.') };
+  if (routeCount(from, to, g) >= FREIGHT.perRoute) return { short: `Route full ${FREIGHT.perRoute}/${FREIGHT.perRoute}`, long: `This route already has ${FREIGHT.perRoute} freighters — more would flood the market. Try another good or destination.` };
+  const c = FREIGHT.cost();
+  if (S.credits < c) return { short: `Need ${fmt(c)} cr`, long: `The next freighter costs <b>${fmt(c)} cr</b> (each one costs 35% more than the last).` };
+  return null;
+}
 function hireFreighter(from, to, g) {
   S.freighters = S.freighters || [];
   const c = FREIGHT.cost();
-  if (S.freighters.length >= FREIGHT.max || S.credits < c || routeCount(from, to, g) >= FREIGHT.perRoute) return false;
+  if (freighterBlock(from, to, g)) return false;
   S.credits -= c; S.freighters.push({ from, to, g, t0: Math.random() });
   addNews('🚚', `Freighter hired: ${ITEMS[g].n} ${LOC[from].n} → ${LOC[to].n}`, '#6dffb0');
   save();

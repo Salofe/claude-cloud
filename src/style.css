@@ -424,3 +424,6 @@ body.mining #warHud { top: 62px; }
 .ally-stars { color: var(--gold); font-size: 28px; letter-spacing: 4px; text-shadow: 0 0 12px rgba(255,210,74,.6); text-align: center; }
 .ally-stars.sm { font-size: 13px; letter-spacing: 1px; }
 @media (max-width: 700px) { #warHud { top: 158px; left: 8px; width: 200px; } }
+.fleetline { margin-top: 8px; font-size: 12px; color: var(--dim); }
+.fleetline b { color: var(--txt); }
+.fleetline.full { color: var(--warn); } .fleetline.full b { color: var(--gold); }

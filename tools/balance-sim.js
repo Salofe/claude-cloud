@@ -96,7 +96,7 @@ function candidates() {
     if (o.n < A.outpostCap(o.lv)) out.push({ name: 'drone ' + L.id, cost: A.OUTPOST.drone[z] * Math.pow(A.OUTPOST.growth, o.n), gain: A.OUTPOST.rate[z] * Math.pow(2, o.lv - 1) * boost, buy: () => o.n++ });
     if (o.lv < A.OUTPOST.maxLv) out.push({ name: 'outlv ' + L.id, cost: A.OUTPOST.build[z] * A.OUTPOST.lvCost[o.lv - 1], gain: A.outpostRate(z, o.lv, o.n) * boost, buy: () => o.lv++ });
   }
-  if (A.has(A.U.TRADE) && (s.freighters || []).length < A.FREIGHT.max) {
+  if (A.has(A.U.TRADE) && (s.freighters || []).length < A.FREIGHT.max()) {
     let best = null;
     for (const L of A.NODES) for (const r of A.tradeRoutes(L.id)) { const f = { from: L.id, to: r.to, g: r.g }; if ((s.freighters || []).filter(x => x.from === f.from && x.to === f.to && x.g === f.g).length >= 3) continue; const inc = A.freighterIncome(f); if (!best || inc > best.inc) best = { f, inc }; }
     if (best) out.push({ name: 'freighter', cost: A.FREIGHT.cost(), gain: best.inc, buy: () => { s.freighters.push(best.f); } });
