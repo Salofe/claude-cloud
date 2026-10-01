@@ -13,23 +13,25 @@ function buildFleet(danger) {
   if (!fleet.length) fleet.push('raider');
   return fleet;
 }
+// enemies of later systems get much tougher, but their damage grows slower (√) so fights stay short and fair
+const enemyDmgMult = () => Math.sqrt(sysDef().enemy);
 function fleetThreat(fleet, z) {
-  const m = Z_ENEMY[z] * sysDef().enemy;
+  const m = Z_ENEMY[z] * sysDef().enemy, md = Z_ENEMY[z] * enemyDmgMult();
   let ehp = 0, dps = 0;
-  for (const k of fleet) { const e = ENEMIES[k]; ehp += (e.hp + e.sp) * m; dps += e.dmg * m * (e.burst || 1) / e.rate; }
+  for (const k of fleet) { const e = ENEMIES[k]; ehp += (e.hp + e.sp) * m; dps += e.dmg * md * (e.burst || 1) / e.rate; }
   const mine = Math.sqrt(Math.max(1, S.hull + ship.shieldMax) * ship.weaponDps * 1.6);
   return Math.sqrt(ehp * dps) / mine;
 }
 
 const Combat = {
   spawn(sc, fleet, z, fromTop) {
-    const m = Z_ENEMY[z] * sysDef().enemy;
+    const m = Z_ENEMY[z] * sysDef().enemy, md = Z_ENEMY[z] * enemyDmgMult();
     fleet.forEach((k, i) => {
       const e = ENEMIES[k];
       let x, y;
       if (fromTop) { x = clamp(sc.p.x + rand(-500, 500), 120, MW - 120); y = Math.max(80, sc.p.y - rand(650, 900)); }
       else { const a = rand(0, TAU); x = clamp(sc.p.x + Math.cos(a) * rand(520, 700), 80, MW - 80); y = clamp(sc.p.y + Math.sin(a) * rand(520, 700), 80, MH - 80); }
-      sc.enemies.push({ k, x, y, vx: 0, vy: 0, a: 0, hp: e.hp * m, max: e.hp * m, sp: e.sp * m, spMax: e.sp * m, dmg: e.dmg * m,
+      sc.enemies.push({ k, x, y, vx: 0, vy: 0, a: 0, hp: e.hp * m, max: e.hp * m, sp: e.sp * m, spMax: e.sp * m, dmg: e.dmg * md,
         rate: e.rate, spd: e.spd, size: e.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1,
         prefer: rand(200, 330) * (0.8 + e.size * 0.3), shT: 0, hitT: 0, loot: e.loot * Z_LOOT[z], military: e.military });
     });
@@ -42,9 +44,9 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : e.military ? '#b6ff7a' : '#ff4d6d';
     for (let i = 0; i < n; i++) {
-      const b = a + (i - (n - 1) / 2) * 0.2;
+      const b = E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
       sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
     }
     sfx('eshoot');
@@ -105,14 +107,15 @@ const Combat = {
       const E = ENEMIES[e.k];
       if (E.summon) {
         e.sumT = (e.sumT == null ? 4 : e.sumT) - dt;
-        if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < 6) {
-          e.sumT = 7;
+        if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < (E.summonMax || 6)) {
+          e.sumT = E.summonMax ? 10 : 7;
           const m = e.max / (E.hp * 1), sw = ENEMIES[E.summon];
-          for (let i = 0; i < 2; i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: 0, spMax: 0, dmg: sw.dmg * m,
+          for (let i = 0; i < (E.summonMax ? 1 : 2); i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: sw.sp * m, spMax: sw.sp * m, dmg: sw.dmg * e.dmg / E.dmg,
             rate: sw.rate, spd: sw.spd, size: sw.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1, prefer: rand(160, 260), shT: 0, hitT: 0, loot: sw.loot * Z_LOOT[sc.combatZ || 0] });
-          sc.parts.burst(e.x, e.y, 20, '#b0ff9a', 150, 0.6, 2);
+          sc.parts.burst(e.x, e.y, 20, E.hive ? '#b0ff9a' : '#ff8a4a', 150, 0.6, 2);
         }
       }
+      if (E.serpent) { e.trail = e.trail || []; e.trT = (e.trT || 0) - dt; if (e.trT <= 0) { e.trT = 0.045; e.trail.unshift({ x: e.x, y: e.y }); if (e.trail.length > 16) e.trail.pop(); } }
       if (Math.random() < dt * 20) sc.parts.add(e.x - Math.cos(e.a) * 16 * e.size, e.y - Math.sin(e.a) * 16 * e.size, rand(-20, 20), rand(-20, 20), 0.3, e.military ? '#9fe0ff' : '#ff6a3a', 2);
     }
     // escort gunships (Private Security Fleet)
@@ -178,6 +181,7 @@ const Combat = {
     ctx.globalCompositeOperation = 'source-over';
     for (const es of sc.escorts || []) if (es.x) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, es.x, es.y, es.a, 0.8, 0.6, t);
     for (const e of sc.enemies) {
+      if (e.trail) drawSerpentBody(ctx, e, t);
       drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t);
       if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);
       if (e.shieldFlash > 0) { ctx.strokeStyle = `rgba(255,120,160,${e.shieldFlash * 3})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, 30 * e.size, 0, TAU); ctx.stroke(); }

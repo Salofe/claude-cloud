@@ -54,6 +54,14 @@ Defeating a system's final guardian opens its **jump gate**. The **Galaxy** map 
 - Each system is hand-made on top of Sol's layout (same slots, new names, looks, ores, factions, texts and boss) and is harder: tougher rocks and pirates (`SYSTEMS` in `src/galaxy.js`). Run `SYS=centauri LEG='{"ore":4,"quick":1}' node tools/balance-sim.js` to simulate one.
 - **Alpha Centauri** (system 2): binary stars, ocean world Pandora, the **Shard Belt** of **crystal asteroids** that shatter into fast shards, and the **Hive Queen**, who keeps spawning swarmers. Simulated: ~150 min without Legacy, ~100 min with a typical Legacy (Sol: ~140 min).
 
+### Systems 3–5
+
+- **Barnard's Star** (red dwarf): you receive the **Drill** (Q / DRILL button) — 3× cutting power at short range, kept forever. Guardian: the **Mining Colossus**, which fires 12-way radial volleys.
+- **Sirius** (blazing white + white dwarf): **armored asteroids** — metal shells the laser barely scratches (15%); drill them. Guardian: the **Solar Serpent**, a fast ribbon of fire.
+- **Tau Ceti** (trade empire): you receive the **Tractor Pulse** (E / PULL button, 14 s cooldown) that pulls every ore chunk within 1,000 px. Guardian: the **Merchant Dreadnought**, with spread volleys and pirate escorts it keeps calling in.
+
+Each system gets tougher (rocks ×1.5, pirate toughness ×1.35 per system; pirate damage grows only with the square root so fights stay short). With the Legacy you'd typically have by then, the simulator puts each system at ~110–125 minutes, with normal fights at 8–15 s and guardians at ~40–65 s and well under your hull + shields.
+
 ## Fields & comets
 
 Every field has its own signature ores: the Moon (iron, ice), Mercury (platinum, **Sunstone**), the Main Belt (nickel, **Cobalt**, iridium), the Trojans (iridium), Saturn's rings (Helium-3, **Ring Pearls**), the Kuiper Belt (iridium, Ring Pearls, exotics) and the Oort Cloud (exotics, **Void Shards**). Average field values match the old balance. Every 45–80 s a **comet** streaks across the field; break it before it escapes for ice and a handful of the field's most valuable ore.

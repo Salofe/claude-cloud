@@ -32,6 +32,7 @@ window.addEventListener('keydown', e => {
   keys.add(e.code);
   audioInit();
   if (e.code === 'Space' && scene === MineScene) e.preventDefault();
+  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); }
   if (e.code === 'Escape') {
     if (!$('sheet').classList.contains('hidden')) closeSheet();
     else if (scene === MineScene && !isBlocking()) MineScene.leave();
@@ -105,6 +106,8 @@ function setupTouchControls() {
   const end = e => { for (const t of e.changedTouches) if (t.identifier === joy.id) { joy.active = false; joy.dx = joy.dy = 0; base.classList.remove('on'); } };
   zone.addEventListener('touchend', end); zone.addEventListener('touchcancel', end);
   fire.addEventListener('touchstart', e => { e.preventDefault(); touchFire = true; fire.classList.add('on'); }, { passive: false });
+  $('toolBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.toggleTool(); }, { passive: false });
+  $('pullBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.pulse(); }, { passive: false });
   const fe = e => { e.preventDefault(); touchFire = false; fire.classList.remove('on'); };
   fire.addEventListener('touchend', fe); fire.addEventListener('touchcancel', fe);
 }

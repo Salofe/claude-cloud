@@ -545,10 +545,59 @@ function drawHiveShip(ctx, type, x, y, ang, s, t) {
   ctx.fillStyle = '#ff6a6a'; ctx.beginPath(); ctx.arc(big ? 17 : 12, -1.5, 1.2, 0, TAU); ctx.arc(big ? 17 : 12, 1.5, 1.2, 0, TAU); ctx.fill();
   ctx.restore();
 }
+// Mining Colossus: a hulking excavator with hazard stripes and spinning drill arms
+function drawMechShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 26, '#ffb03033', 0.8);
+  for (const side of [-1, 1]) {           // drill arms
+    ctx.fillStyle = '#4a4a52'; ctx.fillRect(-2, side * 9 - 2, 14, 4);
+    ctx.save(); ctx.translate(14, side * 9); ctx.rotate(t * 8 * side);
+    ctx.fillStyle = '#c8c8d0'; ctx.beginPath(); ctx.moveTo(8, 0); ctx.lineTo(0, -3.5); ctx.lineTo(0, 3.5); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  ctx.fillStyle = '#2a2a30'; ctx.fillRect(-15, -10, 22, 20);
+  ctx.save(); ctx.beginPath(); ctx.rect(-15, -10, 22, 20); ctx.clip();
+  ctx.fillStyle = '#ffc830';
+  for (let i = -6; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-15 + i * 6, -10); ctx.lineTo(-12 + i * 6, -10); ctx.lineTo(-3 + i * 6, 10); ctx.lineTo(-6 + i * 6, 10); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+  ctx.fillStyle = '#3a3a42'; ctx.fillRect(-11, -6, 14, 12);
+  ctx.strokeStyle = '#ffc830'; ctx.lineWidth = 1; ctx.strokeRect(-15, -10, 22, 20);
+  const pulse = 0.6 + 0.4 * Math.sin(t * 6);
+  ctx.fillStyle = `rgba(255,60,40,${pulse})`; ctx.fillRect(1, -3, 5, 6);
+  glow(ctx, 3, 0, 6, '#ff3a2a', pulse);
+  ctx.fillStyle = '#ff7a30'; ctx.fillRect(-18, -6, 3, 4); ctx.fillRect(-18, 2, 3, 4);
+  ctx.restore();
+}
+// Solar Serpent: a burning head (the body is drawn from its trail)
+function drawSerpentHead(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 22, '#ffb03055', 0.9);
+  const g = ctx.createRadialGradient(2, 0, 1, 0, 0, 10); g.addColorStop(0, '#fff6c0'); g.addColorStop(0.5, '#ffa030'); g.addColorStop(1, '#c03010');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(13, 0); ctx.quadraticCurveTo(4, -9, -7, -6); ctx.lineTo(-7, 6); ctx.quadraticCurveTo(4, 9, 13, 0); ctx.fill();
+  ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(5, -3, 1.4, 0, TAU); ctx.arc(5, 3, 1.4, 0, TAU); ctx.fill();
+  ctx.strokeStyle = '#ffe080'; ctx.lineWidth = 1.2;
+  for (const side of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-3, side * 5); ctx.quadraticCurveTo(-10, side * 13, -15, side * 9 + Math.sin(t * 6) * 2); ctx.stroke(); }
+  ctx.restore();
+}
+function drawSerpentBody(ctx, e, t) {
+  const n = e.trail.length, sz = ENEMIES[e.k].size * 1.3;
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = n - 1; i >= 0; i--) {
+    const p = e.trail[i], k = 1 - i / n, r = (4 + 6 * k) * sz;
+    glow(ctx, p.x, p.y, r * 1.8, i % 2 ? '#ff7a2a' : '#ffb040', 0.35 * k + 0.1);
+    ctx.fillStyle = i % 2 ? `rgba(255,140,50,${0.5 + 0.4 * k})` : `rgba(255,200,90,${0.5 + 0.4 * k})`;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, TAU); ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
   if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
   if (e.hive) return drawHiveShip(ctx, type, x, y, ang, s, t);
+  if (e.mech) return drawMechShip(ctx, type, x, y, ang, s, t);
+  if (e.serpent) return drawSerpentHead(ctx, type, x, y, ang, s, t);
   const mil = e.military;
   const main = mil ? PAL.military : PAL.enemyMid, dark = mil ? PAL.militaryDark : PAL.enemyDark, lit = mil ? '#d8f0a8' : PAL.enemy;
   ctx.save();
@@ -576,7 +625,7 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
     ctx.beginPath(); ctx.moveTo(2, 6); ctx.lineTo(-14, 22); ctx.lineTo(-20, 20); ctx.lineTo(-10, 5); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#ffd24a'; ctx.fillRect(-18, -21, 5, 2); ctx.fillRect(-18, 19, 5, 2);
   }
-  if (type === 'frigate' || type === 'carrier' || type === 'warlord') {
+  if (type === 'frigate' || type === 'carrier' || type === 'warlord' || type === 'dreadnought') {
     ctx.fillStyle = dark;
     ctx.fillRect(-12, -11, 12, 4); ctx.fillRect(-12, 7, 12, 4);
     ctx.fillStyle = lit;
@@ -584,6 +633,14 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   }
   if (type === 'warlord') {
     ctx.save(); ctx.rotate(Math.PI / 2); drawIcon(ctx, 'skull', 0, 2, 9, '#ffd24a'); ctx.restore();
+  }
+  if (type === 'dreadnought') {
+    ctx.fillStyle = dark; ctx.fillRect(-16, -14, 26, 5); ctx.fillRect(-16, 9, 26, 5);
+    for (const [tx, ty] of [[-10, -11.5], [2, -11.5], [-10, 11.5], [2, 11.5]]) {
+      ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(tx, ty, 2.2, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx + 4, ty); ctx.stroke();
+    }
+    ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-4, -6); ctx.lineTo(-15, -4); ctx.moveTo(18, 0); ctx.lineTo(-4, 6); ctx.lineTo(-15, 4); ctx.stroke();
   }
   if (type === 'carrier') {
     ctx.fillStyle = main;
@@ -620,8 +677,28 @@ function drawCrystalRock(ctx, a, t) {
   ctx.beginPath(); ctx.arc(pts[0][0] * gl, pts[0][1] * gl, 1.8, 0, TAU); ctx.fill();
   ctx.restore();
 }
+// armored asteroids (Sirius): a heat-forged metal shell with rivets; ore glows through the seams
+function drawArmoredRock(ctx, a, t) {
+  const ore = ITEMS[a.ore];
+  ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+  const g = ctx.createLinearGradient(-a.r, -a.r, a.r, a.r);
+  g.addColorStop(0, '#c8d0dc'); g.addColorStop(0.45, '#6a7484'); g.addColorStop(1, '#2a3038');
+  ctx.fillStyle = g; ctx.beginPath();
+  a.shape.forEach((p, i) => { const px = p[0] * a.r * (0.85 + p[2] * 0.15), py = p[1] * a.r * (0.85 + p[2] * 0.15); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+  ctx.closePath(); ctx.fill();
+  if (a.hit > 0) { ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fill(); }
+  ctx.strokeStyle = '#1a1e24'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.save(); ctx.clip();
+  ctx.strokeStyle = ore.c; ctx.globalAlpha = 0.75 + 0.2 * Math.sin(t * 3 + a.x); ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(-a.r, -a.r * 0.15); ctx.lineTo(a.r, a.r * 0.1); ctx.moveTo(-a.r * 0.2, -a.r); ctx.lineTo(a.r * 0.1, a.r); ctx.stroke();
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.fillStyle = '#e8ecf2';
+  for (let i = 0; i < 6; i++) { const an = i / 6 * TAU + 0.3; ctx.beginPath(); ctx.arc(Math.cos(an) * a.r * 0.62, Math.sin(an) * a.r * 0.62, 1.3 + a.tier * 0.3, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
 function drawRock(ctx, a, t, scanLv) {
   if (a.crystal) return drawCrystalRock(ctx, a, t);
+  if (a.armored) return drawArmoredRock(ctx, a, t);
   const ore = ITEMS[a.ore];
   ctx.save();
   ctx.translate(a.x, a.y); ctx.rotate(a.rot);

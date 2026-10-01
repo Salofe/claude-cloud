@@ -482,6 +482,11 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .jb-note { margin: 8px 0 2px; font-size: 13px; color: #ffc857; }
 .jb-note.good { color: var(--good); }
 .jump-box .srow { font-size: 13px; }
+.tool { display: inline-block; margin: 0 6px 4px 0; padding: 1px 7px; border: 1px solid rgba(255,176,48,.5); border-radius: 6px; color: #ffc870; font-size: 11px; }
+.tool small { color: var(--dim); }
+.tbtn { position: absolute; right: 136px; width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--fh); font-size: 11px; color: #fff; pointer-events: auto; border: 2px solid #ffb030; background: rgba(255,160,40,.25); }
+#toolBtn { bottom: 150px; } #pullBtn { bottom: 76px; border-color: #9fe0ff; background: rgba(120,200,255,.2); }
+#pullBtn.cd { opacity: .5; }
 </style>
 </head>
 <body>
@@ -542,6 +547,8 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
   <div id="joyZone"></div>
   <div id="joyBase"><div id="joyKnob"></div></div>
   <div id="fireBtn">FIRE</div>
+  <div id="toolBtn" class="tbtn hidden">DRILL</div>
+  <div id="pullBtn" class="tbtn hidden">PULL</div>
 </div>
 
 <div id="battleUI" class="ui hidden">
@@ -760,6 +767,9 @@ const ENEMIES = {
   warlord: { n: 'Pirate Warlord',  hp: 520, sp: 230, dmg: 5, rate: 1.3, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 5, boss: 1 },
   sentinel: { n: 'Alien Sentinel',  hp: 650, sp: 500, dmg: 2.5, rate: 1.0, spd: 70, size: 3.2, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, alien: 1 },
   queen:   { n: 'Hive Queen',      hp: 760, sp: 260, dmg: 2.5, rate: 1.2, spd: 60, size: 3.4, loot: 20000, pow: 30, burst: 4, boss: 1, final: 1, hive: 1, summon: 'swarmer' },
+  colossus: { n: 'Mining Colossus', hp: 900, sp: 200, dmg: 3, rate: 2.4, spd: 45, size: 3.6, loot: 20000, pow: 30, burst: 1, radial: 12, boss: 1, final: 1, mech: 1 },
+  serpent: { n: 'Solar Serpent',   hp: 600, sp: 250, dmg: 2, rate: 0.9, spd: 210, size: 3.0, loot: 20000, pow: 30, burst: 6, boss: 1, final: 1, serpent: 1 },
+  dreadnought: { n: 'Merchant Dreadnought', hp: 680, sp: 400, dmg: 1.6, rate: 1.4, spd: 55, size: 3.8, loot: 20000, pow: 30, burst: 2, spread: 5, boss: 1, final: 1, summon: 'corsair', summonMax: 3 },
   swarmer: { n: 'Swarmer',         hp: 26,  sp: 0,   dmg: 2,  rate: 0.9, spd: 270, size: 0.55, loot: 150,  pow: 1, hive: 1 },
   adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
@@ -1320,10 +1330,59 @@ function drawHiveShip(ctx, type, x, y, ang, s, t) {
   ctx.fillStyle = '#ff6a6a'; ctx.beginPath(); ctx.arc(big ? 17 : 12, -1.5, 1.2, 0, TAU); ctx.arc(big ? 17 : 12, 1.5, 1.2, 0, TAU); ctx.fill();
   ctx.restore();
 }
+// Mining Colossus: a hulking excavator with hazard stripes and spinning drill arms
+function drawMechShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 26, '#ffb03033', 0.8);
+  for (const side of [-1, 1]) {           // drill arms
+    ctx.fillStyle = '#4a4a52'; ctx.fillRect(-2, side * 9 - 2, 14, 4);
+    ctx.save(); ctx.translate(14, side * 9); ctx.rotate(t * 8 * side);
+    ctx.fillStyle = '#c8c8d0'; ctx.beginPath(); ctx.moveTo(8, 0); ctx.lineTo(0, -3.5); ctx.lineTo(0, 3.5); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  ctx.fillStyle = '#2a2a30'; ctx.fillRect(-15, -10, 22, 20);
+  ctx.save(); ctx.beginPath(); ctx.rect(-15, -10, 22, 20); ctx.clip();
+  ctx.fillStyle = '#ffc830';
+  for (let i = -6; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-15 + i * 6, -10); ctx.lineTo(-12 + i * 6, -10); ctx.lineTo(-3 + i * 6, 10); ctx.lineTo(-6 + i * 6, 10); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+  ctx.fillStyle = '#3a3a42'; ctx.fillRect(-11, -6, 14, 12);
+  ctx.strokeStyle = '#ffc830'; ctx.lineWidth = 1; ctx.strokeRect(-15, -10, 22, 20);
+  const pulse = 0.6 + 0.4 * Math.sin(t * 6);
+  ctx.fillStyle = `rgba(255,60,40,${pulse})`; ctx.fillRect(1, -3, 5, 6);
+  glow(ctx, 3, 0, 6, '#ff3a2a', pulse);
+  ctx.fillStyle = '#ff7a30'; ctx.fillRect(-18, -6, 3, 4); ctx.fillRect(-18, 2, 3, 4);
+  ctx.restore();
+}
+// Solar Serpent: a burning head (the body is drawn from its trail)
+function drawSerpentHead(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 22, '#ffb03055', 0.9);
+  const g = ctx.createRadialGradient(2, 0, 1, 0, 0, 10); g.addColorStop(0, '#fff6c0'); g.addColorStop(0.5, '#ffa030'); g.addColorStop(1, '#c03010');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(13, 0); ctx.quadraticCurveTo(4, -9, -7, -6); ctx.lineTo(-7, 6); ctx.quadraticCurveTo(4, 9, 13, 0); ctx.fill();
+  ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(5, -3, 1.4, 0, TAU); ctx.arc(5, 3, 1.4, 0, TAU); ctx.fill();
+  ctx.strokeStyle = '#ffe080'; ctx.lineWidth = 1.2;
+  for (const side of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-3, side * 5); ctx.quadraticCurveTo(-10, side * 13, -15, side * 9 + Math.sin(t * 6) * 2); ctx.stroke(); }
+  ctx.restore();
+}
+function drawSerpentBody(ctx, e, t) {
+  const n = e.trail.length, sz = ENEMIES[e.k].size * 1.3;
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = n - 1; i >= 0; i--) {
+    const p = e.trail[i], k = 1 - i / n, r = (4 + 6 * k) * sz;
+    glow(ctx, p.x, p.y, r * 1.8, i % 2 ? '#ff7a2a' : '#ffb040', 0.35 * k + 0.1);
+    ctx.fillStyle = i % 2 ? `rgba(255,140,50,${0.5 + 0.4 * k})` : `rgba(255,200,90,${0.5 + 0.4 * k})`;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, TAU); ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
   if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
   if (e.hive) return drawHiveShip(ctx, type, x, y, ang, s, t);
+  if (e.mech) return drawMechShip(ctx, type, x, y, ang, s, t);
+  if (e.serpent) return drawSerpentHead(ctx, type, x, y, ang, s, t);
   const mil = e.military;
   const main = mil ? PAL.military : PAL.enemyMid, dark = mil ? PAL.militaryDark : PAL.enemyDark, lit = mil ? '#d8f0a8' : PAL.enemy;
   ctx.save();
@@ -1351,7 +1410,7 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
     ctx.beginPath(); ctx.moveTo(2, 6); ctx.lineTo(-14, 22); ctx.lineTo(-20, 20); ctx.lineTo(-10, 5); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#ffd24a'; ctx.fillRect(-18, -21, 5, 2); ctx.fillRect(-18, 19, 5, 2);
   }
-  if (type === 'frigate' || type === 'carrier' || type === 'warlord') {
+  if (type === 'frigate' || type === 'carrier' || type === 'warlord' || type === 'dreadnought') {
     ctx.fillStyle = dark;
     ctx.fillRect(-12, -11, 12, 4); ctx.fillRect(-12, 7, 12, 4);
     ctx.fillStyle = lit;
@@ -1359,6 +1418,14 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   }
   if (type === 'warlord') {
     ctx.save(); ctx.rotate(Math.PI / 2); drawIcon(ctx, 'skull', 0, 2, 9, '#ffd24a'); ctx.restore();
+  }
+  if (type === 'dreadnought') {
+    ctx.fillStyle = dark; ctx.fillRect(-16, -14, 26, 5); ctx.fillRect(-16, 9, 26, 5);
+    for (const [tx, ty] of [[-10, -11.5], [2, -11.5], [-10, 11.5], [2, 11.5]]) {
+      ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(tx, ty, 2.2, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx + 4, ty); ctx.stroke();
+    }
+    ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-4, -6); ctx.lineTo(-15, -4); ctx.moveTo(18, 0); ctx.lineTo(-4, 6); ctx.lineTo(-15, 4); ctx.stroke();
   }
   if (type === 'carrier') {
     ctx.fillStyle = main;
@@ -1395,8 +1462,28 @@ function drawCrystalRock(ctx, a, t) {
   ctx.beginPath(); ctx.arc(pts[0][0] * gl, pts[0][1] * gl, 1.8, 0, TAU); ctx.fill();
   ctx.restore();
 }
+// armored asteroids (Sirius): a heat-forged metal shell with rivets; ore glows through the seams
+function drawArmoredRock(ctx, a, t) {
+  const ore = ITEMS[a.ore];
+  ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+  const g = ctx.createLinearGradient(-a.r, -a.r, a.r, a.r);
+  g.addColorStop(0, '#c8d0dc'); g.addColorStop(0.45, '#6a7484'); g.addColorStop(1, '#2a3038');
+  ctx.fillStyle = g; ctx.beginPath();
+  a.shape.forEach((p, i) => { const px = p[0] * a.r * (0.85 + p[2] * 0.15), py = p[1] * a.r * (0.85 + p[2] * 0.15); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+  ctx.closePath(); ctx.fill();
+  if (a.hit > 0) { ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fill(); }
+  ctx.strokeStyle = '#1a1e24'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.save(); ctx.clip();
+  ctx.strokeStyle = ore.c; ctx.globalAlpha = 0.75 + 0.2 * Math.sin(t * 3 + a.x); ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(-a.r, -a.r * 0.15); ctx.lineTo(a.r, a.r * 0.1); ctx.moveTo(-a.r * 0.2, -a.r); ctx.lineTo(a.r * 0.1, a.r); ctx.stroke();
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.fillStyle = '#e8ecf2';
+  for (let i = 0; i < 6; i++) { const an = i / 6 * TAU + 0.3; ctx.beginPath(); ctx.arc(Math.cos(an) * a.r * 0.62, Math.sin(an) * a.r * 0.62, 1.3 + a.tier * 0.3, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
 function drawRock(ctx, a, t, scanLv) {
   if (a.crystal) return drawCrystalRock(ctx, a, t);
+  if (a.armored) return drawArmoredRock(ctx, a, t);
   const ore = ITEMS[a.ore];
   ctx.save();
   ctx.translate(a.x, a.y); ctx.rotate(a.rot);
@@ -2860,6 +2947,130 @@ const SYSTEMS = {
   },
 };
 
+// systems 3–5
+Object.assign(SYSTEMS, {
+  barnard: {
+    n: 'Barnard\'s Star', star: 'red', rock: 2.25, enemy: 1.82, value: 1, gift: 'drill',
+    boss: 'colossus', bossFleet: ['colossus', 'corsair', 'corsair'],
+    signal: { title: 'The machine wakes', text: 'Seismic readings from the abandoned mega-mine at <b>The Pit</b>: something enormous is <b>still digging</b> down there — and it attacks every ship that comes close.' },
+    gate: 'The Colossus collapses into scrap. Beneath it, the old miners had dug up an ancient ring — and it is <b>waking up</b>.',
+    intro: 'Barnard\'s Star: a dim red dwarf where miners have dug for centuries. The Haulers Union gives you their best tool, the <b>Drill</b>: press <b>Q</b> (or the DRILL button) to switch. It cuts 3× faster, but only up close. You keep it forever.',
+    factions: {
+      tierra: { n: 'Forge Compact', c: '#ff9a5a' }, marte: { n: 'Rust Brotherhood', c: '#d8805a' }, cinturon: { n: 'Deep Haulers Union', c: '#e0c060' },
+      exterior: { n: 'Ember League', c: '#ff7a9a' }, piratas: { n: 'Black Furnace', c: '#ff4d6d' },
+    },
+    locs: {
+      luna: { n: 'Cinderling', station: 'Old Shaft Base', tex: 'rock', col: ['#b8a898', '#3a3028'], desc: 'A cold, pocked moon of Forge. Generations of miners started here.', field: { n: 'Old Shafts', ores: { iron: 5, nickel: 0.9, titanium: 1, ice: 2.5 } } },
+      tierra: { n: 'Forge', station: 'Anvil Port', tex: 'ice', col: ['#ffd0b0', '#6a3a30'], desc: 'A tidally locked world: one side frozen, one side burning. Its forges never sleep.' },
+      venus: { n: 'Ashveil', station: 'Smoke Spire', tex: 'gas', col: ['#e0a898', '#5a2a20'], desc: 'Thick ash clouds over a hot world. Rich, decadent and thirsty for ice.' },
+      mercurio: { n: 'Brand', station: 'Brand Depot', tex: 'lava', col: ['#ff7040', '#2a0a05'], desc: 'A scorched rock close to the red sun. Platinum lies in the open.', field: { n: 'Scorch Plains', ores: { titanium: 1.5, cobalt: 1.2, platinum: 3.6 } } },
+      marte: { n: 'Rustfall', station: 'Rustfall City', tex: 'rock', col: ['#d07850', '#4a2010'], desc: 'Iron-red canyons and stubborn people. Pays well for ice.' },
+      ceres: { n: 'Hollowrock', station: 'Haulers Hall', tex: 'rock', col: ['#a8a090', '#3a3630'], desc: 'The Haulers\' capital, hollowed out by centuries of mining.', field: { n: 'The Deep Belt', ores: { nickel: 2, cobalt: 3, sunstone: 1.5, iridium: 1.02 } } },
+      jupiter: { n: 'Goliath', tex: 'gas', col: ['#f0b080', '#6a3010'] },
+      europa: { n: 'Ember', station: 'Ember Colony', tex: 'ice', col: ['#ffd8c8', '#8a4a40'], desc: 'A warm ice moon with hot springs. The League buys iridium.' },
+      troyanos: { station: 'Trojan Depot', desc: 'Rocks trapped in Goliath\'s gravity. Sunstone and iridium.', field: { n: 'Goliath Trojans', ores: { sunstone: 3.75, iridium: 2.8, ringpearl: 0.15 } } },
+      saturno: { n: 'Halo', tex: 'gas', col: ['#f0d0b0', '#7a5030'], station: 'Halo Depot', desc: 'A pale ringed giant glowing red in the dim light.', field: { n: 'Halo Rings', ores: { ice: 2.5, he3: 3, ringpearl: 2.5, exotic: 0.51 } } },
+      titan: { n: 'Brimstone', station: 'Sulfur Works', tex: 'titan', col: ['#f0d080', '#6a5020'], desc: 'A sulfur moon of Halo with enormous refineries.' },
+      pluton: { n: 'Coalsack', station: 'The Furnace', tex: 'rock', col: ['#806060', '#201010'], desc: 'A soot-black world. The Black Furnace sells anything.' },
+      kuiper: { n: 'Barnard Drift', station: 'Drift Depot', desc: 'Frozen rocks at the edge of the red sun\'s reach.', field: { n: 'Barnard Drift', ores: { ice: 2.32, ringpearl: 2.2, exotic: 1.6, voidshard: 0.1 } } },
+      oort: { n: 'The Pit', station: 'Last Lamp Outpost', col: ['#ffb070', '#3a1a08'], desc: 'An abandoned mega-mine at the edge of the system. Something still works down there.', field: { n: 'The Pit', ores: { ice: 3, iridium: 2, exotic: 2, voidshard: 0.81 } } },
+    },
+    unlocks: {
+      0: { title: 'Cinderling' }, 3: { title: 'Brand & Rustfall', text: '<b>Brand</b> is covered in <b>Platinum</b> but its heat burns your hull — buy <b>Shields</b>. <b>Rustfall</b> pays a fortune for ice.' },
+      4: { title: 'The Deep Belt', text: '<b>Hollowrock</b> and the <b>Deep Belt</b>: cobalt, sunstone and iridium… and <b>pirates</b>, tougher than ever. Use the <b>Drill (Q)</b> on big rocks.' },
+      6: { title: 'Goliath System', text: '<b>Ember</b> and the <b>Goliath Trojans</b>. The <b>Scanner</b> reveals rich veins.' },
+      7: { title: 'Halo & Influence', text: '<b>Brimstone</b> and the <b>Halo Rings</b>. <b>Invest</b> in stations for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Barnard\'s Star.' },
+      8: { title: 'Coalsack', text: '<b>Coalsack</b>\'s black market and the <b>Barnard Drift</b>.' },
+    },
+    projects: {
+      driver: { n: 'Cinderling Mass Driver', d: 'A magnetic rail on Cinderling hurls ore straight to Forge.', fx: 'Cinderling outpost output ×3' },
+      elevator: { n: 'Forge Space Elevator', d: 'A cable rising from the frozen side of Forge.', fx: 'All ore sells for +25% everywhere' },
+      terraform: { n: 'Terraform Rustfall', d: 'Comets and mirrors turn the red canyons into lakes.', fx: 'Rustfall pays ×2 for everything · Rust Brotherhood reputation +50' },
+      ringstation: { n: 'Halo Ring Megastation', d: 'A refinery city woven into Halo\'s rings.', fx: 'ALL drone income ×3' },
+    },
+  },
+  sirius: {
+    n: 'Sirius', star: 'white', companion: 'blue', rock: 3.38, enemy: 2.46, value: 1,
+    boss: 'serpent', bossFleet: ['serpent', 'raider', 'raider'],
+    signal: { title: 'Something lives in the flares', text: 'Ships near the <b>Flare Reach</b> report a shape swimming through the solar storms — a living ribbon of fire. They call it the <b>Solar Serpent</b>.' },
+    gate: 'The Serpent unravels into sparks. Where it nested, an ancient ring <b>glows white-hot</b> and opens.',
+    intro: 'Sirius burns twice as bright as Sol. Its asteroids are <b>armored</b>: heat-forged metal shells your laser barely scratches. Switch to the <b>Drill (Q)</b> to crack them.',
+    factions: {
+      tierra: { n: 'Sirian Directorate', c: '#9cc8ff' }, marte: { n: 'Canis Clans', c: '#ffb070' }, cinturon: { n: 'Iron Choir', c: '#c0c8d8' },
+      exterior: { n: 'Lumen League', c: '#7affd8' }, piratas: { n: 'Dogstar Raiders', c: '#ff4d6d' },
+    },
+    locs: {
+      luna: { n: 'Glint', station: 'Glint Base', tex: 'rock', col: ['#e0e8f0', '#50586a'], desc: 'A bright, glassy moon of Lumen.', field: { n: 'Glint Scree', ores: { iron: 4, ice: 2, titanium: 1.5, cobalt: 0.23 }, armored: 0.12 } },
+      tierra: { n: 'Lumen', station: 'Radiant Port', tex: 'ocean', col: ['#a8f0ff', '#0a4a6a'], desc: 'A dazzling sea world under a white-hot sun. Pays well for metals.' },
+      venus: { n: 'Mirage', station: 'Glass Spire', tex: 'gas', col: ['#fff0d0', '#a07040'], desc: 'A shimmering cloud world. Its cities crave luxury and ice.' },
+      mercurio: { n: 'Anvil', station: 'Anvil Depot', tex: 'lava', col: ['#ffd070', '#3a1a05'], desc: 'A molten forge-world. Sunstone everywhere — and the heat.', field: { n: 'Molten Fields', ores: { iron: 2, titanium: 2, platinum: 1, sunstone: 1.5 }, armored: 0.25 } },
+      marte: { n: 'Canis', station: 'Howl City', tex: 'rock', col: ['#e8b080', '#6a3a20'], desc: 'Dry plains and proud clans. Water is worth more than gold.' },
+      ceres: { n: 'Ironheart', station: 'Choir Station', tex: 'rock', col: ['#b8c0cc', '#3a4048'], desc: 'Capital of the Iron Belt, where every rock wears armor.', field: { n: 'Iron Belt', ores: { nickel: 2, cobalt: 2, platinum: 2.5, iridium: 1.18 }, armored: 0.45 } },
+      jupiter: { n: 'Argent', tex: 'gas', col: ['#e8eeff', '#4a5a8a'] },
+      europa: { n: 'Frost', station: 'Frost Colony', tex: 'ice', col: ['#f0faff', '#6a8ab0'], desc: 'An ice moon of Argent. Pays well for iridium.' },
+      troyanos: { station: 'Swarm Depot', desc: 'Argent\'s Trojan rocks, many of them armored.', field: { n: 'Argent Swarm', ores: { he3: 2.74, iridium: 3.2, ringpearl: 0.15 }, armored: 0.3 } },
+      saturno: { n: 'Corona', tex: 'gas', col: ['#fff0b0', '#a07020'], station: 'Corona Depot', desc: 'A golden ringed giant lit like a lantern.', field: { n: 'Corona Rings', ores: { ice: 2, he3: 2.5, ringpearl: 3, exotic: 0.37 }, armored: 0.25 } },
+      titan: { n: 'Haze', station: 'Hazeport', tex: 'titan', col: ['#f0e0c0', '#7a6a40'], desc: 'A hazy moon of Corona with huge refineries.' },
+      pluton: { n: 'Dogstar', station: 'Raider Bazaar', tex: 'ice', col: ['#ffffff', '#7080a0'], desc: 'A small frozen world near the white dwarf Sirius B. The Raiders sell anything.' },
+      kuiper: { n: 'Sirius Drift', station: 'Drift Depot', desc: 'Armored rocks drifting far from the glare.', field: { n: 'Sirius Drift', ores: { ice: 2.19, iridium: 2, exotic: 1.9, voidshard: 0.1 }, armored: 0.2 } },
+      oort: { n: 'Flare Reach', station: 'Shade Outpost', col: ['#ffd070', '#4a2008'], desc: 'Where Sirius\' solar storms reach farthest. Something swims in the flares.', field: { n: 'Flare Reach', ores: { ice: 2, ringpearl: 2, exotic: 2, voidshard: 0.45 }, armored: 0.2 } },
+    },
+    unlocks: {
+      0: { title: 'Glint' }, 3: { title: 'Anvil & Canis', text: '<b>Anvil</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Canis</b> pays a fortune for ice. Many rocks here are <b>armored</b>: use the <b>Drill (Q)</b>.' },
+      4: { title: 'The Iron Belt', text: '<b>Ironheart</b> and the <b>Iron Belt</b>: almost half the rocks are armored. Drill them! Pirates are fierce here.' },
+      6: { title: 'Argent System', text: '<b>Frost</b> and the <b>Argent Swarm</b>. The <b>Scanner</b> reveals rich veins.' },
+      7: { title: 'Corona & Influence', text: '<b>Haze</b> and the <b>Corona Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Sirius.' },
+      8: { title: 'Dogstar', text: '<b>Dogstar</b>\'s Raider Bazaar and the <b>Sirius Drift</b>.' },
+    },
+    projects: {
+      driver: { n: 'Glint Mass Driver', d: 'A magnetic rail on Glint hurls ore straight to Lumen.', fx: 'Glint outpost output ×3' },
+      elevator: { n: 'Lumen Space Elevator', d: 'A cable rising out of Lumen\'s bright seas.', fx: 'All ore sells for +25% everywhere' },
+      terraform: { n: 'Terraform Canis', d: 'Seas poured onto the dry plains of Canis.', fx: 'Canis pays ×2 for everything · Canis Clans reputation +50' },
+      ringstation: { n: 'Corona Ring Megastation', d: 'A refinery city in Corona\'s golden rings.', fx: 'ALL drone income ×3' },
+    },
+  },
+  tauceti: {
+    n: 'Tau Ceti', star: 'sol', rock: 5.06, enemy: 3.32, value: 1, gift: 'tractor',
+    boss: 'dreadnought', bossFleet: ['dreadnought', 'frigate'],
+    signal: { title: 'The Toll Gate', text: 'The Mercantile\'s oldest secret: beyond the drift sits an ancient gate — and a <b>Merchant Dreadnought</b> that charges every ship a toll in blood. Nobody has ever paid it and lived.' },
+    gate: 'The Dreadnought breaks apart and its escorts scatter. The Toll Gate is <b>free</b> — and it points deeper into the galaxy.',
+    intro: 'Tau Ceti: the richest trade empire in the sector. The Mercantile gives you a <b>Tractor Pulse</b>: press <b>E</b> (or PULL) to pull every ore chunk around you. You keep it forever.',
+    factions: {
+      tierra: { n: 'Ceti Mercantile', c: '#ffd24a' }, marte: { n: 'Free Port Guild', c: '#ff9a6a' }, cinturon: { n: 'Ore Consortium', c: '#7ae0a0' },
+      exterior: { n: 'Outer Exchange', c: '#8ab0ff' }, piratas: { n: 'Smugglers\' Ring', c: '#ff4d6d' },
+    },
+    locs: {
+      luna: { n: 'Penny', station: 'Mint Base', tex: 'rock', col: ['#d8c8a0', '#4a4030'], desc: 'A dull moon of Aurum where fortunes begin.', field: { n: 'Coin Fields', ores: { iron: 4, ice: 3, titanium: 1, nickel: 0.87 } } },
+      tierra: { n: 'Aurum', station: 'Grand Exchange', tex: 'ocean', col: ['#f0e0a0', '#1a5a6a'], desc: 'Capital of the richest trade empire in the sector.' },
+      venus: { n: 'Silk', station: 'Silk Spire', tex: 'gas', col: ['#ffd0f0', '#7a3a6a'], desc: 'A rose-colored cloud world of luxury traders.' },
+      mercurio: { n: 'Kiln', station: 'Kiln Depot', tex: 'lava', col: ['#ffa050', '#3a1005'], desc: 'A furnace world. Platinum and sunstone in the open.', field: { n: 'Kiln Flats', ores: { iron: 2, nickel: 2, platinum: 2, sunstone: 1.22 } } },
+      marte: { n: 'Bazaar', station: 'Free Port', tex: 'rock', col: ['#e0a070', '#5a3010'], desc: 'A desert market world. Pays well for ice.' },
+      ceres: { n: 'Ledger', station: 'Consortium Hall', tex: 'rock', col: ['#a8b0a0', '#3a4038'], desc: 'The Consortium\'s belt capital.', field: { n: 'Ledger Belt', ores: { cobalt: 1.5, nickel: 3, he3: 2, iridium: 1.39 } } },
+      jupiter: { n: 'Treasury', tex: 'gas', col: ['#f0c070', '#6a4010'] },
+      europa: { n: 'Vault', station: 'Vault Colony', tex: 'ice', col: ['#fff4e0', '#8a7050'], desc: 'An ice moon of Treasury. Pays well for iridium.' },
+      troyanos: { station: 'Treasury Depot', desc: 'Treasury\'s Trojan swarm, rich in iridium.', field: { n: 'Treasury Swarm', ores: { he3: 1, sunstone: 1.5, iridium: 3.49 } } },
+      saturno: { n: 'Crown', tex: 'gas', col: ['#e8e0ff', '#5a4a8a'], station: 'Crown Depot', desc: 'A lilac ringed giant, the jewel of Tau Ceti.', field: { n: 'Crown Rings', ores: { ice: 3, he3: 2, ringpearl: 3.2, exotic: 0.37 } } },
+      titan: { n: 'Mint', station: 'Mintworks', tex: 'titan', col: ['#e0f0d0', '#5a7040'], desc: 'A green-hazed moon of Crown with huge refineries.' },
+      pluton: { n: 'Freeport', station: 'Smugglers\' Den', tex: 'rock', col: ['#c0a0a0', '#302020'], desc: 'Where the Smugglers\' Ring trades everything the Mercantile won\'t.' },
+      kuiper: { n: 'Ceti Drift', station: 'Drift Depot', desc: 'The cold outskirts of the empire.', field: { n: 'Ceti Drift', ores: { iridium: 3.39, ringpearl: 2, exotic: 1.7, voidshard: 0.08 } } },
+      oort: { n: 'The Toll Gate', station: 'Tollhouse', col: ['#ffd24a', '#3a2a08'], desc: 'An ancient gate guarded by a Merchant Dreadnought.', field: { n: 'Toll Gate', ores: { ice: 3, he3: 2, exotic: 2.5, voidshard: 0.82 } } },
+    },
+    unlocks: {
+      0: { title: 'Penny' }, 3: { title: 'Kiln & Bazaar', text: '<b>Kiln</b> is full of <b>Platinum</b> and <b>Sunstone</b> — buy <b>Shields</b>. <b>Bazaar</b> pays a fortune for ice. Use your <b>Tractor Pulse (E)</b> to grab everything.' },
+      4: { title: 'The Ledger Belt', text: '<b>Ledger</b> and its belt: nickel, cobalt, iridium… and the hardest pirates yet.' },
+      6: { title: 'Treasury System', text: '<b>Vault</b> and the <b>Treasury Swarm</b>. The <b>Scanner</b> reveals rich veins.' },
+      7: { title: 'Crown & Influence', text: '<b>Mint</b> and the <b>Crown Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Tau Ceti.' },
+      8: { title: 'Freeport', text: '<b>Freeport</b>\'s Smugglers\' Den and the <b>Ceti Drift</b>.' },
+    },
+    projects: {
+      driver: { n: 'Penny Mass Driver', d: 'A magnetic rail on Penny hurls ore straight to Aurum.', fx: 'Penny outpost output ×3' },
+      elevator: { n: 'Aurum Space Elevator', d: 'A golden cable rising from the Grand Exchange.', fx: 'All ore sells for +25% everywhere' },
+      terraform: { n: 'Terraform Bazaar', d: 'The desert market world gets seas and forests.', fx: 'Bazaar pays ×2 for everything · Free Port Guild reputation +50' },
+      ringstation: { n: 'Crown Ring Megastation', d: 'A refinery city in Crown\'s lilac rings.', fx: 'ALL drone income ×3' },
+    },
+  },
+});
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
@@ -2920,6 +3131,8 @@ const LEGACY = {
   extrPlan:  { icon: '⚗', n: 'Extractor Plans', d: 'Start each system with +5 extractor levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
 };
 const legacyLv = k => (S && S.galaxy && S.galaxy.legacy[k]) || 0;
+// tools found in the galaxy stay with you forever (drill from Barnard, tractor pulse from Tau Ceti)
+const hasTool = k => !!(S && S.galaxy && S.galaxy.tools && S.galaxy.tools[k]);
 const conquered = () => (S && S.galaxy ? S.galaxy.done.length : 0);
 const tributeRate = () => conquered();   // per minute: each conquered system pays 1 Tribute a minute
 function tributeTick(dt) { if (S && S.galaxy && conquered()) S.galaxy.tribute += tributeRate() * dt / 60; }
@@ -2951,6 +3164,7 @@ function jumpTo(id) {
   const G = S.galaxy || { tribute: 0, legacy: {}, done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 } };
   const from = sysId(), bonus = jumpBonus().b;
   if (!G.done.includes(from)) G.done.push(from);
+  G.tools = G.tools || {}; if (D.gift) G.tools[D.gift] = 1;
   G.tribute += bonus;
   G.life.earned += S.stats.earned; G.life.mined += S.stats.mined; G.life.kills += S.stats.kills; G.life.days += S.day;
   const peak = S.stats.peak || 0, muted = S.muted;
@@ -3635,7 +3849,7 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40);
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0;
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -3680,9 +3894,10 @@ const MineScene = {
     const gold = !this.space && Math.random() < 0.006 + depth * 0.02;
     const nv = 2 + Math.floor(tier * 1.5);
     const crystal = !this.space && !!this.loc.field.crystal && Math.random() < this.loc.field.crystal;
+    const armored = !crystal && !this.space && !!this.loc.field.armored && Math.random() < this.loc.field.armored;
     const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -3692,6 +3907,19 @@ const MineScene = {
     return rock;
   },
   // comets streak across the field: break one before it escapes for ice and a load of the field's best ore
+  pullRadius() { return Math.max(1000, ship.magnet * 4); },
+  toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) : ship.laserRange; },
+  toggleTool() {
+    if (!hasTool('drill') || this.space) return;
+    this.tool = this.tool === 'drill' ? 'laser' : 'drill'; sfx('click');
+    toast(this.tool === 'drill' ? '⛏ Drill: 3× power, short range — cracks armored rocks' : '✦ Laser: long range', 'good');
+  },
+  // Tractor Pulse: pull every ore chunk in a wide radius
+  pulse() {
+    if (!hasTool('tractor') || this.space || this.pullCd > 0) return;
+    this.pullT = 2.5; this.pullCd = 14; sfx('upgrade'); this.shake = Math.max(this.shake, 4);
+    this.parts.burst(this.p.x, this.p.y, 40, '#9fe0ff', 420, 0.6, 2);
+  },
   spawnComet() {
     const ores = Object.keys(this.loc.field.ores), best = ores.sort((a, b) => ITEMS[b].b - ITEMS[a].b)[0];
     const dir = Math.random() < 0.5 ? 1 : -1, p = this.p;
@@ -3736,6 +3964,7 @@ const MineScene = {
       for (let i = 0; i < 2; i++) {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
+        if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
       }
       const m = 0.5 * ship.yieldMult;
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
@@ -3794,7 +4023,7 @@ const MineScene = {
       let best = null, bd = 1e9;
       const list = combat ? this.enemies : this.rocks;
       for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
-      if (best && (combat || bd < ship.laserRange + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
+      if (best && (combat || bd < this.toolRange() + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
     } else if (mouse.down && !mouse.onUI) { aim = Math.atan2(wm.y - p.y, wm.x - p.x); firing = true; }
     if (keys.has('Space')) { firing = true; if (aim == null) aim = p.a; }
     const targetA = aim != null ? aim : (al > 0.1 ? Math.atan2(ay, ax) : p.a);
@@ -3808,7 +4037,7 @@ const MineScene = {
     } else if (firing) {
       const dir = aim != null ? aim : p.a;
       const dx = Math.cos(dir), dy = Math.sin(dir);
-      let best = null, bt = ship.laserRange;
+      let best = null, bt = this.toolRange();
       for (const r of this.rocks) {
         const ox = r.x - p.x, oy = r.y - p.y;
         const proj = ox * dx + oy * dy;
@@ -3822,7 +4051,10 @@ const MineScene = {
       const hx = p.x + dx * bt, hy = p.y + dy * bt;
       this.laserHit = { x: hx, y: hy, dir, rock: best };
       if (best) {
-        best.hp -= ship.laserDps * dt; best.hit = 0.05;
+        const drill = this.tool === 'drill';
+        // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range
+        best.hp -= ship.laserDps * (drill ? 3 : 1) * (best.armored && !drill ? 0.15 : 1) * dt; best.hit = 0.05;
+        if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? 'ARMORED — switch to the Drill (Q)' : 'ARMORED — your laser barely scratches it', col: '#c8d0e0', life: 2.5, big: 1 }); }
         if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
         if (best.hp <= 0) this.breakRock(best);
       }
@@ -3859,10 +4091,11 @@ const MineScene = {
     if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
     // --- chunks & loot ---
     const cfree = cargoFree();
+    this.pullT = Math.max(0, this.pullT - dt); this.pullCd = Math.max(0, this.pullCd - dt);
     for (const c of this.chunks) {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
-      const mag = c.cr ? ship.magnet * 1.5 : ship.magnet;
+      const mag = this.pullT > 0 ? this.pullRadius() : c.cr ? ship.magnet * 1.5 : ship.magnet;
       if (d < mag && (cfree > 0 || c.cr)) { const f = 650 * (1 - d / mag) + 140; c.vx += dx / d * f * dt; c.vy += dy / d * f * dt; }
       if (d < 24 && this.collect(c)) c.dead = true;
       if (c.life <= 0) c.dead = true;
@@ -4019,6 +4252,7 @@ const MineScene = {
     ctx.strokeRect(20, 20, MW - 40, MH - 40); ctx.setLineDash([]);
     if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
+    if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
     for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
       if (r.comet) {
@@ -4047,10 +4281,11 @@ const MineScene = {
       ctx.fillStyle = '#c9f7de'; ctx.fillRect(od.x - 3, od.y - 3, 6, 6);
     }
     if (this.laserHit) {
-      const L = this.laserHit, col = laserColor(laserTier());
+      const L = this.laserHit, col = this.tool === 'drill' ? '#ffa030' : laserColor(laserTier());
       const nx = p.x + Math.cos(L.dir) * shipR() * 0.9, ny = p.y + Math.sin(L.dir) * shipR() * 0.9;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = 7 + laserTier() + Math.sin(t * 50) * 2;
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = (this.tool === 'drill' ? 16 : 7 + laserTier()) + Math.sin(t * 50) * 2;
+      if (this.tool === 'drill' && L.rock && Math.random() < 0.6) this.parts.add(L.x, L.y, rand(-120, 120), rand(-120, 120), 0.3, Math.random() < 0.5 ? '#ffd080' : '#ffffff', 2, true);
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
       ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
@@ -4229,23 +4464,25 @@ function buildFleet(danger) {
   if (!fleet.length) fleet.push('raider');
   return fleet;
 }
+// enemies of later systems get much tougher, but their damage grows slower (√) so fights stay short and fair
+const enemyDmgMult = () => Math.sqrt(sysDef().enemy);
 function fleetThreat(fleet, z) {
-  const m = Z_ENEMY[z] * sysDef().enemy;
+  const m = Z_ENEMY[z] * sysDef().enemy, md = Z_ENEMY[z] * enemyDmgMult();
   let ehp = 0, dps = 0;
-  for (const k of fleet) { const e = ENEMIES[k]; ehp += (e.hp + e.sp) * m; dps += e.dmg * m * (e.burst || 1) / e.rate; }
+  for (const k of fleet) { const e = ENEMIES[k]; ehp += (e.hp + e.sp) * m; dps += e.dmg * md * (e.burst || 1) / e.rate; }
   const mine = Math.sqrt(Math.max(1, S.hull + ship.shieldMax) * ship.weaponDps * 1.6);
   return Math.sqrt(ehp * dps) / mine;
 }
 
 const Combat = {
   spawn(sc, fleet, z, fromTop) {
-    const m = Z_ENEMY[z] * sysDef().enemy;
+    const m = Z_ENEMY[z] * sysDef().enemy, md = Z_ENEMY[z] * enemyDmgMult();
     fleet.forEach((k, i) => {
       const e = ENEMIES[k];
       let x, y;
       if (fromTop) { x = clamp(sc.p.x + rand(-500, 500), 120, MW - 120); y = Math.max(80, sc.p.y - rand(650, 900)); }
       else { const a = rand(0, TAU); x = clamp(sc.p.x + Math.cos(a) * rand(520, 700), 80, MW - 80); y = clamp(sc.p.y + Math.sin(a) * rand(520, 700), 80, MH - 80); }
-      sc.enemies.push({ k, x, y, vx: 0, vy: 0, a: 0, hp: e.hp * m, max: e.hp * m, sp: e.sp * m, spMax: e.sp * m, dmg: e.dmg * m,
+      sc.enemies.push({ k, x, y, vx: 0, vy: 0, a: 0, hp: e.hp * m, max: e.hp * m, sp: e.sp * m, spMax: e.sp * m, dmg: e.dmg * md,
         rate: e.rate, spd: e.spd, size: e.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1,
         prefer: rand(200, 330) * (0.8 + e.size * 0.3), shT: 0, hitT: 0, loot: e.loot * Z_LOOT[z], military: e.military });
     });
@@ -4258,9 +4495,9 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : e.military ? '#b6ff7a' : '#ff4d6d';
     for (let i = 0; i < n; i++) {
-      const b = a + (i - (n - 1) / 2) * 0.2;
+      const b = E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
       sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
     }
     sfx('eshoot');
@@ -4321,14 +4558,15 @@ const Combat = {
       const E = ENEMIES[e.k];
       if (E.summon) {
         e.sumT = (e.sumT == null ? 4 : e.sumT) - dt;
-        if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < 6) {
-          e.sumT = 7;
+        if (e.sumT <= 0 && sc.enemies.filter(x => !x.dead && x.k === E.summon).length < (E.summonMax || 6)) {
+          e.sumT = E.summonMax ? 10 : 7;
           const m = e.max / (E.hp * 1), sw = ENEMIES[E.summon];
-          for (let i = 0; i < 2; i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: 0, spMax: 0, dmg: sw.dmg * m,
+          for (let i = 0; i < (E.summonMax ? 1 : 2); i++) sc.enemies.push({ k: E.summon, x: e.x + rand(-40, 40), y: e.y + rand(-40, 40), vx: 0, vy: 0, a: 0, hp: sw.hp * m, max: sw.hp * m, sp: sw.sp * m, spMax: sw.sp * m, dmg: sw.dmg * e.dmg / E.dmg,
             rate: sw.rate, spd: sw.spd, size: sw.size, cd: rand(0.8, 2), burstLeft: 0, burstT: 0, strafe: Math.random() < 0.5 ? 1 : -1, prefer: rand(160, 260), shT: 0, hitT: 0, loot: sw.loot * Z_LOOT[sc.combatZ || 0] });
-          sc.parts.burst(e.x, e.y, 20, '#b0ff9a', 150, 0.6, 2);
+          sc.parts.burst(e.x, e.y, 20, E.hive ? '#b0ff9a' : '#ff8a4a', 150, 0.6, 2);
         }
       }
+      if (E.serpent) { e.trail = e.trail || []; e.trT = (e.trT || 0) - dt; if (e.trT <= 0) { e.trT = 0.045; e.trail.unshift({ x: e.x, y: e.y }); if (e.trail.length > 16) e.trail.pop(); } }
       if (Math.random() < dt * 20) sc.parts.add(e.x - Math.cos(e.a) * 16 * e.size, e.y - Math.sin(e.a) * 16 * e.size, rand(-20, 20), rand(-20, 20), 0.3, e.military ? '#9fe0ff' : '#ff6a3a', 2);
     }
     // escort gunships (Private Security Fleet)
@@ -4394,6 +4632,7 @@ const Combat = {
     ctx.globalCompositeOperation = 'source-over';
     for (const es of sc.escorts || []) if (es.x) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, es.x, es.y, es.a, 0.8, 0.6, t);
     for (const e of sc.enemies) {
+      if (e.trail) drawSerpentBody(ctx, e, t);
       drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t);
       if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);
       if (e.shieldFlash > 0) { ctx.strokeStyle = `rgba(255,120,160,${e.shieldFlash * 3})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, 30 * e.size, 0, TAU); ctx.stroke(); }
@@ -4640,7 +4879,10 @@ function updateMineHUD() {
   const val = LOC[S.loc].market ? oreValueAt(S.loc) : 0;
   $('mineCargo').innerHTML = (rows || '<div class="crow dim">Cargo hold empty</div>') + (val ? `<div class="crow val">Worth<b class="cr">${fmt(val)} cr</b></div>` : '');
   const depth = sc.space ? '' : `<span class="depth">Depth ${Math.round(sc.depthOf(sc.p.y) * 100)}% · richness ×${(1 + sc.depthOf(sc.p.y) * 4).toFixed(1)}</span>`;
-  $('mineInfo').innerHTML = depth + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
+  const tools = sc.space ? '' : (hasTool('drill') ? `<span class="tool">${sc.tool === 'drill' ? '⛏ Drill' : '✦ Laser'} <small>[Q]</small></span>` : '') + (hasTool('tractor') ? `<span class="tool">${sc.pullCd > 0 ? `Pulse ${Math.ceil(sc.pullCd)}s` : '🧲 Pulse ready'} <small>[E]</small></span>` : '');
+  $('toolBtn').classList.toggle('hidden', !hasTool('drill') || sc.space); $('toolBtn').textContent = sc.tool === 'drill' ? 'LASER' : 'DRILL';
+  $('pullBtn').classList.toggle('hidden', !hasTool('tractor') || sc.space); $('pullBtn').textContent = sc.pullCd > 0 ? Math.ceil(sc.pullCd) + 's' : 'PULL'; $('pullBtn').classList.toggle('cd', sc.pullCd > 0);
+  $('mineInfo').innerHTML = tools + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
   const combat = sc.inCombat || sc.clearT > 0;
   $('fireBtn').textContent = sc.inCombat ? 'FIRE' : 'LASER';
   document.body.classList.toggle('battle', combat);
@@ -5111,6 +5353,7 @@ function openHelp() {
     <h4>⚔ Wars</h4><p>When two factions fight, <b>back a side</b> at one of their stations. Their stations pay +30% for metals and every ore sale there <b>pushes the front</b> (see the bar). Help them win to gain a <b>permanent ally</b>: +15% ore at their stations (up to 3 stars) and spoils of war.</p>
     <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
     <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — back a side in wars and fund offensives; later incite wars or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
+    <h4>⛏ Tools</h4><p>Some star systems give you new tools that you keep forever: the <b>Drill</b> (press <b>Q</b>: 3× power at short range, cracks <b>armored</b> rocks) and the <b>Tractor Pulse</b> (press <b>E</b>: pulls every ore chunk around you).</p>
     <h4>🌀 Galaxy</h4><p>Each system's guardian opens a jump gate. In the <b>Galaxy</b> map you jump to the next star: you start fresh there, but conquered systems pay <b>Tribute</b> forever, which buys permanent <b>Legacy</b> bonuses. 15 systems lead to the black hole at the core.</p>
     <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the system — then defeat its guardian and jump through the gate to the next star.</p></div>`);
 }
@@ -5150,6 +5393,7 @@ window.addEventListener('keydown', e => {
   keys.add(e.code);
   audioInit();
   if (e.code === 'Space' && scene === MineScene) e.preventDefault();
+  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); }
   if (e.code === 'Escape') {
     if (!$('sheet').classList.contains('hidden')) closeSheet();
     else if (scene === MineScene && !isBlocking()) MineScene.leave();
@@ -5223,6 +5467,8 @@ function setupTouchControls() {
   const end = e => { for (const t of e.changedTouches) if (t.identifier === joy.id) { joy.active = false; joy.dx = joy.dy = 0; base.classList.remove('on'); } };
   zone.addEventListener('touchend', end); zone.addEventListener('touchcancel', end);
   fire.addEventListener('touchstart', e => { e.preventDefault(); touchFire = true; fire.classList.add('on'); }, { passive: false });
+  $('toolBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.toggleTool(); }, { passive: false });
+  $('pullBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.pulse(); }, { passive: false });
   const fe = e => { e.preventDefault(); touchFire = false; fire.classList.remove('on'); };
   fire.addEventListener('touchend', fe); fire.addEventListener('touchcancel', fe);
 }

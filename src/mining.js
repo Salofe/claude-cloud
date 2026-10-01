@@ -26,7 +26,7 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40);
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0;
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -71,9 +71,10 @@ const MineScene = {
     const gold = !this.space && Math.random() < 0.006 + depth * 0.02;
     const nv = 2 + Math.floor(tier * 1.5);
     const crystal = !this.space && !!this.loc.field.crystal && Math.random() < this.loc.field.crystal;
+    const armored = !crystal && !this.space && !!this.loc.field.armored && Math.random() < this.loc.field.armored;
     const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
@@ -83,6 +84,19 @@ const MineScene = {
     return rock;
   },
   // comets streak across the field: break one before it escapes for ice and a load of the field's best ore
+  pullRadius() { return Math.max(1000, ship.magnet * 4); },
+  toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) : ship.laserRange; },
+  toggleTool() {
+    if (!hasTool('drill') || this.space) return;
+    this.tool = this.tool === 'drill' ? 'laser' : 'drill'; sfx('click');
+    toast(this.tool === 'drill' ? '⛏ Drill: 3× power, short range — cracks armored rocks' : '✦ Laser: long range', 'good');
+  },
+  // Tractor Pulse: pull every ore chunk in a wide radius
+  pulse() {
+    if (!hasTool('tractor') || this.space || this.pullCd > 0) return;
+    this.pullT = 2.5; this.pullCd = 14; sfx('upgrade'); this.shake = Math.max(this.shake, 4);
+    this.parts.burst(this.p.x, this.p.y, 40, '#9fe0ff', 420, 0.6, 2);
+  },
   spawnComet() {
     const ores = Object.keys(this.loc.field.ores), best = ores.sort((a, b) => ITEMS[b].b - ITEMS[a].b)[0];
     const dir = Math.random() < 0.5 ? 1 : -1, p = this.p;
@@ -127,6 +141,7 @@ const MineScene = {
       for (let i = 0; i < 2; i++) {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
+        if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
       }
       const m = 0.5 * ship.yieldMult;
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
@@ -185,7 +200,7 @@ const MineScene = {
       let best = null, bd = 1e9;
       const list = combat ? this.enemies : this.rocks;
       for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
-      if (best && (combat || bd < ship.laserRange + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
+      if (best && (combat || bd < this.toolRange() + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
     } else if (mouse.down && !mouse.onUI) { aim = Math.atan2(wm.y - p.y, wm.x - p.x); firing = true; }
     if (keys.has('Space')) { firing = true; if (aim == null) aim = p.a; }
     const targetA = aim != null ? aim : (al > 0.1 ? Math.atan2(ay, ax) : p.a);
@@ -199,7 +214,7 @@ const MineScene = {
     } else if (firing) {
       const dir = aim != null ? aim : p.a;
       const dx = Math.cos(dir), dy = Math.sin(dir);
-      let best = null, bt = ship.laserRange;
+      let best = null, bt = this.toolRange();
       for (const r of this.rocks) {
         const ox = r.x - p.x, oy = r.y - p.y;
         const proj = ox * dx + oy * dy;
@@ -213,7 +228,10 @@ const MineScene = {
       const hx = p.x + dx * bt, hy = p.y + dy * bt;
       this.laserHit = { x: hx, y: hy, dir, rock: best };
       if (best) {
-        best.hp -= ship.laserDps * dt; best.hit = 0.05;
+        const drill = this.tool === 'drill';
+        // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range
+        best.hp -= ship.laserDps * (drill ? 3 : 1) * (best.armored && !drill ? 0.15 : 1) * dt; best.hit = 0.05;
+        if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? 'ARMORED — switch to the Drill (Q)' : 'ARMORED — your laser barely scratches it', col: '#c8d0e0', life: 2.5, big: 1 }); }
         if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
         if (best.hp <= 0) this.breakRock(best);
       }
@@ -250,10 +268,11 @@ const MineScene = {
     if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
     // --- chunks & loot ---
     const cfree = cargoFree();
+    this.pullT = Math.max(0, this.pullT - dt); this.pullCd = Math.max(0, this.pullCd - dt);
     for (const c of this.chunks) {
       c.x += c.vx * dt; c.y += c.vy * dt; c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt); c.life -= dt;
       const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
-      const mag = c.cr ? ship.magnet * 1.5 : ship.magnet;
+      const mag = this.pullT > 0 ? this.pullRadius() : c.cr ? ship.magnet * 1.5 : ship.magnet;
       if (d < mag && (cfree > 0 || c.cr)) { const f = 650 * (1 - d / mag) + 140; c.vx += dx / d * f * dt; c.vy += dy / d * f * dt; }
       if (d < 24 && this.collect(c)) c.dead = true;
       if (c.life <= 0) c.dead = true;
@@ -410,6 +429,7 @@ const MineScene = {
     ctx.strokeRect(20, 20, MW - 40, MH - 40); ctx.setLineDash([]);
     if (!this.space) this.drawStation(ctx, t);
     const p = this.p;
+    if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
     for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
       if (r.comet) {
@@ -438,10 +458,11 @@ const MineScene = {
       ctx.fillStyle = '#c9f7de'; ctx.fillRect(od.x - 3, od.y - 3, 6, 6);
     }
     if (this.laserHit) {
-      const L = this.laserHit, col = laserColor(laserTier());
+      const L = this.laserHit, col = this.tool === 'drill' ? '#ffa030' : laserColor(laserTier());
       const nx = p.x + Math.cos(L.dir) * shipR() * 0.9, ny = p.y + Math.sin(L.dir) * shipR() * 0.9;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = 7 + laserTier() + Math.sin(t * 50) * 2;
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = (this.tool === 'drill' ? 16 : 7 + laserTier()) + Math.sin(t * 50) * 2;
+      if (this.tool === 'drill' && L.rock && Math.random() < 0.6) this.parts.add(L.x, L.y, rand(-120, 120), rand(-120, 120), 0.3, Math.random() < 0.5 ? '#ffd080' : '#ffffff', 2, true);
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
       ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();

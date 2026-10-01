@@ -63,6 +63,130 @@ const SYSTEMS = {
   },
 };
 
+// systems 3–5
+Object.assign(SYSTEMS, {
+  barnard: {
+    n: 'Barnard\'s Star', star: 'red', rock: 2.25, enemy: 1.82, value: 1, gift: 'drill',
+    boss: 'colossus', bossFleet: ['colossus', 'corsair', 'corsair'],
+    signal: { title: 'The machine wakes', text: 'Seismic readings from the abandoned mega-mine at <b>The Pit</b>: something enormous is <b>still digging</b> down there — and it attacks every ship that comes close.' },
+    gate: 'The Colossus collapses into scrap. Beneath it, the old miners had dug up an ancient ring — and it is <b>waking up</b>.',
+    intro: 'Barnard\'s Star: a dim red dwarf where miners have dug for centuries. The Haulers Union gives you their best tool, the <b>Drill</b>: press <b>Q</b> (or the DRILL button) to switch. It cuts 3× faster, but only up close. You keep it forever.',
+    factions: {
+      tierra: { n: 'Forge Compact', c: '#ff9a5a' }, marte: { n: 'Rust Brotherhood', c: '#d8805a' }, cinturon: { n: 'Deep Haulers Union', c: '#e0c060' },
+      exterior: { n: 'Ember League', c: '#ff7a9a' }, piratas: { n: 'Black Furnace', c: '#ff4d6d' },
+    },
+    locs: {
+      luna: { n: 'Cinderling', station: 'Old Shaft Base', tex: 'rock', col: ['#b8a898', '#3a3028'], desc: 'A cold, pocked moon of Forge. Generations of miners started here.', field: { n: 'Old Shafts', ores: { iron: 5, nickel: 0.9, titanium: 1, ice: 2.5 } } },
+      tierra: { n: 'Forge', station: 'Anvil Port', tex: 'ice', col: ['#ffd0b0', '#6a3a30'], desc: 'A tidally locked world: one side frozen, one side burning. Its forges never sleep.' },
+      venus: { n: 'Ashveil', station: 'Smoke Spire', tex: 'gas', col: ['#e0a898', '#5a2a20'], desc: 'Thick ash clouds over a hot world. Rich, decadent and thirsty for ice.' },
+      mercurio: { n: 'Brand', station: 'Brand Depot', tex: 'lava', col: ['#ff7040', '#2a0a05'], desc: 'A scorched rock close to the red sun. Platinum lies in the open.', field: { n: 'Scorch Plains', ores: { titanium: 1.5, cobalt: 1.2, platinum: 3.6 } } },
+      marte: { n: 'Rustfall', station: 'Rustfall City', tex: 'rock', col: ['#d07850', '#4a2010'], desc: 'Iron-red canyons and stubborn people. Pays well for ice.' },
+      ceres: { n: 'Hollowrock', station: 'Haulers Hall', tex: 'rock', col: ['#a8a090', '#3a3630'], desc: 'The Haulers\' capital, hollowed out by centuries of mining.', field: { n: 'The Deep Belt', ores: { nickel: 2, cobalt: 3, sunstone: 1.5, iridium: 1.02 } } },
+      jupiter: { n: 'Goliath', tex: 'gas', col: ['#f0b080', '#6a3010'] },
+      europa: { n: 'Ember', station: 'Ember Colony', tex: 'ice', col: ['#ffd8c8', '#8a4a40'], desc: 'A warm ice moon with hot springs. The League buys iridium.' },
+      troyanos: { station: 'Trojan Depot', desc: 'Rocks trapped in Goliath\'s gravity. Sunstone and iridium.', field: { n: 'Goliath Trojans', ores: { sunstone: 3.75, iridium: 2.8, ringpearl: 0.15 } } },
+      saturno: { n: 'Halo', tex: 'gas', col: ['#f0d0b0', '#7a5030'], station: 'Halo Depot', desc: 'A pale ringed giant glowing red in the dim light.', field: { n: 'Halo Rings', ores: { ice: 2.5, he3: 3, ringpearl: 2.5, exotic: 0.51 } } },
+      titan: { n: 'Brimstone', station: 'Sulfur Works', tex: 'titan', col: ['#f0d080', '#6a5020'], desc: 'A sulfur moon of Halo with enormous refineries.' },
+      pluton: { n: 'Coalsack', station: 'The Furnace', tex: 'rock', col: ['#806060', '#201010'], desc: 'A soot-black world. The Black Furnace sells anything.' },
+      kuiper: { n: 'Barnard Drift', station: 'Drift Depot', desc: 'Frozen rocks at the edge of the red sun\'s reach.', field: { n: 'Barnard Drift', ores: { ice: 2.32, ringpearl: 2.2, exotic: 1.6, voidshard: 0.1 } } },
+      oort: { n: 'The Pit', station: 'Last Lamp Outpost', col: ['#ffb070', '#3a1a08'], desc: 'An abandoned mega-mine at the edge of the system. Something still works down there.', field: { n: 'The Pit', ores: { ice: 3, iridium: 2, exotic: 2, voidshard: 0.81 } } },
+    },
+    unlocks: {
+      0: { title: 'Cinderling' }, 3: { title: 'Brand & Rustfall', text: '<b>Brand</b> is covered in <b>Platinum</b> but its heat burns your hull — buy <b>Shields</b>. <b>Rustfall</b> pays a fortune for ice.' },
+      4: { title: 'The Deep Belt', text: '<b>Hollowrock</b> and the <b>Deep Belt</b>: cobalt, sunstone and iridium… and <b>pirates</b>, tougher than ever. Use the <b>Drill (Q)</b> on big rocks.' },
+      6: { title: 'Goliath System', text: '<b>Ember</b> and the <b>Goliath Trojans</b>. The <b>Scanner</b> reveals rich veins.' },
+      7: { title: 'Halo & Influence', text: '<b>Brimstone</b> and the <b>Halo Rings</b>. <b>Invest</b> in stations for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Barnard\'s Star.' },
+      8: { title: 'Coalsack', text: '<b>Coalsack</b>\'s black market and the <b>Barnard Drift</b>.' },
+    },
+    projects: {
+      driver: { n: 'Cinderling Mass Driver', d: 'A magnetic rail on Cinderling hurls ore straight to Forge.', fx: 'Cinderling outpost output ×3' },
+      elevator: { n: 'Forge Space Elevator', d: 'A cable rising from the frozen side of Forge.', fx: 'All ore sells for +25% everywhere' },
+      terraform: { n: 'Terraform Rustfall', d: 'Comets and mirrors turn the red canyons into lakes.', fx: 'Rustfall pays ×2 for everything · Rust Brotherhood reputation +50' },
+      ringstation: { n: 'Halo Ring Megastation', d: 'A refinery city woven into Halo\'s rings.', fx: 'ALL drone income ×3' },
+    },
+  },
+  sirius: {
+    n: 'Sirius', star: 'white', companion: 'blue', rock: 3.38, enemy: 2.46, value: 1,
+    boss: 'serpent', bossFleet: ['serpent', 'raider', 'raider'],
+    signal: { title: 'Something lives in the flares', text: 'Ships near the <b>Flare Reach</b> report a shape swimming through the solar storms — a living ribbon of fire. They call it the <b>Solar Serpent</b>.' },
+    gate: 'The Serpent unravels into sparks. Where it nested, an ancient ring <b>glows white-hot</b> and opens.',
+    intro: 'Sirius burns twice as bright as Sol. Its asteroids are <b>armored</b>: heat-forged metal shells your laser barely scratches. Switch to the <b>Drill (Q)</b> to crack them.',
+    factions: {
+      tierra: { n: 'Sirian Directorate', c: '#9cc8ff' }, marte: { n: 'Canis Clans', c: '#ffb070' }, cinturon: { n: 'Iron Choir', c: '#c0c8d8' },
+      exterior: { n: 'Lumen League', c: '#7affd8' }, piratas: { n: 'Dogstar Raiders', c: '#ff4d6d' },
+    },
+    locs: {
+      luna: { n: 'Glint', station: 'Glint Base', tex: 'rock', col: ['#e0e8f0', '#50586a'], desc: 'A bright, glassy moon of Lumen.', field: { n: 'Glint Scree', ores: { iron: 4, ice: 2, titanium: 1.5, cobalt: 0.23 }, armored: 0.12 } },
+      tierra: { n: 'Lumen', station: 'Radiant Port', tex: 'ocean', col: ['#a8f0ff', '#0a4a6a'], desc: 'A dazzling sea world under a white-hot sun. Pays well for metals.' },
+      venus: { n: 'Mirage', station: 'Glass Spire', tex: 'gas', col: ['#fff0d0', '#a07040'], desc: 'A shimmering cloud world. Its cities crave luxury and ice.' },
+      mercurio: { n: 'Anvil', station: 'Anvil Depot', tex: 'lava', col: ['#ffd070', '#3a1a05'], desc: 'A molten forge-world. Sunstone everywhere — and the heat.', field: { n: 'Molten Fields', ores: { iron: 2, titanium: 2, platinum: 1, sunstone: 1.5 }, armored: 0.25 } },
+      marte: { n: 'Canis', station: 'Howl City', tex: 'rock', col: ['#e8b080', '#6a3a20'], desc: 'Dry plains and proud clans. Water is worth more than gold.' },
+      ceres: { n: 'Ironheart', station: 'Choir Station', tex: 'rock', col: ['#b8c0cc', '#3a4048'], desc: 'Capital of the Iron Belt, where every rock wears armor.', field: { n: 'Iron Belt', ores: { nickel: 2, cobalt: 2, platinum: 2.5, iridium: 1.18 }, armored: 0.45 } },
+      jupiter: { n: 'Argent', tex: 'gas', col: ['#e8eeff', '#4a5a8a'] },
+      europa: { n: 'Frost', station: 'Frost Colony', tex: 'ice', col: ['#f0faff', '#6a8ab0'], desc: 'An ice moon of Argent. Pays well for iridium.' },
+      troyanos: { station: 'Swarm Depot', desc: 'Argent\'s Trojan rocks, many of them armored.', field: { n: 'Argent Swarm', ores: { he3: 2.74, iridium: 3.2, ringpearl: 0.15 }, armored: 0.3 } },
+      saturno: { n: 'Corona', tex: 'gas', col: ['#fff0b0', '#a07020'], station: 'Corona Depot', desc: 'A golden ringed giant lit like a lantern.', field: { n: 'Corona Rings', ores: { ice: 2, he3: 2.5, ringpearl: 3, exotic: 0.37 }, armored: 0.25 } },
+      titan: { n: 'Haze', station: 'Hazeport', tex: 'titan', col: ['#f0e0c0', '#7a6a40'], desc: 'A hazy moon of Corona with huge refineries.' },
+      pluton: { n: 'Dogstar', station: 'Raider Bazaar', tex: 'ice', col: ['#ffffff', '#7080a0'], desc: 'A small frozen world near the white dwarf Sirius B. The Raiders sell anything.' },
+      kuiper: { n: 'Sirius Drift', station: 'Drift Depot', desc: 'Armored rocks drifting far from the glare.', field: { n: 'Sirius Drift', ores: { ice: 2.19, iridium: 2, exotic: 1.9, voidshard: 0.1 }, armored: 0.2 } },
+      oort: { n: 'Flare Reach', station: 'Shade Outpost', col: ['#ffd070', '#4a2008'], desc: 'Where Sirius\' solar storms reach farthest. Something swims in the flares.', field: { n: 'Flare Reach', ores: { ice: 2, ringpearl: 2, exotic: 2, voidshard: 0.45 }, armored: 0.2 } },
+    },
+    unlocks: {
+      0: { title: 'Glint' }, 3: { title: 'Anvil & Canis', text: '<b>Anvil</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Canis</b> pays a fortune for ice. Many rocks here are <b>armored</b>: use the <b>Drill (Q)</b>.' },
+      4: { title: 'The Iron Belt', text: '<b>Ironheart</b> and the <b>Iron Belt</b>: almost half the rocks are armored. Drill them! Pirates are fierce here.' },
+      6: { title: 'Argent System', text: '<b>Frost</b> and the <b>Argent Swarm</b>. The <b>Scanner</b> reveals rich veins.' },
+      7: { title: 'Corona & Influence', text: '<b>Haze</b> and the <b>Corona Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Sirius.' },
+      8: { title: 'Dogstar', text: '<b>Dogstar</b>\'s Raider Bazaar and the <b>Sirius Drift</b>.' },
+    },
+    projects: {
+      driver: { n: 'Glint Mass Driver', d: 'A magnetic rail on Glint hurls ore straight to Lumen.', fx: 'Glint outpost output ×3' },
+      elevator: { n: 'Lumen Space Elevator', d: 'A cable rising out of Lumen\'s bright seas.', fx: 'All ore sells for +25% everywhere' },
+      terraform: { n: 'Terraform Canis', d: 'Seas poured onto the dry plains of Canis.', fx: 'Canis pays ×2 for everything · Canis Clans reputation +50' },
+      ringstation: { n: 'Corona Ring Megastation', d: 'A refinery city in Corona\'s golden rings.', fx: 'ALL drone income ×3' },
+    },
+  },
+  tauceti: {
+    n: 'Tau Ceti', star: 'sol', rock: 5.06, enemy: 3.32, value: 1, gift: 'tractor',
+    boss: 'dreadnought', bossFleet: ['dreadnought', 'frigate'],
+    signal: { title: 'The Toll Gate', text: 'The Mercantile\'s oldest secret: beyond the drift sits an ancient gate — and a <b>Merchant Dreadnought</b> that charges every ship a toll in blood. Nobody has ever paid it and lived.' },
+    gate: 'The Dreadnought breaks apart and its escorts scatter. The Toll Gate is <b>free</b> — and it points deeper into the galaxy.',
+    intro: 'Tau Ceti: the richest trade empire in the sector. The Mercantile gives you a <b>Tractor Pulse</b>: press <b>E</b> (or PULL) to pull every ore chunk around you. You keep it forever.',
+    factions: {
+      tierra: { n: 'Ceti Mercantile', c: '#ffd24a' }, marte: { n: 'Free Port Guild', c: '#ff9a6a' }, cinturon: { n: 'Ore Consortium', c: '#7ae0a0' },
+      exterior: { n: 'Outer Exchange', c: '#8ab0ff' }, piratas: { n: 'Smugglers\' Ring', c: '#ff4d6d' },
+    },
+    locs: {
+      luna: { n: 'Penny', station: 'Mint Base', tex: 'rock', col: ['#d8c8a0', '#4a4030'], desc: 'A dull moon of Aurum where fortunes begin.', field: { n: 'Coin Fields', ores: { iron: 4, ice: 3, titanium: 1, nickel: 0.87 } } },
+      tierra: { n: 'Aurum', station: 'Grand Exchange', tex: 'ocean', col: ['#f0e0a0', '#1a5a6a'], desc: 'Capital of the richest trade empire in the sector.' },
+      venus: { n: 'Silk', station: 'Silk Spire', tex: 'gas', col: ['#ffd0f0', '#7a3a6a'], desc: 'A rose-colored cloud world of luxury traders.' },
+      mercurio: { n: 'Kiln', station: 'Kiln Depot', tex: 'lava', col: ['#ffa050', '#3a1005'], desc: 'A furnace world. Platinum and sunstone in the open.', field: { n: 'Kiln Flats', ores: { iron: 2, nickel: 2, platinum: 2, sunstone: 1.22 } } },
+      marte: { n: 'Bazaar', station: 'Free Port', tex: 'rock', col: ['#e0a070', '#5a3010'], desc: 'A desert market world. Pays well for ice.' },
+      ceres: { n: 'Ledger', station: 'Consortium Hall', tex: 'rock', col: ['#a8b0a0', '#3a4038'], desc: 'The Consortium\'s belt capital.', field: { n: 'Ledger Belt', ores: { cobalt: 1.5, nickel: 3, he3: 2, iridium: 1.39 } } },
+      jupiter: { n: 'Treasury', tex: 'gas', col: ['#f0c070', '#6a4010'] },
+      europa: { n: 'Vault', station: 'Vault Colony', tex: 'ice', col: ['#fff4e0', '#8a7050'], desc: 'An ice moon of Treasury. Pays well for iridium.' },
+      troyanos: { station: 'Treasury Depot', desc: 'Treasury\'s Trojan swarm, rich in iridium.', field: { n: 'Treasury Swarm', ores: { he3: 1, sunstone: 1.5, iridium: 3.49 } } },
+      saturno: { n: 'Crown', tex: 'gas', col: ['#e8e0ff', '#5a4a8a'], station: 'Crown Depot', desc: 'A lilac ringed giant, the jewel of Tau Ceti.', field: { n: 'Crown Rings', ores: { ice: 3, he3: 2, ringpearl: 3.2, exotic: 0.37 } } },
+      titan: { n: 'Mint', station: 'Mintworks', tex: 'titan', col: ['#e0f0d0', '#5a7040'], desc: 'A green-hazed moon of Crown with huge refineries.' },
+      pluton: { n: 'Freeport', station: 'Smugglers\' Den', tex: 'rock', col: ['#c0a0a0', '#302020'], desc: 'Where the Smugglers\' Ring trades everything the Mercantile won\'t.' },
+      kuiper: { n: 'Ceti Drift', station: 'Drift Depot', desc: 'The cold outskirts of the empire.', field: { n: 'Ceti Drift', ores: { iridium: 3.39, ringpearl: 2, exotic: 1.7, voidshard: 0.08 } } },
+      oort: { n: 'The Toll Gate', station: 'Tollhouse', col: ['#ffd24a', '#3a2a08'], desc: 'An ancient gate guarded by a Merchant Dreadnought.', field: { n: 'Toll Gate', ores: { ice: 3, he3: 2, exotic: 2.5, voidshard: 0.82 } } },
+    },
+    unlocks: {
+      0: { title: 'Penny' }, 3: { title: 'Kiln & Bazaar', text: '<b>Kiln</b> is full of <b>Platinum</b> and <b>Sunstone</b> — buy <b>Shields</b>. <b>Bazaar</b> pays a fortune for ice. Use your <b>Tractor Pulse (E)</b> to grab everything.' },
+      4: { title: 'The Ledger Belt', text: '<b>Ledger</b> and its belt: nickel, cobalt, iridium… and the hardest pirates yet.' },
+      6: { title: 'Treasury System', text: '<b>Vault</b> and the <b>Treasury Swarm</b>. The <b>Scanner</b> reveals rich veins.' },
+      7: { title: 'Crown & Influence', text: '<b>Mint</b> and the <b>Crown Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Tau Ceti.' },
+      8: { title: 'Freeport', text: '<b>Freeport</b>\'s Smugglers\' Den and the <b>Ceti Drift</b>.' },
+    },
+    projects: {
+      driver: { n: 'Penny Mass Driver', d: 'A magnetic rail on Penny hurls ore straight to Aurum.', fx: 'Penny outpost output ×3' },
+      elevator: { n: 'Aurum Space Elevator', d: 'A golden cable rising from the Grand Exchange.', fx: 'All ore sells for +25% everywhere' },
+      terraform: { n: 'Terraform Bazaar', d: 'The desert market world gets seas and forests.', fx: 'Bazaar pays ×2 for everything · Free Port Guild reputation +50' },
+      ringstation: { n: 'Crown Ring Megastation', d: 'A refinery city in Crown\'s lilac rings.', fx: 'ALL drone income ×3' },
+    },
+  },
+});
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
@@ -123,6 +247,8 @@ const LEGACY = {
   extrPlan:  { icon: '⚗', n: 'Extractor Plans', d: 'Start each system with +5 extractor levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
 };
 const legacyLv = k => (S && S.galaxy && S.galaxy.legacy[k]) || 0;
+// tools found in the galaxy stay with you forever (drill from Barnard, tractor pulse from Tau Ceti)
+const hasTool = k => !!(S && S.galaxy && S.galaxy.tools && S.galaxy.tools[k]);
 const conquered = () => (S && S.galaxy ? S.galaxy.done.length : 0);
 const tributeRate = () => conquered();   // per minute: each conquered system pays 1 Tribute a minute
 function tributeTick(dt) { if (S && S.galaxy && conquered()) S.galaxy.tribute += tributeRate() * dt / 60; }
@@ -154,6 +280,7 @@ function jumpTo(id) {
   const G = S.galaxy || { tribute: 0, legacy: {}, done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 } };
   const from = sysId(), bonus = jumpBonus().b;
   if (!G.done.includes(from)) G.done.push(from);
+  G.tools = G.tools || {}; if (D.gift) G.tools[D.gift] = 1;
   G.tribute += bonus;
   G.life.earned += S.stats.earned; G.life.mined += S.stats.mined; G.life.kills += S.stats.kills; G.life.days += S.day;
   const peak = S.stats.peak || 0, muted = S.muted;

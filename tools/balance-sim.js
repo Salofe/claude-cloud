@@ -88,8 +88,8 @@ function bestActivity() {
 // ttk = seconds to kill everything, hp = share of hull+shield lost. Combat is a side dish: keep ttk short, hp well under 100%.
 function combatCheck() {
   const zs = A.FIELDS.filter(L => A.locOpen(L.id)), L = zs.sort((a, b) => b.field.z - a.field.z)[0]; if (!L || L.field.z < 2) return '';
-  const z = L.field.z, m = A.Z_ENEMY[z] * A.sysDef().enemy, pd = A.ship.weaponDps * 0.65, pool = S().hull = A.ship.hpMax, life = pool + A.ship.shieldMax;
-  const fight = fleet => { let ehp = 0, edps = 0; for (const k of fleet) { const e = A.ENEMIES[k]; ehp += (e.hp + e.sp) * m; edps += e.dmg * m * (e.burst || 1) / e.rate * 0.3; }
+  const z = L.field.z, m = A.Z_ENEMY[z] * A.sysDef().enemy, md = A.Z_ENEMY[z] * Math.sqrt(A.sysDef().enemy), pd = A.ship.weaponDps * 0.65, pool = S().hull = A.ship.hpMax, life = pool + A.ship.shieldMax;
+  const fight = fleet => { let ehp = 0, edps = 0; for (const k of fleet) { const e = A.ENEMIES[k]; ehp += (e.hp + e.sp) * m; edps += e.dmg * md * (e.burst || 1) * (e.spread ? Math.min(e.spread, 2) : 1) / e.rate * 0.3; }
     const ttk = ehp / pd; return { ttk, hp: edps * 0.55 * ttk / life }; };
   let n = 0, tt = 0, hh = 0; for (let i = 0; i < 40; i++) { const f = fight(A.buildFleet(0.35 + (L.danger || 0))); tt += f.ttk; hh += f.hp; n++; }
   const boss = fight(['warlord', 'corsair']), sent = fight(A.sysDef().bossFleet);
@@ -147,7 +147,9 @@ while (t < 5 * 3600) {
   if (s.unlock > lastUnlock) { for (let u = lastUnlock + 1; u <= s.unlock; u++) unlockAt[u] = t; lastUnlock = s.unlock; const bk = {}; for (const o of bestActivity.last || []) if (!bk[o.kind]) bk[o.kind] = o; const fl = {}; for (const o of bestActivity.last || []) if (o.kind === 'mine+depot') fl[o.where] = Math.round(o.rate); log.push('         best by kind: ' + Object.values(bk).map(o => `${o.kind} ${Math.round(o.rate)} (${o.where})`).join(' | ') + ' || fields ' + JSON.stringify(fl)); pendingCombat = 3; if (a && a.fuelPct != null) log.push(`         fuel = ${(a.fuelPct * 100).toFixed(1)}% of haul revenue`); log.push(`${(t / 60).toFixed(1).padStart(6)} min  UNLOCK ${s.unlock} ${A.UNLOCKS[s.unlock].title.padEnd(20)} active ${Math.round(a ? a.rate : 0)}/s (${a && a.kind} ${a && a.where})  drones ${Math.round(A.totalIncome())}/s`); }
   // a real player buys guns & shields to handle the best zone they have open
   { const zs = A.FIELDS.filter(L => A.locOpen(L.id)).map(L => L.field.z); const zmax = Math.max(...zs);
-    if (zmax >= 2) for (let g = 0; g < 60; g++) { if (combatOK(zmax) >= 1) break; const c = A.upgCost('weapons', s.lv.weapons); if (c > s.credits * 0.5) break; s.credits -= c; s.lv.weapons++; } }
+    if (zmax >= 2) for (let g = 0; g < 60; g++) { if (combatOK(zmax) >= 1) break; const c = A.upgCost('weapons', s.lv.weapons); if (c > s.credits * 0.5) break; s.credits -= c; s.lv.weapons++; } 
+    // …and tops up shields when they are cheap (under 2% of their credits)
+    if (zmax >= 2) for (let g = 0; g < 60 && s.lv.shield < A.UPG.shield.max; g++) { const c = A.upgCost('shield', s.lv.shield); if (c > s.credits * 0.02) break; s.credits -= c; s.lv.shield++; } }
   // combat check a minute after each unlock, once the player has geared up for the new zone
   if (pendingCombat && !--pendingCombat) { const cc = combatCheck(); if (cc) log.push('         ' + cc); }
   // shopping
