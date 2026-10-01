@@ -614,6 +614,11 @@ const LOCS = [
     station: 'Frontier Depot', depot: 1, fuel: 8, repair: 5, market: { ...DEPOT },
     field: { n: 'Kuiper Belt', z: 5, ores: { iridium: 3, exotic: 2, he3: 1 }, count: 32, cold: 1 },
     desc: 'The frozen frontier. Exotic crystals glow everywhere… guarded by pirate carriers.' },
+  // revealed by the alien signal once you rule the system
+  { id: 'oort', n: 'Oort Cloud', r: 760, period: 5200, a0: 4.6, size: 7, col: ['#7fdfff', '#1a2a55'], danger: 0.45, tier: 8, secret: 1,
+    station: 'Deep Signal Outpost', depot: 1, fuel: 10, repair: 6, market: { ...DEPOT },
+    field: { n: 'Oort Cloud', z: 5, ores: { exotic: 3, ice: 3, iridium: 2 }, count: 34, cold: 1 },
+    desc: 'The edge of the Sun\'s reach. Something ancient is broadcasting from deep inside the cloud.' },
 ];
 const LOC = Object.fromEntries(LOCS.map(l => [l.id, l]));
 const NODES = LOCS.filter(l => !l.body);
@@ -704,10 +709,12 @@ const ENEMIES = {
   corsair: { n: 'Corsair',         hp: 80,  sp: 25,  dmg: 6,  rate: 1.3, spd: 180, size: 1.05, loot: 110, pow: 2.5 },
   frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
   carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
-  warlord: { n: 'Pirate Warlord',  hp: 2400, sp: 900, dmg: 12, rate: 1.1, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 7, boss: 1 },
+  warlord: { n: 'Pirate Warlord',  hp: 520, sp: 230, dmg: 5, rate: 1.3, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 5, boss: 1 },
+  sentinel: { n: 'Alien Sentinel',  hp: 650, sp: 500, dmg: 2.5, rate: 1.0, spd: 70, size: 3.2, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, alien: 1 },
+  adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };
-const Z_ENEMY = [0.5, 0.7, 1, 3, 8, 22];   // enemy stat multiplier by zone
+const Z_ENEMY = [0.5, 0.7, 1, 2.2, 5, 12];   // enemy stat multiplier by zone (combat is a side dish: tools/balance-sim.js checks fights stay short)
 const Z_LOOT = [1, 5, 30, 250, 2500, 25000];
 
 const RANKS = [
@@ -1181,8 +1188,35 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // ---------- enemy ships ----------
+// alien machines: crystal hulls, rotating rings, a glowing core
+function drawAlienShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 30, '#7fdfff55', 0.8);
+  const big = type === 'sentinel';
+  if (big) for (let k = 0; k < 2; k++) {
+    ctx.save(); ctx.rotate(t * (k ? -0.6 : 0.9));
+    ctx.strokeStyle = k ? 'rgba(217,179,255,0.8)' : 'rgba(127,223,255,0.9)'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(0, 0, 20 + k * 5, 0, TAU); ctx.stroke();
+    for (let i = 0; i < 6; i++) { const a = i * TAU / 6; ctx.fillStyle = k ? '#d9b3ff' : '#9ffcff'; ctx.fillRect(Math.cos(a) * (20 + k * 5) - 1.5, Math.sin(a) * (20 + k * 5) - 1.5, 3, 3); }
+    ctx.restore();
+  }
+  ctx.rotate(ang + (big ? t * 0.3 : 0));
+  const n = big ? 8 : 4, R = big ? 15 : 12;
+  const g = ctx.createLinearGradient(-R, -R, R, R); g.addColorStop(0, '#2a3f7a'); g.addColorStop(0.5, '#4fb6d8'); g.addColorStop(1, '#1a2450');
+  ctx.fillStyle = g; ctx.strokeStyle = '#bff6ff'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) { const a = i * TAU / n, r = i % 2 ? R * 0.62 : R; ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  const pulse = 0.6 + 0.4 * Math.sin(t * 5);
+  ctx.globalCompositeOperation = 'lighter';
+  glow(ctx, 0, 0, big ? 9 : 5, '#ffffff', pulse);
+  ctx.fillStyle = '#e8fdff'; ctx.beginPath(); ctx.arc(0, 0, big ? 3.5 : 2, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
+  if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
   const mil = e.military;
   const main = mil ? PAL.military : PAL.enemyMid, dark = mil ? PAL.militaryDark : PAL.enemyDark, lit = mil ? '#d8f0a8' : PAL.enemy;
   ctx.save();
@@ -1634,6 +1668,7 @@ function loadSave() {
     d.lv.extractor = d.lv.extractor || 1;
     d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
     for (const e of d.events || []) if (/^Pirate warlord at/.test(e.title || '') && !e.warlord && e.locs) { e.kind = 'warlord'; e.warlord = e.locs[0]; } d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
+    if (d.won && !d.signal) d.signal = 1;   // saves that already won get the Oort signal
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     // bal 3: black-market sales used to wipe reputation (−0.02 per unit); undo that once, unless a planet was nuked
     if (d.bal < 3) { if (!(d.nuked || []).length) for (const f in d.rep) if (f !== 'piratas' && d.rep[f] < -10) d.rep[f] = -10; d.bal = 3; }
@@ -1644,7 +1679,7 @@ function hasSave() { return !!loadSave(); }
 // earlier formats were incompatible prototypes; free their space
 try { localStorage.removeItem('solar_prospector_v1'); localStorage.removeItem('solar_prospector_v2'); } catch (e) {}
 const has = stage => S && S.unlock >= stage;
-const locOpen = id => has(LOC[id].tier || 0);
+const locOpen = id => has(LOC[id].tier || 0) && (!LOC[id].secret || !!S.signal);
 const upgOpen = k => has(UPG[k].stage);
 const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
 const econScale = () => S.unlock < 5 ? 1 : 5 * Math.pow(2, S.unlock - 5);
@@ -2148,6 +2183,15 @@ function warlordKilled(id) {
   save();
 }
 
+// ---------- the end of the Solar System: the Sentinel and the gate ----------
+function sentinelKilled() {
+  if (S.gateOpen) return;
+  S.gateOpen = 1;
+  addNews('🌀', '<b>The Sentinel is destroyed.</b> An ancient jump gate wakes up in the Oort Cloud.', '#d9b3ff');
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>The Sentinel's core shatters — and deep in the Oort Cloud, a ring older than the Sun <b>lights up</b>.</p><p>It is a <b>jump gate</b>. On the other side: the stars of the galaxy, and at its heart, a black hole.</p><p class="hint">Traveling the galaxy arrives in the next update. You've finished the Solar System!</p>`, choices: [{ label: 'Incredible', cost: 0, fn: () => {} }] });
+  save();
+}
+
 // ---------- natural system events ----------
 const EVENT_GEN = [
   { kind: 'war', w: 1.1, make() {
@@ -2441,7 +2485,7 @@ function powersAt(id) {
   const city = l.market && !l.depot;
   if (city && l.faction && l.faction !== 'piratas') add('works');
   if (city) add('boom', kindActive('boom', id) ? { why: 'a boom is already running' } : {});
-  if (has(U.BELT) && ((l.danger || 0) >= 0.1 || warlordAt(id))) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
+  if (has(U.BELT) && !l.secret && ((l.danger || 0) >= 0.1 || warlordAt(id))) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
   if (city && l.faction && l.faction !== 'piratas' && has(U.TRADE)) {
     const w = warOf(l.faction);
     if (!w && has(U.SATURN)) {
@@ -2750,11 +2794,11 @@ const MapScene = {
     const day = S.day + (tr ? tr.frac : 0);
     // orbits with bright trailing arc
     for (const l of LOCS) {
-      if (l.parent || l.follow) continue;
+      if (l.parent || l.follow || (l.secret && !locOpen(l.id))) continue;
       const R = l.r * z, open = locOpen(l.id);
       ctx.strokeStyle = open ? 'rgba(120,170,255,0.16)' : 'rgba(120,170,255,0.06)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(sun.x, sun.y, R, 0, TAU); ctx.stroke();
-      if (open && l.id !== 'kuiper') {
+      if (open && l.id !== 'kuiper' && l.id !== 'oort') {
         const a = l.a0 + day / l.period * TAU;
         for (let i = 0; i < 12; i++) {
           ctx.strokeStyle = `rgba(120,200,255,${0.32 * (1 - i / 12)})`; ctx.lineWidth = 2;
@@ -2796,7 +2840,7 @@ const MapScene = {
     }
     // bodies
     for (const l of LOCS) {
-      if (l.id === 'troyanos') continue;
+      if (l.id === 'troyanos' || (l.secret && !locOpen(l.id))) continue;
       const p = this.spos(l, day);
       const r = this.pr(l);
       const open = l.body ? locOpen(l.id) : locOpen(l.id);
@@ -2809,6 +2853,19 @@ const MapScene = {
           ctx.fillStyle = i % 3 ? '#b86a4a' : '#ffb347';
           ctx.fillRect(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr * 0.8, 2 + (i % 3), 2 + (i % 3));
         }
+      } else if (l.id === 'oort') {
+        // the signal: a pulsing cloud, and the ancient gate once the Sentinel falls
+        glow(ctx, p.x, p.y, r * 3, '#7fdfff55', 0.8);
+        ctx.fillStyle = '#bfefff';
+        for (let i = 0; i < 16; i++) { const a = i * 2.39996 + t * 0.06; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * r * (0.3 + (i % 4) * 0.4), p.y + Math.sin(a) * r * (0.3 + (i % 4) * 0.35), 1.5, 0, TAU); ctx.fill(); }
+        if (!S.gateOpen) for (let k = 0; k < 3; k++) { const ph = (t * 0.5 + k / 3) % 1; ctx.globalAlpha = (1 - ph) * 0.7; ctx.strokeStyle = '#7fdfff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p.x, p.y, r * (0.6 + ph * 2.6), 0, TAU); ctx.stroke(); }
+        else {
+          ctx.globalAlpha = 1; ctx.strokeStyle = '#d9b3ff'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(p.x, p.y, r * 1.5, 0, TAU); ctx.stroke();
+          glow(ctx, p.x, p.y, r * 1.4, '#b080ff88', 0.7 + 0.3 * Math.sin(t * 3));
+          for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.4; ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x + Math.cos(a) * r * 1.5 - 2, p.y + Math.sin(a) * r * 1.5 - 2, 4, 4); }
+        }
+        ctx.globalAlpha = open ? 1 : 0.35;
       } else if (l.id === 'kuiper') {
         glow(ctx, p.x, p.y, r * 2.5, '#9fb6ff66', 0.7);
         ctx.fillStyle = '#c9d6ff';
@@ -2845,6 +2902,7 @@ const MapScene = {
     // node markers & labels
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const l of NODES) {
+      if (l.secret && !locOpen(l.id)) continue;
       const p = this.spos(l, day);
       const open = locOpen(l.id);
       const r = this.pr(l) + (l.id === 'troyanos' ? 10 : 0);
@@ -2972,6 +3030,7 @@ const MapScene = {
   pick(x, y) {
     let best = null, bd = 1e9;
     for (const l of NODES) {
+      if (l.secret && !locOpen(l.id)) continue;
       const p = this.spos(l);
       const d = Math.hypot(p.x - x, p.y - y);
       const hit = Math.max(22, this.pr(l) + 14);
@@ -3164,7 +3223,8 @@ const MineScene = {
     this.ambush = null;
     if (!this.space) {
       const dg = locDanger(this.loc.id) * (1 - ship.avoid);
-      if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
+      if (this.loc.id === 'oort' && !S.gateOpen) this.ambush = { at: rand(16, 24), warned: false, boss: 'sentinel' };
+      else if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
       else if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
     }
   },
@@ -3381,10 +3441,10 @@ const MineScene = {
     // --- ambush ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss === 'sentinel' ? '📡 The signal is moving toward you…' : this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
-        const boss = this.ambush.boss && warlordAt(this.loc.id);
-        const fleet = boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
+        const boss = this.ambush.boss === 'sentinel' || (this.ambush.boss && warlordAt(this.loc.id));
+        const fleet = this.ambush.boss === 'sentinel' ? ['sentinel', 'adrone', 'adrone', 'adrone'] : boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
         this.ambush = null;
         if (boss) Combat.spawn(this, fleet, this.z, true);
         else if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
@@ -3417,7 +3477,7 @@ const MineScene = {
   coach() {
     const h = S.hints;
     let msg = '';
-    if (this.inCombat && !h.guns) msg = isTouch ? 'Hold <b>FIRE</b> to shoot the pirates!' : 'Pirates! <b>Hold the mouse</b> to shoot your guns';
+    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
@@ -3579,7 +3639,7 @@ const MineScene = {
       ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.5; ctx.stroke();
       drawIcon(ctx, 'skull', bx + 8, by + 8, 16, '#ffd24a');
       ctx.fillStyle = '#ffd24a'; ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(`PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
+      ctx.fillText(boss.k === 'sentinel' ? 'ALIEN SENTINEL · guardian of the signal' : `PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
       ctx.fillStyle = '#2a1018'; ctx.fillRect(bx, by + 19, bw, 9);
       ctx.fillStyle = '#ff4d6d'; ctx.fillRect(bx, by + 19, bw * clamp(boss.hp / boss.max, 0, 1), 9);
       ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);
@@ -3717,7 +3777,11 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    sc.bolts.push({ x: e.x + Math.cos(a) * 18 * e.size, y: e.y + Math.sin(a) * 18 * e.size, vx: Math.cos(a) * 460, vy: Math.sin(a) * 460, life: 2, dmg: e.dmg, foe: 1, col: e.military ? '#b6ff7a' : '#ff4d6d' });
+    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : e.military ? '#b6ff7a' : '#ff4d6d';
+    for (let i = 0; i < n; i++) {
+      const b = a + (i - (n - 1) / 2) * 0.2;
+      sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
+    }
     sfx('eshoot');
   },
   firePlayer(sc, aim) {
@@ -3742,7 +3806,10 @@ const Combat = {
     sc.parts.burst(e.x, e.y, 25, '#ffffff', 190, 0.6, 3);
     sfx('boom'); sc.shake = Math.max(sc.shake, 10);
     S.stats.kills++;
-    if (ENEMIES[e.k].boss && sc.loc) { sc.shake = 24; sc.parts.burst(e.x, e.y, 120, '#ffd24a', 420, 1.6, 5); warlordKilled(sc.loc.id); }
+    if (ENEMIES[e.k].boss && sc.loc) {
+      sc.shake = 24; sc.parts.burst(e.x, e.y, 120, ENEMIES[e.k].alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
+      if (e.k === 'sentinel') sentinelKilled(); else warlordKilled(sc.loc.id);
+    }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
     for (let i = 0; i < orbs; i++) {
@@ -3942,7 +4009,8 @@ function updateHUD() {
     o.innerHTML = `<small>NEXT UNLOCK</small><b>${nu.icon} ${nu.title}</b><div class="meter gold"><i style="width:${pct * 100}%"></i></div><span>${fmt(S.stats.earned)} / ${fmt(nu.at)} cr earned</span>`;
   } else if (!S.won) {
     o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest & upgrade outposts</span>`;
-  } else o.innerHTML = `<small>SOLAR SOVEREIGN</small><b>👑 You rule the system</b><span>Keep growing your empire.</span>`;
+  } else if (!S.gateOpen) o.innerHTML = `<small>THE SIGNAL</small><b>📡 Find the source in the Oort Cloud</b><span>Mine there to draw out whatever is broadcasting. Bring good guns and shields.</span>`;
+  else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>The jump gate at the Oort Cloud is awake. Next update: travel to the stars.</span>`;
   if (!S.won && has(U.SATURN) && inf >= 100 && !isBlocking()) victory();
   if (pendingUnlocks.length && $('modal').classList.contains('hidden') && !(scene === MineScene && (MineScene.inCombat || MineScene.space)) && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
   else if (pendingChoices.length && $('modal').classList.contains('hidden') && $('sheet').classList.contains('hidden') && scene !== MineScene && !MapScene.travel) showChoice(pendingChoices.shift());
@@ -3959,8 +4027,17 @@ function victory() {
   S.won = true; save();
   sfx('win');
   showModal({ icon: '👑', title: 'You rule the Solar System!', html: `In <b>${S.day} days</b> you went from chipping rocks on the Moon to the most powerful force in the system.<br><br>
-    Ore mined: <b>${fmt(S.stats.mined)}</b><br>Total earnings: <b>${fmt(S.stats.earned)} cr</b><br>Battles won: <b>${S.stats.won}</b><br>Contracts: <b>${S.stats.contracts}</b><br><br>Keep playing and grow your empire.`,
-    buttons: [{ label: 'Keep playing', cls: 'primary', fn: () => {} }] });
+    Ore mined: <b>${fmt(S.stats.mined)}</b><br>Total earnings: <b>${fmt(S.stats.earned)} cr</b><br>Battles won: <b>${S.stats.won}</b><br>Contracts: <b>${S.stats.contracts}</b>`,
+    buttons: [{ label: 'Keep playing', cls: 'primary', fn: () => setTimeout(revealSignal, 400) }] });
+}
+// after you rule the system, something calls from beyond the Kuiper Belt
+function revealSignal() {
+  if (S.signal) return;
+  S.signal = 1; save();
+  addNews('📡', '<b>A signal from the Oort Cloud.</b> It is not human.', '#7fdfff');
+  sfx('event');
+  showModal({ icon: '📡', title: 'A signal from the dark', cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>Your deep-space dishes caught a <b>repeating signal</b> from the <b>Oort Cloud</b>, far beyond the Kuiper Belt. It is <b>not human</b>.</p><p>A new location is on your map. Mine there to find the source — and bring your best <b>guns and shields</b>.</p>`,
+    buttons: [{ label: 'Set course', cls: 'primary', fn: () => {} }] });
 }
 
 // ---------- map panel ----------
@@ -4053,7 +4130,7 @@ function updateMineHUD() {
   document.body.classList.toggle('battle', combat);
   $('battleUI').classList.toggle('hidden', !combat);
   if (combat) {
-    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} PIRATE${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
     $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
     $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
     $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
@@ -4410,6 +4487,7 @@ function openFactions() {
   }
   h += '<div class="sub">Outposts</div>';
   for (const l of FIELDS) {
+    if (l.secret && !locOpen(l.id)) continue;
     const o = S.outposts[l.id];
     if (!locOpen(l.id)) { h += `<div class="srow dim"><span>🔒 ${l.field.n}</span><b>locked</b></div>`; continue; }
     h += `<div class="srow"><span>${o ? '🤖' : '⬜'} ${l.field.n}</span>${o ? `<span class="dim">Lv ${o.lv} · ${o.n} drones</span><b class="cr">+${fmt(outpostIncome(l.id))}/s</b>` : `<b class="dim">Build for ${fmt(buildCost(l.id))}</b>`}</div>`;

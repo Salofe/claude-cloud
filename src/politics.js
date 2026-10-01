@@ -44,6 +44,15 @@ function warlordKilled(id) {
   save();
 }
 
+// ---------- the end of the Solar System: the Sentinel and the gate ----------
+function sentinelKilled() {
+  if (S.gateOpen) return;
+  S.gateOpen = 1;
+  addNews('🌀', '<b>The Sentinel is destroyed.</b> An ancient jump gate wakes up in the Oort Cloud.', '#d9b3ff');
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>The Sentinel's core shatters — and deep in the Oort Cloud, a ring older than the Sun <b>lights up</b>.</p><p>It is a <b>jump gate</b>. On the other side: the stars of the galaxy, and at its heart, a black hole.</p><p class="hint">Traveling the galaxy arrives in the next update. You've finished the Solar System!</p>`, choices: [{ label: 'Incredible', cost: 0, fn: () => {} }] });
+  save();
+}
+
 // ---------- natural system events ----------
 const EVENT_GEN = [
   { kind: 'war', w: 1.1, make() {
@@ -337,7 +346,7 @@ function powersAt(id) {
   const city = l.market && !l.depot;
   if (city && l.faction && l.faction !== 'piratas') add('works');
   if (city) add('boom', kindActive('boom', id) ? { why: 'a boom is already running' } : {});
-  if (has(U.BELT) && ((l.danger || 0) >= 0.1 || warlordAt(id))) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
+  if (has(U.BELT) && !l.secret && ((l.danger || 0) >= 0.1 || warlordAt(id))) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
   if (city && l.faction && l.faction !== 'piratas' && has(U.TRADE)) {
     const w = warOf(l.faction);
     if (!w && has(U.SATURN)) {

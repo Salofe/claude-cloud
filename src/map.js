@@ -125,11 +125,11 @@ const MapScene = {
     const day = S.day + (tr ? tr.frac : 0);
     // orbits with bright trailing arc
     for (const l of LOCS) {
-      if (l.parent || l.follow) continue;
+      if (l.parent || l.follow || (l.secret && !locOpen(l.id))) continue;
       const R = l.r * z, open = locOpen(l.id);
       ctx.strokeStyle = open ? 'rgba(120,170,255,0.16)' : 'rgba(120,170,255,0.06)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(sun.x, sun.y, R, 0, TAU); ctx.stroke();
-      if (open && l.id !== 'kuiper') {
+      if (open && l.id !== 'kuiper' && l.id !== 'oort') {
         const a = l.a0 + day / l.period * TAU;
         for (let i = 0; i < 12; i++) {
           ctx.strokeStyle = `rgba(120,200,255,${0.32 * (1 - i / 12)})`; ctx.lineWidth = 2;
@@ -171,7 +171,7 @@ const MapScene = {
     }
     // bodies
     for (const l of LOCS) {
-      if (l.id === 'troyanos') continue;
+      if (l.id === 'troyanos' || (l.secret && !locOpen(l.id))) continue;
       const p = this.spos(l, day);
       const r = this.pr(l);
       const open = l.body ? locOpen(l.id) : locOpen(l.id);
@@ -184,6 +184,19 @@ const MapScene = {
           ctx.fillStyle = i % 3 ? '#b86a4a' : '#ffb347';
           ctx.fillRect(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr * 0.8, 2 + (i % 3), 2 + (i % 3));
         }
+      } else if (l.id === 'oort') {
+        // the signal: a pulsing cloud, and the ancient gate once the Sentinel falls
+        glow(ctx, p.x, p.y, r * 3, '#7fdfff55', 0.8);
+        ctx.fillStyle = '#bfefff';
+        for (let i = 0; i < 16; i++) { const a = i * 2.39996 + t * 0.06; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * r * (0.3 + (i % 4) * 0.4), p.y + Math.sin(a) * r * (0.3 + (i % 4) * 0.35), 1.5, 0, TAU); ctx.fill(); }
+        if (!S.gateOpen) for (let k = 0; k < 3; k++) { const ph = (t * 0.5 + k / 3) % 1; ctx.globalAlpha = (1 - ph) * 0.7; ctx.strokeStyle = '#7fdfff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p.x, p.y, r * (0.6 + ph * 2.6), 0, TAU); ctx.stroke(); }
+        else {
+          ctx.globalAlpha = 1; ctx.strokeStyle = '#d9b3ff'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(p.x, p.y, r * 1.5, 0, TAU); ctx.stroke();
+          glow(ctx, p.x, p.y, r * 1.4, '#b080ff88', 0.7 + 0.3 * Math.sin(t * 3));
+          for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.4; ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x + Math.cos(a) * r * 1.5 - 2, p.y + Math.sin(a) * r * 1.5 - 2, 4, 4); }
+        }
+        ctx.globalAlpha = open ? 1 : 0.35;
       } else if (l.id === 'kuiper') {
         glow(ctx, p.x, p.y, r * 2.5, '#9fb6ff66', 0.7);
         ctx.fillStyle = '#c9d6ff';
@@ -220,6 +233,7 @@ const MapScene = {
     // node markers & labels
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const l of NODES) {
+      if (l.secret && !locOpen(l.id)) continue;
       const p = this.spos(l, day);
       const open = locOpen(l.id);
       const r = this.pr(l) + (l.id === 'troyanos' ? 10 : 0);
@@ -347,6 +361,7 @@ const MapScene = {
   pick(x, y) {
     let best = null, bd = 1e9;
     for (const l of NODES) {
+      if (l.secret && !locOpen(l.id)) continue;
       const p = this.spos(l);
       const d = Math.hypot(p.x - x, p.y - y);
       const hit = Math.max(22, this.pr(l) + 14);

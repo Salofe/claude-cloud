@@ -6,12 +6,12 @@ const fs = require('fs'), vm = require('vm'), path = require('path');
 const ctx = { console, Math, Date, JSON, Object, Array, localStorage: { getItem() { return null; }, setItem() {} } };
 vm.createContext(ctx);
 const src = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
-vm.runInContext(src('data.js') + '\n' + src('state.js') + '\n' + src('politics.js') + `
+vm.runInContext(src('data.js') + '\n' + src('state.js') + '\n' + src('politics.js') + '\n' + src('battle.js') + `
 function toast() {} function sfx() {} function showEventBanner() {} function updateTicker() {}
 var TEX = {};
 this.api = { newGame, ship, UPG, UPG_KEYS, upgCost, LOC, NODES, FIELDS, ITEMS, ORES, GOODS, OUTPOST, outpostRate, outpostCap,
   PROJECTS, PROJ, built, INVEST, STATION_TIER, UNLOCKS, U, Z_ENEMY, incomeMult, totalIncome, locOpen, has, travelInfo,
-  econScale, influence, fuelPrice, checkUnlocks, tradeRoutes, hireFreighter, FREIGHT, freighterIncome, getS: () => S };
+  econScale, influence, fuelPrice, buildFleet, ENEMIES, Z_ENEMY, locDanger, checkUnlocks, tradeRoutes, hireFreighter, FREIGHT, freighterIncome, getS: () => S };
 `, ctx);
 const A = ctx.api;
 const S = () => A.getS();
@@ -76,6 +76,17 @@ function bestActivity() {
   bestActivity.last = opts;
   return opts.find(o => !o.noPick);
 }
+// combat check: a typical fight in the hardest open zone (and its boss) for the player's current ship.
+// ttk = seconds to kill everything, hp = share of hull+shield lost. Combat is a side dish: keep ttk short, hp well under 100%.
+function combatCheck() {
+  const zs = A.FIELDS.filter(L => A.locOpen(L.id)), L = zs.sort((a, b) => b.field.z - a.field.z)[0]; if (!L || L.field.z < 2) return '';
+  const z = L.field.z, m = A.Z_ENEMY[z], pd = A.ship.weaponDps * 0.65, pool = S().hull = A.ship.hpMax, life = pool + A.ship.shieldMax;
+  const fight = fleet => { let ehp = 0, edps = 0; for (const k of fleet) { const e = A.ENEMIES[k]; ehp += (e.hp + e.sp) * m; edps += e.dmg * m * (e.burst || 1) / e.rate * 0.3; }
+    const ttk = ehp / pd; return { ttk, hp: edps * 0.55 * ttk / life }; };
+  let n = 0, tt = 0, hh = 0; for (let i = 0; i < 40; i++) { const f = fight(A.buildFleet(0.35 + (L.danger || 0))); tt += f.ttk; hh += f.hp; n++; }
+  const boss = fight(['warlord', 'corsair']), sent = fight(['sentinel', 'adrone', 'adrone', 'adrone']);
+  return (z >= 5 ? `sentinel ttk ${sent.ttk.toFixed(0)}s, hull lost ${Math.round(sent.hp * 100)}% · ` : '') + `[dps ${Math.round(A.ship.weaponDps)} hull ${A.ship.hpMax} sh ${A.ship.shieldMax} wlv ${S().lv.weapons}] combat z${z}: fleet ttk ${(tt / n).toFixed(1)}s, hull lost ${Math.round(hh / n * 100)}% · warlord ttk ${boss.ttk.toFixed(0)}s, hull lost ${Math.round(boss.hp * 100)}%`;
+}
 function rateNow() { const a = bestActivity(); return (a ? a.rate : 0) + A.totalIncome(); }
 
 function candidates() {
@@ -116,7 +127,7 @@ function candidates() {
 }
 
 const log = [], unlockAt = {};
-let t = 0, lastUnlock = 0, trips = 0, actCount = {};
+let pendingCombat = 0, t = 0, lastUnlock = 0, trips = 0, actCount = {};
 while (t < 5 * 3600) {
   const s = S();
   const a = bestActivity();
@@ -125,10 +136,12 @@ while (t < 5 * 3600) {
   s.credits += gain; s.stats.earned += gain; t += dt;
   if (a) actCount[a.kind] = (actCount[a.kind] || 0) + dt;
   A.checkUnlocks();
-  if (s.unlock > lastUnlock) { for (let u = lastUnlock + 1; u <= s.unlock; u++) unlockAt[u] = t; lastUnlock = s.unlock; const bk = {}; for (const o of bestActivity.last || []) if (!bk[o.kind]) bk[o.kind] = o; const fl = {}; for (const o of bestActivity.last || []) if (o.kind === 'mine+depot') fl[o.where] = Math.round(o.rate); log.push('         best by kind: ' + Object.values(bk).map(o => `${o.kind} ${Math.round(o.rate)} (${o.where})`).join(' | ') + ' || fields ' + JSON.stringify(fl)); if (a && a.fuelPct != null) log.push(`         fuel = ${(a.fuelPct * 100).toFixed(1)}% of haul revenue`); log.push(`${(t / 60).toFixed(1).padStart(6)} min  UNLOCK ${s.unlock} ${A.UNLOCKS[s.unlock].title.padEnd(20)} active ${Math.round(a ? a.rate : 0)}/s (${a && a.kind} ${a && a.where})  drones ${Math.round(A.totalIncome())}/s`); }
+  if (s.unlock > lastUnlock) { for (let u = lastUnlock + 1; u <= s.unlock; u++) unlockAt[u] = t; lastUnlock = s.unlock; const bk = {}; for (const o of bestActivity.last || []) if (!bk[o.kind]) bk[o.kind] = o; const fl = {}; for (const o of bestActivity.last || []) if (o.kind === 'mine+depot') fl[o.where] = Math.round(o.rate); log.push('         best by kind: ' + Object.values(bk).map(o => `${o.kind} ${Math.round(o.rate)} (${o.where})`).join(' | ') + ' || fields ' + JSON.stringify(fl)); pendingCombat = 3; if (a && a.fuelPct != null) log.push(`         fuel = ${(a.fuelPct * 100).toFixed(1)}% of haul revenue`); log.push(`${(t / 60).toFixed(1).padStart(6)} min  UNLOCK ${s.unlock} ${A.UNLOCKS[s.unlock].title.padEnd(20)} active ${Math.round(a ? a.rate : 0)}/s (${a && a.kind} ${a && a.where})  drones ${Math.round(A.totalIncome())}/s`); }
   // a real player buys guns & shields to handle the best zone they have open
   { const zs = A.FIELDS.filter(L => A.locOpen(L.id)).map(L => L.field.z); const zmax = Math.max(...zs);
     if (zmax >= 2) for (let g = 0; g < 60; g++) { if (combatOK(zmax) >= 1) break; const c = A.upgCost('weapons', s.lv.weapons); if (c > s.credits * 0.5) break; s.credits -= c; s.lv.weapons++; } }
+  // combat check a minute after each unlock, once the player has geared up for the new zone
+  if (pendingCombat && !--pendingCombat) { const cc = combatCheck(); if (cc) log.push('         ' + cc); }
   // shopping
   for (let guard = 0; guard < 200; guard++) {
     const r = Math.max(1, rateNow());
@@ -140,7 +153,7 @@ while (t < 5 * 3600) {
     if (b.cost > s.credits) break;
     s.credits -= b.cost; b.buy();
   }
-  if (!s.won && A.has(A.U.SATURN) && A.influence() >= 100) { s.won = true; log.push(`${(t / 60).toFixed(1).padStart(6)} min  WIN (influence ${A.influence()})`); break; }
+  if (!s.won && A.has(A.U.SATURN) && A.influence() >= 100) { s.won = true; log.push(`${(t / 60).toFixed(1).padStart(6)} min  WIN (influence ${A.influence()})`); log.push('         at the win: ' + combatCheck()); break; }
 }
 const s = S();
 console.log(log.join('\n'));

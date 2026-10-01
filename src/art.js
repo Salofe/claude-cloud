@@ -463,8 +463,35 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // ---------- enemy ships ----------
+// alien machines: crystal hulls, rotating rings, a glowing core
+function drawAlienShip(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, 0, 0, 30, '#7fdfff55', 0.8);
+  const big = type === 'sentinel';
+  if (big) for (let k = 0; k < 2; k++) {
+    ctx.save(); ctx.rotate(t * (k ? -0.6 : 0.9));
+    ctx.strokeStyle = k ? 'rgba(217,179,255,0.8)' : 'rgba(127,223,255,0.9)'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(0, 0, 20 + k * 5, 0, TAU); ctx.stroke();
+    for (let i = 0; i < 6; i++) { const a = i * TAU / 6; ctx.fillStyle = k ? '#d9b3ff' : '#9ffcff'; ctx.fillRect(Math.cos(a) * (20 + k * 5) - 1.5, Math.sin(a) * (20 + k * 5) - 1.5, 3, 3); }
+    ctx.restore();
+  }
+  ctx.rotate(ang + (big ? t * 0.3 : 0));
+  const n = big ? 8 : 4, R = big ? 15 : 12;
+  const g = ctx.createLinearGradient(-R, -R, R, R); g.addColorStop(0, '#2a3f7a'); g.addColorStop(0.5, '#4fb6d8'); g.addColorStop(1, '#1a2450');
+  ctx.fillStyle = g; ctx.strokeStyle = '#bff6ff'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) { const a = i * TAU / n, r = i % 2 ? R * 0.62 : R; ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  const pulse = 0.6 + 0.4 * Math.sin(t * 5);
+  ctx.globalCompositeOperation = 'lighter';
+  glow(ctx, 0, 0, big ? 9 : 5, '#ffffff', pulse);
+  ctx.fillStyle = '#e8fdff'; ctx.beginPath(); ctx.arc(0, 0, big ? 3.5 : 2, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
+  if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
   const mil = e.military;
   const main = mil ? PAL.military : PAL.enemyMid, dark = mil ? PAL.militaryDark : PAL.enemyDark, lit = mil ? '#d8f0a8' : PAL.enemy;
   ctx.save();

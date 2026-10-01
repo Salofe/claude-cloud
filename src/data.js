@@ -101,6 +101,11 @@ const LOCS = [
     station: 'Frontier Depot', depot: 1, fuel: 8, repair: 5, market: { ...DEPOT },
     field: { n: 'Kuiper Belt', z: 5, ores: { iridium: 3, exotic: 2, he3: 1 }, count: 32, cold: 1 },
     desc: 'The frozen frontier. Exotic crystals glow everywhere… guarded by pirate carriers.' },
+  // revealed by the alien signal once you rule the system
+  { id: 'oort', n: 'Oort Cloud', r: 760, period: 5200, a0: 4.6, size: 7, col: ['#7fdfff', '#1a2a55'], danger: 0.45, tier: 8, secret: 1,
+    station: 'Deep Signal Outpost', depot: 1, fuel: 10, repair: 6, market: { ...DEPOT },
+    field: { n: 'Oort Cloud', z: 5, ores: { exotic: 3, ice: 3, iridium: 2 }, count: 34, cold: 1 },
+    desc: 'The edge of the Sun\'s reach. Something ancient is broadcasting from deep inside the cloud.' },
 ];
 const LOC = Object.fromEntries(LOCS.map(l => [l.id, l]));
 const NODES = LOCS.filter(l => !l.body);
@@ -191,10 +196,12 @@ const ENEMIES = {
   corsair: { n: 'Corsair',         hp: 80,  sp: 25,  dmg: 6,  rate: 1.3, spd: 180, size: 1.05, loot: 110, pow: 2.5 },
   frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
   carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
-  warlord: { n: 'Pirate Warlord',  hp: 2400, sp: 900, dmg: 12, rate: 1.1, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 7, boss: 1 },
+  warlord: { n: 'Pirate Warlord',  hp: 520, sp: 230, dmg: 5, rate: 1.3, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 5, boss: 1 },
+  sentinel: { n: 'Alien Sentinel',  hp: 650, sp: 500, dmg: 2.5, rate: 1.0, spd: 70, size: 3.2, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, alien: 1 },
+  adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };
-const Z_ENEMY = [0.5, 0.7, 1, 3, 8, 22];   // enemy stat multiplier by zone
+const Z_ENEMY = [0.5, 0.7, 1, 2.2, 5, 12];   // enemy stat multiplier by zone (combat is a side dish: tools/balance-sim.js checks fights stay short)
 const Z_LOOT = [1, 5, 30, 250, 2500, 25000];
 
 const RANKS = [

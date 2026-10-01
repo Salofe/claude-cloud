@@ -36,6 +36,7 @@ function loadSave() {
     d.lv.extractor = d.lv.extractor || 1;
     d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
     for (const e of d.events || []) if (/^Pirate warlord at/.test(e.title || '') && !e.warlord && e.locs) { e.kind = 'warlord'; e.warlord = e.locs[0]; } d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
+    if (d.won && !d.signal) d.signal = 1;   // saves that already won get the Oort signal
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     // bal 3: black-market sales used to wipe reputation (−0.02 per unit); undo that once, unless a planet was nuked
     if (d.bal < 3) { if (!(d.nuked || []).length) for (const f in d.rep) if (f !== 'piratas' && d.rep[f] < -10) d.rep[f] = -10; d.bal = 3; }
@@ -46,7 +47,7 @@ function hasSave() { return !!loadSave(); }
 // earlier formats were incompatible prototypes; free their space
 try { localStorage.removeItem('solar_prospector_v1'); localStorage.removeItem('solar_prospector_v2'); } catch (e) {}
 const has = stage => S && S.unlock >= stage;
-const locOpen = id => has(LOC[id].tier || 0);
+const locOpen = id => has(LOC[id].tier || 0) && (!LOC[id].secret || !!S.signal);
 const upgOpen = k => has(UPG[k].stage);
 const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
 const econScale = () => S.unlock < 5 ? 1 : 5 * Math.pow(2, S.unlock - 5);

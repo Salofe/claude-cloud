@@ -42,7 +42,11 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    sc.bolts.push({ x: e.x + Math.cos(a) * 18 * e.size, y: e.y + Math.sin(a) * 18 * e.size, vx: Math.cos(a) * 460, vy: Math.sin(a) * 460, life: 2, dmg: e.dmg, foe: 1, col: e.military ? '#b6ff7a' : '#ff4d6d' });
+    const E = ENEMIES[e.k], n = E.spread || 1, col = E.alien ? '#9ffcff' : e.military ? '#b6ff7a' : '#ff4d6d';
+    for (let i = 0; i < n; i++) {
+      const b = a + (i - (n - 1) / 2) * 0.2;
+      sc.bolts.push({ x: e.x + Math.cos(b) * 18 * e.size, y: e.y + Math.sin(b) * 18 * e.size, vx: Math.cos(b) * 460, vy: Math.sin(b) * 460, life: 2, dmg: e.dmg, foe: 1, col });
+    }
     sfx('eshoot');
   },
   firePlayer(sc, aim) {
@@ -67,7 +71,10 @@ const Combat = {
     sc.parts.burst(e.x, e.y, 25, '#ffffff', 190, 0.6, 3);
     sfx('boom'); sc.shake = Math.max(sc.shake, 10);
     S.stats.kills++;
-    if (ENEMIES[e.k].boss && sc.loc) { sc.shake = 24; sc.parts.burst(e.x, e.y, 120, '#ffd24a', 420, 1.6, 5); warlordKilled(sc.loc.id); }
+    if (ENEMIES[e.k].boss && sc.loc) {
+      sc.shake = 24; sc.parts.burst(e.x, e.y, 120, ENEMIES[e.k].alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);
+      if (e.k === 'sentinel') sentinelKilled(); else warlordKilled(sc.loc.id);
+    }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
     for (let i = 0; i < orbs; i++) {

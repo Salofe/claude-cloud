@@ -49,7 +49,8 @@ const MineScene = {
     this.ambush = null;
     if (!this.space) {
       const dg = locDanger(this.loc.id) * (1 - ship.avoid);
-      if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
+      if (this.loc.id === 'oort' && !S.gateOpen) this.ambush = { at: rand(16, 24), warned: false, boss: 'sentinel' };
+      else if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
       else if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
     }
   },
@@ -266,10 +267,10 @@ const MineScene = {
     // --- ambush ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss === 'sentinel' ? '📡 The signal is moving toward you…' : this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
-        const boss = this.ambush.boss && warlordAt(this.loc.id);
-        const fleet = boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
+        const boss = this.ambush.boss === 'sentinel' || (this.ambush.boss && warlordAt(this.loc.id));
+        const fleet = this.ambush.boss === 'sentinel' ? ['sentinel', 'adrone', 'adrone', 'adrone'] : boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
         this.ambush = null;
         if (boss) Combat.spawn(this, fleet, this.z, true);
         else if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
@@ -302,7 +303,7 @@ const MineScene = {
   coach() {
     const h = S.hints;
     let msg = '';
-    if (this.inCombat && !h.guns) msg = isTouch ? 'Hold <b>FIRE</b> to shoot the pirates!' : 'Pirates! <b>Hold the mouse</b> to shoot your guns';
+    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
@@ -464,7 +465,7 @@ const MineScene = {
       ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.5; ctx.stroke();
       drawIcon(ctx, 'skull', bx + 8, by + 8, 16, '#ffd24a');
       ctx.fillStyle = '#ffd24a'; ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(`PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
+      ctx.fillText(boss.k === 'sentinel' ? 'ALIEN SENTINEL · guardian of the signal' : `PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
       ctx.fillStyle = '#2a1018'; ctx.fillRect(bx, by + 19, bw, 9);
       ctx.fillStyle = '#ff4d6d'; ctx.fillRect(bx, by + 19, bw * clamp(boss.hp / boss.max, 0, 1), 9);
       ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);

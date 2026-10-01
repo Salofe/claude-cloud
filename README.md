@@ -45,6 +45,12 @@ node tools/balance-sim.js  # simulates an efficient player and prints when each 
 
 All art is procedural (canvas 2D, including noise-generated planet textures) and all sound is synthesized with WebAudio. Progress is saved to `localStorage` under the versioned key `solar_prospector_v3` (about 20 KB even late in the game). Clawcade persists each game's localStorage on the player's device.
 
+## The end of the Solar System
+
+Reaching 100 influence makes you ruler of the Solar System — and reveals a **signal from the Oort Cloud**, a new far-out mining field. Mining there draws out the **Alien Sentinel** (a boss with alien drones and spread shots). Destroying it wakes an ancient **jump gate**: the way to the galaxy (next update).
+
+Combat is a side dish. `tools/balance-sim.js` prints a combat check per stage (time to kill a typical fleet and the warlord/Sentinel, and the share of hull lost) for a player who buys enough guns; enemy strength per zone is `Z_ENEMY` in `src/data.js`.
+
 ## Icons
 
 All icons are hand-drawn vector paths in `src/icons.js` (24×24 grid, duotone neon style). Game text uses emoji as keys; a MutationObserver swaps them for inline SVG in the UI, and `drawIcon`/`drawIconRow` render the same paths on the canvases, so no emoji is ever shown.

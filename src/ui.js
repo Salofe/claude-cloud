@@ -93,7 +93,8 @@ function updateHUD() {
     o.innerHTML = `<small>NEXT UNLOCK</small><b>${nu.icon} ${nu.title}</b><div class="meter gold"><i style="width:${pct * 100}%"></i></div><span>${fmt(S.stats.earned)} / ${fmt(nu.at)} cr earned</span>`;
   } else if (!S.won) {
     o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest & upgrade outposts</span>`;
-  } else o.innerHTML = `<small>SOLAR SOVEREIGN</small><b>👑 You rule the system</b><span>Keep growing your empire.</span>`;
+  } else if (!S.gateOpen) o.innerHTML = `<small>THE SIGNAL</small><b>📡 Find the source in the Oort Cloud</b><span>Mine there to draw out whatever is broadcasting. Bring good guns and shields.</span>`;
+  else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>The jump gate at the Oort Cloud is awake. Next update: travel to the stars.</span>`;
   if (!S.won && has(U.SATURN) && inf >= 100 && !isBlocking()) victory();
   if (pendingUnlocks.length && $('modal').classList.contains('hidden') && !(scene === MineScene && (MineScene.inCombat || MineScene.space)) && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
   else if (pendingChoices.length && $('modal').classList.contains('hidden') && $('sheet').classList.contains('hidden') && scene !== MineScene && !MapScene.travel) showChoice(pendingChoices.shift());
@@ -110,8 +111,17 @@ function victory() {
   S.won = true; save();
   sfx('win');
   showModal({ icon: '👑', title: 'You rule the Solar System!', html: `In <b>${S.day} days</b> you went from chipping rocks on the Moon to the most powerful force in the system.<br><br>
-    Ore mined: <b>${fmt(S.stats.mined)}</b><br>Total earnings: <b>${fmt(S.stats.earned)} cr</b><br>Battles won: <b>${S.stats.won}</b><br>Contracts: <b>${S.stats.contracts}</b><br><br>Keep playing and grow your empire.`,
-    buttons: [{ label: 'Keep playing', cls: 'primary', fn: () => {} }] });
+    Ore mined: <b>${fmt(S.stats.mined)}</b><br>Total earnings: <b>${fmt(S.stats.earned)} cr</b><br>Battles won: <b>${S.stats.won}</b><br>Contracts: <b>${S.stats.contracts}</b>`,
+    buttons: [{ label: 'Keep playing', cls: 'primary', fn: () => setTimeout(revealSignal, 400) }] });
+}
+// after you rule the system, something calls from beyond the Kuiper Belt
+function revealSignal() {
+  if (S.signal) return;
+  S.signal = 1; save();
+  addNews('📡', '<b>A signal from the Oort Cloud.</b> It is not human.', '#7fdfff');
+  sfx('event');
+  showModal({ icon: '📡', title: 'A signal from the dark', cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>Your deep-space dishes caught a <b>repeating signal</b> from the <b>Oort Cloud</b>, far beyond the Kuiper Belt. It is <b>not human</b>.</p><p>A new location is on your map. Mine there to find the source — and bring your best <b>guns and shields</b>.</p>`,
+    buttons: [{ label: 'Set course', cls: 'primary', fn: () => {} }] });
 }
 
 // ---------- map panel ----------
@@ -204,7 +214,7 @@ function updateMineHUD() {
   document.body.classList.toggle('battle', combat);
   $('battleUI').classList.toggle('hidden', !combat);
   if (combat) {
-    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} PIRATE${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
     $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
     $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
     $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
@@ -561,6 +571,7 @@ function openFactions() {
   }
   h += '<div class="sub">Outposts</div>';
   for (const l of FIELDS) {
+    if (l.secret && !locOpen(l.id)) continue;
     const o = S.outposts[l.id];
     if (!locOpen(l.id)) { h += `<div class="srow dim"><span>🔒 ${l.field.n}</span><b>locked</b></div>`; continue; }
     h += `<div class="srow"><span>${o ? '🤖' : '⬜'} ${l.field.n}</span>${o ? `<span class="dim">Lv ${o.lv} · ${o.n} drones</span><b class="cr">+${fmt(outpostIncome(l.id))}/s</b>` : `<b class="dim">Build for ${fmt(buildCost(l.id))}</b>`}</div>`;
