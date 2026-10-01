@@ -252,12 +252,16 @@ const MineScene = {
     if (!S.hints.move) { this.moved = (this.moved || 0) + v * dt; if (this.moved > 160) S.hints.move = 1; }
     // --- aim & fire ---
     let aim = null, firing = false;
-    const wm = { x: mouse.x - W / 2 + this.cam.x, y: mouse.y - H / 2 + this.cam.y };
+    const vz = viewZoom(), wm = { x: (mouse.x - W / 2) / vz + this.cam.x, y: (mouse.y - H / 2) / vz + this.cam.y };
     const combat = this.inCombat;
     if (touchFire) {
       let best = null, bd = 1e9;
       const list = combat ? this.enemies : this.rocks;
-      for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
+      // keep cutting the same target while it is in reach, so the beam doesn't flick between rocks
+      const lk = this.lock && list.includes(this.lock) && !this.lock.dead ? this.lock : null;
+      if (lk && Math.hypot(lk.x - p.x, lk.y - p.y) - (lk.r || 0) < (combat ? 900 : this.toolRange() + 30)) { best = lk; bd = 0; }
+      else for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
+      this.lock = best;
       if (best && (combat || bd < this.toolRange() + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
     } else if (mouse.down && !mouse.onUI) { aim = Math.atan2(wm.y - p.y, wm.x - p.x); firing = true; }
     if (keys.has('Space')) { firing = true; if (aim == null) aim = p.a; }
@@ -517,7 +521,8 @@ const MineScene = {
   draw(ctx) {
     const t = this.t;
     const sx = (Math.random() - 0.5) * this.shake, sy = (Math.random() - 0.5) * this.shake;
-    const cx = this.cam.x - W / 2 + sx, cy = this.cam.y - H / 2 + sy;
+    const vz = viewZoom(), VW = W / vz, VH = H / vz;
+    const cx = this.cam.x - VW / 2 + sx, cy = this.cam.y - VH / 2 + sy;
     drawSpaceBg(ctx, W, H, cx, cy, t, this.loc.field.cold ? '#0c1838' : this.loc.field.hazard === 'heat' ? '#2a1408' : this.space ? '#1c0b1e' : null);
     const bgLoc = this.space ? LOC[S.loc] : this.loc.id === 'kuiper' ? LOC.pluton : this.loc.parent ? LOC[this.loc.parent] : this.loc.follow ? LOC[this.loc.follow] : this.loc;
     if (bgLoc && bgLoc.nuked) glow(ctx, W * 0.8 - cx * 0.03, H * 0.25 - (cy - MH) * 0.03, Math.min(W, H) * 0.5, '#ff5a2a55', 0.9);
@@ -528,7 +533,7 @@ const MineScene = {
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
     starWash(ctx, W, H, sysDef().star, t);
     ctx.save();
-    ctx.translate(-cx, -cy);
+    ctx.scale(vz, vz); ctx.translate(-cx, -cy);
     ctx.strokeStyle = 'rgba(61,232,255,0.12)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
     ctx.strokeRect(20, 20, MW - 40, MH - 40); ctx.setLineDash([]);
     if (!this.space) this.drawStation(ctx, t);
@@ -545,7 +550,7 @@ const MineScene = {
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (this.scanT >= 0) { const k = this.scanT, R = k * 2000; ctx.strokeStyle = `rgba(127,224,255,${(1 - k) * 0.8})`; ctx.lineWidth = 3 + (1 - k) * 6; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R, 0, TAU); ctx.stroke(); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R * 0.92, 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
-    for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
+    for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + VW + 160 && r.y > cy - 100 && r.y < cy + VH + 100) {
       if (r.comet) {
         const sp = Math.hypot(r.vx, r.vy) || 1, ux = r.vx / sp, uy = r.vy / sp, L = r.r * 5;
         const g = ctx.createLinearGradient(r.x, r.y, r.x - ux * L, r.y - uy * L); g.addColorStop(0, 'rgba(191,246,255,0.55)'); g.addColorStop(1, 'rgba(191,246,255,0)');
@@ -646,7 +651,7 @@ const MineScene = {
       ctx.stroke();
     }
     // off-screen indicators: station & enemies
-    if (!this.space && p.y < DOCK_Y - H * 0.45) {
+    if (!this.space && p.y < DOCK_Y - VH * 0.45) {
       const full = cargoFree() <= 0;
       const dist = Math.round((DOCK_Y - p.y) / 10) * 10;
       const bx = W / 2, by = H - (isTouch ? 44 : 64);
@@ -657,7 +662,7 @@ const MineScene = {
       ctx.globalAlpha = 1;
     }
     for (const e of [...this.enemies, ...this.rocks.filter(r => r.comet || (r.geode && r.seen > 0 && !(r.seenD > 0)))]) {
-      const ex = e.x - cx, ey = e.y - cy;
+      const ex = (e.x - cx) * vz, ey = (e.y - cy) * vz;
       if (ex > 0 && ex < W && ey > 0 && ey < H) continue;
       const a = Math.atan2(ey - H / 2, ex - W / 2);
       const ix = W / 2 + Math.cos(a) * (Math.min(W, H) / 2 - 30), iy = H / 2 + Math.sin(a) * (Math.min(W, H) / 2 - 30);
@@ -680,7 +685,7 @@ const MineScene = {
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     }
     // minimap
-    const mh = 150, mw = mh * MW / MH, mx = W - mw - 14, my = H - mh - (isTouch ? 210 : 40);
+    const mh = isTouch ? 110 : 150, mw = mh * MW / MH, mx = W - mw - (isTouch ? 8 : 14), my = isTouch ? hudBottom() + 8 : H - mh - 40;
     ctx.fillStyle = 'rgba(8,14,34,0.75)'; ctx.strokeStyle = 'rgba(61,232,255,0.35)'; ctx.lineWidth = 1;
     ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh);
     if (!this.space) { ctx.fillStyle = 'rgba(61,232,255,0.35)'; ctx.fillRect(mx, my + DOCK_Y / MH * mh, mw, mh - DOCK_Y / MH * mh); }

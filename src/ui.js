@@ -238,9 +238,9 @@ function updateMineHUD() {
     + (hasTool('deepscan') ? `<span class="tool">${sc.scanCd > 0 ? `Scan ${Math.ceil(sc.scanCd)}s` : '◈ Deep Scan ready'} <small>[C]</small></span>` : '')
     + (hasTool('widebeam') ? '<span class="tool">✦ Wide Beam</span>' : ''))
     + (sc.moltenT > 0 ? `<span class="tool" style="color:#ffb040">☀ MOLTEN ${Math.ceil(sc.moltenT)}s</span>` : sysDef().pulses && !sc.space && sc.pulseIn < 10 ? `<span class="tool">☀ Pulse in ${Math.ceil(sc.pulseIn)}s</span>` : '');
-  for (const [id, k, cd, lbl] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST'], ['bombBtn', 'charges', sc.bombCd, 'BOMB'], ['scanBtn', 'deepscan', sc.scanCd, 'SCAN']]) { $(id).classList.toggle('hidden', !hasTool(k) || sc.space); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); }
+  for (const [id, k, cd, lbl, mx] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST', 45], ['bombBtn', 'charges', sc.bombCd, 'BOMB', 10], ['scanBtn', 'deepscan', sc.scanCd, 'SCAN', built('sonar') ? 7 : 14], ['pullBtn', 'tractor', sc.pullCd, 'PULL', 14]]) { const ok = !hasTool(k) || sc.space; $(id).classList.toggle('hidden', ok); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); $(id).style.setProperty('--p', cd > 0 ? (1 - cd / mx).toFixed(3) : 1); }
   $('toolBtn').classList.toggle('hidden', !hasTool('drill') || sc.space); $('toolBtn').textContent = sc.tool === 'drill' ? 'LASER' : 'DRILL';
-  $('pullBtn').classList.toggle('hidden', !hasTool('tractor') || sc.space); $('pullBtn').textContent = sc.pullCd > 0 ? Math.ceil(sc.pullCd) + 's' : 'PULL'; $('pullBtn').classList.toggle('cd', sc.pullCd > 0);
+
   $('mineInfo').innerHTML = tools + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
   const combat = sc.inCombat || sc.clearT > 0;
   $('fireBtn').textContent = sc.inCombat ? 'FIRE' : 'LASER';

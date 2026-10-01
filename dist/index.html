@@ -13,7 +13,10 @@
   --ft: 'Rajdhani', 'Segoe UI', system-ui, sans-serif; --fh: 'Orbitron', 'Arial Black', sans-serif;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--txt); font-family: var(--ft); font-size: 15px; user-select: none; -webkit-user-select: none; touch-action: none; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--txt); font-family: var(--ft); font-size: 15px; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+canvas, #touchUI, #joyZone, #fireBtn, .tbtn { touch-action: none; }
+/* menus must scroll with a finger, also in fullscreen */
+.sh-body, .tabbody, .mbox, .panel, .tabs, #galaxyPanel, .scroll { touch-action: pan-x pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 canvas#c { position: fixed; inset: 0; display: block; }
 .hidden { display: none !important; }
 b { color: #fff; }
@@ -491,7 +494,25 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 #bombBtn { right: 206px; bottom: 112px; border-color: #ff5a2a; background: rgba(255,90,42,.2); }
 #scanBtn { right: 206px; bottom: 186px; border-color: #7fe0ff; background: rgba(127,224,255,.2); }
 #boostBtn.cd, #bombBtn.cd, #scanBtn.cd { opacity: .5; }
+/* touch buttons: press feedback and a cooldown ring that fills back up */
+.tbtn, #fireBtn { transition: transform .08s, filter .08s; box-shadow: 0 0 14px rgba(0,0,0,.4), inset 0 0 12px rgba(255,255,255,.08); backdrop-filter: blur(2px); }
+.tbtn:active, .tbtn.on, #fireBtn.on { transform: scale(.9); filter: brightness(1.5); }
+.tbtn.cd { opacity: .85 !important; background-image: conic-gradient(rgba(255,255,255,.28) calc(var(--p, 1) * 1turn), rgba(0,0,0,.45) 0); }
 .inv-now { font-size: 13px; color: var(--dim); margin: 4px 0 8px; } .inv-now b { color: var(--gold); }
+
+/* phones in landscape: one-row HUD, compact controls */
+@media (max-height: 520px) and (orientation: landscape) {
+  .topbar { grid-template-columns: auto 1fr 1fr 1fr auto; padding: 4px 10px; padding-top: max(4px, env(safe-area-inset-top)); }
+  .topbar .tbtns { grid-column: auto; grid-row: 1; }
+  .topbar .tbtns button { padding: 3px 6px; }
+  .minebox { top: 56px; width: 150px; padding: 5px 8px; }
+  #fireBtn { right: 18px; bottom: 28px; width: 84px; height: 84px; }
+  .tbtn { width: 50px; height: 50px; font-size: 10px; }
+  #toolBtn { right: 114px; bottom: 20px; } #pullBtn { right: 114px; bottom: 78px; }
+  #boostBtn { right: 34px; bottom: 124px; } #bombBtn { right: 172px; bottom: 36px; } #scanBtn { right: 172px; bottom: 94px; }
+  #coach { top: auto; bottom: 14px; font-size: 14px; padding: 6px 14px; max-width: 55%; }
+  .bt-title { top: 60px; }
+}
 </style>
 </head>
 <body>
@@ -826,6 +847,15 @@ const PAL = {
   bg0: '#03050f', bg1: '#0a1230',
   enemy: '#ff4d6d', enemyDark: '#4a1422', enemyMid: '#b83450', military: '#9bbf6a', militaryDark: '#34462a',
 };
+
+// phones see more of the field: the mining camera zooms out on small touch screens
+function viewZoom() { return typeof isTouch !== 'undefined' && isTouch ? clamp(Math.min(W, H) / 640, 0.62, 1) : 1; }
+// bottom edge of the top HUD bar (touch layouts put the minimap right under it)
+let hudB = 0, hudBT = 0;
+function hudBottom() { const n = performance.now(); if (n - hudBT > 1500) { hudBT = n; const el = document.querySelector('.topbar'); hudB = el ? el.getBoundingClientRect().bottom : 60; } return hudB; }
+// short vibrations on touch devices make hits and breaks feel physical
+let hapticT = 0;
+function haptic(ms) { if (typeof isTouch === 'undefined' || !isTouch || muted || !navigator.vibrate) return; const n = performance.now(); if (n - hapticT < 60) return; hapticT = n; try { navigator.vibrate(ms); } catch (e) {} }
 
 // ---------- noise ----------
 function hash2(x, y, s) {
@@ -2087,7 +2117,9 @@ function noise(dur, vol, filt, delay) {
   const g = AC.createGain(); g.gain.value = vol || 0.3;
   s.connect(f); f.connect(g); g.connect(master); if (fxSend) g.connect(fxSend); s.start(t);
 }
+const HAPTIC = { break: 12, boom: 45, hit: 25, win: [30, 50, 40], lose: [80, 60, 80], alarm: [20, 80, 20], bump: 30, upgrade: 15, warp: 35 };
 function sfx(name) {
+  if (HAPTIC[name] && typeof haptic === 'function') haptic(HAPTIC[name]);
   if (!AC) return;
   switch (name) {
     case 'click': tone(880, 0.06, 'square', 0.05); break;
@@ -6530,12 +6562,16 @@ const MineScene = {
     if (!S.hints.move) { this.moved = (this.moved || 0) + v * dt; if (this.moved > 160) S.hints.move = 1; }
     // --- aim & fire ---
     let aim = null, firing = false;
-    const wm = { x: mouse.x - W / 2 + this.cam.x, y: mouse.y - H / 2 + this.cam.y };
+    const vz = viewZoom(), wm = { x: (mouse.x - W / 2) / vz + this.cam.x, y: (mouse.y - H / 2) / vz + this.cam.y };
     const combat = this.inCombat;
     if (touchFire) {
       let best = null, bd = 1e9;
       const list = combat ? this.enemies : this.rocks;
-      for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
+      // keep cutting the same target while it is in reach, so the beam doesn't flick between rocks
+      const lk = this.lock && list.includes(this.lock) && !this.lock.dead ? this.lock : null;
+      if (lk && Math.hypot(lk.x - p.x, lk.y - p.y) - (lk.r || 0) < (combat ? 900 : this.toolRange() + 30)) { best = lk; bd = 0; }
+      else for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
+      this.lock = best;
       if (best && (combat || bd < this.toolRange() + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
     } else if (mouse.down && !mouse.onUI) { aim = Math.atan2(wm.y - p.y, wm.x - p.x); firing = true; }
     if (keys.has('Space')) { firing = true; if (aim == null) aim = p.a; }
@@ -6795,7 +6831,8 @@ const MineScene = {
   draw(ctx) {
     const t = this.t;
     const sx = (Math.random() - 0.5) * this.shake, sy = (Math.random() - 0.5) * this.shake;
-    const cx = this.cam.x - W / 2 + sx, cy = this.cam.y - H / 2 + sy;
+    const vz = viewZoom(), VW = W / vz, VH = H / vz;
+    const cx = this.cam.x - VW / 2 + sx, cy = this.cam.y - VH / 2 + sy;
     drawSpaceBg(ctx, W, H, cx, cy, t, this.loc.field.cold ? '#0c1838' : this.loc.field.hazard === 'heat' ? '#2a1408' : this.space ? '#1c0b1e' : null);
     const bgLoc = this.space ? LOC[S.loc] : this.loc.id === 'kuiper' ? LOC.pluton : this.loc.parent ? LOC[this.loc.parent] : this.loc.follow ? LOC[this.loc.follow] : this.loc;
     if (bgLoc && bgLoc.nuked) glow(ctx, W * 0.8 - cx * 0.03, H * 0.25 - (cy - MH) * 0.03, Math.min(W, H) * 0.5, '#ff5a2a55', 0.9);
@@ -6806,7 +6843,7 @@ const MineScene = {
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
     starWash(ctx, W, H, sysDef().star, t);
     ctx.save();
-    ctx.translate(-cx, -cy);
+    ctx.scale(vz, vz); ctx.translate(-cx, -cy);
     ctx.strokeStyle = 'rgba(61,232,255,0.12)'; ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
     ctx.strokeRect(20, 20, MW - 40, MH - 40); ctx.setLineDash([]);
     if (!this.space) this.drawStation(ctx, t);
@@ -6823,7 +6860,7 @@ const MineScene = {
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
     if (this.scanT >= 0) { const k = this.scanT, R = k * 2000; ctx.strokeStyle = `rgba(127,224,255,${(1 - k) * 0.8})`; ctx.lineWidth = 3 + (1 - k) * 6; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R, 0, TAU); ctx.stroke(); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R * 0.92, 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
-    for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
+    for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + VW + 160 && r.y > cy - 100 && r.y < cy + VH + 100) {
       if (r.comet) {
         const sp = Math.hypot(r.vx, r.vy) || 1, ux = r.vx / sp, uy = r.vy / sp, L = r.r * 5;
         const g = ctx.createLinearGradient(r.x, r.y, r.x - ux * L, r.y - uy * L); g.addColorStop(0, 'rgba(191,246,255,0.55)'); g.addColorStop(1, 'rgba(191,246,255,0)');
@@ -6924,7 +6961,7 @@ const MineScene = {
       ctx.stroke();
     }
     // off-screen indicators: station & enemies
-    if (!this.space && p.y < DOCK_Y - H * 0.45) {
+    if (!this.space && p.y < DOCK_Y - VH * 0.45) {
       const full = cargoFree() <= 0;
       const dist = Math.round((DOCK_Y - p.y) / 10) * 10;
       const bx = W / 2, by = H - (isTouch ? 44 : 64);
@@ -6935,7 +6972,7 @@ const MineScene = {
       ctx.globalAlpha = 1;
     }
     for (const e of [...this.enemies, ...this.rocks.filter(r => r.comet || (r.geode && r.seen > 0 && !(r.seenD > 0)))]) {
-      const ex = e.x - cx, ey = e.y - cy;
+      const ex = (e.x - cx) * vz, ey = (e.y - cy) * vz;
       if (ex > 0 && ex < W && ey > 0 && ey < H) continue;
       const a = Math.atan2(ey - H / 2, ex - W / 2);
       const ix = W / 2 + Math.cos(a) * (Math.min(W, H) / 2 - 30), iy = H / 2 + Math.sin(a) * (Math.min(W, H) / 2 - 30);
@@ -6958,7 +6995,7 @@ const MineScene = {
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     }
     // minimap
-    const mh = 150, mw = mh * MW / MH, mx = W - mw - 14, my = H - mh - (isTouch ? 210 : 40);
+    const mh = isTouch ? 110 : 150, mw = mh * MW / MH, mx = W - mw - (isTouch ? 8 : 14), my = isTouch ? hudBottom() + 8 : H - mh - 40;
     ctx.fillStyle = 'rgba(8,14,34,0.75)'; ctx.strokeStyle = 'rgba(61,232,255,0.35)'; ctx.lineWidth = 1;
     ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh);
     if (!this.space) { ctx.fillStyle = 'rgba(61,232,255,0.35)'; ctx.fillRect(mx, my + DOCK_Y / MH * mh, mw, mh - DOCK_Y / MH * mh); }
@@ -7538,9 +7575,9 @@ function updateMineHUD() {
     + (hasTool('deepscan') ? `<span class="tool">${sc.scanCd > 0 ? `Scan ${Math.ceil(sc.scanCd)}s` : '◈ Deep Scan ready'} <small>[C]</small></span>` : '')
     + (hasTool('widebeam') ? '<span class="tool">✦ Wide Beam</span>' : ''))
     + (sc.moltenT > 0 ? `<span class="tool" style="color:#ffb040">☀ MOLTEN ${Math.ceil(sc.moltenT)}s</span>` : sysDef().pulses && !sc.space && sc.pulseIn < 10 ? `<span class="tool">☀ Pulse in ${Math.ceil(sc.pulseIn)}s</span>` : '');
-  for (const [id, k, cd, lbl] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST'], ['bombBtn', 'charges', sc.bombCd, 'BOMB'], ['scanBtn', 'deepscan', sc.scanCd, 'SCAN']]) { $(id).classList.toggle('hidden', !hasTool(k) || sc.space); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); }
+  for (const [id, k, cd, lbl, mx] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST', 45], ['bombBtn', 'charges', sc.bombCd, 'BOMB', 10], ['scanBtn', 'deepscan', sc.scanCd, 'SCAN', built('sonar') ? 7 : 14], ['pullBtn', 'tractor', sc.pullCd, 'PULL', 14]]) { const ok = !hasTool(k) || sc.space; $(id).classList.toggle('hidden', ok); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); $(id).style.setProperty('--p', cd > 0 ? (1 - cd / mx).toFixed(3) : 1); }
   $('toolBtn').classList.toggle('hidden', !hasTool('drill') || sc.space); $('toolBtn').textContent = sc.tool === 'drill' ? 'LASER' : 'DRILL';
-  $('pullBtn').classList.toggle('hidden', !hasTool('tractor') || sc.space); $('pullBtn').textContent = sc.pullCd > 0 ? Math.ceil(sc.pullCd) + 's' : 'PULL'; $('pullBtn').classList.toggle('cd', sc.pullCd > 0);
+
   $('mineInfo').innerHTML = tools + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
   const combat = sc.inCombat || sc.clearT > 0;
   $('fireBtn').textContent = sc.inCombat ? 'FIRE' : 'LASER';
@@ -8072,6 +8109,36 @@ window.addEventListener('mouseup', e => { if (mouse.down && scene && scene.onUp 
 canvas.addEventListener('wheel', e => { e.preventDefault(); if (scene && scene.onWheel && !isBlocking()) scene.onWheel(e.deltaY, e.clientX, e.clientY); }, { passive: false });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
+// the page itself never pans or zooms (menus still scroll: they are their own scroll containers)
+const scrollerOf = el => { for (; el && el !== document.body; el = el.parentElement) { const o = getComputedStyle(el).overflowY; if ((o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight + 1) return el; const ox = getComputedStyle(el).overflowX; if ((ox === 'auto' || ox === 'scroll') && el.scrollWidth > el.clientWidth + 1) return el; } return null; };
+// Menus scroll by finger through our own kinetic scroller: in full screen the host page sets
+// touch-action:none, which blocks the browser's native scrolling inside the game frame.
+const kin = { el: null, x: 0, y: 0, vx: 0, vy: 0, t: 0, moved: false, raf: 0 };
+document.addEventListener('touchstart', e => {
+  cancelAnimationFrame(kin.raf);
+  const t = e.touches[0]; kin.el = e.touches.length === 1 && e.target !== canvas ? scrollerOf(e.target) : null;
+  kin.x = t.clientX; kin.y = t.clientY; kin.vx = kin.vy = 0; kin.t = performance.now(); kin.moved = false;
+}, { passive: true, capture: true });
+document.addEventListener('touchmove', e => {
+  if (e.target === canvas) return;
+  if (!kin.el) { if (e.cancelable) e.preventDefault(); return; }
+  const t = e.touches[0], dx = t.clientX - kin.x, dy = t.clientY - kin.y, now = performance.now(), dt = Math.max(1, now - kin.t);
+  if (!kin.moved && Math.hypot(dx, dy) < 6) return;
+  kin.moved = true; if (e.cancelable) e.preventDefault();
+  kin.el.scrollTop -= dy; kin.el.scrollLeft -= dx;
+  kin.vy = lerp(kin.vy, dy / dt, 0.5); kin.vx = lerp(kin.vx, dx / dt, 0.5);
+  kin.x = t.clientX; kin.y = t.clientY; kin.t = now;
+}, { passive: false, capture: true });
+document.addEventListener('touchend', () => {
+  if (!kin.el || !kin.moved) return;
+  const el = kin.el; let last = performance.now();
+  const step = now => { const dt = now - last; last = now; el.scrollTop -= kin.vy * dt; el.scrollLeft -= kin.vx * dt; const k = Math.pow(0.995, dt); kin.vy *= k; kin.vx *= k; if (Math.abs(kin.vy) + Math.abs(kin.vx) > 0.02) kin.raf = requestAnimationFrame(step); };
+  if (performance.now() - kin.t < 80) kin.raf = requestAnimationFrame(step);
+}, { passive: true, capture: true });
+// a finger that scrolled a menu must not also press the button it started on
+document.addEventListener('click', e => { if (kin.moved) { e.stopPropagation(); e.preventDefault(); kin.moved = false; } }, true);
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault());
 // táctil en canvas (mapa: arrastrar/pellizcar)
 let pinch = null;
 canvas.addEventListener('touchstart', e => {
@@ -8136,6 +8203,7 @@ function setupTouchControls() {
   $('boostBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.boost(); }, { passive: false });
   $('bombBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.bomb(); }, { passive: false });
   $('scanBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.scan(); }, { passive: false });
+  for (const el of document.querySelectorAll('.tbtn')) { el.addEventListener('touchstart', () => el.classList.add('on'), { passive: true }); for (const ev of ['touchend', 'touchcancel']) el.addEventListener(ev, () => el.classList.remove('on')); }
   const fe = e => { e.preventDefault(); touchFire = false; fire.classList.remove('on'); };
   fire.addEventListener('touchend', fe); fire.addEventListener('touchcancel', fe);
 }

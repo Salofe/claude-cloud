@@ -47,6 +47,36 @@ window.addEventListener('mouseup', e => { if (mouse.down && scene && scene.onUp 
 canvas.addEventListener('wheel', e => { e.preventDefault(); if (scene && scene.onWheel && !isBlocking()) scene.onWheel(e.deltaY, e.clientX, e.clientY); }, { passive: false });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
+// the page itself never pans or zooms (menus still scroll: they are their own scroll containers)
+const scrollerOf = el => { for (; el && el !== document.body; el = el.parentElement) { const o = getComputedStyle(el).overflowY; if ((o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight + 1) return el; const ox = getComputedStyle(el).overflowX; if ((ox === 'auto' || ox === 'scroll') && el.scrollWidth > el.clientWidth + 1) return el; } return null; };
+// Menus scroll by finger through our own kinetic scroller: in full screen the host page sets
+// touch-action:none, which blocks the browser's native scrolling inside the game frame.
+const kin = { el: null, x: 0, y: 0, vx: 0, vy: 0, t: 0, moved: false, raf: 0 };
+document.addEventListener('touchstart', e => {
+  cancelAnimationFrame(kin.raf);
+  const t = e.touches[0]; kin.el = e.touches.length === 1 && e.target !== canvas ? scrollerOf(e.target) : null;
+  kin.x = t.clientX; kin.y = t.clientY; kin.vx = kin.vy = 0; kin.t = performance.now(); kin.moved = false;
+}, { passive: true, capture: true });
+document.addEventListener('touchmove', e => {
+  if (e.target === canvas) return;
+  if (!kin.el) { if (e.cancelable) e.preventDefault(); return; }
+  const t = e.touches[0], dx = t.clientX - kin.x, dy = t.clientY - kin.y, now = performance.now(), dt = Math.max(1, now - kin.t);
+  if (!kin.moved && Math.hypot(dx, dy) < 6) return;
+  kin.moved = true; if (e.cancelable) e.preventDefault();
+  kin.el.scrollTop -= dy; kin.el.scrollLeft -= dx;
+  kin.vy = lerp(kin.vy, dy / dt, 0.5); kin.vx = lerp(kin.vx, dx / dt, 0.5);
+  kin.x = t.clientX; kin.y = t.clientY; kin.t = now;
+}, { passive: false, capture: true });
+document.addEventListener('touchend', () => {
+  if (!kin.el || !kin.moved) return;
+  const el = kin.el; let last = performance.now();
+  const step = now => { const dt = now - last; last = now; el.scrollTop -= kin.vy * dt; el.scrollLeft -= kin.vx * dt; const k = Math.pow(0.995, dt); kin.vy *= k; kin.vx *= k; if (Math.abs(kin.vy) + Math.abs(kin.vx) > 0.02) kin.raf = requestAnimationFrame(step); };
+  if (performance.now() - kin.t < 80) kin.raf = requestAnimationFrame(step);
+}, { passive: true, capture: true });
+// a finger that scrolled a menu must not also press the button it started on
+document.addEventListener('click', e => { if (kin.moved) { e.stopPropagation(); e.preventDefault(); kin.moved = false; } }, true);
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault());
 // táctil en canvas (mapa: arrastrar/pellizcar)
 let pinch = null;
 canvas.addEventListener('touchstart', e => {
@@ -111,6 +141,7 @@ function setupTouchControls() {
   $('boostBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.boost(); }, { passive: false });
   $('bombBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.bomb(); }, { passive: false });
   $('scanBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.scan(); }, { passive: false });
+  for (const el of document.querySelectorAll('.tbtn')) { el.addEventListener('touchstart', () => el.classList.add('on'), { passive: true }); for (const ev of ['touchend', 'touchcancel']) el.addEventListener(ev, () => el.classList.remove('on')); }
   const fe = e => { e.preventDefault(); touchFire = false; fire.classList.remove('on'); };
   fire.addEventListener('touchend', fe); fire.addEventListener('touchcancel', fe);
 }

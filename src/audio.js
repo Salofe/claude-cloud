@@ -41,7 +41,9 @@ function noise(dur, vol, filt, delay) {
   const g = AC.createGain(); g.gain.value = vol || 0.3;
   s.connect(f); f.connect(g); g.connect(master); if (fxSend) g.connect(fxSend); s.start(t);
 }
+const HAPTIC = { break: 12, boom: 45, hit: 25, win: [30, 50, 40], lose: [80, 60, 80], alarm: [20, 80, 20], bump: 30, upgrade: 15, warp: 35 };
 function sfx(name) {
+  if (HAPTIC[name] && typeof haptic === 'function') haptic(HAPTIC[name]);
   if (!AC) return;
   switch (name) {
     case 'click': tone(880, 0.06, 'square', 0.05); break;

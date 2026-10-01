@@ -5,6 +5,15 @@ const PAL = {
   enemy: '#ff4d6d', enemyDark: '#4a1422', enemyMid: '#b83450', military: '#9bbf6a', militaryDark: '#34462a',
 };
 
+// phones see more of the field: the mining camera zooms out on small touch screens
+function viewZoom() { return typeof isTouch !== 'undefined' && isTouch ? clamp(Math.min(W, H) / 640, 0.62, 1) : 1; }
+// bottom edge of the top HUD bar (touch layouts put the minimap right under it)
+let hudB = 0, hudBT = 0;
+function hudBottom() { const n = performance.now(); if (n - hudBT > 1500) { hudBT = n; const el = document.querySelector('.topbar'); hudB = el ? el.getBoundingClientRect().bottom : 60; } return hudB; }
+// short vibrations on touch devices make hits and breaks feel physical
+let hapticT = 0;
+function haptic(ms) { if (typeof isTouch === 'undefined' || !isTouch || muted || !navigator.vibrate) return; const n = performance.now(); if (n - hapticT < 60) return; hapticT = n; try { navigator.vibrate(ms); } catch (e) {} }
+
 // ---------- noise ----------
 function hash2(x, y, s) {
   let h = (x * 374761393 + y * 668265263 + s * 1442695041) | 0;
