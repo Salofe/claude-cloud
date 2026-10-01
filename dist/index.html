@@ -458,6 +458,15 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .guardian { border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); border-radius: 10px; padding: 8px 12px; margin: 8px 0; display: flex; flex-direction: column; gap: 3px; font-size: 13px; text-align: left; }
 .guardian b { color: var(--c); }
 .guardian em { color: var(--c); font-style: normal; font-weight: 700; }
+/* ---- ore values ---- */
+#mineOres { margin: 2px 0 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.orow { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); line-height: 1.5; }
+.orow i { width: 8px; height: 8px; border-radius: 2px; transform: rotate(45deg); flex: none; }
+.orow b { margin-left: auto; color: var(--gold); font-weight: 700; }
+.tier { font-size: 8px; letter-spacing: 1px; color: var(--gold); margin-left: 4px; }
+.tier .off { color: rgba(255,255,255,.15); font-style: normal; }
+.ore b { color: var(--gold); margin-left: 3px; }
+.srow .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); margin-right: 4px; vertical-align: 1px; }
 </style>
 </head>
 <body>
@@ -510,6 +519,7 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
   <div class="minebox ui">
     <div class="mname" id="mineName"></div>
     <div id="mineInfo"></div>
+    <div id="mineOres"></div>
     <div id="mineCargo"></div>
   </div>
 </div>
@@ -552,18 +562,18 @@ function fmt(n) {
 
 // Ore values climb steeply from zone to zone.
 const ITEMS = {
-  iron:      { n: 'Iron',           b: 4,    c: '#d7a98a', ore: 1, h: 1.0 },
-  ice:       { n: 'Ice',            b: 6,    c: '#a6ecff', ore: 1, h: 0.7 },
-  titanium:  { n: 'Titanium',       b: 30,   c: '#dfe6ff', ore: 1, h: 1.4 },
-  cobalt:    { n: 'Cobalt',         b: 90,   c: '#5b8cff', ore: 1, h: 1.25 },
-  nickel:    { n: 'Nickel',         b: 50,   c: '#9fe0b8', ore: 1, h: 1.2 },
-  he3:       { n: 'Helium-3',       b: 120,  c: '#ffd24a', ore: 1, h: 1.3 },
-  platinum:  { n: 'Platinum',       b: 250,  c: '#fff1b8', ore: 1, h: 1.7 },
-  sunstone:  { n: 'Sunstone',       b: 400,  c: '#ff7a3a', ore: 1, h: 1.6 },
-  iridium:   { n: 'Iridium',        b: 1200, c: '#c38bff', ore: 1, h: 2.2 },
-  ringpearl: { n: 'Ring Pearl',     b: 2500, c: '#bfe8ff', ore: 1, h: 2.0 },
-  exotic:    { n: 'Exotic Crystal', b: 9000, c: '#ff5fd7', ore: 1, h: 2.8 },
-  voidshard: { n: 'Void Shard',     b: 16000, c: '#a070ff', ore: 1, h: 3.0 },
+  iron:      { n: 'Iron',           b: 4,    c: '#b06a3c', ore: 1, h: 1.0 },
+  ice:       { n: 'Ice',            b: 6,    c: '#8fd8ff', ore: 1, h: 0.7 },
+  titanium:  { n: 'Titanium',       b: 30,   c: '#7f8da3', ore: 1, h: 1.4 },
+  cobalt:    { n: 'Cobalt',         b: 90,   c: '#3156ff', ore: 1, h: 1.25 },
+  nickel:    { n: 'Nickel',         b: 50,   c: '#3fcf5a', ore: 1, h: 1.2 },
+  he3:       { n: 'Helium-3',       b: 120,  c: '#ffd84a', ore: 1, h: 1.3 },
+  platinum:  { n: 'Platinum',       b: 250,  c: '#f4f4f4', ore: 1, h: 1.7 },
+  sunstone:  { n: 'Sunstone',       b: 400,  c: '#ff7a1a', ore: 1, h: 1.6 },
+  iridium:   { n: 'Iridium',        b: 1200, c: '#a050ff', ore: 1, h: 2.2 },
+  ringpearl: { n: 'Ring Pearl',     b: 2500, c: '#2ee6c4', ore: 1, h: 2.0 },
+  exotic:    { n: 'Exotic Crystal', b: 9000, c: '#ff3fc8', ore: 1, h: 2.8 },
+  voidshard: { n: 'Void Shard',     b: 16000, c: '#ff2b3a', ore: 1, h: 3.0 },
   food:      { n: 'Food',           b: 60,  c: '#96e072' },
   meds:      { n: 'Medicine',       b: 180, c: '#ff6b7d' },
   machinery: { n: 'Machinery',      b: 150, c: '#e0b35e' },
@@ -1834,6 +1844,11 @@ function goodsValue(locId, k, n) {
 const wantsGood = (locId, k) => { const m = LOC[locId].market; return m && m[k] != null && m[k] > 1; };
 function cargoValueAt(locId) { let v = oreValueAt(locId); for (const k of GOODS) if (S.cargo[k] && wantsGood(locId, k)) v += goodsValue(locId, k, S.cargo[k]); return v; }
 function oreValueBase(k) { return ITEMS[k].b * incomeMult(); }
+// what one unit of ore is worth right now (base price: depots pay ~0.6×, cities 2–3.5×)
+const oreUnit = k => ITEMS[k].b * incomeMult();
+// 1–5 value tier for quick reading (iron 1 … void shard 5)
+const oreTier = k => clamp(Math.ceil(Math.log10(ITEMS[k].b) * 1.2), 1, 5);
+const oreStars = k => '◆'.repeat(oreTier(k)) + '<i class="off">' + '◆'.repeat(5 - oreTier(k)) + '</i>';
 
 // ---------- orbital positions ----------
 function locPos(loc, day) {
@@ -3710,7 +3725,7 @@ const MineScene = {
     if (cargoFree() <= 0) return false;
     addCargo(c.ore, 1); S.stats.mined++;
     this.collected[c.ore] = (this.collected[c.ore] || 0) + 1;
-    this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: '+1 ' + ITEMS[c.ore].n, col: ITEMS[c.ore].c, life: 1.1 });
+    this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: `+1 ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`, col: ITEMS[c.ore].c, life: 1.1 });
     sfx('pickup');
     return true;
   },
@@ -4513,8 +4528,8 @@ function selectLoc(id) {
   for (const e of evs) if (e.war) html += warBarHTML(e);
   if (l.faction && (S.allies || {})[l.faction]) html += `<div class="valline"><span class="ally-stars sm">${'★'.repeat(S.allies[l.faction])}</span> Your ally: ore sells <b>+${Math.round(S.allies[l.faction] * WAR.starBonus * 100)}%</b> here</div>`;
   if (l.field) {
-    const ores = Object.keys(l.field.ores).sort((a, b) => l.field.ores[b] - l.field.ores[a]);
-    html += `<div class="ores">${ores.map(o => `<span class="ore" style="--c:${ITEMS[o].c}">${ITEMS[o].n}</span>`).join('')}</div>`;
+    const ores = Object.keys(l.field.ores).sort((a, b) => ITEMS[b].b - ITEMS[a].b);
+    html += `<div class="ores">${ores.map(o => `<span class="ore" style="--c:${ITEMS[o].c}">${ITEMS[o].n} <b>${fmt(oreUnit(o))}</b></span>`).join('')}</div><small class="dim">Value per unit — most valuable first. Cities pay 2–3.5× that, depots ~0.6×.</small>`;
     if (l.field.hazard === 'heat') html += `<div class="warnline">🔥 Extreme heat — damages your hull unless you have shields.</div>`;
   }
   if (l.market && !here && cargoUsed()) {
@@ -4587,6 +4602,12 @@ function updateMineHUD() {
   updateMineHUD.t = now;
   const sc = MineScene;
   const rows = Object.keys(S.cargo).map(k => `<div class="crow"><i style="background:${ITEMS[k].c}"></i>${ITEMS[k].n}<b>${fmt(S.cargo[k])}</b></div>`).join('');
+  $('mineOres').classList.toggle('hidden', !!sc.space);
+  if (!sc.space && sc.loc.field) {
+    const ores = Object.keys(sc.loc.field.ores).sort((a, b) => ITEMS[b].b - ITEMS[a].b);
+    const key = ores.join() + Math.round(incomeMult() * 100);
+    if ($('mineOres').dataset.k !== key) { $('mineOres').dataset.k = key; $('mineOres').innerHTML = ores.map(o => `<div class="orow"><i style="background:${ITEMS[o].c}"></i>${ITEMS[o].n}<span class="tier">${oreStars(o)}</span><b>${fmt(oreUnit(o))}</b></div>`).join(''); }
+  }
   const val = LOC[S.loc].market ? oreValueAt(S.loc) : 0;
   $('mineCargo').innerHTML = (rows || '<div class="crow dim">Cargo hold empty</div>') + (val ? `<div class="crow val">Worth<b class="cr">${fmt(val)} cr</b></div>` : '');
   const depth = sc.space ? '' : `<span class="depth">Depth ${Math.round(sc.depthOf(sc.p.y) * 100)}% · richness ×${(1 + sc.depthOf(sc.p.y) * 4).toFixed(1)}</span>`;
@@ -4926,6 +4947,12 @@ function buyInvest() {
 }
 
 // ---------- global panels ----------
+// every ore you can reach in this system, most valuable first
+function oreGuide() {
+  const seen = new Set(); for (const l of FIELDS) if (locOpen(l.id)) for (const k in l.field.ores) seen.add(k);
+  for (const k in S.cargo) if (ITEMS[k].ore) seen.add(k);
+  return [...seen].sort((a, b) => ITEMS[b].b - ITEMS[a].b).map(k => `<div class="srow"><span><i class="sw" style="background:${ITEMS[k].c}"></i> ${ITEMS[k].n} <span class="tier">${oreStars(k)}</span></span><b>${fmt(oreUnit(k))} cr</b></div>`).join('');
+}
 function openShip() {
   sfx('click');
   const rows = Object.keys(S.cargo).map(k => `<div class="srow"><span><i class="sw" style="background:${ITEMS[k].c}"></i> ${ITEMS[k].n}</span><b>${S.cargo[k]}</b><button class="mini" onclick="jettison('${k}')">Dump</button></div>`).join('');
@@ -4934,6 +4961,7 @@ function openShip() {
   openSheet(`🚀 ${S.shipName} <small>${UPG.hull.names[S.lv.hull - 1]} class</small>`, `<div class="yard-top"><canvas id="shipView" width="420" height="190"></canvas></div>
     <div class="cols"><div><div class="sub">Systems</div>${upg}</div><div><div class="sub">Cargo hold ${cargoUsed()}/${ship.cargoMax}</div>${rows || '<div class="empty small">Empty</div>'}
     <div class="sub">Stats</div><div class="srow"><span>Ore mined</span><b>${fmt(S.stats.mined)}</b></div><div class="srow"><span>Lifetime earnings</span><b>${fmt(S.stats.earned)} cr</b></div><div class="srow"><span>Record credits (leaderboard)</span><b class="cr">${fmt(S.stats.peak || 0)} cr</b></div>
+    <div class="sub">Ore values <small class="dim">· per unit</small></div>${oreGuide()}
     ${has(U.BELT) ? `<div class="srow"><span>Battles won / lost</span><b>${S.stats.won} / ${S.stats.lost}</b></div>` : ''}${has(U.TRADE) ? `<div class="srow"><span>Contracts</span><b>${S.stats.contracts}</b></div>` : ''}</div></div>`);
   const t0 = performance.now();
   const anim = () => { if (!$('sheet').classList.contains('hidden') && $('shipView')) { drawShipPreview('shipView', shipLv(), (performance.now() - t0) / 1000); requestAnimationFrame(anim); } };

@@ -154,8 +154,8 @@ function selectLoc(id) {
   for (const e of evs) if (e.war) html += warBarHTML(e);
   if (l.faction && (S.allies || {})[l.faction]) html += `<div class="valline"><span class="ally-stars sm">${'★'.repeat(S.allies[l.faction])}</span> Your ally: ore sells <b>+${Math.round(S.allies[l.faction] * WAR.starBonus * 100)}%</b> here</div>`;
   if (l.field) {
-    const ores = Object.keys(l.field.ores).sort((a, b) => l.field.ores[b] - l.field.ores[a]);
-    html += `<div class="ores">${ores.map(o => `<span class="ore" style="--c:${ITEMS[o].c}">${ITEMS[o].n}</span>`).join('')}</div>`;
+    const ores = Object.keys(l.field.ores).sort((a, b) => ITEMS[b].b - ITEMS[a].b);
+    html += `<div class="ores">${ores.map(o => `<span class="ore" style="--c:${ITEMS[o].c}">${ITEMS[o].n} <b>${fmt(oreUnit(o))}</b></span>`).join('')}</div><small class="dim">Value per unit — most valuable first. Cities pay 2–3.5× that, depots ~0.6×.</small>`;
     if (l.field.hazard === 'heat') html += `<div class="warnline">🔥 Extreme heat — damages your hull unless you have shields.</div>`;
   }
   if (l.market && !here && cargoUsed()) {
@@ -228,6 +228,12 @@ function updateMineHUD() {
   updateMineHUD.t = now;
   const sc = MineScene;
   const rows = Object.keys(S.cargo).map(k => `<div class="crow"><i style="background:${ITEMS[k].c}"></i>${ITEMS[k].n}<b>${fmt(S.cargo[k])}</b></div>`).join('');
+  $('mineOres').classList.toggle('hidden', !!sc.space);
+  if (!sc.space && sc.loc.field) {
+    const ores = Object.keys(sc.loc.field.ores).sort((a, b) => ITEMS[b].b - ITEMS[a].b);
+    const key = ores.join() + Math.round(incomeMult() * 100);
+    if ($('mineOres').dataset.k !== key) { $('mineOres').dataset.k = key; $('mineOres').innerHTML = ores.map(o => `<div class="orow"><i style="background:${ITEMS[o].c}"></i>${ITEMS[o].n}<span class="tier">${oreStars(o)}</span><b>${fmt(oreUnit(o))}</b></div>`).join(''); }
+  }
   const val = LOC[S.loc].market ? oreValueAt(S.loc) : 0;
   $('mineCargo').innerHTML = (rows || '<div class="crow dim">Cargo hold empty</div>') + (val ? `<div class="crow val">Worth<b class="cr">${fmt(val)} cr</b></div>` : '');
   const depth = sc.space ? '' : `<span class="depth">Depth ${Math.round(sc.depthOf(sc.p.y) * 100)}% · richness ×${(1 + sc.depthOf(sc.p.y) * 4).toFixed(1)}</span>`;
@@ -567,6 +573,12 @@ function buyInvest() {
 }
 
 // ---------- global panels ----------
+// every ore you can reach in this system, most valuable first
+function oreGuide() {
+  const seen = new Set(); for (const l of FIELDS) if (locOpen(l.id)) for (const k in l.field.ores) seen.add(k);
+  for (const k in S.cargo) if (ITEMS[k].ore) seen.add(k);
+  return [...seen].sort((a, b) => ITEMS[b].b - ITEMS[a].b).map(k => `<div class="srow"><span><i class="sw" style="background:${ITEMS[k].c}"></i> ${ITEMS[k].n} <span class="tier">${oreStars(k)}</span></span><b>${fmt(oreUnit(k))} cr</b></div>`).join('');
+}
 function openShip() {
   sfx('click');
   const rows = Object.keys(S.cargo).map(k => `<div class="srow"><span><i class="sw" style="background:${ITEMS[k].c}"></i> ${ITEMS[k].n}</span><b>${S.cargo[k]}</b><button class="mini" onclick="jettison('${k}')">Dump</button></div>`).join('');
@@ -575,6 +587,7 @@ function openShip() {
   openSheet(`🚀 ${S.shipName} <small>${UPG.hull.names[S.lv.hull - 1]} class</small>`, `<div class="yard-top"><canvas id="shipView" width="420" height="190"></canvas></div>
     <div class="cols"><div><div class="sub">Systems</div>${upg}</div><div><div class="sub">Cargo hold ${cargoUsed()}/${ship.cargoMax}</div>${rows || '<div class="empty small">Empty</div>'}
     <div class="sub">Stats</div><div class="srow"><span>Ore mined</span><b>${fmt(S.stats.mined)}</b></div><div class="srow"><span>Lifetime earnings</span><b>${fmt(S.stats.earned)} cr</b></div><div class="srow"><span>Record credits (leaderboard)</span><b class="cr">${fmt(S.stats.peak || 0)} cr</b></div>
+    <div class="sub">Ore values <small class="dim">· per unit</small></div>${oreGuide()}
     ${has(U.BELT) ? `<div class="srow"><span>Battles won / lost</span><b>${S.stats.won} / ${S.stats.lost}</b></div>` : ''}${has(U.TRADE) ? `<div class="srow"><span>Contracts</span><b>${S.stats.contracts}</b></div>` : ''}</div></div>`);
   const t0 = performance.now();
   const anim = () => { if (!$('sheet').classList.contains('hidden') && $('shipView')) { drawShipPreview('shipView', shipLv(), (performance.now() - t0) / 1000); requestAnimationFrame(anim); } };

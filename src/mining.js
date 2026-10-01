@@ -150,7 +150,7 @@ const MineScene = {
     if (cargoFree() <= 0) return false;
     addCargo(c.ore, 1); S.stats.mined++;
     this.collected[c.ore] = (this.collected[c.ore] || 0) + 1;
-    this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: '+1 ' + ITEMS[c.ore].n, col: ITEMS[c.ore].c, life: 1.1 });
+    this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: `+1 ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`, col: ITEMS[c.ore].c, life: 1.1 });
     sfx('pickup');
     return true;
   },

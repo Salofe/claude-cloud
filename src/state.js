@@ -100,6 +100,11 @@ function goodsValue(locId, k, n) {
 const wantsGood = (locId, k) => { const m = LOC[locId].market; return m && m[k] != null && m[k] > 1; };
 function cargoValueAt(locId) { let v = oreValueAt(locId); for (const k of GOODS) if (S.cargo[k] && wantsGood(locId, k)) v += goodsValue(locId, k, S.cargo[k]); return v; }
 function oreValueBase(k) { return ITEMS[k].b * incomeMult(); }
+// what one unit of ore is worth right now (base price: depots pay ~0.6×, cities 2–3.5×)
+const oreUnit = k => ITEMS[k].b * incomeMult();
+// 1–5 value tier for quick reading (iron 1 … void shard 5)
+const oreTier = k => clamp(Math.ceil(Math.log10(ITEMS[k].b) * 1.2), 1, 5);
+const oreStars = k => '◆'.repeat(oreTier(k)) + '<i class="off">' + '◆'.repeat(5 - oreTier(k)) + '</i>';
 
 // ---------- orbital positions ----------
 function locPos(loc, day) {
