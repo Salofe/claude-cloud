@@ -4,10 +4,7 @@
   --ft: 'Rajdhani', 'Segoe UI', system-ui, sans-serif; --fh: 'Orbitron', 'Arial Black', sans-serif;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--txt); font-family: var(--ft); font-size: 15px; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
-canvas, #touchUI, #joyZone, #fireBtn, .tbtn { touch-action: none; }
-/* menus must scroll with a finger, also in fullscreen */
-.sh-body, .tabbody, .mbox, .panel, .tabs, #galaxyPanel, .scroll { touch-action: pan-x pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--txt); font-family: var(--ft); font-size: 15px; user-select: none; -webkit-user-select: none; touch-action: none; }
 canvas#c { position: fixed; inset: 0; display: block; }
 .hidden { display: none !important; }
 b { color: #fff; }
