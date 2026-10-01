@@ -34,7 +34,8 @@ function loadSave() {
     if (!d || d.v !== 3) return null;
     d.projects = d.projects || {};
     d.lv.extractor = d.lv.extractor || 1;
-    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0; d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
+    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
+    for (const e of d.events || []) if (/^Pirate warlord at/.test(e.title || '') && !e.warlord && e.locs) { e.kind = 'warlord'; e.warlord = e.locs[0]; } d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     return d;
   } catch (e) { return null; }
@@ -416,7 +417,7 @@ function genContracts(locId) {
 }
 function contractText(c) {
   if (c.type === 'deliver') return `Deliver <b>${c.qty} ${ITEMS[c.item].n}</b> to <b>${LOC[c.to].station}</b> (${LOC[c.to].n})`;
-  return `Destroy <b>${c.kills}</b> pirate fleet${c.kills > 1 ? 's' : ''}` + (c.progress != null ? ` (${c.progress}/${c.kills})` : '');
+  return `Destroy <b>${c.kills}</b> pirate fleet${c.kills > 1 ? 's' : ''}${c.at ? ` at <b>${LOC[c.at].field ? LOC[c.at].field.n : LOC[c.at].n}</b> (the warlord's field or routes through it)` : ''}` + (c.progress != null ? ` (${c.progress}/${c.kills})` : '');
 }
 function acceptContract(locId, cid) {
   const list = S.contracts[locId]; const i = list.findIndex(c => c.id === cid);

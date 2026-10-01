@@ -191,6 +191,7 @@ const ENEMIES = {
   corsair: { n: 'Corsair',         hp: 80,  sp: 25,  dmg: 6,  rate: 1.3, spd: 180, size: 1.05, loot: 110, pow: 2.5 },
   frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
   carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
+  warlord: { n: 'Pirate Warlord',  hp: 2400, sp: 900, dmg: 12, rate: 1.1, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 7, boss: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };
 const Z_ENEMY = [0.5, 0.7, 1, 3, 8, 22];   // enemy stat multiplier by zone

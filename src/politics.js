@@ -20,6 +20,30 @@ function addEvent(ev) {
   return ev;
 }
 
+// ---------- pirate warlords ----------
+// the bounty is posted at the field's own city, or the nearest open city if the field only has a depot
+function warlordCity(id) {
+  const l = LOC[id];
+  if (l.market && !l.depot && l.faction !== 'piratas') return l;
+  return NODES.filter(x => x.market && !x.depot && x.faction && x.faction !== 'piratas' && locOpen(x.id) && !x.nuked)
+    .sort((a, b) => locDist(id, a.id, S.day) - locDist(id, b.id, S.day))[0] || null;
+}
+const warlordAt = id => S.events.find(e => e.warlord === id);
+const warlordPrize = () => Math.round(4 * haulRef());
+function warlordKilled(id) {
+  const e = warlordAt(id); if (!e) return;
+  S.events = S.events.filter(x => x !== e);
+  const prize = warlordPrize();
+  earn(prize);
+  repChange('piratas', -10, true);
+  const city = warlordCity(id); if (city && city.faction) repChange(city.faction, 20, true);
+  for (const c of [...S.active]) if (c.type === 'bounty' && c.at === id) completeContract(c);
+  for (const k in S.contracts) S.contracts[k] = S.contracts[k].filter(c => !(c.type === 'bounty' && c.at === id));
+  addNews('🏆', `<b>You destroyed the pirate warlord</b> at ${LOC[id].field.n}: +${fmt(prize)} cr`, '#ffd24a');
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🏆', title: 'Warlord destroyed!', html: `<p>The warlord's flagship breaks apart over ${LOC[id].field.n}. The system is safer — and richer for you.</p><p><b class="cr big-num">+${fmt(prize)} cr</b></p>`, choices: [{ label: 'Collect', cost: 0, fn: () => {} }] });
+  save();
+}
+
 // ---------- natural system events ----------
 const EVENT_GEN = [
   { kind: 'war', w: 1.1, make() {
@@ -87,10 +111,14 @@ const EVENT_GEN = [
       if (!has(U.BELT)) return null;
       const l = pick(NODES.filter(x => x.field && locOpen(x.id) && x.field.z >= 2));
       if (!l) return null;
-      const ev = { icon: '🏴‍☠️', title: `Pirate warlord at ${l.n}`, text: `A notorious warlord raids ${l.n}. Huge bounty for anyone who fights there.`,
+      const city = warlordCity(l.id);
+      const ev = { kind: 'warlord', icon: '🏴‍☠️', title: `Pirate warlord at ${l.field.n}`, warlord: l.id, uid: uid(),
+        text: `A notorious warlord raids ${l.field.n}. He hunts anyone who mines there — destroy his flagship for a huge prize${city ? `, or take the bounty at ${city.station}` : ''}.`,
         dur: randi(20, 30), locs: [l.id], danger: [{ loc: l.id, add: 0.5 }] };
-      const c = S.contracts[l.id] || (S.contracts[l.id] = []);
-      if (l.market && !l.depot) c.unshift({ type: 'bounty', id: uid(), from: l.id, kills: 3, reward: Math.round(3 * 1500 * Z_LOOT[l.field.z]), rep: 25, days: ev.dur, faction: l.faction, urgent: 1 });
+      if (city) {
+        const c = S.contracts[city.id] || (S.contracts[city.id] = []);
+        c.unshift({ type: 'bounty', id: uid(), from: city.id, at: l.id, kills: 3, reward: Math.round(Math.max(3 * 1500 * Z_LOOT[l.field.z], 1.5 * haulRef())), rep: 25, days: ev.dur, faction: city.faction, urgent: 1 });
+      }
       return ev;
   } },
   { kind: 'fuel', w: 0.6, make() {
@@ -308,7 +336,7 @@ function powersAt(id) {
   const city = l.market && !l.depot;
   if (city && l.faction && l.faction !== 'piratas') add('works');
   if (city) add('boom', kindActive('boom', id) ? { why: 'a boom is already running' } : {});
-  if (has(U.BELT) && (l.danger || 0) >= 0.1) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
+  if (has(U.BELT) && ((l.danger || 0) >= 0.1 || warlordAt(id))) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
   if (city && l.faction && l.faction !== 'piratas' && has(U.TRADE)) {
     const w = warOf(l.faction);
     if (!w && has(U.SATURN)) {

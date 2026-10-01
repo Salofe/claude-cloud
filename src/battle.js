@@ -67,6 +67,7 @@ const Combat = {
     sc.parts.burst(e.x, e.y, 25, '#ffffff', 190, 0.6, 3);
     sfx('boom'); sc.shake = Math.max(sc.shake, 10);
     S.stats.kills++;
+    if (ENEMIES[e.k].boss && sc.loc) { sc.shake = 24; sc.parts.burst(e.x, e.y, 120, '#ffd24a', 420, 1.6, 5); warlordKilled(sc.loc.id); }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
     for (let i = 0; i < orbs; i++) {

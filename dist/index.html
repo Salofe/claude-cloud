@@ -697,6 +697,7 @@ const ENEMIES = {
   corsair: { n: 'Corsair',         hp: 80,  sp: 25,  dmg: 6,  rate: 1.3, spd: 180, size: 1.05, loot: 110, pow: 2.5 },
   frigate: { n: 'Pirate Frigate',  hp: 200, sp: 70,  dmg: 8,  rate: 1.6, spd: 135, size: 1.4,  loot: 320, pow: 5, burst: 3 },
   carrier: { n: 'Pirate Carrier',  hp: 600, sp: 200, dmg: 11, rate: 2.4, spd: 90,  size: 2.0,  loot: 1200, pow: 11, burst: 5 },
+  warlord: { n: 'Pirate Warlord',  hp: 2400, sp: 900, dmg: 12, rate: 1.1, spd: 95, size: 2.7, loot: 6000, pow: 20, burst: 7, boss: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },
 };
 const Z_ENEMY = [0.5, 0.7, 1, 3, 8, 22];   // enemy stat multiplier by zone
@@ -1196,11 +1197,20 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   ctx.strokeStyle = dark; ctx.lineWidth = 1; ctx.stroke();
   ctx.fillStyle = lit;
   ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(4, -2.5); ctx.lineTo(4, 2.5); ctx.fill();
-  if (type === 'frigate' || type === 'carrier') {
+  if (type === 'warlord') {
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.moveTo(2, -6); ctx.lineTo(-14, -22); ctx.lineTo(-20, -20); ctx.lineTo(-10, -5); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(2, 6); ctx.lineTo(-14, 22); ctx.lineTo(-20, 20); ctx.lineTo(-10, 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffd24a'; ctx.fillRect(-18, -21, 5, 2); ctx.fillRect(-18, 19, 5, 2);
+  }
+  if (type === 'frigate' || type === 'carrier' || type === 'warlord') {
     ctx.fillStyle = dark;
     ctx.fillRect(-12, -11, 12, 4); ctx.fillRect(-12, 7, 12, 4);
     ctx.fillStyle = lit;
     ctx.fillRect(-2, -10, 3, 2); ctx.fillRect(-2, 8, 3, 2);
+  }
+  if (type === 'warlord') {
+    ctx.save(); ctx.rotate(Math.PI / 2); drawIcon(ctx, 'skull', 0, 2, 9, '#ffd24a'); ctx.restore();
   }
   if (type === 'carrier') {
     ctx.fillStyle = main;
@@ -1615,7 +1625,8 @@ function loadSave() {
     if (!d || d.v !== 3) return null;
     d.projects = d.projects || {};
     d.lv.extractor = d.lv.extractor || 1;
-    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0; d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
+    d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
+    for (const e of d.events || []) if (/^Pirate warlord at/.test(e.title || '') && !e.warlord && e.locs) { e.kind = 'warlord'; e.warlord = e.locs[0]; } d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     return d;
   } catch (e) { return null; }
@@ -1997,7 +2008,7 @@ function genContracts(locId) {
 }
 function contractText(c) {
   if (c.type === 'deliver') return `Deliver <b>${c.qty} ${ITEMS[c.item].n}</b> to <b>${LOC[c.to].station}</b> (${LOC[c.to].n})`;
-  return `Destroy <b>${c.kills}</b> pirate fleet${c.kills > 1 ? 's' : ''}` + (c.progress != null ? ` (${c.progress}/${c.kills})` : '');
+  return `Destroy <b>${c.kills}</b> pirate fleet${c.kills > 1 ? 's' : ''}${c.at ? ` at <b>${LOC[c.at].field ? LOC[c.at].field.n : LOC[c.at].n}</b> (the warlord's field or routes through it)` : ''}` + (c.progress != null ? ` (${c.progress}/${c.kills})` : '');
 }
 function acceptContract(locId, cid) {
   const list = S.contracts[locId]; const i = list.findIndex(c => c.id === cid);
@@ -2081,6 +2092,30 @@ function addEvent(ev) {
   return ev;
 }
 
+// ---------- pirate warlords ----------
+// the bounty is posted at the field's own city, or the nearest open city if the field only has a depot
+function warlordCity(id) {
+  const l = LOC[id];
+  if (l.market && !l.depot && l.faction !== 'piratas') return l;
+  return NODES.filter(x => x.market && !x.depot && x.faction && x.faction !== 'piratas' && locOpen(x.id) && !x.nuked)
+    .sort((a, b) => locDist(id, a.id, S.day) - locDist(id, b.id, S.day))[0] || null;
+}
+const warlordAt = id => S.events.find(e => e.warlord === id);
+const warlordPrize = () => Math.round(4 * haulRef());
+function warlordKilled(id) {
+  const e = warlordAt(id); if (!e) return;
+  S.events = S.events.filter(x => x !== e);
+  const prize = warlordPrize();
+  earn(prize);
+  repChange('piratas', -10, true);
+  const city = warlordCity(id); if (city && city.faction) repChange(city.faction, 20, true);
+  for (const c of [...S.active]) if (c.type === 'bounty' && c.at === id) completeContract(c);
+  for (const k in S.contracts) S.contracts[k] = S.contracts[k].filter(c => !(c.type === 'bounty' && c.at === id));
+  addNews('🏆', `<b>You destroyed the pirate warlord</b> at ${LOC[id].field.n}: +${fmt(prize)} cr`, '#ffd24a');
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🏆', title: 'Warlord destroyed!', html: `<p>The warlord's flagship breaks apart over ${LOC[id].field.n}. The system is safer — and richer for you.</p><p><b class="cr big-num">+${fmt(prize)} cr</b></p>`, choices: [{ label: 'Collect', cost: 0, fn: () => {} }] });
+  save();
+}
+
 // ---------- natural system events ----------
 const EVENT_GEN = [
   { kind: 'war', w: 1.1, make() {
@@ -2148,10 +2183,14 @@ const EVENT_GEN = [
       if (!has(U.BELT)) return null;
       const l = pick(NODES.filter(x => x.field && locOpen(x.id) && x.field.z >= 2));
       if (!l) return null;
-      const ev = { icon: '🏴‍☠️', title: `Pirate warlord at ${l.n}`, text: `A notorious warlord raids ${l.n}. Huge bounty for anyone who fights there.`,
+      const city = warlordCity(l.id);
+      const ev = { kind: 'warlord', icon: '🏴‍☠️', title: `Pirate warlord at ${l.field.n}`, warlord: l.id, uid: uid(),
+        text: `A notorious warlord raids ${l.field.n}. He hunts anyone who mines there — destroy his flagship for a huge prize${city ? `, or take the bounty at ${city.station}` : ''}.`,
         dur: randi(20, 30), locs: [l.id], danger: [{ loc: l.id, add: 0.5 }] };
-      const c = S.contracts[l.id] || (S.contracts[l.id] = []);
-      if (l.market && !l.depot) c.unshift({ type: 'bounty', id: uid(), from: l.id, kills: 3, reward: Math.round(3 * 1500 * Z_LOOT[l.field.z]), rep: 25, days: ev.dur, faction: l.faction, urgent: 1 });
+      if (city) {
+        const c = S.contracts[city.id] || (S.contracts[city.id] = []);
+        c.unshift({ type: 'bounty', id: uid(), from: city.id, at: l.id, kills: 3, reward: Math.round(Math.max(3 * 1500 * Z_LOOT[l.field.z], 1.5 * haulRef())), rep: 25, days: ev.dur, faction: city.faction, urgent: 1 });
+      }
       return ev;
   } },
   { kind: 'fuel', w: 0.6, make() {
@@ -2369,7 +2408,7 @@ function powersAt(id) {
   const city = l.market && !l.depot;
   if (city && l.faction && l.faction !== 'piratas') add('works');
   if (city) add('boom', kindActive('boom', id) ? { why: 'a boom is already running' } : {});
-  if (has(U.BELT) && (l.danger || 0) >= 0.1) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
+  if (has(U.BELT) && ((l.danger || 0) >= 0.1 || warlordAt(id))) add('purge', S.events.some(e => e.mine && e.kind === 'purge' && e.locs.includes(id)) ? { why: 'already secured' } : {});
   if (city && l.faction && l.faction !== 'piratas' && has(U.TRADE)) {
     const w = warOf(l.faction);
     if (!w && has(U.SATURN)) {
@@ -3079,7 +3118,8 @@ const MineScene = {
     this.ambush = null;
     if (!this.space) {
       const dg = locDanger(this.loc.id) * (1 - ship.avoid);
-      if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
+      if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
+      else if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
     }
   },
   depthOf(y) { return clamp(1 - y / (DOCK_Y - 300), 0, 1); },
@@ -3295,11 +3335,13 @@ const MineScene = {
     // --- ambush ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast('⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
-        const fleet = buildFleet(locDanger(this.loc.id));
+        const boss = this.ambush.boss && warlordAt(this.loc.id);
+        const fleet = boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
         this.ambush = null;
-        if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
+        if (boss) Combat.spawn(this, fleet, this.z, true);
+        else if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
         else Combat.spawn(this, fleet, this.z, true);
       }
     }
@@ -3358,14 +3400,15 @@ const MineScene = {
     sfx('win');
     const n = S.stats.kills;
     toast('☠ Pirates destroyed! Grab the loot.', 'good');
-    for (const c of [...S.active]) if (c.type === 'bounty') { c.progress++; if (c.progress >= c.kills) completeContract(c); }
+    const tr = MapScene.travel, here = [S.loc, tr && tr.from, tr && tr.to];
+    for (const c of [...S.active]) if (c.type === 'bounty' && (!c.at || here.includes(c.at))) { c.progress++; if (c.progress >= c.kills) completeContract(c); }
     repChange('piratas', -3, true);
     const near = LOC[S.loc].faction && LOC[S.loc].faction !== 'piratas' ? LOC[S.loc].faction : 'cinturon';
     repChange(near, 2, true);
     S.stats.won++;
     addNews('🏆', `Pirate fleet destroyed`, '#6dffb0');
     // clearing raiders in the war zone helps the side you back
-    const w = backedWar(), tr = MapScene.travel, here = [S.loc, tr && tr.from, tr && tr.to];
+    const w = backedWar();
     if (w && here.some(id => id && w.locs.includes(id))) warPush(w, 6, 'raiders cleared');
     if (this.space) this.clearT = 4;
   },
@@ -3483,6 +3526,20 @@ const MineScene = {
       ctx.fillStyle = '#ff4d6d';
       ctx.save(); ctx.translate(ix, iy); ctx.rotate(a);
       ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-6, -7); ctx.lineTo(-6, 7); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    // warlord health bar
+    const boss = this.enemies.find(e => ENEMIES[e.k].boss && !e.dead);
+    if (boss) {
+      const bw = Math.min(520, W - 40), bx = (W - bw) / 2, by = 100;
+      ctx.fillStyle = 'rgba(8,10,24,0.85)'; roundRect(ctx, bx - 10, by - 6, bw + 20, 42, 8); ctx.fill();
+      ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.5; ctx.stroke();
+      drawIcon(ctx, 'skull', bx + 8, by + 8, 16, '#ffd24a');
+      ctx.fillStyle = '#ffd24a'; ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(`PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
+      ctx.fillStyle = '#2a1018'; ctx.fillRect(bx, by + 19, bw, 9);
+      ctx.fillStyle = '#ff4d6d'; ctx.fillRect(bx, by + 19, bw * clamp(boss.hp / boss.max, 0, 1), 9);
+      ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     }
     // minimap
     const mh = 150, mw = mh * MW / MH, mx = W - mw - 14, my = H - mh - (isTouch ? 210 : 40);
@@ -3641,6 +3698,7 @@ const Combat = {
     sc.parts.burst(e.x, e.y, 25, '#ffffff', 190, 0.6, 3);
     sfx('boom'); sc.shake = Math.max(sc.shake, 10);
     S.stats.kills++;
+    if (ENEMIES[e.k].boss && sc.loc) { sc.shake = 24; sc.parts.burst(e.x, e.y, 120, '#ffd24a', 420, 1.6, 5); warlordKilled(sc.loc.id); }
     // loot: credit orbs + some ore
     const orbs = randi(3, 6);
     for (let i = 0; i < orbs; i++) {

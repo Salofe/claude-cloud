@@ -49,7 +49,8 @@ const MineScene = {
     this.ambush = null;
     if (!this.space) {
       const dg = locDanger(this.loc.id) * (1 - ship.avoid);
-      if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
+      if (warlordAt(this.loc.id)) this.ambush = { at: rand(14, 26), warned: false, boss: 1 };   // the warlord hunts anyone mining his field
+      else if (Math.random() < dg * 0.9) this.ambush = { at: rand(20, 45), warned: false };
     }
   },
   depthOf(y) { return clamp(1 - y / (DOCK_Y - 300), 0, 1); },
@@ -265,11 +266,13 @@ const MineScene = {
     // --- ambush ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast('⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
-        const fleet = buildFleet(locDanger(this.loc.id));
+        const boss = this.ambush.boss && warlordAt(this.loc.id);
+        const fleet = boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
         this.ambush = null;
-        if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
+        if (boss) Combat.spawn(this, fleet, this.z, true);
+        else if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
         else Combat.spawn(this, fleet, this.z, true);
       }
     }
@@ -328,14 +331,15 @@ const MineScene = {
     sfx('win');
     const n = S.stats.kills;
     toast('☠ Pirates destroyed! Grab the loot.', 'good');
-    for (const c of [...S.active]) if (c.type === 'bounty') { c.progress++; if (c.progress >= c.kills) completeContract(c); }
+    const tr = MapScene.travel, here = [S.loc, tr && tr.from, tr && tr.to];
+    for (const c of [...S.active]) if (c.type === 'bounty' && (!c.at || here.includes(c.at))) { c.progress++; if (c.progress >= c.kills) completeContract(c); }
     repChange('piratas', -3, true);
     const near = LOC[S.loc].faction && LOC[S.loc].faction !== 'piratas' ? LOC[S.loc].faction : 'cinturon';
     repChange(near, 2, true);
     S.stats.won++;
     addNews('🏆', `Pirate fleet destroyed`, '#6dffb0');
     // clearing raiders in the war zone helps the side you back
-    const w = backedWar(), tr = MapScene.travel, here = [S.loc, tr && tr.from, tr && tr.to];
+    const w = backedWar();
     if (w && here.some(id => id && w.locs.includes(id))) warPush(w, 6, 'raiders cleared');
     if (this.space) this.clearT = 4;
   },
@@ -453,6 +457,20 @@ const MineScene = {
       ctx.fillStyle = '#ff4d6d';
       ctx.save(); ctx.translate(ix, iy); ctx.rotate(a);
       ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-6, -7); ctx.lineTo(-6, 7); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    // warlord health bar
+    const boss = this.enemies.find(e => ENEMIES[e.k].boss && !e.dead);
+    if (boss) {
+      const bw = Math.min(520, W - 40), bx = (W - bw) / 2, by = 100;
+      ctx.fillStyle = 'rgba(8,10,24,0.85)'; roundRect(ctx, bx - 10, by - 6, bw + 20, 42, 8); ctx.fill();
+      ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.5; ctx.stroke();
+      drawIcon(ctx, 'skull', bx + 8, by + 8, 16, '#ffd24a');
+      ctx.fillStyle = '#ffd24a'; ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(`PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
+      ctx.fillStyle = '#2a1018'; ctx.fillRect(bx, by + 19, bw, 9);
+      ctx.fillStyle = '#ff4d6d'; ctx.fillRect(bx, by + 19, bw * clamp(boss.hp / boss.max, 0, 1), 9);
+      ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     }
     // minimap
     const mh = 150, mw = mh * MW / MH, mx = W - mw - 14, my = H - mh - (isTouch ? 210 : 40);

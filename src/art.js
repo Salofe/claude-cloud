@@ -486,11 +486,20 @@ function drawEnemyShip(ctx, type, x, y, ang, s, t) {
   ctx.strokeStyle = dark; ctx.lineWidth = 1; ctx.stroke();
   ctx.fillStyle = lit;
   ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(4, -2.5); ctx.lineTo(4, 2.5); ctx.fill();
-  if (type === 'frigate' || type === 'carrier') {
+  if (type === 'warlord') {
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.moveTo(2, -6); ctx.lineTo(-14, -22); ctx.lineTo(-20, -20); ctx.lineTo(-10, -5); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(2, 6); ctx.lineTo(-14, 22); ctx.lineTo(-20, 20); ctx.lineTo(-10, 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffd24a'; ctx.fillRect(-18, -21, 5, 2); ctx.fillRect(-18, 19, 5, 2);
+  }
+  if (type === 'frigate' || type === 'carrier' || type === 'warlord') {
     ctx.fillStyle = dark;
     ctx.fillRect(-12, -11, 12, 4); ctx.fillRect(-12, 7, 12, 4);
     ctx.fillStyle = lit;
     ctx.fillRect(-2, -10, 3, 2); ctx.fillRect(-2, 8, 3, 2);
+  }
+  if (type === 'warlord') {
+    ctx.save(); ctx.rotate(Math.PI / 2); drawIcon(ctx, 'skull', 0, 2, 9, '#ffd24a'); ctx.restore();
   }
   if (type === 'carrier') {
     ctx.fillStyle = main;
