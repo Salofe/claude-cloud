@@ -684,8 +684,97 @@ function drawWhaleShip(ctx, type, x, y, ang, s, t) {
   ctx.fillStyle = '#0a2a4a'; ctx.beginPath(); ctx.arc(10, -2.5, 1.4, 0, TAU); ctx.fill();
   ctx.restore();
 }
-function drawEnemyShip(ctx, type, x, y, ang, s, t) {
+// Space Kraken (Kepler): a glowing mantle with eight tentacles trailing behind
+function drawKraken(ctx, type, x, y, ang, s, t) {
   const e = ENEMIES[type];
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, -4, 0, 30, '#c080ff33', 0.8);
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 8; i++) {
+    const side = i < 4 ? -1 : 1, k = (i % 4) / 3, y0 = side * (2 + k * 5);
+    ctx.strokeStyle = i % 2 ? '#7a3a9a' : '#9a4ab8'; ctx.lineWidth = 3.2 - k * 0.8;
+    ctx.beginPath(); ctx.moveTo(-6, y0);
+    let px = -6, py = y0;
+    for (let j = 1; j <= 6; j++) { px -= 4; py = y0 * (1 + j * 0.25) + Math.sin(t * 3 + i * 1.3 + j * 0.8) * j * 0.9; ctx.lineTo(px, py); }
+    ctx.stroke();
+    ctx.fillStyle = '#7fffe0'; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 4 + i); ctx.beginPath(); ctx.arc(px, py, 0.9, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  ctx.lineCap = 'butt';
+  const pulse = 1 + Math.sin(t * 2.5) * 0.05;
+  const g = ctx.createRadialGradient(6, -3, 1, 2, 0, 15);
+  g.addColorStop(0, '#e0a0ff'); g.addColorStop(0.6, '#8a3ab0'); g.addColorStop(1, '#3a1050');
+  ctx.fillStyle = g; ctx.strokeStyle = '#e8c0ff'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.ellipse(4, 0, 13 * pulse, 9 / pulse, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7fffe0';
+  for (const [sx, sy] of [[8, -5], [2, -6], [-3, -4], [8, 5], [2, 6], [-3, 4], [12, 0]]) { ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 3 + sx + sy); ctx.beginPath(); ctx.arc(sx, sy, 0.9, 0, TAU); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  for (const sy of [-3.5, 3.5]) {
+    ctx.fillStyle = '#fff4a0'; ctx.beginPath(); ctx.ellipse(-4, sy, 2.4, 1.8, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#1a0a20'; ctx.beginPath(); ctx.ellipse(-3.6, sy, 0.8, 1.5, 0, 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+}
+// Radiant Titan (Rigel): a floating crystal giant ringed by shards and halos
+function drawRadiant(ctx, type, x, y, ang, s, t) {
+  const e = ENEMIES[type], k = s * e.size;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k);
+  glow(ctx, 0, 0, 34, '#a0d8ff55', 0.9);
+  ctx.strokeStyle = 'rgba(200,235,255,0.5)'; ctx.lineWidth = 0.7;
+  for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.ellipse(0, 0, 20 + i * 4, 6 + i * 2, t * (0.4 - i * 0.7), 0, TAU); ctx.stroke(); }
+  for (let i = 0; i < 6; i++) {
+    const a = t * 0.8 + i * TAU / 6, r = 17 + Math.sin(t * 2 + i) * 1.5, sx = Math.cos(a) * r, sy = Math.sin(a) * r * 0.75;
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(a + t);
+    ctx.fillStyle = 'rgba(190,230,255,0.85)'; ctx.beginPath(); ctx.moveTo(0, -3.5); ctx.lineTo(1.6, 0); ctx.lineTo(0, 3.5); ctx.lineTo(-1.6, 0); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  ctx.rotate(Math.sin(t * 0.6) * 0.2);
+  const g = ctx.createLinearGradient(-10, -12, 10, 12);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(0.5, '#8ac8ff'); g.addColorStop(1, '#2a4a9a');
+  ctx.fillStyle = g; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 0.9;
+  ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(9, -3); ctx.lineTo(6, 10); ctx.lineTo(0, 14); ctx.lineTo(-6, 10); ctx.lineTo(-9, -3); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(0, 14); ctx.moveTo(-9, -3); ctx.lineTo(9, -3); ctx.moveTo(-6, 10); ctx.lineTo(0, 2); ctx.lineTo(6, 10); ctx.stroke();
+  // the eye looks at you
+  const ea = ang - Math.sin(t * 0.6) * 0.2;
+  glow(ctx, Math.cos(ea) * 2.5, Math.sin(ea) * 2.5 - 1, 7, '#ffffff', 0.9);
+  ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(Math.cos(ea) * 2.5, Math.sin(ea) * 2.5 - 1, 2, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+// Stellar Phoenix (Betelgeuse): a bird of fire with beating wings; reborn in blue flame
+function drawPhoenix(ctx, type, x, y, ang, s, t, ent) {
+  const e = ENEMIES[type], blue = ent && ent.reborn;
+  const c0 = blue ? '#e0f4ff' : '#fff2a0', c1 = blue ? '#60b0ff' : '#ffa030', c2 = blue ? '#2050c0' : '#d02010';
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s * e.size, s * e.size);
+  glow(ctx, -4, 0, 34, c1 + '66', 0.9);
+  ctx.globalCompositeOperation = 'lighter';
+  // tail of fire
+  for (let i = 0; i < 5; i++) {
+    const w = Math.sin(t * 6 + i) * 3, L = 20 + i * 3;
+    const g = ctx.createLinearGradient(-6, 0, -6 - L, w); g.addColorStop(0, c1); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 2.4 - i * 0.3;
+    ctx.beginPath(); ctx.moveTo(-6, 0); ctx.quadraticCurveTo(-6 - L * 0.5, (i - 2) * 2.5 + w, -6 - L, (i - 2) * 5 + w); ctx.stroke();
+  }
+  // wings
+  const flap = Math.sin(t * 5);
+  for (const sd of [-1, 1]) {
+    const tipY = sd * (20 + flap * 6), tipX = -6 + flap * 2;
+    const g = ctx.createLinearGradient(0, 0, tipX, tipY); g.addColorStop(0, c0); g.addColorStop(0.5, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.moveTo(4, sd * 2); ctx.quadraticCurveTo(2, sd * 14, tipX, tipY); ctx.quadraticCurveTo(-4, sd * 10, -8, sd * 6); ctx.quadraticCurveTo(-6, sd * 8, -10, sd * 3); ctx.lineTo(-4, sd * 1.5); ctx.closePath(); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // body & head
+  const bg = ctx.createRadialGradient(6, 0, 1, 0, 0, 12); bg.addColorStop(0, '#ffffff'); bg.addColorStop(0.4, c0); bg.addColorStop(1, c1);
+  ctx.fillStyle = bg; ctx.beginPath(); ctx.ellipse(1, 0, 10, 4.5, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(10, -2.5); ctx.lineTo(16, 0); ctx.lineTo(10, 2.5); ctx.closePath(); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#3a0a00'; ctx.beginPath(); ctx.arc(8, -1.4, 0.9, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+function drawEnemyShip(ctx, type, x, y, ang, s, t, ent) {
+  const e = ENEMIES[type];
+  if (e.kraken) return drawKraken(ctx, type, x, y, ang, s, t);
+  if (e.radiant) return drawRadiant(ctx, type, x, y, ang, s, t);
+  if (e.phoenix) return drawPhoenix(ctx, type, x, y, ang, s, t, ent);
   if (e.alien) return drawAlienShip(ctx, type, x, y, ang, s, t);
   if (e.fort) return drawFortShip(ctx, type, x, y, ang, s, t);
   if (e.whale) return drawWhaleShip(ctx, type, x, y, ang, s, t);
@@ -812,7 +901,8 @@ function drawRock(ctx, a, t, scanLv) {
     glow(ctx, a.x, a.y, a.r * 1.9, '#ff5a2a', 0.25 + pulse * 0.3);
   }
   if (a.crystal) return drawCrystalRock(ctx, a, t);
-  if (a.armored) return drawArmoredRock(ctx, a, t);
+  if (a.armored) { drawArmoredRock(ctx, a, t); return drawRockFx(ctx, a, t); }
+  if (a.living) drawLivingFins(ctx, a, t);
   const ore = ITEMS[a.ore];
   ctx.save();
   ctx.translate(a.x, a.y); ctx.rotate(a.rot);
@@ -850,7 +940,8 @@ function drawRock(ctx, a, t, scanLv) {
   }
   shadeRock(ctx, a, () => { ctx.beginPath(); a.shape.forEach((p, i) => { const px = p[0] * a.r * p[2], py = p[1] * a.r * p[2]; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); });
   ctx.restore();
-  if (scanLv >= 2 && a.rich) {
+  drawRockFx(ctx, a, t);
+  if ((scanLv >= 2 || a.seen > 0) && a.rich) {
     ctx.strokeStyle = ore.c; ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 4);
     ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(a.x, a.y, a.r + 8, 0, TAU); ctx.stroke();
@@ -858,6 +949,45 @@ function drawRock(ctx, a, t, scanLv) {
   }
 }
 
+// living rocks (Kepler): little fins that beat as they swim, and glowing spots
+function drawLivingFins(ctx, a, t) {
+  const sp = Math.hypot(a.vx, a.vy), dir = sp > 3 ? Math.atan2(a.vy, a.vx) : a.rot, w = Math.sin(a.swim || 0);
+  ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(dir);
+  glow(ctx, 0, 0, a.r * 1.7, a.flee > 0 ? '#ff9a7a55' : '#7fffd055', 0.6 + 0.2 * Math.sin(t * 2 + a.x));
+  ctx.fillStyle = '#4a8a7a'; ctx.strokeStyle = '#9fffe0'; ctx.lineWidth = 1;
+  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-a.r * 0.1, sd * a.r * 0.75); ctx.quadraticCurveTo(-a.r * 0.5, sd * a.r * (1.35 + w * 0.15 * sd), -a.r * 0.8, sd * a.r * 0.7); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-a.r * 0.85, 0); ctx.lineTo(-a.r * 1.45, -a.r * (0.4 + w * 0.2)); ctx.lineTo(-a.r * 1.3, 0); ctx.lineTo(-a.r * 1.45, a.r * (0.4 - w * 0.2)); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+// overlays shared by every rock: living glow spots, molten heat (Betelgeuse pulses), revealed geodes (Deep Scan)
+function drawRockFx(ctx, a, t) {
+  if (a.living) {
+    const sp = Math.hypot(a.vx, a.vy), dir = sp > 3 ? Math.atan2(a.vy, a.vx) : a.rot;
+    ctx.fillStyle = a.flee > 0 ? '#ffb090' : '#9fffe0';
+    for (let i = 0; i < 5; i++) { const an = i * 2.4 + a.r, d = a.r * (0.25 + (i % 3) * 0.2); ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7); ctx.beginPath(); ctx.arc(a.x + Math.cos(an) * d, a.y + Math.sin(an) * d, 1.5 + a.tier * 0.5, 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    const ex = a.x + Math.cos(dir) * a.r * 0.55, ey = a.y + Math.sin(dir) * a.r * 0.55;
+    for (const sd of [-1, 1]) { const px = ex - Math.sin(dir) * sd * a.r * 0.22, py = ey + Math.cos(dir) * sd * a.r * 0.22; ctx.fillStyle = '#fffbe0'; ctx.beginPath(); ctx.arc(px, py, 1.6 + a.tier * 0.7, 0, TAU); ctx.fill(); ctx.fillStyle = '#0a1a1a'; ctx.beginPath(); ctx.arc(px + Math.cos(dir) * 0.8, py + Math.sin(dir) * 0.8, 0.8 + a.tier * 0.35, 0, TAU); ctx.fill(); }
+  }
+  if (MineScene.moltenT > 0 && !a.comet) {
+    const k = Math.min(1, MineScene.moltenT / 2);
+    glow(ctx, a.x, a.y, a.r * 1.5, '#ff5a1a', 0.45 * k);
+    ctx.strokeStyle = `rgba(255,${170 + Math.round(60 * Math.sin(t * 8 + a.x))},80,${0.8 * k})`; ctx.lineWidth = 1.2 + a.tier * 0.4;
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.rot);
+    ctx.beginPath(); ctx.moveTo(-a.r * 0.6, a.r * 0.3); ctx.lineTo(0, -a.r * 0.1); ctx.lineTo(a.r * 0.55, a.r * 0.35); ctx.moveTo(0, -a.r * 0.1); ctx.lineTo(-a.r * 0.15, -a.r * 0.6); ctx.stroke();
+    ctx.restore();
+  }
+  if (a.geode && a.seen > 0 && !(a.seenD > 0)) {
+    const col = ITEMS[a.geode].c, k = Math.min(1, a.seen / 1.5), pr = a.r + 10 + Math.sin(t * 5) * 3;
+    ctx.globalAlpha = k;
+    glow(ctx, a.x, a.y, a.r * 1.4, col + '88', 0.8);
+    ctx.strokeStyle = col; ctx.lineWidth = 2.2;
+    ctx.beginPath(); for (let i = 0; i <= 6; i++) { const an = i / 6 * TAU + t * 0.5; i ? ctx.lineTo(a.x + Math.cos(an) * pr, a.y + Math.sin(an) * pr) : ctx.moveTo(a.x + Math.cos(an) * pr, a.y + Math.sin(an) * pr); } ctx.stroke();
+    ctx.fillStyle = col; ctx.font = '700 12px Rajdhani, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(`GEODE · ${ITEMS[a.geode].n}`, a.x, a.y - pr - 6);
+    ctx.globalAlpha = 1;
+  }
+}
 function drawOreChunk(ctx, c, t) {
   const col = ITEMS[c.ore].c;
   glow(ctx, c.x, c.y, 18, col + 'aa', 0.7);

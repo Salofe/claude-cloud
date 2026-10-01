@@ -204,6 +204,12 @@ PROJECTS.push(
     d: 'Gravity shepherds steer the system\'s comets straight through your mining fields.', fx: 'Comets come 3× as often and drop ×2 ore' },
   { id: 'bounty', sys: 'altair', icon: '☠', n: 'Bounty Exchange', loc: 'tierra', stage: 4, cost: 50e6, infl: 6,
     d: 'Every free city in Altair pays you for every pirate you blow up.', fx: 'Pirate loot ×3' },
+  { id: 'whisperer', sys: 'kepler', icon: '🎵', n: 'Reef Whisperers', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'Singers of the Reef Keepers teach your ship the song living rocks love. They swim right up to your laser.', fx: 'Living rocks stop fleeing and drop ×2 ore' },
+  { id: 'sonar', sys: 'rigel', icon: '◈', n: 'Quantum Sonar Array', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'A sonar that hears the echo of every geode in the system — even the ones that haven\'t formed yet.', fx: 'Deep Scan recharges 2× faster · geodes drop ×2 ore' },
+  { id: 'starheart', sys: 'betelgeuse', icon: '☀', n: 'Starheart Tap', loc: 'ceres', stage: 4, cost: 50e6, infl: 6,
+    d: 'You drill a pipe into the heart of a dying star. It pulses more often, and you are ready every time.', fx: 'Stellar pulses come 2× as often and last 50% longer' },
 );
 const PROJ = Object.fromEntries(PROJECTS.map(p => [p.id, p]));
 
@@ -226,6 +232,9 @@ const ENEMIES = {
   citadel: { n: 'Dust Citadel',    hp: 1000, sp: 300, dmg: 1.4, rate: 0.22, spd: 0, size: 4.2, loot: 20000, pow: 30, burst: 1, spiral: 4, boss: 1, final: 1, fort: 1 },
   leviathan: { n: 'Ice Leviathan', hp: 760, sp: 300, dmg: 2.5, rate: 1.6, spd: 80, size: 3.8, loot: 20000, pow: 30, burst: 3, spread: 3, dash: 1, boss: 1, final: 1, whale: 1 },
   pirateking: { n: 'Pirate King',  hp: 720, sp: 420, dmg: 2.2, rate: 1.2, spd: 90, size: 3.4, loot: 20000, pow: 30, burst: 3, spread: 3, boss: 1, final: 1, summon: 'raider', summonMax: 4 },
+  kraken:  { n: 'Space Kraken',    hp: 800, sp: 280, dmg: 2.2, rate: 1.3, spd: 70, size: 3.8, loot: 20000, pow: 30, burst: 2, spread: 4, boss: 1, final: 1, kraken: 1, ink: 1 },
+  radiant: { n: 'Radiant Titan',   hp: 860, sp: 340, dmg: 2.0, rate: 2.0, spd: 50, size: 3.8, loot: 20000, pow: 30, burst: 1, radial: 10, boss: 1, final: 1, radiant: 1, beam: 1 },
+  phoenix: { n: 'Stellar Phoenix', hp: 540, sp: 260, dmg: 2.2, rate: 1.1, spd: 150, size: 3.4, loot: 20000, pow: 30, burst: 3, spread: 3, dash: 1, rebirth: 1, boss: 1, final: 1, phoenix: 1 },
   swarmer: { n: 'Swarmer',         hp: 26,  sp: 0,   dmg: 2,  rate: 0.9, spd: 270, size: 0.55, loot: 150,  pow: 1, hive: 1 },
   adrone:  { n: 'Sentinel Drone',  hp: 40,  sp: 40,  dmg: 3,  rate: 1.0, spd: 230, size: 0.7,  loot: 300,  pow: 1, alien: 1 },
   patrol:  { n: 'Military Patrol', hp: 160, sp: 80,  dmg: 7,  rate: 1.4, spd: 170, size: 1.25, loot: 400, pow: 4.5, military: 1 },

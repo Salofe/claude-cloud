@@ -26,7 +26,8 @@ const MineScene = {
     if (this.space) this.p = { x: MW / 2, y: MH / 2, vx: 0, vy: 0, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     else this.p = { x: MW / 2, y: DOCK_Y + 60, vx: 0, vy: -260, a: -Math.PI / 2, shield: ship.shieldMax, shT: 0, fireCd: 0 };
     this.cam = { x: this.p.x, y: this.p.y - 120 };
-    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = []; this.etrail = [];
+    this.dayTimer = 0; this.collected = {}; this.cometT = rand(20, 40); this.tool = this.tool || 'laser'; this.pullT = 0; this.pullCd = this.pullCd || 0; this.boostT = 0; this.boostCd = this.boostCd || 0; this.bombCd = this.bombCd || 0; this.bombs = []; this.blasts = []; this.etrail = []; this.scanCd = this.scanCd || 0; this.scanT = -1; this.moltenT = 0; this.waveT = -1; this.inks = []; this.forks = null;
+    this.pulseIn = sysDef().pulses ? rand(20, 30) : 0;
     const rich = S.events.some(e => e.rich === this.loc.id);
     this.target = Math.round(f.count * (rich ? 1.25 : 1));
     if (this.space) {
@@ -73,14 +74,18 @@ const MineScene = {
     const crystal = !this.space && !!this.loc.field.crystal && Math.random() < this.loc.field.crystal;
     const armored = !crystal && !this.space && !!this.loc.field.armored && Math.random() < this.loc.field.armored;
     const volatile = !crystal && !armored && !this.space && !!this.loc.field.explosive && Math.random() < this.loc.field.explosive;
+    const living = !crystal && !armored && !volatile && !this.space && !!this.loc.field.living && Math.random() < this.loc.field.living;
+    // geodes (Rigel onward) hide a big load of the field's best ore — the Deep Scanner shows where they are
+    const geode = !this.space && tier >= 2 && !!this.loc.field.geodes && Math.random() < this.loc.field.geodes ? this.bestOre() : null;
     const hp = R * 0.7 * ITEMS[ore].h * Z_HP[this.z] * sysDef().rock * (gold ? 2 : 1) * (crystal ? 0.75 : 1);
     const rock = {
-      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile,
+      x, y, vx: rand(-14, 14), vy: rand(-14, 14), rot: rand(0, TAU), vr: rand(-0.4, 0.4), r: R, tier, ore, rich: isRich, gold, crystal, armored, volatile, living, geode,
       hp, maxhp: hp, hit: 0, cold: this.loc.field.cold,
       shape: makeRockShape(9 + tier * 2, 0.22),
       veins: Array.from({ length: nv }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
       craters: Array.from({ length: tier }, () => { const a = rand(0, TAU), d = rand(0, 0.5); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.1, 0.2)]; }),
     };
+    if (living) { const a = rand(0, TAU); rock.vx = Math.cos(a) * 30; rock.vy = Math.sin(a) * 30; rock.wa = a; }
     this.rocks.push(rock);
     return rock;
   },
@@ -95,6 +100,16 @@ const MineScene = {
     if (!hasTool('charges') || this.space || this.bombCd > 0) return;
     this.bombCd = 10; this.bombs = this.bombs || []; this.bombs.push({ x: this.p.x, y: this.p.y, t: 1.2 }); sfx('click');
   },
+  bestOre() { return Object.keys(this.loc.field.ores).sort((a, b) => ITEMS[b].b - ITEMS[a].b)[0]; },
+  // Deep Scanner (Rigel): a wave that reveals every geode (and rich or golden rock) around you
+  scan() {
+    if (!hasTool('deepscan') || this.space || this.scanCd > 0) return;
+    this.scanCd = built('sonar') ? 7 : 14; this.scanT = 0; this.scanO = { x: this.p.x, y: this.p.y };
+    let n = 0;
+    for (const r of this.rocks) { const d = Math.hypot(r.x - this.p.x, r.y - this.p.y); if (d < 1800) { r.seen = 14; r.seenD = d / 2000; if (r.geode) n++; } }
+    tone(300, 0.6, 'sine', 0.08, 1500); tone(1500, 0.5, 'sine', 0.04, null, 0.55);
+    toast(n ? `◈ Deep Scan: ${n} geode${n > 1 ? 's' : ''} nearby!` : '◈ Deep Scan: no geodes nearby', n ? 'good' : '');
+  },
   pullRadius() { return Math.max(1000, ship.magnet * 4); },
   toolRange() { return this.tool === 'drill' ? Math.max(110, ship.laserRange * 0.45) * (built('borer') ? 1.6 : 1) : ship.laserRange; },
   toggleTool() {
@@ -107,6 +122,10 @@ const MineScene = {
     if (!hasTool('tractor') || this.space || this.pullCd > 0) return;
     this.pullT = 2.5; this.pullCd = 14; sfx('upgrade'); this.shake = Math.max(this.shake, 4);
     this.parts.burst(this.p.x, this.p.y, 40, '#9fe0ff', 420, 0.6, 2);
+    // living rocks are soothed by the pulse: they stop and drift toward you for a few seconds
+    let calmed = 0;
+    for (const r of this.rocks) if (r.living && Math.hypot(r.x - this.p.x, r.y - this.p.y) < this.pullRadius()) { r.calm = 6; r.flee = 0; calmed++; }
+    if (calmed) this.floaters.push({ x: this.p.x, y: this.p.y - 40, txt: `${calmed} living rock${calmed > 1 ? 's' : ''} calmed`, col: '#9fffe0', life: 1.6 });
   },
   spawnComet() {
     const ores = Object.keys(this.loc.field.ores), best = ores.sort((a, b) => ITEMS[b].b - ITEMS[a].b)[0];
@@ -153,6 +172,13 @@ const MineScene = {
       this.floaters.push({ x: r.x, y: r.y - 30, txt: 'JACKPOT!', col: '#ffd24a', life: 2, big: 1 });
       S.stats.jackpots++; sfx('win');
     }
+    if (r.geode) {
+      const n = Math.round((5 + r.tier * 3) * ship.yieldMult * (built('sonar') ? 2 : 1));
+      for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.geode);
+      this.parts.burst(r.x, r.y, 50, ITEMS[r.geode].c, 260, 1.1, 3.5); this.parts.burst(r.x, r.y, 20, '#ffffff', 180, 0.6, 2.5);
+      this.floaters.push({ x: r.x, y: r.y - 30, txt: `GEODE! ${n} ${ITEMS[r.geode].n}`, col: ITEMS[r.geode].c, life: 2.2, big: 1 });
+      S.stats.geodes = (S.stats.geodes || 0) + 1; sfx('win'); this.shake = Math.max(this.shake, 8);
+    }
     if (r.crystal && r.tier > 1) {
       // crystals shatter into a spray of fast shards you have to chase
       const n = r.tier === 3 ? 5 : 3;
@@ -167,17 +193,19 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
-        c.volatile = false;
+        c.volatile = false; c.geode = null; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; }
       }
-      const m = 0.5 * ship.yieldMult;
+      const m = 0.5 * ship.yieldMult * this.oreBonus(r);
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
     } else {
       // crystal shards reward the chase (+20%), armored rocks reward the drill (×1.5)
-      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult * (r.shard ? 1.2 : 1) * (r.shard && built('resonance') ? 2 : 1) * (r.armored ? 1.5 : 1) * (r.armored && built('plasmaforge') ? 2 : 1) * (r.volatile ? 1.2 : 1);
+      const m = (rand(1, 2) + (r.rich ? 2 : 0)) * ship.yieldMult * (r.shard ? 1.2 : 1) * (r.shard && built('resonance') ? 2 : 1) * (r.armored ? 1.5 : 1) * (r.armored && built('plasmaforge') ? 2 : 1) * (r.volatile ? 1.2 : 1) * this.oreBonus(r);
       const n = Math.floor(m) + (Math.random() < m % 1 ? 1 : 0);
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.ore);
     }
   },
+  // living rocks (Kepler) and molten rocks (Betelgeuse pulses) are worth more
+  oreBonus(r) { return (r.living ? 1.6 * (built('whisperer') ? 2 : 1) : 1) * (this.moltenT > 0 ? 1.5 : 1); },
   dropChunk(x, y, ore) {
     const a = rand(0, TAU), v = rand(20, 60);
     this.chunks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, ore, rot: rand(0, TAU), life: 45 });
@@ -196,6 +224,8 @@ const MineScene = {
     sfx('pickup');
     return true;
   },
+  // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range; molten rocks melt twice as fast
+  laserDmg(r, drill) { return ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (r.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * (this.moltenT > 0 ? 2 : 1); },
   get inCombat() { return this.enemies.length > 0; },
   update(dt) {
     this.t += dt;
@@ -213,7 +243,8 @@ const MineScene = {
     p.vx += ax * acc * dt; p.vy += ay * acc * dt;
     const drag = Math.pow(0.4, dt);
     p.vx *= drag; p.vy *= drag;
-    const maxV = 360 * ship.thrust * (this.boostT > 0 ? 1.5 : 1);
+    const inInk = (this.inks || []).some(k => Math.hypot(p.x - k.x, p.y - k.y) < k.r * 0.8);
+    const maxV = 360 * ship.thrust * (this.boostT > 0 ? 1.5 : 1) * (inInk ? 0.55 : 1);
     const v = Math.hypot(p.vx, p.vy);
     if (v > maxV) { p.vx *= maxV / v; p.vy *= maxV / v; }
     p.x = clamp(p.x + p.vx * dt, 40, MW - 40); p.y = clamp(p.y + p.vy * dt, 40, MH - 40);
@@ -254,13 +285,24 @@ const MineScene = {
       }
       const hx = p.x + dx * bt, hy = p.y + dy * bt;
       this.laserHit = { x: hx, y: hy, dir, rock: best };
+      this.forks = null;
       if (best) {
         const drill = this.tool === 'drill';
-        // armored rocks shrug off the laser; the drill cuts them (and everything) 3× faster at close range
-        best.hp -= ship.laserDps * (this.boostT > 0 ? 3 : 1) * (drill ? (built('borer') ? 4.5 : 3) : 1) * (best.armored && !drill ? (built('plasmaforge') ? 0.6 : 0.15) : 1) * dt; best.hit = 0.05;
+        best.hp -= this.laserDmg(best, drill) * dt; best.hit = 0.05;
+        if (best.living && !best.calm && !built('whisperer')) {
+          if (!(best.flee > 0)) { this.parts.burst(best.x, best.y, 10, '#9fffe0', 90, 0.5, 2); if (!this.livingHint) { this.livingHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('tractor') ? 'IT\'S ALIVE! It flees — calm it with the Tractor Pulse (E)' : 'IT\'S ALIVE! It flees — chase it!', col: '#9fffe0', life: 2.8, big: 1 }); } }
+          best.flee = 2;
+        }
+        // Wide Beam (Betelgeuse): the laser forks into two more rocks near the target, at half power
+        if (hasTool('widebeam') && !drill) {
+          const near = this.rocks.filter(r => r !== best && !r.comet && Math.hypot(r.x - best.x, r.y - best.y) < 260 + best.r).sort((a, b) => Math.hypot(a.x - best.x, a.y - best.y) - Math.hypot(b.x - best.x, b.y - best.y)).slice(0, 2);
+          this.forks = near.map(r => ({ x: r.x, y: r.y, r }));
+          for (const r of near) { r.hp -= this.laserDmg(r, false) * 0.5 * dt; r.hit = 0.05; if (r.living && !r.calm && !built('whisperer')) r.flee = 2; }
+          for (const r of near) if (r.hp <= 0 && this.rocks.includes(r)) this.breakRock(r);
+        }
         if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? 'ARMORED — switch to the Drill (Q)' : 'ARMORED — your laser barely scratches it', col: '#c8d0e0', life: 2.5, big: 1 }); }
         if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
-        if (best.hp <= 0) this.breakRock(best);
+        if (best.hp <= 0 && this.rocks.includes(best)) this.breakRock(best);
       }
     }
     const lOn = firing && !combat;
@@ -274,6 +316,14 @@ const MineScene = {
         if (r.x < -80 || r.x > MW + 80) r.gone = 1;
         r.y = clamp(r.y, r.r, maxY);
       } else {
+        if (r.living) {
+          r.calm = Math.max(0, (r.calm || 0) - dt); r.flee = Math.max(0, (r.flee || 0) - dt);
+          if (r.calm > 0) { const k = Math.pow(0.15, dt); r.vx *= k; r.vy *= k; }
+          else if (r.flee > 0) { const ex = r.x - p.x, ey = r.y - p.y, ed = Math.hypot(ex, ey) || 1, sp = [0, 165, 125, 90][r.tier]; r.vx = lerp(r.vx, ex / ed * sp, dt * 2.5); r.vy = lerp(r.vy, ey / ed * sp, dt * 2.5); if (Math.random() < dt * 12) this.parts.add(r.x - r.vx * 0.2, r.y - r.vy * 0.2, rand(-15, 15), rand(-15, 15), 0.6, '#9fffe0', 2); }
+          else { r.wa = (r.wa || 0) + rand(-1.2, 1.2) * dt; r.vx = lerp(r.vx, Math.cos(r.wa) * 28, dt * 0.8); r.vy = lerp(r.vy, Math.sin(r.wa) * 28, dt * 0.8); }
+          r.swim = (r.swim || 0) + dt * (3 + Math.hypot(r.vx, r.vy) / 25);
+        }
+        if (r.seen > 0) { r.seen -= dt; if (r.seenD > 0) r.seenD -= dt; }
         if (r.shard) { const sp = Math.hypot(r.vx, r.vy); if (sp > 35) { const k = Math.pow(0.55, dt); r.vx *= k; r.vy *= k; } }
         if (r.x < r.r || r.x > MW - r.r) r.vx *= -1;
         if (r.y < r.r || r.y > maxY) r.vy *= -1;
@@ -299,6 +349,19 @@ const MineScene = {
     this.boostT = Math.max(0, this.boostT - dt); this.boostCd = Math.max(0, this.boostCd - dt); this.bombCd = Math.max(0, this.bombCd - dt);
     for (const b of this.bombs) { b.t -= dt; if (b.t <= 0) { b.done = 1; this.explode(b.x, b.y, 230, 0.6, false); } }
     this.bombs = this.bombs.filter(b => !b.done);
+    this.scanCd = Math.max(0, this.scanCd - dt); if (this.scanT >= 0) { this.scanT += dt; if (this.scanT > 1) this.scanT = -1; }
+    // Betelgeuse pulses: a heat wave washes over the field and every rock turns molten for a while
+    if (sysDef().pulses && !this.space) {
+      this.moltenT = Math.max(0, this.moltenT - dt); if (this.waveT >= 0) { this.waveT += dt; if (this.waveT > 1.4) this.waveT = -1; }
+      this.pulseIn -= dt;
+      if (this.pulseIn < 3 && !this.pulseWarned) { this.pulseWarned = 1; toast('☀ Betelgeuse is about to pulse — get ready to mine!', 'good'); tone(55, 2.8, 'sine', 0.3, 38); }
+      if (this.pulseIn <= 0) {
+        const hs = built('starheart');
+        this.pulseIn = rand(50, 70) / (hs ? 2 : 1); this.pulseWarned = 0;
+        this.moltenT = 10 * (hs ? 1.5 : 1); this.waveT = 0; this.shake = Math.max(this.shake, 8);
+        sfx('boom'); this.floaters.push({ x: p.x, y: p.y - 70, txt: 'MOLTEN! 2× laser · +50% ore', col: '#ffb040', life: 2.4, big: 1 });
+      }
+    }
     for (const b of this.blasts) b.t += dt; this.blasts = this.blasts.filter(b => b.t < 0.5);
     if (this.boostT > 0 && Math.random() < dt * 40) this.parts.add(this.p.x + rand(-14, 14), this.p.y + rand(-14, 14), -this.p.vx * 0.3, -this.p.vy * 0.3, 0.4, '#ffe14a', 2.5, true);
     for (const c of this.chunks) {
@@ -480,6 +543,7 @@ const MineScene = {
     }
     if (this.boostT > 0) glow(ctx, p.x, p.y, 70, '#ffe14a', 0.25 + 0.1 * Math.sin(t * 20));
     if (this.pullT > 0) { ctx.strokeStyle = `rgba(159,224,255,${this.pullT / 2.5 * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, this.pullRadius() * (1 - this.pullT / 2.5 * 0.3), 0, TAU); ctx.stroke(); }
+    if (this.scanT >= 0) { const k = this.scanT, R = k * 2000; ctx.strokeStyle = `rgba(127,224,255,${(1 - k) * 0.8})`; ctx.lineWidth = 3 + (1 - k) * 6; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R, 0, TAU); ctx.stroke(); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(this.scanO.x, this.scanO.y, R * 0.92, 0, TAU); ctx.stroke(); }
     if (cargoFree() > 0) { ctx.strokeStyle = 'rgba(61,232,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, ship.magnet, 0, TAU); ctx.stroke(); }
     for (const r of this.rocks) if (r.x > cx - 160 && r.x < cx + W + 160 && r.y > cy - 100 && r.y < cy + H + 100) {
       if (r.comet) {
@@ -518,6 +582,15 @@ const MineScene = {
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
       ctx.globalCompositeOperation = 'source-over';
       glow(ctx, L.x, L.y, L.rock ? 26 : 10, col, 0.9);
+      if (this.forks) {
+        ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = col;
+        for (const f of this.forks) {
+          ctx.globalAlpha = 0.7; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(L.x, L.y);
+          for (let i = 1; i < 6; i++) { const k = i / 6; ctx.lineTo(lerp(L.x, f.x, k) + rand(-8, 8), lerp(L.y, f.y, k) + rand(-8, 8)); }
+          ctx.lineTo(f.x, f.y); ctx.stroke(); glow(ctx, f.x, f.y, 18, col, 0.7);
+        }
+        ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      }
     }
     for (const dr of this.drones) {
       glow(ctx, dr.x, dr.y, 10, '#3de8ff88', 0.8);
@@ -557,6 +630,12 @@ const MineScene = {
     }
     ctx.globalAlpha = 1;
     ctx.restore();
+    if (this.waveT >= 0) {
+      const k = this.waveT / 1.4, x = -W * 0.3 + k * W * 1.6, g = ctx.createLinearGradient(x - W * 0.35, 0, x, 0);
+      g.addColorStop(0, 'rgba(255,90,30,0)'); g.addColorStop(0.8, `rgba(255,120,40,${0.35 * (1 - k * 0.5)})`); g.addColorStop(1, 'rgba(255,220,150,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    if (this.moltenT > 0) { ctx.fillStyle = `rgba(255,80,20,${Math.min(0.08, this.moltenT * 0.02)})`; ctx.fillRect(0, 0, W, H); }
     drawDust(ctx, W, H, cx, cy, p.vx, p.vy, this.loc.field.cold ? '#d8f0ff' : this.loc.field.hazard === 'heat' ? '#ffd0a0' : '#cfdcff');
     // crosshair
     if (!isTouch && !mouse.onUI) {
@@ -577,12 +656,12 @@ const MineScene = {
       ctx.fillText(`▼ STATION ${dist} m ▼`, bx, by);
       ctx.globalAlpha = 1;
     }
-    for (const e of [...this.enemies, ...this.rocks.filter(r => r.comet)]) {
+    for (const e of [...this.enemies, ...this.rocks.filter(r => r.comet || (r.geode && r.seen > 0 && !(r.seenD > 0)))]) {
       const ex = e.x - cx, ey = e.y - cy;
       if (ex > 0 && ex < W && ey > 0 && ey < H) continue;
       const a = Math.atan2(ey - H / 2, ex - W / 2);
       const ix = W / 2 + Math.cos(a) * (Math.min(W, H) / 2 - 30), iy = H / 2 + Math.sin(a) * (Math.min(W, H) / 2 - 30);
-      ctx.fillStyle = e.comet ? '#bff6ff' : '#ff4d6d';
+      ctx.fillStyle = e.comet ? '#bff6ff' : e.geode ? ITEMS[e.geode].c : '#ff4d6d';
       ctx.save(); ctx.translate(ix, iy); ctx.rotate(a);
       ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-6, -7); ctx.lineTo(-6, 7); ctx.closePath(); ctx.fill(); ctx.restore();
     }
@@ -605,7 +684,7 @@ const MineScene = {
     ctx.fillStyle = 'rgba(8,14,34,0.75)'; ctx.strokeStyle = 'rgba(61,232,255,0.35)'; ctx.lineWidth = 1;
     ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh);
     if (!this.space) { ctx.fillStyle = 'rgba(61,232,255,0.35)'; ctx.fillRect(mx, my + DOCK_Y / MH * mh, mw, mh - DOCK_Y / MH * mh); }
-    for (const r of this.rocks) { ctx.fillStyle = r.comet ? '#bff6ff' : r.gold ? '#ffd24a' : r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mw - 1, my + r.y / MH * mh - 1, r.tier * 0.8 + 0.6, r.tier * 0.8 + 0.6); }
+    for (const r of this.rocks) { ctx.fillStyle = r.comet ? '#bff6ff' : r.geode && r.seen > 0 ? ITEMS[r.geode].c : r.living ? '#9fffe0' : r.gold ? '#ffd24a' : r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mw - 1, my + r.y / MH * mh - 1, r.tier * 0.8 + 0.6, r.tier * 0.8 + 0.6); }
     ctx.fillStyle = '#ff4d6d'; for (const e of this.enemies) ctx.fillRect(mx + e.x / MW * mw - 1.5, my + e.y / MH * mh - 1.5, 3, 3);
     ctx.fillStyle = '#3de8ff'; ctx.fillRect(mx + p.x / MW * mw - 2, my + p.y / MH * mh - 2, 4, 4);
     if (this.loc.field.hazard === 'heat' && ship.shieldMax <= 0) { ctx.fillStyle = `rgba(255,120,40,${0.08 + 0.05 * Math.sin(t * 4)})`; ctx.fillRect(0, 0, W, H); }

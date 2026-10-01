@@ -32,7 +32,7 @@ window.addEventListener('keydown', e => {
   keys.add(e.code);
   audioInit();
   if (e.code === 'Space' && scene === MineScene) e.preventDefault();
-  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); if (e.code === 'KeyR') MineScene.boost(); if (e.code === 'KeyF') MineScene.bomb(); }
+  if (scene === MineScene && !isBlocking()) { if (e.code === 'KeyQ') MineScene.toggleTool(); if (e.code === 'KeyE') MineScene.pulse(); if (e.code === 'KeyR') MineScene.boost(); if (e.code === 'KeyF') MineScene.bomb(); if (e.code === 'KeyC') MineScene.scan(); }
   if (e.code === 'Escape') {
     if (!$('sheet').classList.contains('hidden')) closeSheet();
     else if (scene === MineScene && !isBlocking()) MineScene.leave();
@@ -110,6 +110,7 @@ function setupTouchControls() {
   $('pullBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.pulse(); }, { passive: false });
   $('boostBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.boost(); }, { passive: false });
   $('bombBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.bomb(); }, { passive: false });
+  $('scanBtn').addEventListener('touchstart', e => { e.preventDefault(); MineScene.scan(); }, { passive: false });
   const fe = e => { e.preventDefault(); touchFire = false; fire.classList.remove('on'); };
   fire.addEventListener('touchend', fe); fire.addEventListener('touchcancel', fe);
 }

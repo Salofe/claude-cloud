@@ -480,5 +480,6 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 #pullBtn.cd { opacity: .5; }
 #boostBtn { right: 40px; bottom: 200px; border-color: #ffe14a; background: rgba(255,225,74,.2); }
 #bombBtn { right: 206px; bottom: 112px; border-color: #ff5a2a; background: rgba(255,90,42,.2); }
-#boostBtn.cd, #bombBtn.cd { opacity: .5; }
+#scanBtn { right: 206px; bottom: 186px; border-color: #7fe0ff; background: rgba(127,224,255,.2); }
+#boostBtn.cd, #bombBtn.cd, #scanBtn.cd { opacity: .5; }
 .inv-now { font-size: 13px; color: var(--dim); margin: 4px 0 8px; } .inv-now b { color: var(--gold); }

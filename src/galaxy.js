@@ -1159,6 +1159,966 @@ Object.assign(SYSTEMS, {
  }
 });
 
+// systems 9–11
+Object.assign(SYSTEMS, {
+ "kepler": {
+  "n": "Kepler",
+  "star": "sol",
+  "rock": 9.4,
+  "enemy": 5.5,
+  "value": 1,
+  "boss": "kraken",
+  "bossFleet": [
+   "kraken",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Something in the trench",
+   "text": "Fishing crews keep losing ships near the <b>Kraken's Trench</b>. The black box of the last one recorded a single word: <b>tentacles</b>. Whatever lives down there is sitting on the ancient gate."
+  },
+  "gate": "The Kraken sinks into the dark, trailing glowing ink. At the bottom of the trench, an ancient ring <b>opens like an eye</b>.",
+  "intro": "Kepler is a system of <b>ocean worlds</b> — and its asteroids are <b>alive</b>. <b>Living rocks</b> glow with spots and swim around; when your laser stings them they <b>flee</b>. Chase them down (Overdrive helps!) or use the <b>Tractor Pulse (E)</b> to calm them for a few seconds. They drop <b>60% more ore</b>.",
+  "factions": {
+   "tierra": {
+    "n": "Tidal Republic",
+    "c": "#6fd8e0"
+   },
+   "marte": {
+    "n": "Salt Clans",
+    "c": "#e0d0a0"
+   },
+   "cinturon": {
+    "n": "Reef Keepers",
+    "c": "#7fffb0"
+   },
+   "exterior": {
+    "n": "Deepwater Pact",
+    "c": "#7a9aff"
+   },
+   "piratas": {
+    "n": "Black Tide",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Shoal",
+    "station": "Shoal Base",
+    "tex": "ice",
+    "col": [
+     "#c8f0f0",
+     "#2a5a6a"
+    ],
+    "desc": "A wet little moon of Thalassa. Its rocks swim in schools.",
+    "field": {
+     "n": "Shoal Shallows",
+     "ores": {
+      "iron": 3,
+      "ice": 3,
+      "nickel": 1,
+      "cobalt": 0.11
+     },
+     "living": 0.12
+    }
+   },
+   "tierra": {
+    "n": "Thalassa",
+    "station": "Deepwater Port",
+    "tex": "ocean",
+    "col": [
+     "#6fd0ff",
+     "#043a6a"
+    ],
+    "desc": "A world with no land at all. The cities float."
+   },
+   "venus": {
+    "n": "Pearlhaze",
+    "station": "Nacre Spire",
+    "tex": "gas",
+    "col": [
+     "#f0e8f8",
+     "#7a6a9a"
+    ],
+    "desc": "A shimmering cloud world. Its people love pearls."
+   },
+   "mercurio": {
+    "n": "Scald",
+    "station": "Steam Vents Depot",
+    "tex": "lava",
+    "col": [
+     "#ffb070",
+     "#2a3a4a"
+    ],
+    "desc": "Boiling seas and steam geysers. Sunstone under the foam.",
+    "field": {
+     "n": "Scald Geysers",
+     "ores": {
+      "titanium": 2,
+      "nickel": 2,
+      "platinum": 1.5,
+      "sunstone": 1.22
+     },
+     "living": 0.15
+    }
+   },
+   "marte": {
+    "n": "Saltflat",
+    "station": "Salt Gate",
+    "tex": "rock",
+    "col": [
+     "#e8e0c8",
+     "#6a5a40"
+    ],
+    "desc": "The only dry planet in Kepler — and it's dying of thirst. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Reef",
+    "station": "Reefhold",
+    "tex": "rock",
+    "col": [
+     "#90c8a8",
+     "#24443a"
+    ],
+    "desc": "The Reef Keepers' home, built inside a giant living reef.",
+    "field": {
+     "n": "The Living Reef",
+     "ores": {
+      "nickel": 2,
+      "cobalt": 2,
+      "platinum": 1,
+      "ringpearl": 0.35
+     },
+     "living": 0.3
+    }
+   },
+   "jupiter": {
+    "n": "Maelstrom",
+    "tex": "gas",
+    "col": [
+     "#a0e0f0",
+     "#1a4a7a"
+    ]
+   },
+   "europa": {
+    "n": "Undertow",
+    "station": "Undertow Colony",
+    "tex": "ice",
+    "col": [
+     "#e0f8ff",
+     "#4a7a9a"
+    ],
+    "desc": "An ice moon over a warm hidden ocean. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Maelstrom Depot",
+    "desc": "Maelstrom's Trojans, where living rocks gather to feed.",
+    "field": {
+     "n": "Maelstrom Shoals",
+     "ores": {
+      "he3": 2,
+      "platinum": 1,
+      "iridium": 2,
+      "ringpearl": 0.36
+     },
+     "living": 0.22
+    }
+   },
+   "saturno": {
+    "n": "Coralring",
+    "station": "Coral Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#f0d8c8",
+     "#7a5a6a"
+    ],
+    "desc": "A giant whose rings are made of something like coral.",
+    "field": {
+     "n": "Coral Rings",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 3,
+      "iridium": 1,
+      "exotic": 0.07
+     },
+     "living": 0.22
+    }
+   },
+   "titan": {
+    "n": "Kelpmire",
+    "station": "Kelpworks",
+    "tex": "titan",
+    "col": [
+     "#a0c890",
+     "#2a4a2a"
+    ],
+    "desc": "A moon covered in floating kelp forests and refineries."
+   },
+   "pluton": {
+    "n": "Wreckreef",
+    "station": "Smuggler's Grotto",
+    "tex": "rock",
+    "col": [
+     "#7a8a8a",
+     "#1a2a2a"
+    ],
+    "desc": "A reef of sunken ships where the Black Tide trades."
+   },
+   "kuiper": {
+    "n": "The Abyss",
+    "station": "Abyss Buoy",
+    "desc": "A dark sea of rock at the edge of the system. Big things swim here.",
+    "field": {
+     "n": "The Abyss",
+     "ores": {
+      "ice": 1,
+      "ringpearl": 3,
+      "iridium": 1,
+      "exotic": 2.12
+     },
+     "living": 0.2
+    }
+   },
+   "oort": {
+    "n": "Kraken's Trench",
+    "station": "Last Buoy",
+    "col": [
+     "#7fe0e0",
+     "#0a2a3a"
+    ],
+    "desc": "A trench in space. Something with tentacles lives at the bottom.",
+    "field": {
+     "n": "Kraken's Trench",
+     "ores": {
+      "ice": 2,
+      "ringpearl": 2,
+      "exotic": 2,
+      "voidshard": 0.45
+     },
+     "living": 0.15
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Shoal"
+   },
+   "3": {
+    "title": "Scald & Saltflat",
+    "text": "<b>Scald</b> boils with <b>Sunstone</b> — buy <b>Shields</b>. <b>Saltflat</b> pays a fortune for ice. Some rocks here are <b>alive</b>: they flee when you laser them, but drop 60% more ore."
+   },
+   "4": {
+    "title": "The Living Reef",
+    "text": "<b>Reef</b> and <b>the Living Reef</b>: almost a third of the rocks swim. Calm them with the <b>Tractor Pulse (E)</b> and cut them while they're still."
+   },
+   "6": {
+    "title": "Maelstrom System",
+    "text": "<b>Undertow</b> and the <b>Maelstrom Shoals</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Coralring & Influence",
+    "text": "<b>Kelpmire</b> and the <b>Coral Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Kepler."
+   },
+   "8": {
+    "title": "Wreckreef",
+    "text": "<b>Wreckreef</b>'s Smuggler's Grotto and <b>the Abyss</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🚀",
+    "n": "Tamed Rock Herd",
+    "d": "You whistle, and a herd of living rocks swims your ore home all by itself.",
+    "fx": "Shoal outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Glowing Plankton Lanes",
+    "d": "You seed the trade lanes with glowing plankton. Ships just follow the lights.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🛡",
+    "n": "Coral Gunship Pod",
+    "d": "Living gunships grown from reef coral. They hunt in pairs — two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "🗼",
+    "n": "Geyser Launcher",
+    "d": "You cap the biggest geyser on Scald. Every few minutes it blasts a full cargo hold into orbit.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Ocean Drop",
+    "d": "You drop an entire ocean on Saltflat. It arrives as one very large, very wet comet.",
+    "fx": "Saltflat pays ×2 for everything · Salt Clans reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Whirlpool Gates",
+    "d": "You teach the Maelstrom to spin wormholes. Dive in, pop out anywhere.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Coral Ring Reef",
+    "d": "You grow a living reef all the way around Coralring. It eats asteroids and spits out pure ore.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Sunlit Sea",
+    "d": "A shell of water around the star: one ocean the size of a solar system, glowing with light.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Tsunami Cannon",
+    "d": "You fire a wave of compressed ocean. It does not stop at the planet's surface.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "rigel": {
+  "n": "Rigel",
+  "star": "blue",
+  "rock": 10.9,
+  "enemy": 6.1,
+  "value": 1,
+  "gift": "deepscan",
+  "boss": "radiant",
+  "bossFleet": [
+   "radiant",
+   "corsair",
+   "corsair"
+  ],
+  "signal": {
+   "title": "A giant made of light",
+   "text": "Something stands in the <b>Radiant Rift</b> — a crystal giant that burns brighter than the star. Ships that get close see a thin blue line… and then nothing. <b>Watch for the line and dodge.</b>"
+  },
+  "gate": "The Radiant Titan cracks and its light pours out like water. In the glare, an ancient ring <b>focuses into a gate</b>.",
+  "intro": "Rigel is a <b>blue supergiant</b>, so bright it lights up the whole sky. Its heat bakes hidden <b>geodes</b> inside some asteroids. The Geode Cutters give you the <b>Deep Scanner</b>: press <b>C</b> (or SCAN) to send out a wave that shows every geode nearby. Break a geode for a <b>huge load of the field's best ore</b>. You keep it forever.",
+  "factions": {
+   "tierra": {
+    "n": "Rigel Concord",
+    "c": "#8ab8ff"
+   },
+   "marte": {
+    "n": "Prism Guild",
+    "c": "#c0a0ff"
+   },
+   "cinturon": {
+    "n": "Geode Cutters",
+    "c": "#7fe0ff"
+   },
+   "exterior": {
+    "n": "Halo Union",
+    "c": "#b0c8ff"
+   },
+   "piratas": {
+    "n": "Glare Raiders",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Glint",
+    "station": "Glint Base",
+    "tex": "ice",
+    "col": [
+     "#e0f0ff",
+     "#3a5a8a"
+    ],
+    "desc": "A frost moon that sparkles like a mirror ball.",
+    "field": {
+     "n": "Glint Fields",
+     "ores": {
+      "iron": 4,
+      "ice": 2,
+      "titanium": 2.77
+     },
+     "geodes": 0.06
+    }
+   },
+   "tierra": {
+    "n": "Bluehaven",
+    "station": "Halo Harbor",
+    "tex": "ocean",
+    "col": [
+     "#8ad0ff",
+     "#0a2a6a"
+    ],
+    "desc": "A blue world under a blue sun. Everyone wears sunglasses."
+   },
+   "venus": {
+    "n": "Sapphire",
+    "station": "Sapphire Spire",
+    "tex": "gas",
+    "col": [
+     "#a0b8ff",
+     "#2a2a8a"
+    ],
+    "desc": "A deep blue cloud world, rich and proud."
+   },
+   "mercurio": {
+    "n": "Searlight",
+    "station": "Flare Depot",
+    "tex": "lava",
+    "col": [
+     "#d0e8ff",
+     "#1a2a5a"
+    ],
+    "desc": "Scorched white by Rigel. Platinum and geodes everywhere.",
+    "field": {
+     "n": "Searing Plains",
+     "ores": {
+      "titanium": 1,
+      "cobalt": 1,
+      "platinum": 2,
+      "sunstone": 0.29
+     },
+     "geodes": 0.1
+    }
+   },
+   "marte": {
+    "n": "Prism",
+    "station": "Prism Gate",
+    "tex": "rock",
+    "col": [
+     "#c8b8e8",
+     "#3a2a5a"
+    ],
+    "desc": "A glassy desert that splits light into rainbows. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Quarry",
+    "station": "Geode Hall",
+    "tex": "rock",
+    "col": [
+     "#a8b0c8",
+     "#2a3040"
+    ],
+    "desc": "The Geode Cutters' capital. Every rock here has been cut open.",
+    "field": {
+     "n": "The Geode Belt",
+     "ores": {
+      "cobalt": 2,
+      "platinum": 2,
+      "sunstone": 1,
+      "iridium": 0.52
+     },
+     "geodes": 0.2
+    }
+   },
+   "jupiter": {
+    "n": "Behemoth",
+    "tex": "gas",
+    "col": [
+     "#b0d0ff",
+     "#1a3a8a"
+    ]
+   },
+   "europa": {
+    "n": "Frostlight",
+    "station": "Frostlight Colony",
+    "tex": "ice",
+    "col": [
+     "#f0f8ff",
+     "#6a8ab0"
+    ],
+    "desc": "An ice moon that glows at night. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Behemoth Depot",
+    "desc": "Behemoth's Trojans, packed with geodes.",
+    "field": {
+     "n": "Behemoth Swarm",
+     "ores": {
+      "platinum": 2,
+      "sunstone": 3,
+      "iridium": 6.63
+     },
+     "geodes": 0.15
+    }
+   },
+   "saturno": {
+    "n": "Halo",
+    "station": "Halo Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e8f0ff",
+     "#5a6aa0"
+    ],
+    "desc": "A giant with rings so bright they cast shadows.",
+    "field": {
+     "n": "Halo Rings",
+     "ores": {
+      "he3": 3,
+      "sunstone": 2,
+      "iridium": 2,
+      "exotic": 0.67
+     },
+     "geodes": 0.12
+    }
+   },
+   "titan": {
+    "n": "Lumen",
+    "station": "Lumenworks",
+    "tex": "titan",
+    "col": [
+     "#d0d8f0",
+     "#4a5070"
+    ],
+    "desc": "A pale moon of refineries that run on starlight."
+   },
+   "pluton": {
+    "n": "Umbra",
+    "station": "Shadow Market",
+    "tex": "rock",
+    "col": [
+     "#5a5a7a",
+     "#101020"
+    ],
+    "desc": "The only dark place in Rigel. The Glare Raiders love it."
+   },
+   "kuiper": {
+    "n": "Rigel Reach",
+    "station": "Reach Depot",
+    "desc": "The far edge of Rigel's glare, full of geodes.",
+    "field": {
+     "n": "Rigel Reach",
+     "ores": {
+      "sunstone": 1,
+      "iridium": 2,
+      "exotic": 1.47
+     },
+     "geodes": 0.12
+    }
+   },
+   "oort": {
+    "n": "The Radiant Rift",
+    "station": "Shade Outpost",
+    "col": [
+     "#a0d0ff",
+     "#0a1a4a"
+    ],
+    "desc": "A rift of pure light where a crystal giant stands guard.",
+    "field": {
+     "n": "The Radiant Rift",
+     "ores": {
+      "platinum": 2,
+      "iridium": 1,
+      "exotic": 2,
+      "voidshard": 0.28
+     },
+     "geodes": 0.1
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Glint"
+   },
+   "3": {
+    "title": "Searlight & Prism",
+    "text": "<b>Searlight</b> is scorched white — buy <b>Shields</b>. <b>Prism</b> pays a fortune for ice. Press <b>C</b> to <b>Deep Scan</b> for hidden geodes!"
+   },
+   "4": {
+    "title": "The Geode Belt",
+    "text": "<b>Quarry</b> and the <b>Geode Belt</b>: one rock in five hides a geode. Scan, then crack them open."
+   },
+   "6": {
+    "title": "Behemoth System",
+    "text": "<b>Frostlight</b> and the <b>Behemoth Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Halo & Influence",
+    "text": "<b>Lumen</b> and the <b>Halo Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Rigel."
+   },
+   "8": {
+    "title": "Umbra",
+    "text": "<b>Umbra</b>'s Shadow Market and <b>Rigel Reach</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🚀",
+    "n": "Photon Sail Freight",
+    "d": "Rigel's light is so strong you just put sails on the cargo and let it get blown home.",
+    "fx": "Glint outpost output ×3"
+   },
+   "beacons": {
+    "icon": "📡",
+    "n": "Mirror Relay",
+    "d": "Giant mirrors bounce your ships across the system. They arrive slightly tanned.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "⚔",
+    "n": "Prism Lancers",
+    "d": "Gunships with crystal hulls that split every shot into a rainbow. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Light-Pressure Lift",
+    "d": "Cargo pods with mirror bellies. Point them at Rigel and they fall upward.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Continental Sunshade",
+    "d": "An umbrella the size of a continent turns Prism from a glassy desert into a meadow.",
+    "fx": "Prism pays ×2 for everything · Prism Guild reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Lightway Gates",
+    "d": "You turn your ships into light, beam them across the system, and turn them back. Mostly the same.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Halo Melt Ring",
+    "d": "Focused starlight melts asteroids into a glowing river of ore that runs around Halo's rings.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Supergiant Lens",
+    "d": "A lens wider than a planet's orbit focuses a blue supergiant straight onto your bank account.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Rigel Lance",
+    "d": "You focus the Supergiant Lens into one beam. Planets never know what hit them.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ },
+ "betelgeuse": {
+  "n": "Betelgeuse",
+  "star": "red",
+  "rock": 12.6,
+  "enemy": 6.8,
+  "value": 1,
+  "gift": "widebeam",
+  "pulses": 1,
+  "boss": "phoenix",
+  "bossFleet": [
+   "phoenix",
+   "raider",
+   "raider"
+  ],
+  "signal": {
+   "title": "Born from the fire",
+   "text": "Every time Betelgeuse pulses, something huge rises out of the flames near the <b>Phoenix Nest</b>. The Exodus Fleet calls it the <b>Stellar Phoenix</b>. Legends say you have to kill it <b>twice</b>."
+  },
+  "gate": "The Phoenix burns out for good, and its ashes swirl into a ring. An ancient gate <b>ignites</b>.",
+  "intro": "Betelgeuse is a <b>red supergiant about to explode</b>. Every minute or so it <b>pulses</b>: a wave of heat washes over the field and every rock turns <b>molten</b> for a few seconds — <b>double laser damage and +50% ore</b>. Mine hard when the wave hits! The Forge Syndicate gives you the <b>Wide Beam</b>: your laser now <b>forks</b> into two more rocks near your target. You keep it forever.",
+  "factions": {
+   "tierra": {
+    "n": "Last Light Accord",
+    "c": "#ffa080"
+   },
+   "marte": {
+    "n": "Ash Brotherhood",
+    "c": "#d08060"
+   },
+   "cinturon": {
+    "n": "Forge Syndicate",
+    "c": "#ffc060"
+   },
+   "exterior": {
+    "n": "Exodus Fleet",
+    "c": "#a0a0ff"
+   },
+   "piratas": {
+    "n": "Cinder Reavers",
+    "c": "#ff4d6d"
+   }
+  },
+  "locs": {
+   "luna": {
+    "n": "Ember",
+    "station": "Emberwatch",
+    "tex": "rock",
+    "col": [
+     "#d09070",
+     "#3a1a10"
+    ],
+    "desc": "A moon glowing dull red in Betelgeuse's light.",
+    "field": {
+     "n": "Ember Fields",
+     "ores": {
+      "iron": 5,
+      "ice": 2,
+      "sunstone": 0.1
+     }
+    }
+   },
+   "tierra": {
+    "n": "Dusk",
+    "station": "Dusk Harbor",
+    "tex": "ocean",
+    "col": [
+     "#e09080",
+     "#3a1a2a"
+    ],
+    "desc": "An ocean world where the sun never stops setting."
+   },
+   "venus": {
+    "n": "Crimson",
+    "station": "Crimson Spire",
+    "tex": "gas",
+    "col": [
+     "#ff8070",
+     "#5a1020"
+    ],
+    "desc": "A blood-red cloud world. The richest people pack their bags here."
+   },
+   "mercurio": {
+    "n": "Pyre",
+    "station": "Pyre Depot",
+    "tex": "lava",
+    "col": [
+     "#ff7040",
+     "#2a0804"
+    ],
+    "desc": "A planet inside the star's outer layers. It is very, very hot.",
+    "field": {
+     "n": "Pyre Flats",
+     "ores": {
+      "iron": 2,
+      "titanium": 1,
+      "cobalt": 2,
+      "sunstone": 2.11
+     },
+     "geodes": 0.06
+    }
+   },
+   "marte": {
+    "n": "Ashfall",
+    "station": "Ash Gate",
+    "tex": "rock",
+    "col": [
+     "#a08070",
+     "#2a1a14"
+    ],
+    "desc": "Ash falls like snow here. Pays well for ice."
+   },
+   "ceres": {
+    "n": "Forge",
+    "station": "Foundry Hall",
+    "tex": "rock",
+    "col": [
+     "#c08060",
+     "#3a2014"
+    ],
+    "desc": "The Forge Syndicate melts asteroids in the star's heat.",
+    "field": {
+     "n": "The Forge Belt",
+     "ores": {
+      "nickel": 2,
+      "cobalt": 1,
+      "sunstone": 2,
+      "iridium": 0.57
+     },
+     "geodes": 0.08
+    }
+   },
+   "jupiter": {
+    "n": "Inferno",
+    "tex": "gas",
+    "col": [
+     "#ffa060",
+     "#7a1a10"
+    ]
+   },
+   "europa": {
+    "n": "Steam",
+    "station": "Steamvent Colony",
+    "tex": "ice",
+    "col": [
+     "#f0d0c8",
+     "#7a4a4a"
+    ],
+    "desc": "An ice moon slowly melting into steam. Pays well for iridium."
+   },
+   "troyanos": {
+    "station": "Inferno Depot",
+    "desc": "Inferno's Trojans, glowing in the red light.",
+    "field": {
+     "n": "Inferno Swarm",
+     "ores": {
+      "he3": 2,
+      "sunstone": 3,
+      "iridium": 6.98
+     },
+     "geodes": 0.06
+    }
+   },
+   "saturno": {
+    "n": "Gloam",
+    "station": "Gloam Ring Depot",
+    "tex": "gas",
+    "col": [
+     "#e0a090",
+     "#5a2a2a"
+    ],
+    "desc": "A giant whose icy rings are slowly boiling away.",
+    "field": {
+     "n": "Gloam Rings",
+     "ores": {
+      "he3": 2,
+      "sunstone": 2,
+      "iridium": 2,
+      "voidshard": 0.29
+     },
+     "geodes": 0.06
+    }
+   },
+   "titan": {
+    "n": "Smelt",
+    "station": "Smeltworks",
+    "tex": "titan",
+    "col": [
+     "#d09070",
+     "#4a2a1a"
+    ],
+    "desc": "A moon of giant furnaces."
+   },
+   "pluton": {
+    "n": "Exodus",
+    "station": "Evacuation Market",
+    "tex": "rock",
+    "col": [
+     "#8080a0",
+     "#1a1a2a"
+    ],
+    "desc": "Everyone is trying to leave before the star blows. Everything is on sale."
+   },
+   "kuiper": {
+    "n": "The Red Shroud",
+    "station": "Shroud Depot",
+    "desc": "Gas the star threw off long ago, now full of ore.",
+    "field": {
+     "n": "The Red Shroud",
+     "ores": {
+      "sunstone": 2,
+      "iridium": 2,
+      "voidshard": 0.67
+     },
+     "geodes": 0.06
+    }
+   },
+   "oort": {
+    "n": "Phoenix Nest",
+    "station": "Ashen Outpost",
+    "col": [
+     "#ffb060",
+     "#3a0a04"
+    ],
+    "desc": "A nest of flame at the edge of the system.",
+    "field": {
+     "n": "Phoenix Nest",
+     "ores": {
+      "ice": 2,
+      "sunstone": 2,
+      "exotic": 1,
+      "voidshard": 0.89
+     },
+     "geodes": 0.06
+    }
+   }
+  },
+  "unlocks": {
+   "0": {
+    "title": "Ember"
+   },
+   "3": {
+    "title": "Pyre & Ashfall",
+    "text": "<b>Pyre</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Ashfall</b> pays a fortune for ice. When Betelgeuse <b>pulses</b>, every rock turns molten — mine fast!"
+   },
+   "4": {
+    "title": "The Forge Belt",
+    "text": "<b>Forge</b> and the <b>Forge Belt</b>. Your <b>Wide Beam</b> shines in a crowd: aim at clusters."
+   },
+   "6": {
+    "title": "Inferno System",
+    "text": "<b>Steam</b> and the <b>Inferno Swarm</b>. The <b>Scanner</b> reveals rich veins."
+   },
+   "7": {
+    "title": "Gloam & Influence",
+    "text": "<b>Smelt</b> and the <b>Gloam Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Betelgeuse."
+   },
+   "8": {
+    "title": "Exodus",
+    "text": "<b>Exodus</b>'s Evacuation Market and <b>the Red Shroud</b>."
+   }
+  },
+  "projects": {
+   "driver": {
+    "icon": "🚀",
+    "n": "Flare Surfers",
+    "d": "Your ore rides the star's own solar flares like a wave, all the way home.",
+    "fx": "Ember outpost output ×3"
+   },
+   "beacons": {
+    "icon": "💡",
+    "n": "Pulse Riders",
+    "d": "Ships launch at the exact moment Betelgeuse pulses and surf the shockwave.",
+    "fx": "Travel 50% faster · fuel −30%"
+   },
+   "fleet": {
+    "icon": "🔥",
+    "n": "Ember Wing",
+    "d": "Fireproof gunships that fly through solar flares for fun. Two fly with you in every fight.",
+    "fx": "Pirate danger −50% · 2 escort gunships in every fight"
+   },
+   "elevator": {
+    "icon": "⬆",
+    "n": "Thermal Updraft Tower",
+    "d": "A tower so hot that the air inside rises at orbital speed. Cargo goes up with it.",
+    "fx": "All ore sells for +25% everywhere"
+   },
+   "terraform": {
+    "icon": "🌱",
+    "n": "Planet Fridge",
+    "d": "You wrap Ashfall in a giant cooling blanket. Snow falls for the first time in a billion years.",
+    "fx": "Ashfall pays ×2 for everything · Ash Brotherhood reputation +50"
+   },
+   "gates": {
+    "icon": "🌀",
+    "n": "Borrowed Shockwave",
+    "d": "You borrow tomorrow's supernova shockwave and ride it today. Instant travel, slightly singed.",
+    "fx": "Instant, free travel anywhere"
+   },
+   "ringstation": {
+    "icon": "💫",
+    "n": "Star-Lifting Ring",
+    "d": "You siphon the star's outer layers and refine them into ore. It had plenty to spare.",
+    "fx": "ALL drone income ×3"
+   },
+   "dyson": {
+    "icon": "☀",
+    "n": "Supernova Bottle",
+    "d": "A shell built to catch the supernova when it comes. Until then, it's the biggest battery ever made.",
+    "fx": "ALL income ×5"
+   },
+   "nova": {
+    "icon": "💥",
+    "n": "Early Supernova",
+    "d": "Why wait? You set off a tiny slice of Betelgeuse's supernova — aimed.",
+    "fx": "Lets you DESTROY planets (from the Star Map)"
+   }
+  }
+ }
+});
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },

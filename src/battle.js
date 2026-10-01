@@ -44,7 +44,7 @@ const Combat = {
     const lead = dist / 460 * 0.6;
     const tx = p.x + p.vx * lead, ty = p.y + p.vy * lead;
     const a = Math.atan2(ty - e.y, tx - e.x) + rand(-0.09, 0.09);
-    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : e.military ? '#b6ff7a' : '#ff4d6d';
+    const E = ENEMIES[e.k], n = E.spiral || E.radial || E.spread || 1, col = E.alien ? '#9ffcff' : E.hive ? '#b0ff9a' : E.mech ? '#ffb030' : E.serpent ? '#ffe080' : E.fort ? '#ffa860' : E.whale ? '#bfefff' : E.kraken ? '#d090ff' : E.radiant ? '#bfe8ff' : E.phoenix ? (e.reborn ? '#90c8ff' : '#ffb040') : e.military ? '#b6ff7a' : '#ff4d6d';
     if (E.spiral) e.spin = (e.spin || 0) + 0.32;
     for (let i = 0; i < n; i++) {
       const b = E.spiral ? e.spin + i * TAU / n : E.radial ? a + i * TAU / n : a + (i - (n - 1) / 2) * 0.2;
@@ -66,6 +66,13 @@ const Combat = {
     e.shT = 2.2;
     if (e.sp > 0) { const a = Math.min(e.sp, dmg); e.sp -= a; dmg -= a; e.shieldFlash = 0.25; }
     if (dmg > 0) { e.hp -= dmg; e.hitT = 0.08; }
+    if (e.hp <= 0 && !e.dead && ENEMIES[e.k].rebirth && !e.reborn) {   // the Phoenix rises once from its ashes
+      e.reborn = 1; e.hp = e.max * 0.5; e.sp = e.spMax; e.shT = 0;
+      sc.parts.burst(e.x, e.y, 90, '#90c8ff', 380, 1.2, 4); sc.shake = Math.max(sc.shake, 18); sfx('boom');
+      for (let i = 0; i < 16; i++) { const b = i * TAU / 16; sc.bolts.push({ x: e.x, y: e.y, vx: Math.cos(b) * 380, vy: Math.sin(b) * 380, life: 2.2, dmg: e.dmg, foe: 1, col: '#90c8ff' }); }
+      sc.floaters.push({ x: e.x, y: e.y - 90, txt: 'THE PHOENIX RISES AGAIN!', col: '#90c8ff', life: 2.5, big: 1 });
+      return;
+    }
     if (e.hp <= 0 && !e.dead) this.kill(sc, e);
   },
   kill(sc, e) {
@@ -98,6 +105,29 @@ const Combat = {
         e.dashCd = (e.dashCd == null ? 4 : e.dashCd) - dt;
         if (e.dashCd <= 0 && d < 750) { e.dashCd = 5; e.dashT = 0.9; e.dvx = nx * 650; e.dvy = ny * 650; sfx('alarm'); }
       }
+      // Kraken: squirts ink clouds that slow you down and hide the field
+      if (ENEMIES[e.k].ink) {
+        e.inkCd = (e.inkCd == null ? 5 : e.inkCd) - dt;
+        if (e.inkCd <= 0 && d < 850) {
+          e.inkCd = 8; sc.inks = sc.inks || [];
+          const ix = p.x + p.vx * 0.4, iy = p.y + p.vy * 0.4;
+          sc.inks.push({ x: ix, y: iy, r: 0, R: 230, t: 7 });
+          for (let i = 0; i < 24; i++) { const k = i / 24; sc.parts.add(lerp(e.x, ix, k), lerp(e.y, iy, k), rand(-30, 30), rand(-30, 30), 0.6, '#5a2a7a', 5); }
+          sfx('bump');
+        }
+      }
+      // Radiant Titan: aims a thin line at you, then fires a beam down it — move out of the line!
+      if (ENEMIES[e.k].beam) {
+        e.beamCd = (e.beamCd == null ? 5 : e.beamCd) - dt;
+        if (!e.beam && e.beamCd <= 0 && d < 900) { e.beam = { a: Math.atan2(dy, dx), t: 1.3, fire: 0 }; tone(300, 1.3, 'sine', 0.05, 900); }
+        if (e.beam) {
+          const B = e.beam;
+          if (B.t > 0) { B.t -= dt; if (B.t <= 0) { B.fire = 0.45; sfx('warp'); sc.shake = Math.max(sc.shake, 8);
+            const ux = Math.cos(B.a), uy = Math.sin(B.a), rx = p.x - e.x, ry = p.y - e.y, along = rx * ux + ry * uy, perp = Math.abs(rx * uy - ry * ux);
+            if (along > 0 && perp < 34 + shipR() * 0.4) { sc.damage(e.dmg * 12); sc.parts.burst(p.x, p.y, 20, '#bfe8ff', 160, 0.5, 3); } } }
+          else { B.fire -= dt; if (B.fire <= 0) { e.beam = null; e.beamCd = 6; } }
+        }
+      }
       if (e.dashT > 0) {
         e.dashT -= dt; e.vx = e.dvx; e.vy = e.dvy;
         if (d < 30 * e.size) { e.dashT = 0; sc.damage(e.dmg * 10); p.vx += nx * 500; p.vy += ny * 500; sc.shake = 16; sfx('hit'); }
@@ -107,7 +137,7 @@ const Combat = {
       e.a = Math.atan2(dy, dx);
       e.shT -= dt; e.hitT -= dt; if (e.shieldFlash) e.shieldFlash -= dt;
       if (e.shT <= 0 && e.spMax) e.sp = Math.min(e.spMax, e.sp + e.spMax * 0.15 * dt);
-      if (d < 750) {
+      if (d < 750 && !(e.beam && e.beam.t > 0)) {
         e.cd -= dt;
         if (e.cd <= 0) { e.burstLeft = ENEMIES[e.k].burst || 1; e.cd = e.rate * rand(0.85, 1.2); }
         if (e.burstLeft > 0) { e.burstT -= dt; if (e.burstT <= 0) { this.fireEnemy(sc, e); e.burstLeft--; e.burstT = 0.12; } }
@@ -174,6 +204,7 @@ const Combat = {
       }
     }
     sc.bolts = sc.bolts.filter(b => !b.dead);
+    if (sc.inks) { for (const k of sc.inks) { k.t -= dt; k.r = Math.min(k.R, k.r + 600 * dt); } sc.inks = sc.inks.filter(k => k.t > 0); }
     const before = sc.enemies.length;
     sc.enemies = sc.enemies.filter(e => !e.dead);
     if (before && !sc.enemies.length && sc.hadCombat) sc.onVictory();
@@ -188,15 +219,33 @@ const Combat = {
     }
     ctx.globalCompositeOperation = 'source-over';
     for (const es of sc.escorts || []) if (es.x) drawPlayerShip(ctx, { hull: 1, engine: 3, weapons: 3, laser: 1 }, es.x, es.y, es.a, 0.8, 0.6, t);
+    for (const e of sc.enemies) if (e.beam) {
+      const B = e.beam, L = 1600, x2 = e.x + Math.cos(B.a) * L, y2 = e.y + Math.sin(B.a) * L;
+      ctx.globalCompositeOperation = 'lighter';
+      if (B.t > 0) { ctx.strokeStyle = `rgba(190,232,255,${0.25 + 0.35 * Math.abs(Math.sin(t * 30))})`; ctx.lineWidth = 1.5 + (1.3 - B.t) * 3; ctx.setLineDash([14, 8]); }
+      else { ctx.strokeStyle = 'rgba(190,232,255,0.9)'; ctx.lineWidth = 50 * (B.fire / 0.45); ctx.setLineDash([]); }
+      ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
+      if (B.t <= 0) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 10 * (B.fire / 0.45); ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(x2, y2); ctx.stroke(); }
+      ctx.globalCompositeOperation = 'source-over';
+    }
     for (const e of sc.enemies) {
       if (e.trail) drawSerpentBody(ctx, e, t);
-      drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t);
+      drawEnemyShip(ctx, e.k, e.x, e.y, e.a, 1.3, t, e);
       if (e.hitT > 0) glow(ctx, e.x, e.y, 30 * e.size, '#ffffff', 0.6);
       if (e.shieldFlash > 0) { ctx.strokeStyle = `rgba(255,120,160,${e.shieldFlash * 3})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, 30 * e.size, 0, TAU); ctx.stroke(); }
       const w = 50 * e.size, y = e.y - 32 * e.size - 8;
       ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(e.x - w / 2 - 1, y - 1, w + 2, e.spMax ? 9 : 6);
       ctx.fillStyle = '#ff4d6d'; ctx.fillRect(e.x - w / 2, y, w * clamp(e.hp / e.max, 0, 1), 4);
       if (e.spMax) { ctx.fillStyle = '#ff9ec0'; ctx.fillRect(e.x - w / 2, y + 5, w * clamp(e.sp / e.spMax, 0, 1), 3); }
+    }
+    for (const k of sc.inks || []) {
+      const a = Math.min(1, k.t / 1.5);
+      for (let i = 0; i < 5; i++) {
+        const an = i * 1.26 + k.R, ox = Math.cos(an) * k.r * 0.35, oy = Math.sin(an) * k.r * 0.35;
+        const g = ctx.createRadialGradient(k.x + ox, k.y + oy, 0, k.x + ox, k.y + oy, k.r * 0.75);
+        g.addColorStop(0, `rgba(14,4,24,${0.8 * a})`); g.addColorStop(0.7, `rgba(30,8,50,${0.55 * a})`); g.addColorStop(1, 'rgba(30,8,50,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(k.x + ox, k.y + oy, k.r * 0.75, 0, TAU); ctx.fill();
+      }
     }
   },
 };

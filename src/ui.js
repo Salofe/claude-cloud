@@ -232,10 +232,13 @@ function updateMineHUD() {
   const val = LOC[S.loc].market ? oreValueAt(S.loc) : 0;
   $('mineCargo').innerHTML = (rows || '<div class="crow dim">Cargo hold empty</div>') + (val ? `<div class="crow val">Worth<b class="cr">${fmt(val)} cr</b></div>` : '');
   const depth = sc.space ? '' : `<span class="depth">Depth ${Math.round(sc.depthOf(sc.p.y) * 100)}% · richness ×${(1 + sc.depthOf(sc.p.y) * 4).toFixed(1)}</span>`;
-  const tools = sc.space ? '' : (hasTool('drill') ? `<span class="tool">${sc.tool === 'drill' ? '⛏ Drill' : '✦ Laser'} <small>[Q]</small></span>` : '') + (hasTool('tractor') ? `<span class="tool">${sc.pullCd > 0 ? `Pulse ${Math.ceil(sc.pullCd)}s` : '🧲 Pulse ready'} <small>[E]</small></span>` : '')
+  const tools = sc.space ? '' : (isTouch ? '' : (hasTool('drill') ? `<span class="tool">${sc.tool === 'drill' ? '⛏ Drill' : '✦ Laser'} <small>[Q]</small></span>` : '') + (hasTool('tractor') ? `<span class="tool">${sc.pullCd > 0 ? `Pulse ${Math.ceil(sc.pullCd)}s` : '🧲 Pulse ready'} <small>[E]</small></span>` : '')
     + (hasTool('overdrive') ? `<span class="tool">${sc.boostT > 0 ? `⚡ OVERDRIVE ${Math.ceil(sc.boostT)}s` : sc.boostCd > 0 ? `Overdrive ${Math.ceil(sc.boostCd)}s` : '⚡ Overdrive ready'} <small>[R]</small></span>` : '')
-    + (hasTool('charges') ? `<span class="tool">${sc.bombCd > 0 ? `Charge ${Math.ceil(sc.bombCd)}s` : '💥 Charge ready'} <small>[F]</small></span>` : '');
-  for (const [id, k, cd, lbl] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST'], ['bombBtn', 'charges', sc.bombCd, 'BOMB']]) { $(id).classList.toggle('hidden', !hasTool(k) || sc.space); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); }
+    + (hasTool('charges') ? `<span class="tool">${sc.bombCd > 0 ? `Charge ${Math.ceil(sc.bombCd)}s` : '💥 Charge ready'} <small>[F]</small></span>` : '')
+    + (hasTool('deepscan') ? `<span class="tool">${sc.scanCd > 0 ? `Scan ${Math.ceil(sc.scanCd)}s` : '◈ Deep Scan ready'} <small>[C]</small></span>` : '')
+    + (hasTool('widebeam') ? '<span class="tool">✦ Wide Beam</span>' : ''))
+    + (sc.moltenT > 0 ? `<span class="tool" style="color:#ffb040">☀ MOLTEN ${Math.ceil(sc.moltenT)}s</span>` : sysDef().pulses && !sc.space && sc.pulseIn < 10 ? `<span class="tool">☀ Pulse in ${Math.ceil(sc.pulseIn)}s</span>` : '');
+  for (const [id, k, cd, lbl] of [['boostBtn', 'overdrive', sc.boostCd, 'BOOST'], ['bombBtn', 'charges', sc.bombCd, 'BOMB'], ['scanBtn', 'deepscan', sc.scanCd, 'SCAN']]) { $(id).classList.toggle('hidden', !hasTool(k) || sc.space); $(id).textContent = cd > 0 ? Math.ceil(cd) + 's' : lbl; $(id).classList.toggle('cd', cd > 0); }
   $('toolBtn').classList.toggle('hidden', !hasTool('drill') || sc.space); $('toolBtn').textContent = sc.tool === 'drill' ? 'LASER' : 'DRILL';
   $('pullBtn').classList.toggle('hidden', !hasTool('tractor') || sc.space); $('pullBtn').textContent = sc.pullCd > 0 ? Math.ceil(sc.pullCd) + 's' : 'PULL'; $('pullBtn').classList.toggle('cd', sc.pullCd > 0);
   $('mineInfo').innerHTML = tools + (ship.shieldMax ? `<span>Shield ${fmt(sc.p.shield)}/${fmt(ship.shieldMax)}</span>` : '') + (sc.loc.field.hazard === 'heat' ? ' <span class="badt">🔥 HEAT</span>' : '');
@@ -244,7 +247,7 @@ function updateMineHUD() {
   document.body.classList.toggle('battle', combat);
   $('battleUI').classList.toggle('hidden', !combat);
   if (combat) {
-    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
+    $('btTitle').innerHTML = sc.inCombat ? `⚔ ${sc.enemies.length} ${sc.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale || ENEMIES[e.k].kraken || ENEMIES[e.k].radiant || ENEMIES[e.k].phoenix) ? 'HOSTILE' : 'PIRATE'}${sc.enemies.length > 1 ? 'S' : ''}` : '✔ AREA CLEAR — resuming course';
     $('btnWarp').classList.toggle('hidden', !sc.space || !sc.inCombat);
     $('btnWarp').textContent = sc.warp ? `Warping… ${Math.round(sc.warp.t / ship.warpTime * 100)}%` : `⚡ Warp out (${ship.warpTime.toFixed(1)}s)`;
     $('btnContinue').classList.toggle('hidden', !(sc.space && !sc.inCombat));
@@ -714,7 +717,7 @@ function openHelp() {
     <h4>⚔ Wars</h4><p>When two factions fight, <b>back a side</b> at one of their stations. Their stations pay +30% for metals and every ore sale there <b>pushes the front</b> (see the bar). Help them win to gain a <b>permanent ally</b>: +15% ore at their stations (up to 3 stars) and spoils of war.</p>
     <h4>📦 Trade</h4><p>The Trade tab shows the best deals from each station: one tap buys the goods and plots your course. Hire 🚚 freighters to run a route for you forever.</p>
     <h4>🏛 Power</h4><p>Select a planet on the map (or open its Planet tab) to fund public works, start booms, hire mercenaries — back a side in wars and fund offensives; later incite wars or broker peace. Each action has a cooldown per planet. The Nova Cannon can even destroy a world…</p>
-    <h4>⛏ Tools</h4><p>Some star systems give you tools you keep forever: the <b>Drill</b> (<b>Q</b>: 3× power at short range, cracks <b>armored</b> rocks), the <b>Tractor Pulse</b> (<b>E</b>: pulls every ore chunk around you), <b>Overdrive</b> (<b>R</b>: 8 s of triple power and speed) and <b>Mining Charges</b> (<b>F</b>: a bomb that cracks every rock around it). <b>Volatile</b> rocks explode when broken — chain them!</p>
+    <h4>⛏ Tools</h4><p>Some star systems give you tools you keep forever: the <b>Drill</b> (<b>Q</b>: 3× power at short range, cracks <b>armored</b> rocks), the <b>Tractor Pulse</b> (<b>E</b>: pulls every ore chunk around you), <b>Overdrive</b> (<b>R</b>: 8 s of triple power and speed) and <b>Mining Charges</b> (<b>F</b>: a bomb that cracks every rock around it), the <b>Deep Scanner</b> (<b>C</b>: shows hidden <b>geodes</b> — break one for a huge load of the field's best ore) and the <b>Wide Beam</b> (your laser forks into two more rocks). <b>Volatile</b> rocks explode when broken — chain them! <b>Living</b> rocks flee from your laser but drop 60% more ore — calm them with the Tractor Pulse.</p>
     <h4>🌀 Galaxy</h4><p>Each system's guardian opens a jump gate. In the <b>Galaxy</b> map you jump to the next star: you start fresh there, but conquered systems pay <b>Tribute</b> forever, which buys permanent <b>Legacy</b> bonuses. 15 systems lead to the black hole at the core.</p>
     <h4>👑 Win</h4><p>Invest in stations to earn influence. Reach <b>100 influence</b> to rule the system — then defeat its guardian and jump through the gate to the next star.</p></div>`);
 }

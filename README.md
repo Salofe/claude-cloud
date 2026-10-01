@@ -66,11 +66,17 @@ Defeating a system's final guardian opens its **jump gate**. The **Galaxy** map 
 - **Vega** (fast-spinning blue star): **3× comets** in every field, and you receive **Overdrive** (R / BOOST: 8 s of triple cutting power and +50% speed, 45 s cooldown). Guardian: the **Ice Leviathan**, which rams you. Signature: Comet Herding Array (comets 3× more often and ×2 ore).
 - **Altair** (pirate empire): you receive **Mining Charges** (F / BOMB: blows up 1.2 s later, shattering rocks around it and hurting pirates, 10 s cooldown). Guardian: the **Pirate King**, who keeps calling raiders. Signature: Bounty Exchange (pirate loot ×3).
 
+### Systems 9–11
+
+- **Kepler** (ocean worlds): **living asteroids** with fins, eyes and glowing spots swim around the field and **flee** when your laser stings them; the **Tractor Pulse** calms them for 6 s. They drop **+60% ore**. Guardian: the **Space Kraken**, whose **ink clouds** slow you down and hide the field. Signature: Reef Whisperers (living rocks stop fleeing, ×2 ore).
+- **Rigel** (blue supergiant): some big rocks hide **geodes**; you receive the **Deep Scanner** (C / SCAN, 14 s cooldown) — a wave that marks every geode within 1,800 px (plus rich and golden rocks). Breaking a geode drops a big load of the field's best ore. Guardian: the **Radiant Titan**, which aims a thin line at you and fires a beam down it — get out of the line! Signature: Quantum Sonar Array (scan 2× faster, geodes ×2 ore).
+- **Betelgeuse** (red supergiant about to explode): about every minute the star **pulses** — a heat wave makes every rock **molten** for 10 s (2× laser damage, +50% ore). You receive the **Wide Beam**: the laser forks into two more rocks near the target at half power. Guardian: the **Stellar Phoenix**, which dashes at you and **rises once from its ashes** in blue fire. Signature: Starheart Tap (pulses 2× as often, 50% longer).
+
 Review of earlier mechanics: crystal shards now drop +20% (rewarding the chase), armored rocks ×1.5 ore (a prize for the drill, not just an obstacle).
 
 Every system reinvents the nine megaprojects with its own (ever crazier) tech — e.g. Centauri's Twin-Star Dyson Lattice, Barnard's Mine-Shaft Wormholes, Sirius' White Dwarf Hammer, Tau Ceti's Planetary Repossession Beam — and adds one **signature project** with a unique effect: Crystal Resonance Array (crystal shards ×2 ore), Deep Core Borer (drill reach +60%, power ×1.5), Plasma Forge (laser 60% vs armor, armored rocks ×2 ore), Galactic Stock Exchange (trade & freighter income ×3).
 
-Each system gets tougher (rocks ×1.5 then ×1.35 per system from Epsilon Eridani on, pirate toughness ×1.35 then ~×1.2; pirate damage grows only with the square root so fights stay short). With the Legacy you'd typically have by then, the simulator puts each system at ~110–125 minutes, with normal fights at 8–15 s and guardians at ~40–65 s and well under your hull + shields.
+Each system gets tougher (rocks ×1.5, then ×1.35 per system from Epsilon Eridani, then ×1.15 from Kepler on as Legacy grows; pirate toughness ×1.35, then ~×1.2, then ~×1.12; pirate damage grows only with the square root so fights stay short). With the Legacy you'd typically have by then, the simulator puts each system at ~130–150 minutes (not counting the bonuses of each system's own mechanic), with normal fights at 8–15 s and guardians at ~40–65 s and well under your hull + shields.
 
 ## Fields & comets
 
@@ -81,6 +87,12 @@ Every field has its own signature ores: the Moon (iron, ice), Mercury (platinum,
 Reaching 100 influence makes you ruler of the Solar System — and reveals a **signal from the Oort Cloud**, a new far-out mining field. Mining there draws out the **Alien Sentinel** (a boss with alien drones and spread shots). Destroying it wakes an ancient **jump gate**: the way to the galaxy (next update).
 
 Combat is a side dish. `tools/balance-sim.js` prints a combat check per stage (time to kill a typical fleet and the warlord/Sentinel, and the share of hull lost) for a player who buys enough guns; enemy strength per zone is `Z_ENEMY` in `src/data.js`.
+
+## Music, sound & look
+
+- **Music** (`src/music.js`): six calm generative pieces (electric piano, bells, pads, sub bass through a generated reverb) drift in every few minutes with long silences between them, like a sandbox game soundtrack. Each piece keeps its key, tempo and chords but recomposes its melody every time. Guardians get their own driving theme. Toggle it in the menu (saved per device).
+- **Ambience**: rare distant sounds between pieces (radio chatter, solar wind, hull creaks, a far-off space whale, station chimes) and a short reverb on all effects.
+- **Look**: every star system has its own painted nebula sky with dust lanes; shooting stars; foreground dust that streaks with your speed; the star's color washes over the field; asteroids are lit from one side with rim light; an ion ribbon trails your ship; brighter explosions; twinkling ore.
 
 ## Icons
 
