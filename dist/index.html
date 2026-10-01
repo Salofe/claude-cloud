@@ -474,6 +474,14 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .minebox { min-width: 270px; }
 .crow { white-space: nowrap; }
 @media (max-width: 700px) { .minebox { min-width: 0; } .crow .tier { display: none; } }
+.jump-box { border: 1px solid #ffc857; background: rgba(255,200,87,.07); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+.jump-box.full { border-color: var(--good); background: rgba(109,255,176,.06); }
+.jb-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--dim); }
+.jb-top b { font-size: 24px; color: #f0e0ff; font-family: var(--fh); }
+.jb-top b small { font-size: 14px; color: var(--dim); }
+.jb-note { margin: 8px 0 2px; font-size: 13px; color: #ffc857; }
+.jb-note.good { color: var(--good); }
+.jump-box .srow { font-size: 13px; }
 </style>
 </head>
 <body>
@@ -3058,8 +3066,14 @@ function renderGalaxyPanel() {
     const jb = jumpBonus();
     if (!SYSTEMS[nx.id]) h += `<p class="hint">The gate points here, but this system isn't charted yet — coming in a future update.</p>`;
     else if (!S.gateOpen) h += `<p class="hint">🔒 Defeat ${sysName()}'s guardian to open the gate.</p>`;
-    else h += `<p class="hint">Jumping now gives <b>+${jb.b} Tribute</b> <small>(${jb.why.join(', ')})</small>.${jb.max > jb.b ? ` Up to <b>${jb.max - jb.b} more</b> is still available in ${sysName()} — select it to see how.` : ''} Your credits, ship upgrades, outposts and freighters stay behind; Tribute, Legacy and your records come with you.</p>
-      <button class="btn primary big" onclick="confirmJump('${nx.id}')">🌀 Jump to ${nx.n}</button>`;
+    else {
+      const full = jb.b >= jb.max;
+      h += `<div class="jump-box ${full ? 'full' : ''}"><div class="jb-top"><span>Tribute if you jump now</span><b>${jb.b}<small> / ${jb.max}</small></b></div>
+        <div class="meter gold"><i style="width:${Math.round(jb.b / jb.max * 100)}%"></i></div>
+        ${full ? '<div class="jb-note good">✔ You earned everything here.</div>' : `<div class="jb-note">⚠ <b>${jb.max - jb.b} Tribute</b> still left in ${sysName()}:</div>${jb.left.slice(0, 3).map(x => `<div class="srow"><span>${x.n}</span><b>+${x.t}</b></div>`).join('')}${jb.left.length > 3 ? `<small class="dim">…and ${jb.left.length - 3} more (select ${sysName()})</small>` : ''}`}</div>
+        <button class="btn primary big" onclick="confirmJump('${nx.id}')">🌀 Jump to ${nx.n}</button>
+        <p class="hint">Credits, ship upgrades, outposts and freighters stay behind. Tribute, Legacy and records come with you.</p>`;
+    }
   }
   if (g.id === cur) {
     const jb = jumpBonus();

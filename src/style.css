@@ -465,3 +465,11 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .minebox { min-width: 270px; }
 .crow { white-space: nowrap; }
 @media (max-width: 700px) { .minebox { min-width: 0; } .crow .tier { display: none; } }
+.jump-box { border: 1px solid #ffc857; background: rgba(255,200,87,.07); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+.jump-box.full { border-color: var(--good); background: rgba(109,255,176,.06); }
+.jb-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--dim); }
+.jb-top b { font-size: 24px; color: #f0e0ff; font-family: var(--fh); }
+.jb-top b small { font-size: 14px; color: var(--dim); }
+.jb-note { margin: 8px 0 2px; font-size: 13px; color: #ffc857; }
+.jb-note.good { color: var(--good); }
+.jump-box .srow { font-size: 13px; }
