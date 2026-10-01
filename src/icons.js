@@ -100,6 +100,7 @@ const ICON = {
   system: { s: cP(12, 12, 5.5) + cP(12, 12, 9.5), d: cP(12, 12, 2.4) + cP(17.5, 12, 1.4) + cP(5.3, 5.3, 1.3) },
   arrowDown: { s: 'M12 3.5v16M6 13.5l6 6 6-6' },
   arrowUp: { s: 'M12 20.5v-16M6 10.5l6-6 6 6' },
+  note: { c: '#d9b3ff', f: 'M9 6.5l10-3v3l-10 3z', s: 'M9 18V6.5l10-3V16M9 9.5l10-3', d: 'M5 18a3 2.5 0 1 0 6 0a3 2.5 0 1 0-6 0zM15 16a3 2.5 0 1 0 6 0a3 2.5 0 1 0-6 0z' },
   fleet: { c: '#3de8ff', f: 'M12 2.5l3.5 7-3.5-1.8-3.5 1.8zM6 11.5l3.5 7-3.5-1.8-3.5 1.8zM18 11.5l3.5 7-3.5-1.8-3.5 1.8z', s: 'M12 2.5l3.5 7-3.5-1.8-3.5 1.8zM6 11.5l3.5 7-3.5-1.8-3.5 1.8zM18 11.5l3.5 7-3.5-1.8-3.5 1.8z' },
 };
 
@@ -115,7 +116,7 @@ const GLYPH = {
   '🆘': 'sos', '🧑‍🚀': 'astronaut', '✅': 'done', '✔': 'check', '❌': 'fail', '🔴': 'mars', '🪐': 'saturn', '🧲': 'magnet',
   '🗼': 'elevator', '🌍': 'globe', '🌀': 'portal', '💫': 'ring', '⬢': 'hull', '✦': 'laser', '⌬': 'magnet', '▣': 'hold',
   '⚗': 'flask', '⇮': 'engine', '◍': 'tank', '✚': 'guns', '◈': 'radar', '◎': 'target', '✺': 'system', '⬇': 'arrowDown',
-  '⬆': 'arrowUp', '⛴': 'fleet',
+  '⬆': 'arrowUp', '🎵': 'note', '⛴': 'fleet',
 };
 const GLYPH_RE = new RegExp('(' + Object.keys(GLYPH).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\uFE0F?', 'gu');
 

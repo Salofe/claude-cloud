@@ -1745,6 +1745,7 @@ const ICON = {
   system: { s: cP(12, 12, 5.5) + cP(12, 12, 9.5), d: cP(12, 12, 2.4) + cP(17.5, 12, 1.4) + cP(5.3, 5.3, 1.3) },
   arrowDown: { s: 'M12 3.5v16M6 13.5l6 6 6-6' },
   arrowUp: { s: 'M12 20.5v-16M6 10.5l6-6 6 6' },
+  note: { c: '#d9b3ff', f: 'M9 6.5l10-3v3l-10 3z', s: 'M9 18V6.5l10-3V16M9 9.5l10-3', d: 'M5 18a3 2.5 0 1 0 6 0a3 2.5 0 1 0-6 0zM15 16a3 2.5 0 1 0 6 0a3 2.5 0 1 0-6 0z' },
   fleet: { c: '#3de8ff', f: 'M12 2.5l3.5 7-3.5-1.8-3.5 1.8zM6 11.5l3.5 7-3.5-1.8-3.5 1.8zM18 11.5l3.5 7-3.5-1.8-3.5 1.8z', s: 'M12 2.5l3.5 7-3.5-1.8-3.5 1.8zM6 11.5l3.5 7-3.5-1.8-3.5 1.8zM18 11.5l3.5 7-3.5-1.8-3.5 1.8z' },
 };
 
@@ -1760,7 +1761,7 @@ const GLYPH = {
   '🆘': 'sos', '🧑‍🚀': 'astronaut', '✅': 'done', '✔': 'check', '❌': 'fail', '🔴': 'mars', '🪐': 'saturn', '🧲': 'magnet',
   '🗼': 'elevator', '🌍': 'globe', '🌀': 'portal', '💫': 'ring', '⬢': 'hull', '✦': 'laser', '⌬': 'magnet', '▣': 'hold',
   '⚗': 'flask', '⇮': 'engine', '◍': 'tank', '✚': 'guns', '◈': 'radar', '◎': 'target', '✺': 'system', '⬇': 'arrowDown',
-  '⬆': 'arrowUp', '⛴': 'fleet',
+  '⬆': 'arrowUp', '🎵': 'note', '⛴': 'fleet',
 };
 const GLYPH_RE = new RegExp('(' + Object.keys(GLYPH).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\uFE0F?', 'gu');
 
@@ -1829,6 +1830,7 @@ function audioInit() {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     master = AC.createGain(); master.gain.value = muted ? 0 : 0.45; master.connect(AC.destination);
     startAmbient();
+    if (typeof MUSIC !== 'undefined') MUSIC.init();
   } catch (e) { AC = null; }
 }
 function setMuted(m) {
@@ -1910,6 +1912,185 @@ function startAmbient() {
     o.connect(og); og.connect(f); o.start(); lfo.start();
   });
 }
+
+// ---- music.js ----
+'use strict';
+// ============ MUSIC: calm generative pieces that drift in now and then ============
+// Like the soundtrack of a sandbox game: long silences, then a quiet piece fades in.
+// Each piece has a fixed character (key, tempo, chords, instruments, form) but its
+// melody is re-composed every time it plays, so it never sounds exactly the same.
+// Everything is synthesized with WebAudio: electric piano, soft pads, bells, sub bass,
+// all through a generated reverb.
+
+const NOTE = m => 440 * Math.pow(2, (m - 69) / 12);
+const MUSIC_VOL = 1.4;
+// song form: intro, theme, variation, theme, variation, outro (~2 minutes)
+const FORM = (a = 8, b = 8) => ['i', 'i', ...Array(a).fill('A'), ...Array(b).fill('B'), ...Array(a).fill('A'), ...Array(b / 2).fill('B'), 'o', 'o'];
+const MUSIC = {
+  bus: null, rev: null, on: true, playing: null, nextAt: 0, timer: null, rng: Math.random,
+  init() {
+    if (!AC || this.bus) return;
+    try { this.on = localStorage.getItem('sp_music') !== '0'; } catch (e) {}
+    this.bus = AC.createGain(); this.bus.gain.value = this.on ? MUSIC_VOL : 0; this.bus.connect(master);
+    // reverb: 3.5 s of decaying stereo noise
+    const len = AC.sampleRate * 3.5, buf = AC.createBuffer(2, len, AC.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
+    this.rev = AC.createConvolver(); this.rev.buffer = buf;
+    const wet = AC.createGain(); wet.gain.value = 0.55; this.rev.connect(wet); wet.connect(this.bus);
+    this.dry = AC.createGain(); this.dry.gain.value = 0.6; this.dry.connect(this.bus); this.dry.connect(this.rev);
+    this.nextAt = AC.currentTime + 25 + Math.random() * 20;   // first piece soon after you start
+    this.timer = setInterval(() => this.tick(), 200);
+  },
+  setOn(v) { this.on = v; try { localStorage.setItem('sp_music', v ? '1' : '0'); } catch (e) {} if (this.bus) this.bus.gain.setTargetAtTime(v ? MUSIC_VOL : 0, AC.currentTime, 0.4); },
+  // ---- instruments ----
+  out(t, vol) { const g = AC.createGain(); g.gain.value = vol; g.connect(this.dry); return g; },
+  epiano(m, t, dur, vol) {
+    const o = this.out(t, 1), f = NOTE(m);
+    for (const [mul, v, dec] of [[1, 1, 2.2], [2, 0.25, 0.9], [4, 0.08, 0.25]]) {
+      const osc = AC.createOscillator(), g = AC.createGain();
+      osc.type = 'sine'; osc.frequency.value = f * mul; osc.detune.value = (Math.random() - 0.5) * 6;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol * v, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(vol * v * 0.3, t + Math.min(dur, dec) * 0.6);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.8);
+      osc.connect(g); g.connect(o); osc.start(t); osc.stop(t + dur + 1);
+    }
+  },
+  bell(m, t, vol) {
+    const o = this.out(t, 1), f = NOTE(m);
+    for (const [mul, v, dec] of [[1, 1, 2.5], [2.76, 0.35, 0.8], [5.4, 0.12, 0.3]]) {
+      const osc = AC.createOscillator(), g = AC.createGain();
+      osc.type = 'sine'; osc.frequency.value = f * mul;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol * v, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
+      osc.connect(g); g.connect(o); osc.start(t); osc.stop(t + dec + 0.1);
+    }
+  },
+  pad(notes, t, dur, vol, bright) {
+    const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = bright || 900; f.Q.value = 0.4;
+    const g = AC.createGain(); g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + Math.min(2.5, dur * 0.4));
+    g.gain.setValueAtTime(vol, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 2.5);
+    f.connect(g); g.connect(this.dry);
+    for (const m of notes) for (const det of [-7, 7]) {
+      const osc = AC.createOscillator(); osc.type = 'triangle'; osc.frequency.value = NOTE(m); osc.detune.value = det;
+      osc.connect(f); osc.start(t); osc.stop(t + dur + 2.6);
+    }
+  },
+  bass(m, t, dur, vol) {
+    const osc = AC.createOscillator(), g = AC.createGain(); osc.type = 'sine'; osc.frequency.value = NOTE(m);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g); g.connect(this.dry); osc.start(t); osc.stop(t + dur + 0.1);
+  },
+  pulse(m, t, vol) {   // short plucked synth for the guardian theme
+    const osc = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain();
+    osc.type = 'sawtooth'; osc.frequency.value = NOTE(m); f.type = 'lowpass'; f.frequency.setValueAtTime(2400, t); f.frequency.exponentialRampToValueAtTime(300, t + 0.25);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    osc.connect(f); f.connect(g); g.connect(this.dry); osc.start(t); osc.stop(t + 0.35);
+  },
+  // ---- playback ----
+  play(id) {
+    const P = PIECES[id]; if (!P || !AC) return;
+    const beat = 60 / P.bpm, bar = beat * 4, bars = P.form.length;
+    this.playing = { id, P, beat, bar, start: AC.currentTime + 0.3, nextBar: 0, bars, motif: this.motif(P) };
+  },
+  stop(fade) { if (this.playing) { this.playing.stopAt = this.playing.nextBar + (fade ? 1 : 0); } },
+  // a 2-bar melodic idea built from the piece's scale; sections vary it
+  motif(P) {
+    const r = this.rng, notes = [];
+    const rhythm = pick(P.rhythms);
+    let deg = Math.floor(r() * 3) + 2;
+    for (const at of rhythm) { deg = clamp(deg + pick([-2, -1, -1, 1, 1, 2, 0, 3, -3]), 0, P.scale.length - 1); notes.push({ at, deg }); }
+    return notes;
+  },
+  tick() {
+    if (!AC || !this.bus) return;
+    const now = AC.currentTime;
+    const pl = this.playing;
+    if (!pl) {
+      if (scene === TitleScene) return;
+      const boss = typeof MineScene !== 'undefined' && scene === MineScene && MineScene.enemies.some(e => ENEMIES[e.k].final);
+      if (boss) { this.play('guardian'); return; }
+      if (now >= this.nextAt && this.on) {
+        const calm = Object.keys(PIECES).filter(k => !PIECES[k].combat && k !== this.last);
+        this.last = pick(calm); this.play(this.last);
+      }
+      return;
+    }
+    // a guardian shows up: let the calm piece end at the bar line, the guardian theme takes over
+    const bossNow = scene === MineScene && MineScene.enemies.some(e => ENEMIES[e.k].final);
+    if (!pl.P.combat && bossNow && pl.stopAt == null) pl.stopAt = pl.nextBar;
+    // the guardian theme stops when the boss is gone
+    if (pl.P.combat && !(scene === MineScene && MineScene.enemies.some(e => ENEMIES[e.k].final)) && pl.stopAt == null) pl.stopAt = pl.nextBar + 1;
+    while (pl.start + pl.nextBar * pl.bar < now + 1.2) {
+      const i = pl.nextBar;
+      if (i >= pl.bars || (pl.stopAt != null && i >= pl.stopAt)) {
+        this.playing = null;
+        this.nextAt = now + pl.bar * 2 + 150 + Math.random() * 180;   // 2.5–5.5 min of silence before the next piece
+        return;
+      }
+      this.renderBar(pl, i, pl.start + i * pl.bar);
+      pl.nextBar++;
+    }
+  },
+  renderBar(pl, i, t) {
+    const P = pl.P, b = pl.beat, sec = P.form[i], ch = P.chords[i % P.chords.length];
+    const fadeIn = i < 2 ? (i + 1) / 3 : 1, fadeOut = i >= pl.bars - 2 ? (pl.bars - i) / 3 : 1, v = Math.min(fadeIn, fadeOut);
+    if (P.pad) this.pad(ch.map(n => n + 12), t, pl.bar * 1.02, 0.035 * v, P.bright);
+    if (P.bassOn && sec !== 'i') this.bass(ch[0] - 12, t, pl.bar * 0.95, 0.09 * v);
+    if (P.combat) {   // driving pulses + arpeggio
+      for (let s = 0; s < 8; s++) this.pulse(ch[0] - (s % 2 ? 0 : 12), t + s * b / 2, 0.05 * v);
+      if (sec !== 'i') for (let s = 0; s < 8; s++) this.bell(ch[(s * 2) % ch.length] + 24, t + s * b / 2 + b / 4, 0.03 * v);
+    }
+    if (P.arp && sec !== 'i') for (let s = 0; s < 8; s++) {
+      if (this.rng() < 0.18) continue;
+      const m = ch[s % ch.length] + 12 * (1 + (s >> 2));
+      P.arp === 'bell' ? this.bell(m, t + s * b / 2, 0.035 * v) : this.epiano(m, t + s * b / 2, b * 0.5, 0.03 * v);
+    }
+    if (P.comp && sec !== 'i' && sec !== 'o') { for (const n of ch.slice(1)) this.epiano(n, t, b * 3, 0.03 * v); if (this.rng() < 0.5) for (const n of ch.slice(1)) this.epiano(n, t + b * 2.5, b * 1.5, 0.022 * v); }
+    // melody: sections A play the motif, B a varied/inverted version, i/o are quiet
+    if (sec === 'A' || sec === 'B') {
+      const half = i % 2, shift = sec === 'B' ? pick([2, -1, 3]) : 0;
+      for (const n of pl.motif) {
+        const bt = n.at - half * 4; if (bt < 0 || bt >= 4) continue;
+        let deg = clamp(n.deg + shift, 0, P.scale.length - 1);
+        if (sec === 'B' && this.rng() < 0.25) deg = clamp(P.scale.length - 1 - deg, 0, P.scale.length - 1);
+        const m = P.scale[deg] + (P.lead === 'bell' ? 12 : 0);
+        if (P.lead === 'bell') this.bell(m, t + bt * b, 0.07 * v); else this.epiano(m, t + bt * b, b * 1.6, 0.075 * v);
+      }
+    }
+  },
+};
+// helper: chord voicings in MIDI numbers
+const PIECES = {
+  drift: { name: 'Drift', bpm: 64, pad: 1, bassOn: 1, lead: 'piano', bright: 800,
+    scale: [62, 64, 65, 67, 69, 72, 74, 76, 77, 79],
+    chords: [[38, 53, 57, 60, 64], [34, 50, 53, 57, 62], [41, 53, 57, 60, 64], [36, 52, 55, 60, 62]],
+    rhythms: [[0, 1.5, 3, 4.5, 6], [0, 2, 3, 5, 7], [0, 1, 2.5, 4, 6.5]], form: FORM() },
+  orbit: { name: 'Orbit', bpm: 78, pad: 1, arp: 'bell', lead: 'piano', bright: 1100,
+    scale: [60, 62, 64, 66, 67, 69, 71, 72, 74, 76],
+    chords: [[36, 52, 55, 59, 66], [38, 54, 57, 60, 64], [40, 55, 59, 62, 67], [33, 52, 55, 60, 64]],
+    rhythms: [[0, 1, 2, 4, 5, 6], [0, 0.5, 1.5, 4, 4.5, 5.5]], form: FORM() },
+  oldmoon: { name: 'Old Moon', bpm: 58, pad: 1, comp: 1, bassOn: 1, lead: 'piano', bright: 700,
+    scale: [57, 59, 60, 62, 64, 65, 67, 69, 71, 72],
+    chords: [[33, 52, 57, 60, 64], [29, 53, 57, 60, 65], [36, 52, 55, 60, 64], [31, 50, 55, 59, 62]],
+    rhythms: [[0, 2, 3, 4, 6], [0, 1.5, 2, 4, 5.5, 6]], form: FORM() },
+  starlight: { name: 'Starlight', bpm: 92, pad: 1, arp: 'piano', lead: 'bell', bright: 1400,
+    scale: [64, 66, 68, 71, 73, 76, 78, 80, 83, 85],
+    chords: [[40, 56, 59, 64, 68], [37, 56, 61, 64, 68], [33, 57, 61, 64, 69], [35, 54, 59, 63, 66]],
+    rhythms: [[0, 1, 1.5, 3, 4, 5, 6.5], [0, 0.5, 1, 2, 4, 4.5, 5, 6]], form: FORM() },
+  deepfield: { name: 'Deep Field', bpm: 50, pad: 1, bassOn: 1, lead: 'bell', bright: 500,
+    scale: [60, 62, 63, 67, 68, 72, 74, 75, 79, 80],
+    chords: [[36, 51, 55, 62, 67], [32, 51, 56, 60, 63], [29, 51, 56, 60, 65], [31, 50, 55, 59, 62]],
+    rhythms: [[0, 3, 5], [0, 2.5, 6], [1, 4, 6.5]], form: FORM() },
+  homeward: { name: 'Homeward', bpm: 72, pad: 1, comp: 1, bassOn: 1, lead: 'piano', bright: 900,
+    scale: [65, 67, 69, 70, 72, 74, 76, 77, 79, 81],
+    chords: [[41, 57, 60, 64, 69], [45, 55, 60, 64, 67], [46, 57, 62, 65, 69], [48, 55, 60, 64, 70]],
+    rhythms: [[0, 1, 2, 3, 4.5, 6], [0, 1.5, 2, 3.5, 4, 6]], form: FORM() },
+  guardian: { name: 'Guardian', bpm: 118, combat: 1, pad: 1, bassOn: 1, lead: 'bell', bright: 1200,
+    scale: [62, 65, 67, 69, 72, 74, 77, 79, 81, 84],
+    chords: [[38, 50, 53, 57, 62], [34, 50, 53, 58, 62], [36, 52, 55, 60, 64], [33, 49, 52, 57, 61]],
+    rhythms: [[0, 1, 2, 3, 4, 5, 6, 7], [0, 1.5, 2, 3, 4, 5.5, 6, 7]], form: Array(64).fill('A').map((s, i) => i < 2 ? 'i' : i % 8 >= 4 ? 'B' : 'A') },
+};
 
 // ---- state.js ----
 'use strict';
@@ -6429,6 +6610,7 @@ function openMenu() {
   openSheet('☰ Menu', `<div class="menu">
     <button class="btn primary big" onclick="closeSheet()">Resume</button>
     <button class="btn big" onclick="openHelp()">How to play</button>
+    <button class="btn big" id="musicBtn" onclick="audioInit(); MUSIC.setOn(!MUSIC.on); this.textContent = MUSIC.on ? '🎵 Music: on' : '🎵 Music: off'">${typeof MUSIC !== 'undefined' && MUSIC.on ? '🎵 Music: on' : '🎵 Music: off'}</button>
     <button class="btn big danger" onclick="confirmNew()">New game</button></div>`);
 }
 function confirmNew() {

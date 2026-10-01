@@ -8,6 +8,7 @@ function audioInit() {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     master = AC.createGain(); master.gain.value = muted ? 0 : 0.45; master.connect(AC.destination);
     startAmbient();
+    if (typeof MUSIC !== 'undefined') MUSIC.init();
   } catch (e) { AC = null; }
 }
 function setMuted(m) {

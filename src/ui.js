@@ -694,6 +694,7 @@ function openMenu() {
   openSheet('☰ Menu', `<div class="menu">
     <button class="btn primary big" onclick="closeSheet()">Resume</button>
     <button class="btn big" onclick="openHelp()">How to play</button>
+    <button class="btn big" id="musicBtn" onclick="audioInit(); MUSIC.setOn(!MUSIC.on); this.textContent = MUSIC.on ? '🎵 Music: on' : '🎵 Music: off'">${typeof MUSIC !== 'undefined' && MUSIC.on ? '🎵 Music: on' : '🎵 Music: off'}</button>
     <button class="btn big danger" onclick="confirmNew()">New game</button></div>`);
 }
 function confirmNew() {
