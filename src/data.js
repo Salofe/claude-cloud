@@ -125,7 +125,7 @@ const UNLOCKS = [
   { at: 500000, icon: '☄️', title: 'The Asteroid Belt', text: '<b>Ceres</b> and the Main Belt: nickel, <b>cobalt</b>, iridium… and <b>pirates</b>. You fly and shoot in battle — buy <b>Weapons</b>!', upg: ['weapons'] },
   { at: 4e6, icon: '📈', title: 'Trade & Events', text: 'Stations let you <b>buy and sell goods</b> and offer <b>contracts</b>. Buy goods cheap on one planet and sell them on the next stop of your ore runs. System <b>events</b> — wars, plagues, booms — swing prices. <b>Venus</b> is open.', upg: [] },
   { at: 20e6, icon: '🪐', title: 'Jupiter System', text: '<b>Europa</b> and the <b>Trojan</b> asteroids: iridium worth <b>300× iron</b>. The <b>Scanner</b> reveals rich veins.', upg: ['scanner'] },
-  { at: 150e6, icon: '👑', title: 'Saturn & Influence', text: '<b>Titan</b> and the <b>Rings</b>. <b>Invest</b> in stations: each level adds <b>+10% to ALL income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule the system.', upg: [] },
+  { at: 150e6, icon: '👑', title: 'Saturn & Influence', text: '<b>Titan</b> and the <b>Rings</b>. <b>Invest</b> in stations: each level adds <b>+10% of your base income</b> (ore, drones, freighters) and <b>influence</b>. Reach <b>100 influence</b> to rule the system.', upg: [] },
   { at: 1.5e9, icon: '💎', title: 'The Frontier', text: '<b>Pluto</b>\'s black market and the <b>Kuiper Belt</b>. Exotic crystals are worth <b>2,000× iron</b>.', upg: [] },
 ];
 const U = { OUTPOST: 1, MAP: 2, MARS: 3, BELT: 4, TRADE: 5, JUPITER: 6, SATURN: 7, FRONTIER: 8 };

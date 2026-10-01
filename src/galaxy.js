@@ -51,7 +51,7 @@ const SYSTEMS = {
       0: { title: 'Tethys' }, 3: { title: 'Cinder & Dune', text: '<b>Cinder</b> burns with <b>Sunstone</b> but the heat eats your hull — buy <b>Shields</b>. <b>Dune</b> pays a fortune for ice.' },
       4: { title: 'The Shard Belt', text: '<b>Halcyon</b> and the <b>Shard Belt</b>: asteroids that grow as <b>crystals</b> and shatter into many shards when you break them. Catch them all! Pirates here are tougher than at home.' },
       6: { title: 'Typhon System', text: '<b>Nyx</b> and the <b>Typhon Swarm</b>: iridium everywhere. The <b>Scanner</b> reveals rich veins.' },
-      7: { title: 'Aurelia & Influence', text: '<b>Mist</b> and the golden <b>Aurelia Halo</b>. <b>Invest</b> in stations: each level adds <b>+10% to ALL income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Alpha Centauri.' },
+      7: { title: 'Aurelia & Influence', text: '<b>Mist</b> and the golden <b>Aurelia Halo</b>. <b>Invest</b> in stations: each level adds <b>+10% of your base income</b> (ore, drones, freighters) and <b>influence</b>. Reach <b>100 influence</b> to rule Alpha Centauri.' },
       8: { title: 'Proxima', text: '<b>Proxima b</b>\'s Red Market and the <b>Proxima Drift</b>. Exotics and even <b>Void Shards</b>.' },
     },
     projects: {
@@ -100,7 +100,7 @@ Object.assign(SYSTEMS, {
       0: { title: 'Cinderling' }, 3: { title: 'Brand & Rustfall', text: '<b>Brand</b> is covered in <b>Platinum</b> but its heat burns your hull — buy <b>Shields</b>. <b>Rustfall</b> pays a fortune for ice.' },
       4: { title: 'The Deep Belt', text: '<b>Hollowrock</b> and the <b>Deep Belt</b>: cobalt, sunstone and iridium… and <b>pirates</b>, tougher than ever. Use the <b>Drill (Q)</b> on big rocks.' },
       6: { title: 'Goliath System', text: '<b>Ember</b> and the <b>Goliath Trojans</b>. The <b>Scanner</b> reveals rich veins.' },
-      7: { title: 'Halo & Influence', text: '<b>Brimstone</b> and the <b>Halo Rings</b>. <b>Invest</b> in stations for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Barnard\'s Star.' },
+      7: { title: 'Halo & Influence', text: '<b>Brimstone</b> and the <b>Halo Rings</b>. <b>Invest</b> in stations (each level <b>+10% base income</b>) for income and <b>influence</b>. Reach <b>100 influence</b> to rule Barnard\'s Star.' },
       8: { title: 'Coalsack', text: '<b>Coalsack</b>\'s black market and the <b>Barnard Drift</b>.' },
     },
     projects: {
@@ -145,7 +145,7 @@ Object.assign(SYSTEMS, {
       0: { title: 'Glint' }, 3: { title: 'Anvil & Canis', text: '<b>Anvil</b> burns with <b>Sunstone</b> — buy <b>Shields</b>. <b>Canis</b> pays a fortune for ice. Many rocks here are <b>armored</b>: use the <b>Drill (Q)</b>.' },
       4: { title: 'The Iron Belt', text: '<b>Ironheart</b> and the <b>Iron Belt</b>: almost half the rocks are armored. Drill them! Pirates are fierce here.' },
       6: { title: 'Argent System', text: '<b>Frost</b> and the <b>Argent Swarm</b>. The <b>Scanner</b> reveals rich veins.' },
-      7: { title: 'Corona & Influence', text: '<b>Haze</b> and the <b>Corona Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Sirius.' },
+      7: { title: 'Corona & Influence', text: '<b>Haze</b> and the <b>Corona Rings</b>. <b>Invest</b> in stations (each level <b>+10% base income</b>) for income and <b>influence</b>. Reach <b>100 influence</b> to rule Sirius.' },
       8: { title: 'Dogstar', text: '<b>Dogstar</b>\'s Raider Bazaar and the <b>Sirius Drift</b>.' },
     },
     projects: {
@@ -190,7 +190,7 @@ Object.assign(SYSTEMS, {
       0: { title: 'Penny' }, 3: { title: 'Kiln & Bazaar', text: '<b>Kiln</b> is full of <b>Platinum</b> and <b>Sunstone</b> — buy <b>Shields</b>. <b>Bazaar</b> pays a fortune for ice. Use your <b>Tractor Pulse (E)</b> to grab everything.' },
       4: { title: 'The Ledger Belt', text: '<b>Ledger</b> and its belt: nickel, cobalt, iridium… and the hardest pirates yet.' },
       6: { title: 'Treasury System', text: '<b>Vault</b> and the <b>Treasury Swarm</b>. The <b>Scanner</b> reveals rich veins.' },
-      7: { title: 'Crown & Influence', text: '<b>Mint</b> and the <b>Crown Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Tau Ceti.' },
+      7: { title: 'Crown & Influence', text: '<b>Mint</b> and the <b>Crown Rings</b>. <b>Invest</b> in stations (each level <b>+10% base income</b>) for income and <b>influence</b>. Reach <b>100 influence</b> to rule Tau Ceti.' },
       8: { title: 'Freeport', text: '<b>Freeport</b>\'s Smugglers\' Den and the <b>Ceti Drift</b>.' },
     },
     projects: {
@@ -464,7 +464,7 @@ Object.assign(SYSTEMS, {
    },
    "7": {
     "title": "Veil & Influence",
-    "text": "<b>Murk</b> and the <b>Veil Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Epsilon Eridani."
+    "text": "<b>Murk</b> and the <b>Veil Rings</b>. <b>Invest</b> in stations (each level <b>+10% base income</b>) for income and <b>influence</b>. Reach <b>100 influence</b> to rule Epsilon Eridani."
    },
    "8": {
     "title": "Snuff",
@@ -778,7 +778,7 @@ Object.assign(SYSTEMS, {
    },
    "7": {
     "title": "Halcyon Ice & Influence",
-    "text": "<b>Slush</b> and the <b>Comet Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Vega."
+    "text": "<b>Slush</b> and the <b>Comet Rings</b>. <b>Invest</b> in stations (each level <b>+10% base income</b>) for income and <b>influence</b>. Reach <b>100 influence</b> to rule Vega."
    },
    "8": {
     "title": "Breakwater",
@@ -1093,7 +1093,7 @@ Object.assign(SYSTEMS, {
    },
    "7": {
     "title": "Skullring & Influence",
-    "text": "<b>Rumhaze</b> and the <b>Skull Rings</b>. <b>Invest</b> for <b>+10% income</b> and <b>influence</b>. Reach <b>100 influence</b> to rule Altair."
+    "text": "<b>Rumhaze</b> and the <b>Skull Rings</b>. <b>Invest</b> in stations (each level <b>+10% base income</b>) for income and <b>influence</b>. Reach <b>100 influence</b> to rule Altair."
    },
    "8": {
     "title": "Tortuga",
@@ -1237,14 +1237,15 @@ const allyFactions = () => Object.keys(FACTIONS).filter(f => f !== 'piratas' && 
 function jumpBonus() {
   let b = 10, why = ['base 10'];
   if (S.gateOpen) { b += 5; why.push('final boss +5'); }
-  const st = Object.values(S.allies || {}).reduce((a, x) => a + x, 0); if (st) { b += 3 * st; why.push(`ally stars +${3 * st}`); }
+  // wars are a side dish: only your first 3 ally stars count for Tribute (5 each)
+  const st = Math.min(3, Object.values(S.allies || {}).reduce((a, x) => a + x, 0)); if (st) { b += 5 * st; why.push(`ally stars +${5 * st}`); }
   const pj = sysProjects().filter(p => built(p.id)).reduce((a, p) => a + projTribute(p), 0); if (pj) { b += pj; why.push(`megaprojects +${pj}`); }
   // what is still on the table in this system
   const left = [];
   if (!S.gateOpen) left.push({ n: 'Defeat the final guardian', t: 5 });
   for (const p of sysProjects()) if (!built(p.id)) left.push({ n: p.n, t: projTribute(p), cost: p.cost });
-  const starsLeft = allyFactions().reduce((a, f) => a + WAR.maxStars - Math.min(WAR.maxStars, (S.allies || {})[f] || 0), 0);
-  if (starsLeft) left.push({ n: `Win wars as an ally (${starsLeft} star${starsLeft > 1 ? 's' : ''} left)`, t: 3 * starsLeft });
+  const starsLeft = 3 - Math.min(3, Object.values(S.allies || {}).reduce((a, x) => a + x, 0));
+  if (starsLeft) left.push({ n: `Win ${starsLeft} more war${starsLeft > 1 ? 's' : ''} as an ally`, t: 5 * starsLeft });
   return { b, why, left, max: b + left.reduce((a, x) => a + x.t, 0) };
 }
 function jumpTo(id) {

@@ -453,9 +453,13 @@ function dockBody(tab) {
     const needRep = lv < 3 ? INVEST.rep[lv] : 0;
     const rep = l.faction ? S.rep[l.faction] : 0;
     const okRep = rep >= needRep;
-    let h = `<div class="inv"><p>Invest in <b>${l.station}</b>. Every level adds <b>+10% to ALL your income</b> (mining, drones, everything) and permanent <b>influence</b>.</p><div class="invlv">`;
+    // investments add +10% of BASE income each (additive): show exactly what the next level does
+    let inv = 0; for (const k in S.invest) inv += S.invest[k];
+    const now = totalIncome(), next = now * (1 + INVEST.bonus * (inv + 1)) / (1 + INVEST.bonus * inv);
+    let h = `<div class="inv"><p>Invest in <b>${l.station}</b>. Each level adds <b>+10% of your base income</b> from ore, drones and freighters (all stations stack: ${inv} level${inv === 1 ? '' : 's'} so far = <b>+${Math.round(inv * INVEST.bonus * 100)}%</b>) and permanent <b>influence</b>.</p>
+      <div class="inv-now">Next level: passive income <b>${fmt(now)}/s → ${fmt(next)}/s</b> · ore prices <b>+${Math.round(INVEST.bonus / (1 + INVEST.bonus * inv) * 100)}%</b></div><div class="invlv">`;
     for (let i = 0; i < 3; i++) {
-      h += `<div class="ivc ${i < lv ? 'own' : i === lv ? 'next' : ''}"><b>${INVEST.names[i]}</b><small>+10% income</small><small>+${INVEST.infl[i]} influence</small>${INVEST.rep[i] ? `<small>Needs rep ${INVEST.rep[i]}</small>` : ''}<em>${i < lv ? '✔ OWNED' : fmt(INVEST.cost[i] * (STATION_TIER[id] || 5)) + ' cr'}</em></div>`;
+      h += `<div class="ivc ${i < lv ? 'own' : i === lv ? 'next' : ''}"><b>${INVEST.names[i]}</b><small>+10% base income</small><small>+${INVEST.infl[i]} influence</small>${INVEST.rep[i] ? `<small>Needs rep ${INVEST.rep[i]}</small>` : ''}<em>${i < lv ? '✔ OWNED' : fmt(INVEST.cost[i] * (STATION_TIER[id] || 5)) + ' cr'}</em></div>`;
     }
     h += '</div>';
     if (cost != null) h += `<button class="btn primary big" ${S.credits >= cost && okRep ? '' : 'disabled'} onclick="buyInvest()">${okRep ? `Invest · ${fmt(cost)} cr` : `Needs ${needRep} reputation with ${FACTIONS[l.faction].n} (you have ${Math.round(rep)})`}</button>`;
