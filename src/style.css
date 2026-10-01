@@ -460,3 +460,8 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 .srow .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); margin-right: 4px; vertical-align: 1px; }
 .trib { color: #d9b3ff; }
 .trib-left { margin-top: 6px; font-size: 13px; }
+.crow .unit { color: var(--gold); font-size: 11px; margin-left: 6px; opacity: .85; }
+.crow .tier { margin-left: 5px; }
+.minebox { min-width: 270px; }
+.crow { white-space: nowrap; }
+@media (max-width: 700px) { .minebox { min-width: 0; } .crow .tier { display: none; } }

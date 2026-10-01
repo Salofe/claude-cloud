@@ -227,13 +227,8 @@ function updateMineHUD() {
   if (updateMineHUD.t && now - updateMineHUD.t < 150) return;
   updateMineHUD.t = now;
   const sc = MineScene;
-  const rows = Object.keys(S.cargo).map(k => `<div class="crow"><i style="background:${ITEMS[k].c}"></i>${ITEMS[k].n}<b>${fmt(S.cargo[k])}</b></div>`).join('');
-  $('mineOres').classList.toggle('hidden', !!sc.space);
-  if (!sc.space && sc.loc.field) {
-    const ores = Object.keys(sc.loc.field.ores).sort((a, b) => ITEMS[b].b - ITEMS[a].b);
-    const key = ores.join() + Math.round(incomeMult() * 100);
-    if ($('mineOres').dataset.k !== key) { $('mineOres').dataset.k = key; $('mineOres').innerHTML = ores.map(o => `<div class="orow"><i style="background:${ITEMS[o].c}"></i>${ITEMS[o].n}<span class="tier">${oreStars(o)}</span><b>${fmt(oreUnit(o))}</b></div>`).join(''); }
-  }
+  // what's in your hold, each with how good it is: value tier and price per unit
+  const rows = Object.keys(S.cargo).sort((a, b) => ITEMS[b].b - ITEMS[a].b).map(k => `<div class="crow"><i style="background:${ITEMS[k].c}"></i>${ITEMS[k].n}${ITEMS[k].ore ? `<span class="tier">${oreStars(k)}</span><small class="unit">${fmt(oreUnit(k))} ea</small>` : ''}<b>${fmt(S.cargo[k])}</b></div>`).join('');
   const val = LOC[S.loc].market ? oreValueAt(S.loc) : 0;
   $('mineCargo').innerHTML = (rows || '<div class="crow dim">Cargo hold empty</div>') + (val ? `<div class="crow val">Worth<b class="cr">${fmt(val)} cr</b></div>` : '');
   const depth = sc.space ? '' : `<span class="depth">Depth ${Math.round(sc.depthOf(sc.p.y) * 100)}% · richness ×${(1 + sc.depthOf(sc.p.y) * 4).toFixed(1)}</span>`;
