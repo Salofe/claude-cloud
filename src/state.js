@@ -48,6 +48,8 @@ function hasSave() { return !!loadSave(); }
 try { localStorage.removeItem('solar_prospector_v1'); localStorage.removeItem('solar_prospector_v2'); } catch (e) {}
 const has = stage => S && S.unlock >= stage;
 const locOpen = id => has(LOC[id].tier || 0) && (!LOC[id].secret || !!S.signal);
+// the hidden final field shows up (locked, as an unknown signal) once the frontier opens
+const locVisible = id => !LOC[id].secret || has(U.FRONTIER);
 const upgOpen = k => has(UPG[k].stage);
 const locZone = id => LOC[id].field ? LOC[id].field.z : (LOC[id].parent && LOC[LOC[id].parent].field ? LOC[LOC[id].parent].field.z : clamp((LOC[id].tier || 0) - 2, 0, 5));
 const econScale = () => S.unlock < 5 ? 1 : 5 * Math.pow(2, S.unlock - 5);

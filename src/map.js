@@ -24,7 +24,7 @@ const MapScene = {
     if (instant) Object.assign(this.cam, t); else this.camT = t;
   },
   zoomAll() {
-    let m = 0; for (const l of NODES) if (locOpen(l.id)) { const p = locPos(l.id, S.day); m = Math.max(m, Math.hypot(p.x, p.y)); }
+    let m = 0; for (const l of NODES) if (locOpen(l.id) || (l.secret && locVisible(l.id))) { const p = locPos(l.id, S.day); m = Math.max(m, Math.hypot(p.x, p.y)); }
     this.camT = { x: 0, y: 0, z: Math.min(W, H) / 2 / (m + 70) };
   },
   w2s(x, y) { return { x: (x - this.cam.x) * this.cam.z + W / 2, y: (y - this.cam.y) * this.cam.z + H / 2 }; },
@@ -125,7 +125,7 @@ const MapScene = {
     const day = S.day + (tr ? tr.frac : 0);
     // orbits with bright trailing arc
     for (const l of LOCS) {
-      if (l.parent || l.follow || (l.secret && !locOpen(l.id))) continue;
+      if (l.parent || l.follow || !locVisible(l.id)) continue;
       const R = l.r * z, open = locOpen(l.id);
       ctx.strokeStyle = open ? 'rgba(120,170,255,0.16)' : 'rgba(120,170,255,0.06)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(sun.x, sun.y, R, 0, TAU); ctx.stroke();
@@ -172,7 +172,7 @@ const MapScene = {
     }
     // bodies
     for (const l of LOCS) {
-      if (l.id === 'troyanos' || (l.secret && !locOpen(l.id))) continue;
+      if (l.id === 'troyanos' || !locVisible(l.id)) continue;
       const p = this.spos(l, day);
       const r = this.pr(l);
       const open = l.body ? locOpen(l.id) : locOpen(l.id);
@@ -234,7 +234,7 @@ const MapScene = {
     // node markers & labels
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const l of NODES) {
-      if (l.secret && !locOpen(l.id)) continue;
+      if (!locVisible(l.id)) continue;
       const p = this.spos(l, day);
       const open = locOpen(l.id);
       const r = this.pr(l) + (l.id === 'troyanos' ? 10 : 0);
@@ -255,7 +255,7 @@ const MapScene = {
         for (let i = 0; i < 4; i++) { const a0 = i * TAU / 4 + t * 0.8; ctx.beginPath(); ctx.arc(p.x, p.y, rr, a0, a0 + 0.9); ctx.stroke(); }
       }
       // label pill
-      const label = open ? l.n.toUpperCase() : '     ' + l.n.toUpperCase();
+      const label = open ? l.n.toUpperCase() : '     ' + (l.secret && !S.signal ? 'UNKNOWN SIGNAL' : l.n.toUpperCase());
       ctx.font = `700 ${isSel ? 12 : 11}px Rajdhani, sans-serif`;
       const tw = ctx.measureText(label).width + 14, ly = p.y + r + 14;
       ctx.globalAlpha = open ? 1 : 0.55;
@@ -362,7 +362,7 @@ const MapScene = {
   pick(x, y) {
     let best = null, bd = 1e9;
     for (const l of NODES) {
-      if (l.secret && !locOpen(l.id)) continue;
+      if (!locVisible(l.id)) continue;
       const p = this.spos(l);
       const d = Math.hypot(p.x - x, p.y - y);
       const hit = Math.max(22, this.pr(l) + 14);

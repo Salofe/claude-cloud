@@ -92,7 +92,7 @@ function updateHUD() {
     const prev = UNLOCKS[S.unlock].at, pct = clamp((S.stats.earned - prev) / (nu.at - prev), 0, 1);
     o.innerHTML = `<small>NEXT UNLOCK</small><b>${nu.icon} ${nu.title}</b><div class="meter gold"><i style="width:${pct * 100}%"></i></div><span>${fmt(S.stats.earned)} / ${fmt(nu.at)} cr earned</span>`;
   } else if (!S.won) {
-    o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest & upgrade outposts</span>`;
+    o.innerHTML = `<small>FINAL GOAL</small><b>👑 Reach 100 influence</b><div class="meter gold"><i style="width:${Math.min(100, inf)}%"></i></div><span>Influence ${inf}/100 · invest & upgrade outposts${has(U.FRONTIER) ? ` · then trace the signal beyond ${LOC.kuiper.n}` : ''}</span>`;
   } else if (!S.gateOpen) o.innerHTML = `<small>FINAL GUARDIAN</small><b>📡 Find the source in ${LOC.oort.n}</b><span>Mine there to draw it out. Bring good guns and shields.</span>`;
   else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>Open the Galaxy map to jump — or stay and earn more Tribute first.</span>`;
   $('bGal').classList.toggle('hidden', !(S.gateOpen || (S.galaxy && S.galaxy.done.length)));
@@ -104,7 +104,8 @@ function showUnlock(i) {
   const u = UNLOCKS[i];
   sfx('win');
   const upg = u.upg.length ? `<div class="unl-upg">${u.upg.map(k => `<span class="chip ore">${UPG[k].icon} ${UPG[k].n}</span>`).join('')}</div><small>New upgrades available at any station.</small>` : '';
-  showModal({ icon: u.icon, title: u.title, cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>${u.text}</p>${upg}`,
+  const tease = i === UNLOCKS.length - 1 ? `<p class="hint">📡 Your dishes also pick up a <b>faint signal from beyond ${LOC.kuiper.n}</b>. Rule the system (100 influence) to trace it.</p>` : '';
+  showModal({ icon: u.icon, title: u.title, cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>${u.text}</p>${upg}${tease}`,
     buttons: [{ label: 'Awesome!', cls: 'primary', fn: () => { if (!$('sheet').classList.contains('hidden') && LOC[S.loc].station) renderDock(); updateHUD(); } }] });
   const el = $('objective'); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
 }
@@ -121,7 +122,7 @@ function revealSignal() {
   S.signal = 1; save();
   addNews('📡', `<b>${sysDef().signal.title}</b> — ${LOC.oort.n} appears on your map.`, '#7fdfff');
   sfx('event');
-  showModal({ icon: '📡', title: sysDef().signal.title, cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>${sysDef().signal.text}</p><p>A new location is on your map: <b>${LOC.oort.n}</b>. Mine there to find the source — and bring your best <b>guns and shields</b>.</p>`,
+  showModal({ icon: '📡', title: sysDef().signal.title, cls: 'unlock', html: `<div class="unl-tag">NEW!</div><p>${sysDef().signal.text}</p><p>A new location is on your map: <b>${LOC.oort.n}</b>. Mining there will draw out its <b>guardian — a boss fight</b>. Bring your best <b>guns and shields</b>; defeating it opens the way to the stars.</p>`,
     buttons: [{ label: 'Set course', cls: 'primary', fn: () => {} }] });
 }
 
@@ -132,6 +133,11 @@ function selectLoc(id) {
   const p = $('locPanel');
   const here = id === S.loc;
   let html = `<div class="lp-head"><div><h3>${l.n}</h3><small>${[l.station, l.field && l.field.n].filter(Boolean).join(' · ')}</small></div><button class="x" onclick="hideLocPanel()">✕</button></div>`;
+  if (l.secret && !S.signal) {
+    html = `<div class="lp-head"><div><h3>Unknown signal</h3><small>Beyond ${LOC.kuiper.n}</small></div><button class="x" onclick="hideLocPanel()">✕</button></div>`;
+    html += `<div class="locked-box">📡 Something out here is broadcasting — and it is not human.<br><small>Rule the system (<b>100 influence</b>, you have ${influence()}) to trace it.</small></div><p class="desc">Whatever waits there will not be friendly. It guards the way out of ${sysName() === 'Sol' ? 'the Solar System' : sysName()}.</p>`;
+    p.innerHTML = html; p.classList.remove('hidden'); return;
+  }
   if (!locOpen(id)) {
     const u = UNLOCKS[l.tier];
     html += `<div class="locked-box">🔒 Unlocks at <b>${fmt(u.at)} cr</b> lifetime earnings<br><small>${u.title}</small></div><p class="desc">${l.desc}</p>`;
@@ -160,12 +166,13 @@ function selectLoc(id) {
     const hot = Object.keys(l.market).map(k => ({ k, m: priceRatio(id, k) })).filter(x => x.m >= 1.45).sort((a, b) => b.m - a.m).slice(0, 4);
     if (hot.length) html += `<div class="sub">Pays well for</div><div class="ores">${hot.map(x => `<span class="ore" style="--c:${ITEMS[x.k].c}">${ITEMS[x.k].n} <b>×${x.m.toFixed(1)}</b></span>`).join('')}</div>`;
   }
+  if (id === 'oort' && !S.gateOpen) html += guardianBox();
   const pws = powersAt(id);
   if (pws.length) html += `<div class="sub">⚡ Your power</div>${powerButtons(pws)}`;
   if (here) {
     html += `<div class="lp-actions">`;
     if (l.station) html += `<button class="btn primary big" onclick="openDock()">🛰 Dock at ${l.station}</button>`;
-    if (l.field) html += `<button class="btn ore big" onclick="enterMine()">⛏ Mine ${l.field.n}</button>`;
+    if (l.field) html += `<button class="btn ore big" onclick="enterMine()">${id === 'oort' && !S.gateOpen ? '☠ Mine & face the guardian' : `⛏ Mine ${l.field.n}`}</button>`;
     if (id === 'oort' && S.gateOpen) html += `<button class="btn primary big" onclick="openGalaxy()">🌀 Enter the gate</button>`;
     if (!l.station) {
       const stations = NODES.filter(x => x.station && locOpen(x.id));
@@ -187,7 +194,21 @@ function selectLoc(id) {
   p.classList.remove('hidden');
 }
 function hideLocPanel() { $('locPanel').classList.add('hidden'); MapScene.sel = null; }
-function enterMine() { sfx('click'); closeSheet(true); setScene(MineScene, S.loc); }
+function enterMine() {
+  sfx('click');
+  if (S.loc === 'oort' && !S.gateOpen) {
+    const b = ENEMIES[sysDef().boss];
+    return showModal({ icon: '☠', title: `Face the ${b.n}?`, danger: true, html: `${guardianBox()}<p>It arrives about <b>20 seconds</b> after you start mining. Destroy it to open the gate — or fly back <b>down</b> to the station to escape.</p>`,
+      buttons: [{ label: 'Let\'s fight', cls: 'danger', fn: () => { closeSheet(true); setScene(MineScene, S.loc); } }, { label: 'Not yet', fn: () => {} }] });
+  }
+  closeSheet(true); setScene(MineScene, S.loc);
+}
+// how ready you are for this system's final guardian
+function guardianBox() {
+  const b = ENEMIES[sysDef().boss], th = fleetThreat(sysDef().bossFleet, 5);
+  const [lbl, col, tip] = th < 0.9 ? ['Ready', '#6dffb0', 'Your ship can take it.'] : th < 1.5 ? ['Tough', '#ffc857', 'Doable — keep moving and dodge its shots.'] : th < 2.4 ? ['Very hard', '#ff934a', 'Upgrade Guns and Shields (or a bigger hull) first.'] : ['Deadly', '#ff4d6d', 'You would be shot down. Upgrade Guns, Shields and Ship Class first.'];
+  return `<div class="guardian" style="--c:${col}"><b>☠ Guardian: ${b.n}</b><span>Your chances: <em>${lbl}</em> — ${tip}</span></div>`;
+}
 
 function showMapUI(on) {
   $('mapTools').classList.toggle('hidden', !on);

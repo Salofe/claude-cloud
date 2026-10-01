@@ -343,6 +343,7 @@ const MineScene = {
     const h = S.hints;
     let msg = '';
     if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
+    else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = `☠ ${this.ambush.boss === 'final' ? `The ${ENEMIES[sysDef().boss].n}` : 'The warlord\'s flagship'} arrives in <b>${Math.ceil(this.ambush.at)} s</b> — get ready, or fly <b>down</b> to escape`;
     else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
     else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
     else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
