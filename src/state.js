@@ -316,7 +316,8 @@ function dockAtStation() {
     if (can > 0) { S.fuel += can; S.credits -= can * fp; r.fuel = can; r.fuelCost = can * fp; }
   }
   const hneed = Math.ceil(ship.hpMax - S.hull);
-  if (hneed > 0) {
+  if (hneed > 0 && S.stats.docks < 3) { S.hull = ship.hpMax; r.repair = hneed; r.repairCost = 0; } // first trips: free courtesy repairs
+  else if (hneed > 0) {
     const rp = (l.repair || 3) * (1 + S.unlock);
     const can = Math.min(hneed, Math.floor(S.credits / rp));
     if (can > 0) { S.hull = Math.min(ship.hpMax, S.hull + can); S.credits -= can * rp; r.repair = can; r.repairCost = can * rp; }

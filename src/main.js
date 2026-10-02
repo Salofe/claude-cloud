@@ -154,8 +154,10 @@ Object.assign(TXT, {
   main_tag: { en: 'Mine · Upgrade · Cross the Galaxy', es: 'Mina · Mejora · Cruza la Galaxia' },
   main_play: { en: '▶ PLAY', es: '▶ JUGAR' },
   main_howto: { en: 'How to play', es: 'Cómo jugar' },
-  main_foot: { en: 'Mouse & keyboard or touch · Saves automatically', es: 'Mouse y teclado o táctil · Guardado automático' },
-  main_foot_touch: { en: 'Touch controls · Saves automatically', es: 'Controles táctiles · Guardado automático' },
+  main_pitch: { en: 'Mine asteroids, sell the ore and upgrade your ship until you conquer the galaxy.', es: 'Mina asteroides, vende el mineral y mejora tu nave hasta conquistar la galaxia.' },
+  main_savebadge: { en: '💾 Your progress saves automatically', es: '💾 Tu progreso se guarda automáticamente' },
+  main_foot: { en: 'Mouse & keyboard · Free · No sign-up', es: 'Mouse y teclado · Gratis · Sin registro' },
+  main_foot_touch: { en: 'Touch controls · Free · No sign-up', es: 'Controles táctiles · Gratis · Sin registro' },
   main_credits: { en: 'Credits', es: 'Créditos' },
   main_day: { en: 'Day', es: 'Día' },
   main_cargo: { en: 'Cargo', es: 'Carga' },
@@ -221,6 +223,7 @@ const TitleScene = {
     if (sv) { const d = loadSave(); $('cont').innerHTML = `${tx('main_continue')} <small>${fmt(d.credits)} cr · ${(SYSTEMS[d.sys || 'sol'] || SYSTEMS.sol).n}${d.galaxy ? ` · ${tx(d.galaxy.done.length === 1 ? 'main_conq1' : 'main_conq', { n: d.galaxy.done.length })}` : ''}</small>`; }
     $('newg').textContent = sv ? tx('main_newgame') : tx('main_play');
     $('newg').classList.toggle('primary', !sv);
+    $('newg').classList.toggle('huge', !sv);
   },
   exit() { $('title').classList.add('hidden'); $('hud').classList.remove('hidden'); },
   update(dt) { this.t += dt; },

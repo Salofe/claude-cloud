@@ -133,6 +133,7 @@ Object.assign(TXT, {
   ui_sold: { en: 'SOLD', es: 'VENDIDO' },
   ui_strike_nosale: { en: 'Market closed by a strike — ore not sold.', es: 'Mercado cerrado por huelga: no se vendió el mineral.' },
   ui_refueled: { en: '⛽ Refueled +{n} (−{c} cr)', es: '⛽ Recargado +{n} (−{c} cr)' },
+  ui_repaired_free: { en: '🔧 Repaired +{n} (free for new pilots)', es: '🔧 Reparado +{n} (gratis para pilotos nuevos)' },
   ui_repaired: { en: '🔧 Repaired +{n} (−{c} cr)', es: '🔧 Reparado +{n} (−{c} cr)' },
   ui_cargo_cap: { en: 'CARGO', es: 'CARGA' },
   ui_black_mkt: { en: '☠ Black market: selling a full hold here costs about −{n} reputation with every faction.', es: '☠ Mercado negro: vender una bodega llena aquí cuesta unos −{n} de reputación con cada facción.' },
@@ -662,7 +663,7 @@ function renderDock(fresh) {
       ${r.sold.length ? `<div class="rc-main"><div><small>${tx('ui_sold')}</small><span>${r.sold.map(([k, n]) => `<i class="sw" style="background:${ITEMS[k].c}"></i>${n} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div><b class="cr" id="rcTotal" data-v="${r.total}">+0 cr</b></div>` : ''}
       ${r.total > 0 && S.stats.docks <= 1 ? `<div class="rc-first">${tx('ui_first_sale')}</div>` : ''}
       ${marketClosed(S.loc) ? `<div class="rc-sub badt">${tx('ui_strike_nosale')}</div>` : ''}
-      ${r.fuel || r.repair ? `<div class="rc-sub">${r.fuel ? tx('ui_refueled', { n: r.fuel, c: fmt(r.fuelCost) }) : ''} ${r.repair ? tx('ui_repaired', { n: r.repair, c: fmt(r.repairCost) }) : ''}</div>` : ''}
+      ${r.fuel || r.repair ? `<div class="rc-sub">${r.fuel ? tx('ui_refueled', { n: r.fuel, c: fmt(r.fuelCost) }) : ''} ${r.repair ? (r.repairCost ? tx('ui_repaired', { n: r.repair, c: fmt(r.repairCost) }) : tx('ui_repaired_free', { n: r.repair })) : ''}</div>` : ''}
     </div>`;
   }
   let sellbox = '';

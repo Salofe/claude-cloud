@@ -44,7 +44,12 @@ button { font-family: var(--ft); cursor: pointer; }
 #title h1 span { display: block; color: #fff; }
 .tag { font-size: clamp(15px, 3.5vw, 21px); color: var(--gold); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; margin: 14px 0 30px; }
 .tbox .tbtns { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto; }
-.foot { color: var(--dim); font-size: 13px; margin-top: 26px; }
+.foot { color: var(--dim); font-size: 13px; margin-top: 12px; }
+@media (max-width: 520px) { .tag { letter-spacing: 1.5px; font-size: 15px; } .savebadge { font-size: 13px; padding: 6px 12px; } }
+@media (max-height: 520px) and (orientation: landscape) { #title h1 { font-size: 34px; } .tag { margin: 8px 0 18px; } .tbox .pitch { margin: -10px auto 14px; font-size: 14px; } .tbox .btn.huge { padding: 10px 16px; font-size: 21px; } .savebadge { margin-top: 10px; } .tbox { padding: 4px 20px; } .tbox .tbtns { gap: 6px; } .tbox #howto { padding: 7px 14px; } .foot { margin-top: 6px; } }
+.tbox .pitch { font-size: clamp(15px, 3.6vw, 19px); line-height: 1.4; color: var(--txt); max-width: 460px; margin: -16px auto 26px; text-shadow: 0 1px 6px #000; }
+.tbox .btn.huge { font-size: clamp(22px, 5vw, 28px); padding: 18px 20px; letter-spacing: 2px; animation: pulseglow 1.6s infinite; }
+.savebadge { display: inline-block; margin: 22px 0 0; padding: 7px 14px; max-width: 92%; border: 1px solid rgba(80,255,170,.35); border-radius: 20px; background: rgba(20,60,45,.45); color: #8fffc8; font-size: 14px; font-weight: 600; }
 
 /* ---------- HUD ---------- */
 .topbar { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: linear-gradient(180deg, rgba(5,9,24,.95), rgba(5,9,24,.75)); border-bottom: 1px solid var(--line); z-index: 10; padding-top: max(8px, env(safe-area-inset-top)); }
@@ -235,6 +240,7 @@ button { font-family: var(--ft); cursor: pointer; }
 #eventBanner b { display: block; font-size: 18px; font-family: var(--fh); font-weight: 600; }
 #eventBanner p { margin: 2px 0 0; font-size: 14px; color: #e8dcc0; }
 #toasts { position: fixed; bottom: 44px; right: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 40; pointer-events: none; align-items: flex-end; }
+@media (hover: hover) and (pointer: fine) { body.mining #toasts { bottom: 204px; } }
 .toast { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--cyan); border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 15px; animation: slidein .2s ease-out; transition: opacity .4s, transform .4s; max-width: 320px; }
 .toast.good { border-left-color: var(--good); }
 .toast.bad { border-left-color: var(--bad); }
@@ -558,12 +564,14 @@ body.newbie .upg.can .btn.primary:not(.maxb) { animation: pulseglow 1.1s infinit
   <div class="tbox">
     <h1><span>SOLAR</span>PROSPECTOR</h1>
     <p class="tag" data-tx="main_tag">Mine · Upgrade · Cross the Galaxy</p>
+    <p class="pitch" data-tx="main_pitch">Mine asteroids, sell the ore and upgrade your ship until you conquer the galaxy.</p>
     <div class="tbtns">
       <button id="cont" class="btn primary big hidden">▶ Continue</button>
-      <button id="newg" class="btn primary big" data-tx="main_play">▶ PLAY</button>
+      <button id="newg" class="btn primary big huge" data-tx="main_play">▶ PLAY</button>
       <button id="howto" class="btn big" data-tx="main_howto">How to play</button>
     </div>
-    <p class="foot" data-tx="main_foot">Mouse & keyboard or touch · Saves automatically</p>
+    <p class="savebadge" data-tx="main_savebadge">💾 Your progress saves automatically</p>
+    <p class="foot" data-tx="main_foot">Mouse & keyboard or touch · Free · No sign-up</p>
   </div>
 </div>
 
@@ -6201,7 +6209,8 @@ function dockAtStation() {
     if (can > 0) { S.fuel += can; S.credits -= can * fp; r.fuel = can; r.fuelCost = can * fp; }
   }
   const hneed = Math.ceil(ship.hpMax - S.hull);
-  if (hneed > 0) {
+  if (hneed > 0 && S.stats.docks < 3) { S.hull = ship.hpMax; r.repair = hneed; r.repairCost = 0; } // first trips: free courtesy repairs
+  else if (hneed > 0) {
     const rp = (l.repair || 3) * (1 + S.unlock);
     const can = Math.min(hneed, Math.floor(S.credits / rp));
     if (can > 0) { S.hull = Math.min(ship.hpMax, S.hull + can); S.credits -= can * rp; r.repair = can; r.repairCost = can * rp; }
@@ -11915,14 +11924,19 @@ const MineScene = {
   collect(c) {
     if (c.cr) {
       earn(c.cr);
-      this.floaters.push({ x: this.p.x + rand(-20, 20), y: this.p.y - 26, txt: '+' + fmt(c.cr) + ' cr', col: '#ffd24a', life: 1.2 });
+      const fc = this.floaters.find(f => f.crSum && f.life > 0.5);
+      if (fc) { fc.crSum += c.cr; fc.txt = '+' + fmt(fc.crSum) + ' cr'; fc.life = 1.2; fc.x = this.p.x; }
+      else this.floaters.push({ x: this.p.x, y: this.p.y - 26, txt: '+' + fmt(c.cr) + ' cr', col: '#ffd24a', life: 1.2, crSum: c.cr });
       sfx('cash');
       return true;
     }
     if (cargoFree() <= 0) return false;
     addCargo(c.ore, 1); S.stats.mined++;
     this.collected[c.ore] = (this.collected[c.ore] || 0) + 1;
-    this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: `+1 ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`, col: ITEMS[c.ore].c, life: 1.1 });
+    // pickups of the same ore in quick succession merge into one counter instead of stacking on top of each other
+    const fl = this.floaters.find(f => f.ore === c.ore && f.life > 0.5);
+    if (fl) { fl.n++; fl.txt = `+${fl.n} ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`; fl.life = 1.1; fl.x = this.p.x; fl.y = Math.min(fl.y, this.p.y - 22); }
+    else this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: `+1 ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`, col: ITEMS[c.ore].c, life: 1.1, ore: c.ore, n: 1 });
     sfx('pickup');
     return true;
   },
@@ -12999,6 +13013,7 @@ Object.assign(TXT, {
   ui_sold: { en: 'SOLD', es: 'VENDIDO' },
   ui_strike_nosale: { en: 'Market closed by a strike — ore not sold.', es: 'Mercado cerrado por huelga: no se vendió el mineral.' },
   ui_refueled: { en: '⛽ Refueled +{n} (−{c} cr)', es: '⛽ Recargado +{n} (−{c} cr)' },
+  ui_repaired_free: { en: '🔧 Repaired +{n} (free for new pilots)', es: '🔧 Reparado +{n} (gratis para pilotos nuevos)' },
   ui_repaired: { en: '🔧 Repaired +{n} (−{c} cr)', es: '🔧 Reparado +{n} (−{c} cr)' },
   ui_cargo_cap: { en: 'CARGO', es: 'CARGA' },
   ui_black_mkt: { en: '☠ Black market: selling a full hold here costs about −{n} reputation with every faction.', es: '☠ Mercado negro: vender una bodega llena aquí cuesta unos −{n} de reputación con cada facción.' },
@@ -13528,7 +13543,7 @@ function renderDock(fresh) {
       ${r.sold.length ? `<div class="rc-main"><div><small>${tx('ui_sold')}</small><span>${r.sold.map(([k, n]) => `<i class="sw" style="background:${ITEMS[k].c}"></i>${n} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div><b class="cr" id="rcTotal" data-v="${r.total}">+0 cr</b></div>` : ''}
       ${r.total > 0 && S.stats.docks <= 1 ? `<div class="rc-first">${tx('ui_first_sale')}</div>` : ''}
       ${marketClosed(S.loc) ? `<div class="rc-sub badt">${tx('ui_strike_nosale')}</div>` : ''}
-      ${r.fuel || r.repair ? `<div class="rc-sub">${r.fuel ? tx('ui_refueled', { n: r.fuel, c: fmt(r.fuelCost) }) : ''} ${r.repair ? tx('ui_repaired', { n: r.repair, c: fmt(r.repairCost) }) : ''}</div>` : ''}
+      ${r.fuel || r.repair ? `<div class="rc-sub">${r.fuel ? tx('ui_refueled', { n: r.fuel, c: fmt(r.fuelCost) }) : ''} ${r.repair ? (r.repairCost ? tx('ui_repaired', { n: r.repair, c: fmt(r.repairCost) }) : tx('ui_repaired_free', { n: r.repair })) : ''}</div>` : ''}
     </div>`;
   }
   let sellbox = '';
@@ -14121,8 +14136,10 @@ Object.assign(TXT, {
   main_tag: { en: 'Mine · Upgrade · Cross the Galaxy', es: 'Mina · Mejora · Cruza la Galaxia' },
   main_play: { en: '▶ PLAY', es: '▶ JUGAR' },
   main_howto: { en: 'How to play', es: 'Cómo jugar' },
-  main_foot: { en: 'Mouse & keyboard or touch · Saves automatically', es: 'Mouse y teclado o táctil · Guardado automático' },
-  main_foot_touch: { en: 'Touch controls · Saves automatically', es: 'Controles táctiles · Guardado automático' },
+  main_pitch: { en: 'Mine asteroids, sell the ore and upgrade your ship until you conquer the galaxy.', es: 'Mina asteroides, vende el mineral y mejora tu nave hasta conquistar la galaxia.' },
+  main_savebadge: { en: '💾 Your progress saves automatically', es: '💾 Tu progreso se guarda automáticamente' },
+  main_foot: { en: 'Mouse & keyboard · Free · No sign-up', es: 'Mouse y teclado · Gratis · Sin registro' },
+  main_foot_touch: { en: 'Touch controls · Free · No sign-up', es: 'Controles táctiles · Gratis · Sin registro' },
   main_credits: { en: 'Credits', es: 'Créditos' },
   main_day: { en: 'Day', es: 'Día' },
   main_cargo: { en: 'Cargo', es: 'Carga' },
@@ -14188,6 +14205,7 @@ const TitleScene = {
     if (sv) { const d = loadSave(); $('cont').innerHTML = `${tx('main_continue')} <small>${fmt(d.credits)} cr · ${(SYSTEMS[d.sys || 'sol'] || SYSTEMS.sol).n}${d.galaxy ? ` · ${tx(d.galaxy.done.length === 1 ? 'main_conq1' : 'main_conq', { n: d.galaxy.done.length })}` : ''}</small>`; }
     $('newg').textContent = sv ? tx('main_newgame') : tx('main_play');
     $('newg').classList.toggle('primary', !sv);
+    $('newg').classList.toggle('huge', !sv);
   },
   exit() { $('title').classList.add('hidden'); $('hud').classList.remove('hidden'); },
   update(dt) { this.t += dt; },

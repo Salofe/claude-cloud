@@ -35,7 +35,12 @@ button { font-family: var(--ft); cursor: pointer; }
 #title h1 span { display: block; color: #fff; }
 .tag { font-size: clamp(15px, 3.5vw, 21px); color: var(--gold); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; margin: 14px 0 30px; }
 .tbox .tbtns { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto; }
-.foot { color: var(--dim); font-size: 13px; margin-top: 26px; }
+.foot { color: var(--dim); font-size: 13px; margin-top: 12px; }
+@media (max-width: 520px) { .tag { letter-spacing: 1.5px; font-size: 15px; } .savebadge { font-size: 13px; padding: 6px 12px; } }
+@media (max-height: 520px) and (orientation: landscape) { #title h1 { font-size: 34px; } .tag { margin: 8px 0 18px; } .tbox .pitch { margin: -10px auto 14px; font-size: 14px; } .tbox .btn.huge { padding: 10px 16px; font-size: 21px; } .savebadge { margin-top: 10px; } .tbox { padding: 4px 20px; } .tbox .tbtns { gap: 6px; } .tbox #howto { padding: 7px 14px; } .foot { margin-top: 6px; } }
+.tbox .pitch { font-size: clamp(15px, 3.6vw, 19px); line-height: 1.4; color: var(--txt); max-width: 460px; margin: -16px auto 26px; text-shadow: 0 1px 6px #000; }
+.tbox .btn.huge { font-size: clamp(22px, 5vw, 28px); padding: 18px 20px; letter-spacing: 2px; animation: pulseglow 1.6s infinite; }
+.savebadge { display: inline-block; margin: 22px 0 0; padding: 7px 14px; max-width: 92%; border: 1px solid rgba(80,255,170,.35); border-radius: 20px; background: rgba(20,60,45,.45); color: #8fffc8; font-size: 14px; font-weight: 600; }
 
 /* ---------- HUD ---------- */
 .topbar { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: linear-gradient(180deg, rgba(5,9,24,.95), rgba(5,9,24,.75)); border-bottom: 1px solid var(--line); z-index: 10; padding-top: max(8px, env(safe-area-inset-top)); }
@@ -226,6 +231,7 @@ button { font-family: var(--ft); cursor: pointer; }
 #eventBanner b { display: block; font-size: 18px; font-family: var(--fh); font-weight: 600; }
 #eventBanner p { margin: 2px 0 0; font-size: 14px; color: #e8dcc0; }
 #toasts { position: fixed; bottom: 44px; right: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 40; pointer-events: none; align-items: flex-end; }
+@media (hover: hover) and (pointer: fine) { body.mining #toasts { bottom: 204px; } }
 .toast { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--cyan); border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 15px; animation: slidein .2s ease-out; transition: opacity .4s, transform .4s; max-width: 320px; }
 .toast.good { border-left-color: var(--good); }
 .toast.bad { border-left-color: var(--bad); }

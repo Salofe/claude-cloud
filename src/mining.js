@@ -312,14 +312,19 @@ const MineScene = {
   collect(c) {
     if (c.cr) {
       earn(c.cr);
-      this.floaters.push({ x: this.p.x + rand(-20, 20), y: this.p.y - 26, txt: '+' + fmt(c.cr) + ' cr', col: '#ffd24a', life: 1.2 });
+      const fc = this.floaters.find(f => f.crSum && f.life > 0.5);
+      if (fc) { fc.crSum += c.cr; fc.txt = '+' + fmt(fc.crSum) + ' cr'; fc.life = 1.2; fc.x = this.p.x; }
+      else this.floaters.push({ x: this.p.x, y: this.p.y - 26, txt: '+' + fmt(c.cr) + ' cr', col: '#ffd24a', life: 1.2, crSum: c.cr });
       sfx('cash');
       return true;
     }
     if (cargoFree() <= 0) return false;
     addCargo(c.ore, 1); S.stats.mined++;
     this.collected[c.ore] = (this.collected[c.ore] || 0) + 1;
-    this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: `+1 ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`, col: ITEMS[c.ore].c, life: 1.1 });
+    // pickups of the same ore in quick succession merge into one counter instead of stacking on top of each other
+    const fl = this.floaters.find(f => f.ore === c.ore && f.life > 0.5);
+    if (fl) { fl.n++; fl.txt = `+${fl.n} ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`; fl.life = 1.1; fl.x = this.p.x; fl.y = Math.min(fl.y, this.p.y - 22); }
+    else this.floaters.push({ x: this.p.x, y: this.p.y - 22, txt: `+1 ${ITEMS[c.ore].n} · ${fmt(oreUnit(c.ore))}`, col: ITEMS[c.ore].c, life: 1.1, ore: c.ore, n: 1 });
     sfx('pickup');
     return true;
   },
