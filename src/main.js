@@ -260,6 +260,7 @@ function startGame(cont) {
 
 // ---------- inicio ----------
 function init() {
+  if (isTouch) touchifyContent();
   translateStatic();
   startIconizer();
   setupTouchControls();

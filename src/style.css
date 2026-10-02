@@ -495,10 +495,11 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
   .topbar .tbtns { grid-column: auto; grid-row: 1; }
   .topbar .tbtns button { padding: 3px 6px; }
   .minebox { top: 56px; width: 150px; padding: 5px 8px; }
-  #fireBtn { right: 18px; bottom: 28px; width: 84px; height: 84px; }
-  .tbtn { width: 50px; height: 50px; font-size: 10px; }
-  #toolBtn { right: 114px; bottom: 20px; } #pullBtn { right: 114px; bottom: 78px; }
-  #boostBtn { right: 34px; bottom: 124px; } #phaseBtn { right: 34px; bottom: 180px; } #bombBtn { right: 172px; bottom: 36px; } #scanBtn { right: 172px; bottom: 94px; }
+  #fireBtn { right: 18px; bottom: 40px; width: 84px; height: 84px; }
+  .tbtn { width: 52px; height: 52px; font-size: 9px; }
+  #toolBtn { right: 112px; bottom: 34px; } #pullBtn { right: 112px; bottom: 92px; }
+  #boostBtn { right: 34px; bottom: 136px; } #phaseBtn { right: 34px; bottom: 194px; } #bombBtn { right: 170px; bottom: 50px; } #scanBtn { right: 170px; bottom: 108px; }
+  #bGal.notify::after { top: -3px; }
   #coach { top: auto; bottom: 14px; font-size: 14px; padding: 6px 14px; max-width: 55%; }
   .bt-title { top: 60px; }
 }
@@ -516,3 +517,9 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 
 .sys-portrait { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); margin: 6px 0; background: #04060f; }
 .tour { font-size: 14px; color: #cfe6ff; }
+
+/* long Spanish labels on the round touch buttons */
+.tbtn { text-align: center; line-height: 1.05; padding: 0 3px; box-sizing: border-box; }
+html[lang=es] .tbtn { font-size: 9.5px; letter-spacing: -0.2px; }
+@media (max-height: 520px) and (orientation: landscape) { html[lang=es] .tbtn { font-size: 8.5px; } }
+@media (max-height: 520px) and (orientation: landscape) { #bGal.notify::after { top: -1px; right: -4px; } .topbar { padding-top: max(8px, env(safe-area-inset-top)); } }

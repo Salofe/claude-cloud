@@ -3208,3 +3208,20 @@ function applyEsLegacy() {
   if (!ES) return;
   for (const k in (ES_CONTENT.base || {}).legacy || {}) if (LEGACY[k]) mergeText(LEGACY[k], ES_CONTENT.base.legacy[k]);
 }
+
+// On touch devices the story texts name the on-screen buttons instead of keyboard keys ("press R (or BOOST)" → "tap BOOST")
+const TOUCH_BTN = { Q: ['DRILL', 'TALADRO'], E: ['PULL', 'ATRAER'], R: ['BOOST', 'TURBO'], F: ['BOMB', 'BOMBA'], C: ['SCAN', 'ESCANEAR'], X: ['PHASE', 'FASE'] };
+function touchify(s) {
+  if (typeof s !== 'string') return s;
+  const btn = k => TOUCH_BTN[k][ES ? 1 : 0];
+  return s
+    .replace(/\b([Pp]ress|[Pp]ulsa) <b>([QERFCX])<\/b> \((?:or|o) (?:the |el botón )?([^)]+?)(?: button)?\)/g, (m, v, k, b) => `${v[0] === 'P' ? (ES ? 'Toca' : 'Tap') : (ES ? 'toca' : 'tap')} <b>${b}</b>`)
+    .replace(/\b([Pp]ress|[Pp]ulsa) <b>([QERFCX])<\/b>/g, (m, v, k) => `${v[0] === 'P' ? (ES ? 'Toca' : 'Tap') : (ES ? 'toca' : 'tap')} <b>${btn(k)}</b>`)
+    .replace(/ \(([QERFCX])\)/g, (m, k) => ` (${btn(k)})`);
+}
+function touchifyContent() {
+  const walk = o => { for (const k in o) { if (typeof o[k] === 'string') o[k] = touchify(o[k]); else if (o[k] && typeof o[k] === 'object') walk(o[k]); } };
+  for (const id in SYSTEMS) { const D = SYSTEMS[id]; for (const k of ['intro', 'signal', 'unlocks', 'tour']) if (D[k]) { if (typeof D[k] === 'string') D[k] = touchify(D[k]); else walk(D[k]); } }
+  for (const u of SOL_SNAP.unlocks) walk(u);
+  for (const u of UNLOCKS) walk(u);
+}

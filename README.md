@@ -87,6 +87,13 @@ Systems share the same roles (a start moon, a capital, ore fields, a black marke
 
 **Tribute:** when you arrive in a new system the welcome screen offers to spend your Tribute right away, the Galaxy button glows with the amount while you can afford a Legacy upgrade, and plans bought mid-system apply immediately.
 
+## Languages (English + Spanish)
+
+The game reads `Clawcade.lang()` once at boot (Clawcade reloads the game when the player flips its ES/EN switch); outside Clawcade it uses `?lang=es` or the browser language.
+- `src/i18n.js`: `TXT` (every interface string as `{ en, es }`, each module adds its own section), `tx(key, vars)` with `{placeholders}`, `ES`/`LANG`.
+- `src/content_es.js`: the Spanish version of the world's content (ores, factions, Sol's worlds, unlocks, megaprojects, upgrades, enemies, ranks, Legacy and every star system's names and story), laid over the English data at boot. On touch devices story texts name the on-screen buttons instead of keys.
+- Natural Latin-American Spanish; invented one-word planet names stay as they are, descriptive names are translated.
+
 ## Mobile
 
 - Menus scroll with a finger through the game's own kinetic scroller, so they also work in full screen (where the host page blocks native scrolling); a drag never presses the button it started on.
