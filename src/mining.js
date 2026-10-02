@@ -356,15 +356,17 @@ const MineScene = {
     const vz = viewZoom(), wm = { x: (mouse.x - W / 2) / vz + this.cam.x, y: (mouse.y - H / 2) / vz + this.cam.y };
     const combat = this.inCombat;
     if (touchFire) {
+      // auto-aim: the nearest target (rock edge, or enemy hull); keep the current one only while it is still about as close,
+      // so the beam doesn't flick between two rocks but never ignores one right next to you
+      const list = combat ? this.enemies : this.rocks, edge = r => Math.hypot(r.x - p.x, r.y - p.y) - (r.r || (r.size ? 18 * r.size : 0));
       let best = null, bd = 1e9;
-      const list = combat ? this.enemies : this.rocks;
-      // keep cutting the same target while it is in reach, so the beam doesn't flick between rocks
+      for (const r of list) { if (r.dead) continue; const d = edge(r); if (d < bd) { bd = d; best = r; } }
       const lk = this.lock && list.includes(this.lock) && !this.lock.dead ? this.lock : null;
-      if (lk && Math.hypot(lk.x - p.x, lk.y - p.y) - (lk.r || 0) < (combat ? 900 : this.toolRange() + 30)) { best = lk; bd = 0; }
-      else for (const r of list) { const d = Math.hypot(r.x - p.x, r.y - p.y) - (r.r || 0); if (d < bd) { bd = d; best = r; } }
+      if (lk && best !== lk) { const ld = edge(lk); if (ld <= bd + 40 && ld < (combat ? 900 : this.toolRange())) { best = lk; bd = ld; } }
       this.lock = best;
-      if (best && (combat || bd < this.toolRange() + 40)) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = true; }
-    } else if (mouse.down && !mouse.onUI) { aim = Math.atan2(wm.y - p.y, wm.x - p.x); firing = true; }
+      const reach = combat ? 1e9 : this.toolRange() + 40;
+      if (best && bd < reach * 2.5) { aim = Math.atan2(best.y - p.y, best.x - p.x); firing = bd < reach; }
+    } else { this.lock = null; if (mouse.down && !mouse.onUI) { aim = Math.atan2(wm.y - p.y, wm.x - p.x); firing = true; } }
     if (keys.has('Space')) { firing = true; if (aim == null) aim = p.a; }
     const targetA = aim != null ? aim : (al > 0.1 ? Math.atan2(ay, ax) : p.a);
     const da = ((targetA - p.a + Math.PI) % TAU + TAU) % TAU - Math.PI;
