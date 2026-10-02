@@ -322,6 +322,8 @@ function dockAtStation() {
     const can = Math.min(hneed, Math.floor(S.credits / rp));
     if (can > 0) { S.hull = Math.min(ship.hpMax, S.hull + can); S.credits -= can * rp; r.repair = can; r.repairCost = can * rp; }
   }
+  // broke pilots are never stranded: stations patch the hull to 40% for free
+  if (S.hull < ship.hpMax * 0.4) { const add = Math.ceil(ship.hpMax * 0.4 - S.hull); S.hull += add; r.repair += add; r.patched = 1; }
   S.stats.docks++;
   if (has(U.TRADE) && l.market && !l.depot && (!S.contracts[id] || !S.nextContracts[id])) genContracts(id);
   save();

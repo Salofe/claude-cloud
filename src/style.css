@@ -232,6 +232,7 @@ button { font-family: var(--ft); cursor: pointer; }
 #eventBanner p { margin: 2px 0 0; font-size: 14px; color: #e8dcc0; }
 #toasts { position: fixed; bottom: 44px; right: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 40; pointer-events: none; align-items: flex-end; }
 @media (hover: hover) and (pointer: fine) { body.mining #toasts { bottom: 204px; } }
+@media (pointer: coarse) { body.mining #toasts { bottom: calc(200px + env(safe-area-inset-bottom)); } }
 .toast { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--cyan); border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 15px; animation: slidein .2s ease-out; transition: opacity .4s, transform .4s; max-width: 320px; }
 .toast.good { border-left-color: var(--good); }
 .toast.bad { border-left-color: var(--bad); }
