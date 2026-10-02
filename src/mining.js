@@ -794,6 +794,7 @@ const MineScene = {
     for (const r of this.rocks) { ctx.fillStyle = r.comet ? '#bff6ff' : r.geode && r.seen > 0 ? ITEMS[r.geode].c : r.living ? '#9fffe0' : r.gold ? '#ffd24a' : r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mw - 1, my + r.y / MH * mh - 1, r.tier * 0.8 + 0.6, r.tier * 0.8 + 0.6); }
     ctx.fillStyle = '#ff4d6d'; for (const e of this.enemies) ctx.fillRect(mx + e.x / MW * mw - 1.5, my + e.y / MH * mh - 1.5, 3, 3);
     ctx.fillStyle = '#3de8ff'; ctx.fillRect(mx + p.x / MW * mw - 2, my + p.y / MH * mh - 2, 4, 4);
+    if (this.flashAt) { const k = 1 - (performance.now() - this.flashAt) / 900; if (k > 0) { ctx.fillStyle = `rgba(255,255,255,${k})`; ctx.fillRect(0, 0, W, H); } else this.flashAt = 0; }
     if (this.loc.field.hazard === 'heat' && ship.shieldMax <= 0) { ctx.fillStyle = `rgba(255,120,40,${0.08 + 0.05 * Math.sin(t * 4)})`; ctx.fillRect(0, 0, W, H); }
   },
   drawStation(ctx, t) {

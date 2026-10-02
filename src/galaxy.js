@@ -3583,6 +3583,69 @@ function startPortrait() {
   frame();
 }
 
+// ---------- the jump: your ship dives into the gate, crosses hyperspace and bursts out in the new system ----------
+const JumpScene = {
+  t: 0, to: null, done: false, stars: null,
+  enter(id) {
+    this.t = 0; this.to = id; this.done = false; this.from = sysId();
+    this.lv = shipLv();
+    this.stars = Array.from({ length: 260 }, () => ({ a: Math.random() * TAU, d: Math.random(), s: 0.5 + Math.random() * 1.5 }));
+    $('hud').classList.add('hidden'); showMineUI && showMineUI(false); laserSound(false);
+    tone(110, 1.6, 'sawtooth', 0.05, 440); sfx('alarm');
+    this.skip = () => { if (this.t > 0.5 && this.t < 3.9) this.t = 3.9; };
+    canvas.addEventListener('pointerdown', this.skip);
+  },
+  exit() { canvas.removeEventListener('pointerdown', this.skip); $('hud').classList.remove('hidden'); },
+  update(dt) {
+    const t0 = this.t; this.t += dt;
+    if (t0 < 1.6 && this.t >= 1.6) { sfx('warp'); tone(200, 2.2, 'sine', 0.08, 1400); haptic([30, 40, 60]); }
+    if (t0 < 4.2 && this.t >= 4.2 && !this.done) {   // the flash hides the switch to the new system
+      this.done = true; sfx('boom'); haptic(80);
+      const id = this.to; setTimeout(() => { jumpTo(id); MineScene.flashAt = performance.now(); sfx('win'); }, 0);
+    }
+  },
+  draw(ctx) {
+    const t = this.t, cx = W / 2, cy = H / 2, m = Math.min(W, H);
+    const D = SYSTEMS[this.to], P0 = STAR_PAL[sysDef().star] || STAR_PAL.sol, P1 = STAR_PAL[D.star] || STAR_PAL.sol;
+    if (t < 1.6) {
+      // approach: the ancient gate opens, the ship flies into it
+      drawSpaceBg(ctx, W, H, t * 30, t * 60, t);
+      const k = t / 1.6, R = m * (0.22 + k * 0.5);
+      glow(ctx, cx, cy, R * 1.6, '#a07cff55', 0.6 + k * 0.4);
+      ctx.save(); ctx.translate(cx, cy);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R); g.addColorStop(0, `rgba(255,255,255,${0.3 + k * 0.6})`); g.addColorStop(0.5, `rgba(170,120,255,${0.25 + k * 0.4})`); g.addColorStop(1, 'rgba(60,20,120,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill();
+      for (let i = 0; i < 3; i++) { ctx.save(); ctx.rotate(t * (1.2 - i * 0.9) * (1 + k * 3)); ctx.strokeStyle = ['#d9b3ff', '#a07cff', '#ffffff'][i]; ctx.lineWidth = 4 - i; ctx.setLineDash([R * 0.2, R * 0.08]); ctx.beginPath(); ctx.arc(0, 0, R * (1 - i * 0.12), 0, TAU); ctx.stroke(); ctx.restore(); }
+      ctx.setLineDash([]); ctx.restore();
+      const sy = lerp(H * 0.95, cy, Math.pow(k, 1.6)), sc = lerp(2.4, 0.4, Math.pow(k, 1.4));
+      drawPlayerShip(ctx, this.lv, cx, sy, -Math.PI / 2, sc, 1, t);
+      for (let i = 0; i < 4; i++) { const a = Math.random() * TAU, d = R * (1 + Math.random()); ctx.fillStyle = '#d9b3ff'; ctx.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 2, 2); }
+    } else {
+      // hyperspace: streaking stars, colored rings, the old star's color turning into the new one
+      const k = clamp((t - 1.6) / 2.6, 0, 1), sp = 0.2 + Math.sin(k * Math.PI) * 2.2;
+      ctx.fillStyle = '#02030a'; ctx.fillRect(0, 0, W, H);
+      const c0 = hexRgb(P0.core[2]), c1 = hexRgb(P1.core[2]), c = mixc(c0, c1, k), col = `rgb(${c.map(Math.round).join(',')})`;
+      glow(ctx, cx, cy, m * 0.6, `rgba(${c.map(Math.round).join(',')},0.35)`, 1);
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      for (const st of this.stars) {
+        st.d += sp * 0.012 * (0.4 + st.d); if (st.d > 1.2) { st.d = 0.02; st.a = Math.random() * TAU; }
+        const r1 = Math.pow(st.d, 2) * m, r0 = Math.max(0, r1 - (20 + sp * 90) * st.d);
+        ctx.strokeStyle = Math.random() < 0.5 ? col : '#ffffff'; ctx.globalAlpha = Math.min(1, st.d * 2); ctx.lineWidth = st.s * (0.5 + st.d * 2);
+        ctx.beginPath(); ctx.moveTo(cx + Math.cos(st.a) * r0, cy + Math.sin(st.a) * r0); ctx.lineTo(cx + Math.cos(st.a) * r1, cy + Math.sin(st.a) * r1); ctx.stroke();
+      }
+      for (let i = 0; i < 6; i++) { const ph = (t * 1.6 + i / 6) % 1; ctx.globalAlpha = (1 - ph) * 0.5; ctx.strokeStyle = i % 2 ? col : '#a07cff'; ctx.lineWidth = 2 + ph * 8; ctx.beginPath(); ctx.ellipse(cx, cy, ph * m * 0.9, ph * m * 0.9, 0, 0, TAU); ctx.stroke(); }
+      ctx.globalAlpha = 1; ctx.lineCap = 'butt'; ctx.globalCompositeOperation = 'source-over';
+      drawPlayerShip(ctx, this.lv, cx + Math.sin(t * 9) * 3, cy + m * 0.12 + Math.cos(t * 7) * 3, -Math.PI / 2, 1.6, 1.4, t);
+      ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = `900 ${Math.round(m * 0.05)}px Orbitron, sans-serif`; ctx.fillText(D.n.toUpperCase(), cx, cy - m * 0.28);
+      ctx.font = `700 ${Math.round(m * 0.028)}px Rajdhani, sans-serif`; ctx.fillStyle = 'rgba(217,179,255,0.9)';
+      ctx.fillText(`JUMPING · SYSTEM ${GALAXY.findIndex(g => g.id === this.to) + 1} / ${GALAXY.length}`, cx, cy - m * 0.21);
+      // arrival flash
+      if (t > 3.7) { ctx.fillStyle = `rgba(255,255,255,${clamp((t - 3.7) / 0.5, 0, 1)})`; ctx.fillRect(0, 0, W, H); }
+    }
+  },
+};
+
 // ---------- the final boss of each system opens its gate ----------
 function finalBossKilled() {
   if (S.gateOpen) return;
@@ -3729,5 +3792,5 @@ function closeGalaxy() { sfx('click'); setScene(has(U.MAP) ? MapScene : MineScen
 function confirmJump(id) {
   const D = SYSTEMS[id];
   showModal({ icon: '🌀', title: `Jump to ${D.n}?`, html: `<p>Everything you built in <b>${sysName()}</b> stays behind and becomes part of your empire: it pays <b>Tribute</b> every minute.</p><p>You start fresh in ${D.n}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there.</p><div class="trib-call">You'll arrive with <b>${Math.floor((S.galaxy ? S.galaxy.tribute : 0) + jumpBonus().b)} Tribute</b>. Spend it on <b>Legacy</b> as soon as you land (Galaxy button) — it's what makes each new system faster.</div>`,
-    buttons: [{ label: 'Jump!', cls: 'primary', fn: () => { sfx('win'); jumpTo(id); } }, { label: 'Not yet', fn: () => {} }] });
+    buttons: [{ label: 'Jump!', cls: 'primary', fn: () => setTimeout(() => setScene(JumpScene, id), 30) }, { label: 'Not yet', fn: () => {} }] });
 }
