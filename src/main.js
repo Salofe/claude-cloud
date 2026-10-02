@@ -287,54 +287,56 @@ function init() {
 function thumbMode(kind) {
   document.body.classList.add('thumb');
   newGame();
-  S.lv = { hull: 4, laser: 26, magnet: 10, cargo: 5, refinery: 5, engine: 14, tank: 3, shield: 10, weapons: 18, scanner: 3 };
+  S.sys = 'sgra';   // the cover shows the end of the road: the black hole at the heart of the galaxy
+  S.lv = { hull: 5, laser: 40, magnet: 10, cargo: 5, refinery: 5, engine: 18, tank: 3, shield: 10, weapons: 24, scanner: 3 };
   $('title').classList.add('hidden'); $('hud').classList.add('hidden');
-  const t = 12.3;
-  drawSpaceBg(ctx, W, H, 120, 80, t, '#141a44');
-  drawPlanet(ctx, W * 0.83, H * 0.26, H * 0.36, LOC.saturno, Math.PI * 0.85, t);
-  drawSun(ctx, -W * 0.02, H * 0.95, 70, t);
-  MineScene.loc = LOC.saturno;
+  const t = 12.3, s = Math.min(W / 1280, H / 720), sq = W / H < 1.3;
+  drawSpaceBg(ctx, W, H, 340, 160, t, '#120818');
+  // Sagittarius A*
+  const bx = sq ? W * 0.62 : W * 0.7, by = sq ? H * 0.36 : H * 0.4;
+  drawBlackHole(ctx, bx, by, H * (sq ? 0.12 : 0.15), t);
+  // a ringed world and a distant red giant
+  drawPlanet(ctx, sq ? W * 0.12 : W * 0.06, H * 0.88, H * 0.2, LOC.saturno, -0.6, t);
+  drawSun(ctx, W * 0.96, H * 0.08, 26 * s, t, 'red');
+  MineScene.loc = LOC.saturno; MineScene.moltenT = 0;
   const rocks = [];
-  const mk = (x, y, tier, ore, rich) => { const r = { x, y, r: [0, 20, 34, 56][tier] * 1.5, tier, ore, rich, rot: rand(0, TAU), hit: 0, shape: makeRockShape(9 + tier * 2, 0.22),
+  const mk = (x, y, tier, ore, extra) => { const r = Object.assign({ x, y, r: [0, 20, 34, 56][tier] * 1.6 * s, tier, ore, rich: true, rot: rand(0, TAU), hit: 0, vx: 0, vy: 0, shape: makeRockShape(9 + tier * 2, 0.22),
     veins: Array.from({ length: 3 + tier * 2 }, () => { const a = rand(0, TAU), d = rand(0, 0.6); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.07, 0.16)]; }),
-    craters: Array.from({ length: tier }, () => { const a = rand(0, TAU), d = rand(0, 0.5); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.1, 0.2)]; }) }; rocks.push(r); return r; };
-  const big = mk(W * 0.64, H * 0.6, 3, 'iridium', true);
-  mk(W * 0.86, H * 0.78, 2, 'platinum', false); mk(W * 0.5, H * 0.86, 1, 'ice', false); mk(W * 0.92, H * 0.5, 1, 'he3', true); mk(W * 0.24, H * 0.92, 2, 'nickel', false); mk(W * 0.72, H * 0.14, 1, 'exotic', true);
+    craters: Array.from({ length: tier }, () => { const a = rand(0, TAU), d = rand(0, 0.5); return [Math.cos(a) * d, Math.sin(a) * d, rand(0.1, 0.2)]; }) }, extra || {}); rocks.push(r); return r; };
+  const big = mk(W * 0.56, H * 0.74, 3, 'iridium');
+  mk(W * 0.8, H * 0.8, 2, 'exotic', { living: true, swim: 1.2, vx: -20, vy: 4 });
+  mk(W * 0.44, H * 0.93, 2, 'sunstone', { volatile: true });
+  mk(W * 0.93, H * 0.6, 1, 'voidshard', { crystal: true });
+  mk(W * 0.68, H * 0.95, 1, 'ringpearl', { armored: true });
   for (const r of rocks) drawRock(ctx, r, t, 3);
-  const sx = W * 0.3, sy = H * 0.62;
-  const ang = Math.atan2(big.y - sy, big.x - sx);
-  // láser
-  const col = laserColor(4), nx = sx + Math.cos(ang) * 90 * Math.min(1, W / 1024), ny = sy + Math.sin(ang) * 90 * Math.min(1, W / 1024);
+  const sx = W * 0.3, sy = H * 0.66, ang = Math.atan2(big.y - sy, big.x - sx);
+  // engine ribbon
+  ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+  for (let i = 0; i < 26; i++) { const k = i / 26; ctx.strokeStyle = `rgba(255,107,214,${0.35 * (1 - k)})`; ctx.lineWidth = (12 - k * 10) * s; ctx.beginPath(); ctx.moveTo(sx - Math.cos(ang) * (60 + i * 14) * s, sy - Math.sin(ang) * (60 + i * 14) * s + Math.sin(i * 0.4) * 6 * s); ctx.lineTo(sx - Math.cos(ang) * (74 + i * 14) * s, sy - Math.sin(ang) * (74 + i * 14) * s + Math.sin((i + 1) * 0.4) * 6 * s); ctx.stroke(); }
+  // laser
+  const col = laserColor(5), nx = sx + Math.cos(ang) * 92 * s, ny = sy + Math.sin(ang) * 92 * s;
   const hx = big.x - Math.cos(ang) * big.r * 0.8, hy = big.y - Math.sin(ang) * big.r * 0.8;
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.strokeStyle = col; ctx.globalAlpha = 0.4; ctx.lineWidth = 16;
+  ctx.strokeStyle = col; ctx.globalAlpha = 0.45; ctx.lineWidth = 18 * s;
   ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(hx, hy); ctx.stroke();
-  ctx.globalAlpha = 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+  ctx.globalAlpha = 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3.5 * s;
   ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(hx, hy); ctx.stroke();
-  ctx.globalCompositeOperation = 'source-over';
-  glow(ctx, hx, hy, 60, col, 1);
+  ctx.lineCap = 'butt'; ctx.globalCompositeOperation = 'source-over';
+  glow(ctx, hx, hy, 70 * s, col, 1);
   const P = new Particles();
-  for (let i = 0; i < 60; i++) { const a = ang + Math.PI + rand(-1.2, 1.2), v = rand(10, 80); P.add(hx + Math.cos(a) * v, hy + Math.sin(a) * v, 0, 0, rand(0.3, 1), Math.random() < 0.5 ? ITEMS.iridium.c : col, rand(1.5, 4)); }
+  for (let i = 0; i < 80; i++) { const a = ang + Math.PI + rand(-1.3, 1.3), v = rand(10, 100) * s; P.add(hx + Math.cos(a) * v, hy + Math.sin(a) * v, 0, 0, rand(0.3, 1), Math.random() < 0.5 ? ITEMS.iridium.c : col, rand(1.5, 4.5) * s); }
   P.draw(ctx);
-  for (let i = 0; i < 7; i++) drawOreChunk(ctx, { x: sx + 60 + i * 38 + rand(-10, 10), y: sy + 70 + Math.sin(i) * 26, ore: pick(['iridium', 'platinum', 'he3']), rot: i }, 0);
-  // piratas a lo lejos
-  drawEnemyShip(ctx, 'corsair', W * 0.95, H * 0.93, Math.PI * 1.1, 1.3, t);
-  drawEnemyShip(ctx, 'raider', W * 0.88, H * 0.97, Math.PI * 1.05, 1.1, t);
-  drawPlayerShip(ctx, shipLv(), sx, sy, ang, 3.0 * Math.min(1, W / 1280 * 1.25), 1, t);
-  // título
+  for (let i = 0; i < 8; i++) drawOreChunk(ctx, { x: sx + (40 + i * 34) * s + rand(-10, 10), y: sy + (66 + Math.sin(i) * 24) * s, ore: pick(['iridium', 'exotic', 'ringpearl', 'voidshard']), rot: i }, 0.4 + i);
+  // a guardian rising near the disk
+  drawPhoenix(ctx, 'phoenix', bx - H * 0.36, by + H * 0.1, 0.4, 0.95 * s, t, null);
+  drawPlayerShip(ctx, shipLv(), sx, sy, ang, 3.2 * s, 1, t);
   if (kind !== 'clean') {
-    const s = Math.min(W / 1280, H / 720);
     ctx.textAlign = 'left';
-    ctx.font = `900 ${Math.round(92 * s)}px Orbitron, 'Arial Black', sans-serif`;
-    ctx.shadowColor = '#3de8ff'; ctx.shadowBlur = 30 * s;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('SOLAR', 60 * s, 130 * s);
-    ctx.fillStyle = '#3de8ff';
-    ctx.fillText('PROSPECTOR', 60 * s, 225 * s);
+    const fs = Math.round((sq ? 78 : 96) * s * (sq ? 1.35 : 1));
+    ctx.font = `900 ${fs}px Orbitron, 'Arial Black', sans-serif`;
+    ctx.shadowColor = '#3de8ff'; ctx.shadowBlur = 34 * s;
+    ctx.fillStyle = '#ffffff'; ctx.fillText('SOLAR', 56 * s, fs * 1.25);
+    ctx.fillStyle = '#3de8ff'; ctx.fillText('PROSPECTOR', 56 * s, fs * 2.3);
     ctx.shadowBlur = 0;
-    ctx.font = `600 ${Math.round(30 * s)}px Rajdhani, sans-serif`;
-    ctx.fillStyle = '#ffd24a';
-    ctx.fillText(tx('main_thumb_tag'), 64 * s, 275 * s);
   }
   document.body.dataset.ready = '1';
 }

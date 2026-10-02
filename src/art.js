@@ -13,7 +13,7 @@ let hudB = 0, hudBT = 0;
 function hudBottom() { const n = performance.now(); if (n - hudBT > 1500) { hudBT = n; const el = document.querySelector('.topbar'); hudB = el ? el.getBoundingClientRect().bottom : 60; } return hudB; }
 // a DOM panel's box, refreshed every half second (canvas overlays use it to avoid sitting under panels)
 const _pr = {};
-function panelRect(sel) { const n = performance.now(), c = _pr[sel]; if (c && n - c.t < 500) return c.r; const el = document.querySelector(sel); const r = el && el.offsetParent ? el.getBoundingClientRect() : null; _pr[sel] = { t: n, r }; return r; }
+function panelRect(sel) { const n = performance.now(), c = _pr[sel]; if (c && n - c.t < 500) return c.r; const el = document.querySelector(sel); const r = el && el.getClientRects().length && getComputedStyle(el).display !== 'none' ? el.getBoundingClientRect() : null; _pr[sel] = { t: n, r }; return r; }
 // short vibrations on touch devices make hits and breaks feel physical
 let hapticT = 0;
 function haptic(ms) { if (typeof isTouch === 'undefined' || !isTouch || muted || !navigator.vibrate) return; const n = performance.now(); if (n - hapticT < 60) return; hapticT = n; try { navigator.vibrate(ms); } catch (e) {} }
@@ -413,7 +413,9 @@ function drawBlackHole(ctx, x, y, r, t) {
   ctx.strokeStyle = 'rgba(255,240,210,0.6)'; ctx.lineWidth = r * 0.1; ctx.beginPath(); ctx.arc(x, y, r * 1.2, Math.PI * 1.02, Math.PI * 1.98); ctx.stroke();
   ctx.restore();
   ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,225,180,0.95)'; ctx.lineWidth = Math.max(1, r * 0.06); ctx.beginPath(); ctx.arc(x, y, r * 1.04, 0, TAU); ctx.stroke();
+  ctx.lineWidth = Math.max(1, r * 0.06);
+  ctx.strokeStyle = 'rgba(255,225,180,0.95)'; ctx.beginPath(); ctx.arc(x, y, r * 1.04, Math.PI, TAU); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,225,180,0.3)'; ctx.beginPath(); ctx.arc(x, y, r * 1.04, 0, Math.PI); ctx.stroke();
   disk(true);
 }
 // Sagittarius A* seen from a mining field: the bottom of a vast black hole hangs over the top of the field

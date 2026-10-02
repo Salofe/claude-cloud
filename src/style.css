@@ -523,3 +523,14 @@ body.galaxy #objective, body.galaxy #warHud, body.galaxy #mapTools, body.galaxy 
 html[lang=es] .tbtn { font-size: 9.5px; letter-spacing: -0.2px; }
 @media (max-height: 520px) and (orientation: landscape) { html[lang=es] .tbtn { font-size: 8.5px; } }
 @media (max-height: 520px) and (orientation: landscape) { #bGal.notify::after { top: -1px; right: -4px; } .topbar { padding-top: max(8px, env(safe-area-inset-top)); } }
+/* medium screens (e.g. the Clawcade embed): compact top bar so longer Spanish labels never overlap */
+.stat { flex-shrink: 0; }
+@media (min-width: 901px) and (max-width: 1420px) {
+  .topbar { gap: 10px; padding-left: 10px; padding-right: 10px; }
+  .stat .lbl .lg { display: none; } .stat .lbl .sh { display: inline; }
+  .stat .lbl { letter-spacing: .5px; font-size: 10px; }
+  .stat b { font-size: 17px; }
+  .stat.bar { width: 96px; }
+  .topbar .tbtns button span { display: none; }
+  .topbar .tbtns button { padding: 6px 8px; }
+}
