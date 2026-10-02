@@ -6,6 +6,7 @@
 // ores, factions and texts on top of Sol, and gets harder: tougher rocks and pirates.
 
 // pristine copy of the Solar System, taken before anything is modified
+applyEsBase();
 const SOL_SNAP = JSON.parse(JSON.stringify({ locs: LOCS, factions: FACTIONS, unlocks: UNLOCKS, projects: PROJECTS.map(p => ({ id: p.id, icon: p.icon, n: p.n, d: p.d, fx: p.fx })) }));
 
 const SYSTEMS = {
@@ -3410,6 +3411,7 @@ const LAYOUT = {
 };
 for (const id in LAYOUT) Object.assign(SYSTEMS[id], LAYOUT[id].sys, { layout: LAYOUT[id].locs });
 
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
@@ -3428,6 +3430,7 @@ const GALAXY = [
   { id: 'rim', n: 'Core Rim', star: 'orange', x: 0.12, y: 0.12 },
   { id: 'sgra', n: 'Sagittarius A*', star: 'hole', x: 0, y: 0 },
 ];
+applyEsSystems();
 const sysId = () => (S && S.sys) || 'sol';
 const sysDef = () => SYSTEMS[sysId()];
 const sysName = () => sysDef().n;
@@ -3469,6 +3472,7 @@ const LEGACY = {
   cargoPlan: { icon: '▣', n: 'Cargo Plans', d: 'Start each system with +5 cargo bay levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
   extrPlan:  { icon: '⚗', n: 'Extractor Plans', d: 'Start each system with +5 extractor levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
 };
+applyEsLegacy();
 // the cheapest Legacy upgrade you could buy right now (null if none)
 function legacyAffordable() {
   const G = S && S.galaxy; if (!G) return null;
