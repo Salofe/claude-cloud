@@ -3462,6 +3462,71 @@ function ensureMarkets() {
   }
 }
 
+// ---------- player-facing text (English + Spanish) ----------
+Object.assign(TXT, {
+  gal_why_base: { en: 'base 10', es: 'base 10' },
+  gal_why_boss: { en: 'final boss +5', es: 'jefe final +5' },
+  gal_why_stars: { en: 'ally stars +{n}', es: 'estrellas de aliado +{n}' },
+  gal_why_proj: { en: 'megaprojects +{n}', es: 'megaproyectos +{n}' },
+  gal_left_boss: { en: 'Defeat the final guardian', es: 'Derrota al guardián final' },
+  gal_left_war1: { en: 'Win 1 more war as an ally', es: 'Gana 1 guerra más como aliado' },
+  gal_left_wars: { en: 'Win {n} more wars as an ally', es: 'Gana {n} guerras más como aliado' },
+  gal_news_arrive: { en: 'You came through the gate to <b>{name}</b>. A new system to conquer.', es: 'Cruzaste el portal hacia <b>{name}</b>. Un nuevo sistema por conquistar.' },
+  gal_welcome_title: { en: 'Welcome to {name}', es: 'Bienvenido a {name}' },
+  gal_system_tag: { en: 'SYSTEM {n} / {total}', es: 'SISTEMA {n} / {total}' },
+  gal_welcome_trib: { en: '⬢ <b>{trib} Tribute</b> to spend (+{bonus} for leaving {from}). Spend it on <b>Legacy</b> now — permanent bonuses that make {name} much faster.', es: '⬢ Tienes <b>{trib} de Tributo</b> para gastar (+{bonus} por dejar {from}). Gástalo ya en <b>Legado</b>: bonos permanentes que hacen {name} mucho más rápido.' },
+  gal_btn_spend: { en: '⬢ Spend Tribute on Legacy', es: '⬢ Gastar Tributo en Legado' },
+  gal_btn_later: { en: 'Later', es: 'Luego' },
+  gal_btn_mine: { en: 'Let\'s mine', es: '¡A minar!' },
+  gal_jumping: { en: 'JUMPING · SYSTEM {n} / {total}', es: 'SALTANDO · SISTEMA {n} / {total}' },
+  gal_news_guardian: { en: '<b>The guardian is destroyed.</b> An ancient jump gate wakes up in {name}.', es: '<b>El guardián fue destruido.</b> Un antiguo portal de salto despierta en {name}.' },
+  gal_gate_title: { en: 'The gate awakens', es: 'El portal despierta' },
+  gal_gate_next: { en: ' — next stop: <b>{name}</b>', es: ': próxima parada, <b>{name}</b>' },
+  gal_gate_html: { en: 'Open the <b>Galaxy</b> map to see where it leads{next}. You can stay as long as you like: the more you achieve here, the more <b>Tribute</b> you take with you.', es: 'Abre el mapa de la <b>Galaxia</b> para ver adónde lleva{next}. Puedes quedarte todo lo que quieras: cuanto más logres aquí, más <b>Tributo</b> te llevas.' },
+  gal_btn_open_map: { en: 'Open the Galaxy map', es: 'Abrir mapa de la Galaxia' },
+  gal_news_end: { en: '<b>The Devourer is gone.</b> You crossed the whole Milky Way, from the rim to its heart.', es: '<b>El Devorador ya no existe.</b> Cruzaste toda la Vía Láctea, del borde hasta su corazón.' },
+  gal_end_title: { en: 'The heart of the galaxy', es: 'El corazón de la galaxia' },
+  gal_end_p1: { en: 'From a little moon in the Solar System to the black hole at the center of the Milky Way: <b>15 star systems</b>, all yours.', es: 'De una pequeña luna del Sistema Solar al agujero negro en el centro de la Vía Láctea: <b>15 sistemas estelares</b>, todos tuyos.' },
+  gal_end_earned: { en: 'credits earned', es: 'créditos ganados' },
+  gal_end_mined: { en: 'ore mined', es: 'mineral extraído' },
+  gal_end_kills: { en: 'pirates defeated', es: 'piratas derrotados' },
+  gal_end_days: { en: 'days in space', es: 'días en el espacio' },
+  gal_end_andromeda: { en: 'Far beyond the galaxy\'s edge, your dishes catch a new signal… from <b>Andromeda</b>. A new galaxy is coming in a future update.', es: 'Mucho más allá del borde de la galaxia, tus antenas captan una nueva señal… desde <b>Andrómeda</b>. Una nueva galaxia llegará en una futura actualización.' },
+  gal_end_keep: { en: 'You can keep playing here as long as you like — your Tribute keeps flowing.', es: 'Puedes seguir jugando aquí todo lo que quieras: tu Tributo sigue llegando.' },
+  gal_btn_keep: { en: 'Keep playing', es: 'Seguir jugando' },
+  gal_title: { en: 'The Galaxy', es: 'La Galaxia' },
+  gal_conquered_count: { en: '{n} of {total} systems conquered', es: '{n} de {total} sistemas conquistados' },
+  gal_tribute: { en: 'TRIBUTE', es: 'TRIBUTO' },
+  gal_trib_rate1: { en: '+{rate} / min from 1 conquered system', es: '+{rate} / min de 1 sistema conquistado' },
+  gal_trib_rate: { en: '+{rate} / min from {n} conquered systems', es: '+{rate} / min de {n} sistemas conquistados' },
+  gal_trib_none: { en: 'Conquer a system to earn Tribute', es: 'Conquista un sistema para ganar Tributo' },
+  gal_legacy_head: { en: 'Legacy <small class="dim">· permanent, all systems · bought plans also apply right now</small>', es: 'Legado <small class="dim">· permanente, en todos los sistemas · los planos comprados también aplican ya</small>' },
+  gal_owned: { en: 'owned', es: 'tuyo' },
+  gal_lv: { en: 'Lv', es: 'Nv' },
+  gal_max: { en: 'Max', es: 'Máx' },
+  gal_spend_call: { en: '⬢ You have <b>{n} Tribute</b> to spend. Legacy upgrades are permanent and make every system faster.', es: '⬢ Tienes <b>{n} de Tributo</b> para gastar. Las mejoras de Legado son permanentes y aceleran cada sistema.' },
+  gal_system_n: { en: 'system {n}', es: 'sistema {n}' },
+  gal_here: { en: 'You are here.', es: 'Estás aquí.' },
+  gal_here_gate: { en: ' Rule this system and defeat its guardian to open the gate.', es: ' Gobierna este sistema y derrota a su guardián para abrir el portal.' },
+  gal_conquered: { en: 'Conquered. It pays you Tribute every minute.', es: 'Conquistado. Te paga Tributo cada minuto.' },
+  gal_hole: { en: 'The supermassive black hole at the heart of the galaxy. The end of the road — and maybe a door to something beyond.', es: 'El agujero negro supermasivo en el corazón de la galaxia. El final del camino… y quizás una puerta a algo más allá.' },
+  gal_uncharted: { en: 'Uncharted. Arrives in a future update.', es: 'Sin explorar. Llegará en una futura actualización.' },
+  gal_uncharted_next: { en: 'The gate points here, but this system isn\'t charted yet — coming in a future update.', es: 'El portal apunta aquí, pero este sistema aún no está cartografiado: llegará en una futura actualización.' },
+  gal_locked: { en: '🔒 Defeat {name}\'s guardian to open the gate.', es: '🔒 Derrota al guardián de {name} para abrir el portal.' },
+  gal_jump_now: { en: 'Tribute if you jump now', es: 'Tributo si saltas ahora' },
+  gal_earned_all: { en: '✔ You earned everything here.', es: '✔ Ya ganaste todo aquí.' },
+  gal_still_left: { en: '⚠ <b>{n} Tribute</b> still left in {name}:', es: '⚠ Aún quedan <b>{n} de Tributo</b> en {name}:' },
+  gal_and_more: { en: '…and {n} more (select {name})', es: '…y {n} más (selecciona {name})' },
+  gal_jump_btn: { en: '🌀 Jump to {name}', es: '🌀 Saltar a {name}' },
+  gal_stays: { en: 'Credits, ship upgrades, outposts and freighters stay behind. Tribute, Legacy and records come with you.', es: 'Los créditos, mejoras de nave, puestos mineros y cargueros se quedan. El Tributo, el Legado y los récords van contigo.' },
+  gal_leaving: { en: 'Tribute for leaving {name} <small class="dim">· {b} of {max} possible</small>', es: 'Tributo por dejar {name} <small class="dim">· {b} de {max} posibles</small>' },
+  gal_legacy_locked: { en: 'Legacy upgrades unlock after your first jump: spend Tribute on permanent bonuses for every system.', es: 'Las mejoras de Legado se desbloquean tras tu primer salto: gasta Tributo en bonos permanentes para todos los sistemas.' },
+  gal_confirm_title: { en: 'Jump to {name}?', es: '¿Saltar a {name}?' },
+  gal_confirm_html: { en: '<p>Everything you built in <b>{here}</b> stays behind and becomes part of your empire: it pays <b>Tribute</b> every minute.</p><p>You start fresh in {name}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there.</p><div class="trib-call">You\'ll arrive with <b>{trib} Tribute</b>. Spend it on <b>Legacy</b> as soon as you land (Galaxy button) — it\'s what makes each new system faster.</div>', es: '<p>Todo lo que construiste en <b>{here}</b> se queda y pasa a formar parte de tu imperio: te paga <b>Tributo</b> cada minuto.</p><p>Empiezas de cero en {name}: créditos, mejoras de nave, puestos mineros, cargueros y reputación se reinician. Conservas el <b>Tributo, el Legado, el historial de alianzas y tus récords</b>.</p><p class="hint">Allí los piratas y las rocas son más duros.</p><div class="trib-call">Llegarás con <b>{trib} de Tributo</b>. Gástalo en <b>Legado</b> apenas aterrices (botón Galaxia): es lo que acelera cada nuevo sistema.</div>' },
+  gal_btn_jump: { en: 'Jump!', es: '¡Saltar!' },
+  gal_btn_notyet: { en: 'Not yet', es: 'Todavía no' },
+});
+
 // ---------- Tribute & Legacy ----------
 const LEGACY = {
   ore:       { icon: '⛏', n: 'Prospector\'s Legacy', d: '+10% ore value everywhere', cost: lv => Math.round(8 * Math.pow(1.6, lv)) },
@@ -3502,17 +3567,17 @@ function buyLegacy(k) {
 const projTribute = p => Math.round(2 + 1.5 * Math.log10(p.cost / 4e4));
 const allyFactions = () => Object.keys(FACTIONS).filter(f => f !== 'piratas' && factionAlive(f));
 function jumpBonus() {
-  let b = 10, why = ['base 10'];
-  if (S.gateOpen) { b += 5; why.push('final boss +5'); }
+  let b = 10, why = [tx('gal_why_base')];
+  if (S.gateOpen) { b += 5; why.push(tx('gal_why_boss')); }
   // wars are a side dish: only your first 3 ally stars count for Tribute (5 each)
-  const st = Math.min(3, Object.values(S.allies || {}).reduce((a, x) => a + x, 0)); if (st) { b += 5 * st; why.push(`ally stars +${5 * st}`); }
-  const pj = sysProjects().filter(p => built(p.id)).reduce((a, p) => a + projTribute(p), 0); if (pj) { b += pj; why.push(`megaprojects +${pj}`); }
+  const st = Math.min(3, Object.values(S.allies || {}).reduce((a, x) => a + x, 0)); if (st) { b += 5 * st; why.push(tx('gal_why_stars', { n: 5 * st })); }
+  const pj = sysProjects().filter(p => built(p.id)).reduce((a, p) => a + projTribute(p), 0); if (pj) { b += pj; why.push(tx('gal_why_proj', { n: pj })); }
   // what is still on the table in this system
   const left = [];
-  if (!S.gateOpen) left.push({ n: 'Defeat the final guardian', t: 5 });
+  if (!S.gateOpen) left.push({ n: tx('gal_left_boss'), t: 5 });
   for (const p of sysProjects()) if (!built(p.id)) left.push({ n: p.n, t: projTribute(p), cost: p.cost });
   const starsLeft = 3 - Math.min(3, Object.values(S.allies || {}).reduce((a, x) => a + x, 0));
-  if (starsLeft) left.push({ n: `Win ${starsLeft} more war${starsLeft > 1 ? 's' : ''} as an ally`, t: 5 * starsLeft });
+  if (starsLeft) left.push({ n: tx(starsLeft > 1 ? 'gal_left_wars' : 'gal_left_war1', { n: starsLeft }), t: 5 * starsLeft });
   return { b, why, left, max: b + left.reduce((a, x) => a + x.t, 0) };
 }
 function jumpTo(id) {
@@ -3532,13 +3597,13 @@ function jumpTo(id) {
   S.lv.laser += 5 * (G.legacy.laserPlan || 0); S.lv.cargo += 5 * (G.legacy.cargoPlan || 0); S.lv.extractor += 5 * (G.legacy.extrPlan || 0);
   if (G.legacy.quick) { S.credits = 50000; S.stats.earned = UNLOCKS[U.MAP].at; checkUnlocks(); pendingUnlocks = []; }
   S.fuel = ship.fuelMax; S.hull = ship.hpMax;
-  S.news = []; addNews('🌀', `You came through the gate to <b>${D.n}</b>. A new system to conquer.`, '#d9b3ff');
+  S.news = []; addNews('🌀', tx('gal_news_arrive', { name: D.n }), '#d9b3ff');
   save();
   shownCredits = S.credits;
   setScene(MineScene, 'luna');
   updateHUD(); updateTicker();
-  setTimeout(() => { showModal({ icon: '', title: `Welcome to ${D.n}`, cls: 'unlock', html: `<div class="unl-tag">SYSTEM ${GALAXY.findIndex(g => g.id === id) + 1} / ${GALAXY.length}</div><canvas id="sysPortrait" class="sys-portrait" width="460" height="230"></canvas>${D.tour ? `<p class="tour">${D.tour}</p>` : ''}<p>${D.intro || ''}</p><div class="trib-call">⬢ <b>${Math.floor(G.tribute)} Tribute</b> to spend (+${bonus} for leaving ${SYSTEMS[from].n}). Spend it on <b>Legacy</b> now — permanent bonuses that make ${D.n} much faster.</div>`,
-    buttons: legacyAffordable() ? [{ label: '⬢ Spend Tribute on Legacy', cls: 'primary', fn: () => setTimeout(() => { GalaxyScene.sel = id; openGalaxy(); }, 50) }, { label: 'Later', fn: () => {} }] : [{ label: 'Let\'s mine', cls: 'primary', fn: () => {} }] }); startPortrait(); }, 400);
+  setTimeout(() => { showModal({ icon: '', title: tx('gal_welcome_title', { name: D.n }), cls: 'unlock', html: `<div class="unl-tag">${tx('gal_system_tag', { n: GALAXY.findIndex(g => g.id === id) + 1, total: GALAXY.length })}</div><canvas id="sysPortrait" class="sys-portrait" width="460" height="230"></canvas>${D.tour ? `<p class="tour">${D.tour}</p>` : ''}<p>${D.intro || ''}</p><div class="trib-call">${tx('gal_welcome_trib', { trib: Math.floor(G.tribute), bonus, from: SYSTEMS[from].n, name: D.n })}</div>`,
+    buttons: legacyAffordable() ? [{ label: tx('gal_btn_spend'), cls: 'primary', fn: () => setTimeout(() => { GalaxyScene.sel = id; openGalaxy(); }, 50) }, { label: tx('gal_btn_later'), fn: () => {} }] : [{ label: tx('gal_btn_mine'), cls: 'primary', fn: () => {} }] }); startPortrait(); }, 400);
   return true;
 }
 
@@ -3643,7 +3708,7 @@ const JumpScene = {
       ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,0.9)';
       ctx.font = `900 ${Math.round(m * 0.05)}px Orbitron, sans-serif`; ctx.fillText(D.n.toUpperCase(), cx, cy - m * 0.28);
       ctx.font = `700 ${Math.round(m * 0.028)}px Rajdhani, sans-serif`; ctx.fillStyle = 'rgba(217,179,255,0.9)';
-      ctx.fillText(`JUMPING · SYSTEM ${GALAXY.findIndex(g => g.id === this.to) + 1} / ${GALAXY.length}`, cx, cy - m * 0.21);
+      ctx.fillText(tx('gal_jumping', { n: GALAXY.findIndex(g => g.id === this.to) + 1, total: GALAXY.length }), cx, cy - m * 0.21);
       // arrival flash
       if (t > 3.7) { ctx.fillStyle = `rgba(255,255,255,${clamp((t - 3.7) / 0.5, 0, 1)})`; ctx.fillRect(0, 0, W, H); }
     }
@@ -3656,8 +3721,8 @@ function finalBossKilled() {
   S.gateOpen = 1;
   const nx = nextSystem();
   if (!nx) return showEnding();
-  addNews('🌀', `<b>The guardian is destroyed.</b> An ancient jump gate wakes up in ${LOC.oort.n}.`, '#d9b3ff');
-  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: 'The gate awakens', html: `<p>${sysDef().gate}</p><p>Open the <b>Galaxy</b> map to see where it leads${nx ? ` — next stop: <b>${nx.n}</b>` : ''}. You can stay as long as you like: the more you achieve here, the more <b>Tribute</b> you take with you.</p>`, choices: [{ label: 'Open the Galaxy map', cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }, { label: 'Later', cost: 0, fn: () => {} }] });
+  addNews('🌀', tx('gal_news_guardian', { name: LOC.oort.n }), '#d9b3ff');
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌀', title: tx('gal_gate_title'), html: `<p>${sysDef().gate}</p><p>${tx('gal_gate_html', { next: nx ? tx('gal_gate_next', { name: nx.n }) : '' })}</p>`, choices: [{ label: tx('gal_btn_open_map'), cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }, { label: tx('gal_btn_later'), cost: 0, fn: () => {} }] });
   save();
 }
 
@@ -3666,14 +3731,14 @@ function showEnding() {
   const G = S.galaxy || { done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 }, tribute: 0 };
   G.finished = 1; if (!G.done.includes(sysId())) G.done.push(sysId());
   const L = G.life, earned = L.earned + S.stats.earned, mined = L.mined + S.stats.mined, kills = L.kills + S.stats.kills, days = L.days + S.day;
-  addNews('🌌', '<b>The Devourer is gone.</b> You crossed the whole Milky Way, from the rim to its heart.', '#ffd24a');
+  addNews('🌌', tx('gal_news_end'), '#ffd24a');
   save();
-  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌌', title: 'The heart of the galaxy', html: `<p>${sysDef().gate}</p>
-    <p>From a little moon in the Solar System to the black hole at the center of the Milky Way: <b>15 star systems</b>, all yours.</p>
-    <div class="ending-stats"><div><b>${fmt(earned)}</b><small>credits earned</small></div><div><b>${fmt(mined)}</b><small>ore mined</small></div><div><b>${fmt(kills)}</b><small>pirates defeated</small></div><div><b>${fmt(days)}</b><small>days in space</small></div></div>
-    <p class="hint">Far beyond the galaxy's edge, your dishes catch a new signal… from <b>Andromeda</b>. A new galaxy is coming in a future update.</p>
-    <p>You can keep playing here as long as you like — your Tribute keeps flowing.</p>`,
-    choices: [{ label: 'Keep playing', cost: 0, fn: () => {} }, { label: 'Open the Galaxy map', cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }] });
+  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌌', title: tx('gal_end_title'), html: `<p>${sysDef().gate}</p>
+    <p>${tx('gal_end_p1')}</p>
+    <div class="ending-stats"><div><b>${fmt(earned)}</b><small>${tx('gal_end_earned')}</small></div><div><b>${fmt(mined)}</b><small>${tx('gal_end_mined')}</small></div><div><b>${fmt(kills)}</b><small>${tx('gal_end_kills')}</small></div><div><b>${fmt(days)}</b><small>${tx('gal_end_days')}</small></div></div>
+    <p class="hint">${tx('gal_end_andromeda')}</p>
+    <p>${tx('gal_end_keep')}</p>`,
+    choices: [{ label: tx('gal_btn_keep'), cost: 0, fn: () => {} }, { label: tx('gal_btn_open_map'), cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }] });
 }
 
 // ---------- the Galaxy map ----------
@@ -3749,52 +3814,52 @@ const GalaxyScene = {
 function renderGalaxyPanel() {
   const G = S.galaxy, g = GALAXY.find(x => x.id === GalaxyScene.sel), i = GALAXY.indexOf(g);
   const done = G ? G.done : [], cur = sysId(), nx = nextSystem();
-  let h = `<div class="lp-head"><div><h3>The Galaxy</h3><small>${done.length} of ${GALAXY.length} systems conquered</small></div><button class="x" onclick="closeGalaxy()">✕</button></div>`;
-  h += `<div class="gal-trib"><div><small>TRIBUTE</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? `+${tributeRate()} / min from ${conquered()} conquered system${conquered() > 1 ? 's' : ''}` : 'Conquer a system to earn Tribute'}</span></div>`;
+  let h = `<div class="lp-head"><div><h3>${tx('gal_title')}</h3><small>${tx('gal_conquered_count', { n: done.length, total: GALAXY.length })}</small></div><button class="x" onclick="closeGalaxy()">✕</button></div>`;
+  h += `<div class="gal-trib"><div><small>${tx('gal_tribute')}</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? tx(conquered() > 1 ? 'gal_trib_rate' : 'gal_trib_rate1', { rate: tributeRate(), n: conquered() }) : tx('gal_trib_none')}</span></div>`;
   const legacyHtml = () => {
-    let x = `<div class="sub">Legacy <small class="dim">· permanent, all systems · bought plans also apply right now</small></div><div class="legacy">`;
+    let x = `<div class="sub">${tx('gal_legacy_head')}</div><div class="legacy">`;
     for (const k in LEGACY) {
       const L = LEGACY[k], lv = G.legacy[k] || 0, maxed = L.max && lv >= L.max, c = L.cost(lv);
-      x += `<div class="lg-row ${!maxed && G.tribute >= c ? 'can' : ''}"><span>${L.icon} <b>${L.n}</b> ${L.max === 1 ? (lv ? '<small class="good">owned</small>' : '') : `<small>Lv ${lv}${L.max ? '/' + L.max : ''}</small>`}<br><small class="dim">${L.d}</small></span>
-        <button class="btn small-btn" ${maxed || G.tribute < c ? 'disabled' : ''} onclick="buyLegacy('${k}') && (sfx('upgrade'), renderGalaxyPanel())">${maxed ? 'Max' : `${c} ⬢`}</button></div>`;
+      x += `<div class="lg-row ${!maxed && G.tribute >= c ? 'can' : ''}"><span>${L.icon} <b>${L.n}</b> ${L.max === 1 ? (lv ? `<small class="good">${tx('gal_owned')}</small>` : '') : `<small>${tx('gal_lv')} ${lv}${L.max ? '/' + L.max : ''}</small>`}<br><small class="dim">${L.d}</small></span>
+        <button class="btn small-btn" ${maxed || G.tribute < c ? 'disabled' : ''} onclick="buyLegacy('${k}') && (sfx('upgrade'), renderGalaxyPanel())">${maxed ? tx('gal_max') : `${c} ⬢`}</button></div>`;
     }
     return x + '</div>';
   };
   const spendFirst = G && legacyAffordable();
-  if (spendFirst) h += `<div class="trib-call">⬢ You have <b>${Math.floor(G.tribute)} Tribute</b> to spend. Legacy upgrades are permanent and make every system faster.</div>` + legacyHtml();
+  if (spendFirst) h += `<div class="trib-call">${tx('gal_spend_call', { n: Math.floor(G.tribute) })}</div>` + legacyHtml();
   // selected star
-  h += `<div class="sub">${g.n} <small class="dim">· system ${i + 1}</small></div>`;
-  if (g.id === cur) h += `<p class="hint">You are here.${S.gateOpen ? '' : ' Rule this system and defeat its guardian to open the gate.'}</p>`;
-  else if (done.includes(g.id)) h += `<p class="hint">Conquered. It pays you Tribute every minute.</p>`;
-  else if (g.star === 'hole') h += `<p class="hint">The supermassive black hole at the heart of the galaxy. The end of the road — and maybe a door to something beyond.</p>`;
-  else if (!SYSTEMS[g.id]) h += `<p class="hint">Uncharted. Arrives in a future update.</p>`;
+  h += `<div class="sub">${g.n} <small class="dim">· ${tx('gal_system_n', { n: i + 1 })}</small></div>`;
+  if (g.id === cur) h += `<p class="hint">${tx('gal_here')}${S.gateOpen ? '' : tx('gal_here_gate')}</p>`;
+  else if (done.includes(g.id)) h += `<p class="hint">${tx('gal_conquered')}</p>`;
+  else if (g.star === 'hole') h += `<p class="hint">${tx('gal_hole')}</p>`;
+  else if (!SYSTEMS[g.id]) h += `<p class="hint">${tx('gal_uncharted')}</p>`;
   if (nx && g.id === nx.id) {
     const jb = jumpBonus();
-    if (!SYSTEMS[nx.id]) h += `<p class="hint">The gate points here, but this system isn't charted yet — coming in a future update.</p>`;
-    else if (!S.gateOpen) h += `<p class="hint">🔒 Defeat ${sysName()}'s guardian to open the gate.</p>`;
+    if (!SYSTEMS[nx.id]) h += `<p class="hint">${tx('gal_uncharted_next')}</p>`;
+    else if (!S.gateOpen) h += `<p class="hint">${tx('gal_locked', { name: sysName() })}</p>`;
     else {
       const full = jb.b >= jb.max;
-      h += `<div class="jump-box ${full ? 'full' : ''}"><div class="jb-top"><span>Tribute if you jump now</span><b>${jb.b}<small> / ${jb.max}</small></b></div>
+      h += `<div class="jump-box ${full ? 'full' : ''}"><div class="jb-top"><span>${tx('gal_jump_now')}</span><b>${jb.b}<small> / ${jb.max}</small></b></div>
         <div class="meter gold"><i style="width:${Math.round(jb.b / jb.max * 100)}%"></i></div>
-        ${full ? '<div class="jb-note good">✔ You earned everything here.</div>' : `<div class="jb-note">⚠ <b>${jb.max - jb.b} Tribute</b> still left in ${sysName()}:</div>${jb.left.slice(0, 3).map(x => `<div class="srow"><span>${x.n}</span><b>+${x.t}</b></div>`).join('')}${jb.left.length > 3 ? `<small class="dim">…and ${jb.left.length - 3} more (select ${sysName()})</small>` : ''}`}</div>
-        <button class="btn primary big" onclick="confirmJump('${nx.id}')">🌀 Jump to ${nx.n}</button>
-        <p class="hint">Credits, ship upgrades, outposts and freighters stay behind. Tribute, Legacy and records come with you.</p>`;
+        ${full ? `<div class="jb-note good">${tx('gal_earned_all')}</div>` : `<div class="jb-note">${tx('gal_still_left', { n: jb.max - jb.b, name: sysName() })}</div>${jb.left.slice(0, 3).map(x => `<div class="srow"><span>${x.n}</span><b>+${x.t}</b></div>`).join('')}${jb.left.length > 3 ? `<small class="dim">${tx('gal_and_more', { n: jb.left.length - 3, name: sysName() })}</small>` : ''}`}</div>
+        <button class="btn primary big" onclick="confirmJump('${nx.id}')">${tx('gal_jump_btn', { name: nx.n })}</button>
+        <p class="hint">${tx('gal_stays')}</p>`;
     }
   }
   if (g.id === cur) {
     const jb = jumpBonus();
-    h += `<div class="sub">Tribute for leaving ${sysName()} <small class="dim">· ${jb.b} of ${jb.max} possible</small></div><div class="meter gold"><i style="width:${Math.round(jb.b / jb.max * 100)}%"></i></div>`;
+    h += `<div class="sub">${tx('gal_leaving', { name: sysName(), b: jb.b, max: jb.max })}</div><div class="meter gold"><i style="width:${Math.round(jb.b / jb.max * 100)}%"></i></div>`;
     if (jb.left.length) h += `<div class="trib-left">${jb.left.slice(0, 8).map(x => `<div class="srow"><span>${x.n}${x.cost ? ` <small class="dim">${fmt(x.cost)} cr</small>` : ''}</span><b>+${x.t}</b></div>`).join('')}</div>`;
   }
   // legacy shop
   if (G) { if (!spendFirst) h += legacyHtml(); }
-  else h += '<p class="hint">Legacy upgrades unlock after your first jump: spend Tribute on permanent bonuses for every system.</p>';
+  else h += `<p class="hint">${tx('gal_legacy_locked')}</p>`;
   $('galPanel').innerHTML = h;
 }
 function openGalaxy() { sfx('click'); closeSheet(true); GalaxyScene.prev = scene === GalaxyScene ? GalaxyScene.prev : scene === MineScene ? null : scene; setScene(GalaxyScene); }
 function closeGalaxy() { sfx('click'); setScene(has(U.MAP) ? MapScene : MineScene, has(U.MAP) ? undefined : S.loc); }
 function confirmJump(id) {
   const D = SYSTEMS[id];
-  showModal({ icon: '🌀', title: `Jump to ${D.n}?`, html: `<p>Everything you built in <b>${sysName()}</b> stays behind and becomes part of your empire: it pays <b>Tribute</b> every minute.</p><p>You start fresh in ${D.n}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there.</p><div class="trib-call">You'll arrive with <b>${Math.floor((S.galaxy ? S.galaxy.tribute : 0) + jumpBonus().b)} Tribute</b>. Spend it on <b>Legacy</b> as soon as you land (Galaxy button) — it's what makes each new system faster.</div>`,
-    buttons: [{ label: 'Jump!', cls: 'primary', fn: () => setTimeout(() => setScene(JumpScene, id), 30) }, { label: 'Not yet', fn: () => {} }] });
+  showModal({ icon: '🌀', title: tx('gal_confirm_title', { name: D.n }), html: tx('gal_confirm_html', { here: sysName(), name: D.n, trib: Math.floor((S.galaxy ? S.galaxy.tribute : 0) + jumpBonus().b) }),
+    buttons: [{ label: tx('gal_btn_jump'), cls: 'primary', fn: () => setTimeout(() => setScene(JumpScene, id), 30) }, { label: tx('gal_btn_notyet'), fn: () => {} }] });
 }

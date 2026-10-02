@@ -1,4 +1,5 @@
 'use strict';
+Object.assign(TXT, { art_geode: { en: 'GEODE · {name}', es: 'GEODA · {name}' } });
 // ============ PROCEDURAL ART (glowing vector style) ============
 const PAL = {
   bg0: '#03050f', bg1: '#0a1230',
@@ -1130,7 +1131,7 @@ function drawRockFx(ctx, a, t) {
     ctx.strokeStyle = col; ctx.lineWidth = 2.2;
     ctx.beginPath(); for (let i = 0; i <= 6; i++) { const an = i / 6 * TAU + t * 0.5; i ? ctx.lineTo(a.x + Math.cos(an) * pr, a.y + Math.sin(an) * pr) : ctx.moveTo(a.x + Math.cos(an) * pr, a.y + Math.sin(an) * pr); } ctx.stroke();
     ctx.fillStyle = col; ctx.font = '700 12px Rajdhani, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(`GEODE · ${ITEMS[a.geode].n}`, a.x, a.y - pr - 6);
+    ctx.fillText(tx('art_geode', { name: ITEMS[a.geode].n }), a.x, a.y - pr - 6);
     ctx.globalAlpha = 1;
   }
 }

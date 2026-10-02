@@ -23,6 +23,12 @@ function fleetThreat(fleet, z) {
   return Math.sqrt(ehp * dps) / mine;
 }
 
+Object.assign(TXT, {
+  bat_shielded: { en: 'SHIELDED — destroy the shards first!', es: 'CON ESCUDO: ¡destruye primero los fragmentos!' },
+  bat_phoenix: { en: 'THE PHOENIX RISES AGAIN!', es: '¡EL FÉNIX RENACE!' },
+  bat_hydra: { en: 'THE HYDRA SPLITS IN TWO!', es: '¡LA HIDRA SE DIVIDE EN DOS!' },
+});
+
 const Combat = {
   spawn(sc, fleet, z, fromTop) {
     const m = Z_ENEMY[z] * sysDef().enemy, md = Z_ENEMY[z] * enemyDmgMult();
@@ -66,7 +72,7 @@ const Combat = {
     e.shT = 2.2;
     if (ENEMIES[e.k].ward && sc.enemies.some(o => !o.dead && o.k === ENEMIES[e.k].summon)) {   // the Archon hides behind its shield shards
       dmg *= 0.1; e.wardFlash = 0.3;
-      if (!sc.wardHint) { sc.wardHint = 1; sc.floaters.push({ x: e.x, y: e.y - 90, txt: 'SHIELDED — destroy the shards first!', col: '#ffe080', life: 2.5, big: 1 }); }
+      if (!sc.wardHint) { sc.wardHint = 1; sc.floaters.push({ x: e.x, y: e.y - 90, txt: tx('bat_shielded'), col: '#ffe080', life: 2.5, big: 1 }); }
     }
     if (e.sp > 0) { const a = Math.min(e.sp, dmg); e.sp -= a; dmg -= a; e.shieldFlash = 0.25; }
     if (dmg > 0) { e.hp -= dmg; e.hitT = 0.08; }
@@ -74,7 +80,7 @@ const Combat = {
       e.reborn = 1; e.hp = e.max * 0.5; e.sp = e.spMax; e.shT = 0;
       sc.parts.burst(e.x, e.y, 90, '#90c8ff', 380, 1.2, 4); sc.shake = Math.max(sc.shake, 18); sfx('boom');
       for (let i = 0; i < 16; i++) { const b = i * TAU / 16; sc.bolts.push({ x: e.x, y: e.y, vx: Math.cos(b) * 380, vy: Math.sin(b) * 380, life: 2.2, dmg: e.dmg, foe: 1, col: '#90c8ff' }); }
-      sc.floaters.push({ x: e.x, y: e.y - 90, txt: 'THE PHOENIX RISES AGAIN!', col: '#90c8ff', life: 2.5, big: 1 });
+      sc.floaters.push({ x: e.x, y: e.y - 90, txt: tx('bat_phoenix'), col: '#90c8ff', life: 2.5, big: 1 });
       return;
     }
     if (e.hp <= 0 && !e.dead) this.kill(sc, e);
@@ -90,7 +96,8 @@ const Combat = {
       const m = e.max / KE.hp, H = ENEMIES[KE.split];
       for (const side of [-1, 1]) sc.enemies.push({ k: KE.split, x: e.x + side * 60, y: e.y, vx: side * 200, vy: 0, a: 0, hp: H.hp * m, max: H.hp * m, sp: H.sp * m, spMax: H.sp * m, dmg: H.dmg * e.dmg / KE.dmg,
         rate: H.rate, spd: H.spd, size: H.size, cd: rand(0.8, 1.6), burstLeft: 0, burstT: 0, strafe: side, prefer: rand(200, 300), shT: 0, hitT: 0, loot: H.loot * Z_LOOT[sc.combatZ || 0] });
-      sc.floaters.push({ x: e.x, y: e.y - 80, txt: 'THE HYDRA SPLITS IN TWO!', col: '#ff9ad8', life: 2.5, big: 1 });
+      sc.floaters.push({ x: e.x, y: e.y - 80, txt: tx('bat_hydra'),
+ col: '#ff9ad8', life: 2.5, big: 1 });
       sc.parts.burst(e.x, e.y, 80, '#ff9ad8', 300, 1.2, 4);
     } else if (KE.boss && sc.loc) {
       sc.shake = 24; sc.parts.burst(e.x, e.y, 120, KE.alien ? '#9ffcff' : '#ffd24a', 420, 1.6, 5);

@@ -144,7 +144,7 @@ const MapScene = {
   },
   startTravel(to) {
     const info = travelInfo(to);
-    if (info.fuel > S.fuel) { toast('Not enough fuel', 'bad'); sfx('full'); return; }
+    if (info.fuel > S.fuel) { toast(tx('map_no_fuel'), 'bad'); sfx('full'); return; }
     if (S.loc === to) return;
     S.fuel -= info.fuel;
     const dur = built('gates') ? 1.1 : clamp(1.2 + info.days * 0.3, 1.6, 6);
@@ -160,7 +160,7 @@ const MapScene = {
     showMapUI(false); hideLocPanel();
     const tb = $('travelBanner');
     tb.classList.remove('hidden');
-    tb.innerHTML = `Flying to <b>${LOC[to].n}</b> · ${info.days} day${info.days > 1 ? 's' : ''}`;
+    tb.innerHTML = tx('map_flying_to', { name: LOC[to].n, n: info.days, days: tx(info.days > 1 ? 'map_days' : 'map_day') });
     const p = locPos(S.loc, S.day), q = locPos(to, S.day);
     const span = Math.max(Math.abs(p.x - q.x), Math.abs(p.y - q.y)) / 2 + 110;
     this.camT = null;
@@ -174,7 +174,7 @@ const MapScene = {
     if (tr.storm) {
       const dmg = Math.max(0, randi(8, 20) - ship.shieldMax * 0.15);
       S.hull = Math.max(1, S.hull - dmg);
-      if (dmg) toast(`The solar storm damaged your hull (−${Math.round(dmg)})`, 'bad');
+      if (dmg) toast(tx('map_storm_dmg', { n: Math.round(dmg) }), 'bad');
     }
     save();
     this.focus(S.loc);
@@ -323,7 +323,7 @@ const MapScene = {
         for (let i = 0; i < 4; i++) { const a0 = i * TAU / 4 + t * 0.8; ctx.beginPath(); ctx.arc(p.x, p.y, rr, a0, a0 + 0.9); ctx.stroke(); }
       }
       // label pill
-      const label = open ? l.n.toUpperCase() : '     ' + (l.secret && !S.signal ? 'UNKNOWN SIGNAL' : l.n.toUpperCase());
+      const label = open ? l.n.toUpperCase() : '     ' + (l.secret && !S.signal ? tx('map_unknown_signal') : l.n.toUpperCase());
       ctx.font = `700 ${isSel ? 12 : 11}px Rajdhani, sans-serif`;
       const tw = ctx.measureText(label).width + 14, ly = p.y + r + 14;
       ctx.globalAlpha = open ? 1 : 0.55;
@@ -512,50 +512,50 @@ function runEncounter(enc, done) {
   const k = pick(opts);
   const trap = has(U.BELT);
   if (k === 'derelict') {
-    showModal({ icon: '🛰️', title: 'Drifting wreck', html: 'Your sensors spot an abandoned freighter. It might have cargo on board…' + (trap ? ' or it might be bait.' : ''),
+    showModal({ icon: '🛰️', title: tx('map_wreck_title'), html: tx('map_wreck_html') + (trap ? tx('map_wreck_bait') : ''),
       buttons: [
-        { label: 'Salvage it', cls: 'primary', fn: () => {
-          if (trap && Math.random() < 0.22 - ship.avoid * 0.3) { toast('It was a trap!', 'bad'); sfx('alarm'); return pirateEncounter(enc.danger + 0.1, done); }
+        { label: tx('map_salvage'), cls: 'primary', fn: () => {
+          if (trap && Math.random() < 0.22 - ship.avoid * 0.3) { toast(tx('map_trap'), 'bad'); sfx('alarm'); return pirateEncounter(enc.danger + 0.1, done); }
           const pool = has(U.TRADE) ? ITEM_KEYS : ORES.slice(0, 5);
           const it = pick(pool); const n = Math.min(cargoFree(), randi(3, 6 + S.lv.hull * 3));
-          if (n > 0) { addCargo(it, n); toast(`+${n} ${ITEMS[it].n}`, 'good'); sfx('pickup'); } else toast('Cargo hold full — nothing to take', 'bad');
+          if (n > 0) { addCargo(it, n); toast(`+${n} ${ITEMS[it].n}`, 'good'); sfx('pickup'); } else toast(tx('map_hold_full'), 'bad');
           done();
         } },
-        { label: 'Ignore', fn: done },
+        { label: tx('map_ignore'), fn: done },
       ] });
   } else if (k === 'distress') {
     const fac = pick(['tierra', 'marte', 'cinturon', 'exterior']);
-    showModal({ icon: '🆘', title: 'Distress signal', html: `A <b style="color:${FACTIONS[fac].c}">${FACTIONS[fac].n}</b> ship's life support is failing. Helping costs 5 fuel.`,
+    showModal({ icon: '🆘', title: tx('map_distress_title'), html: tx('map_distress_html', { col: FACTIONS[fac].c, fac: FACTIONS[fac].n }),
       buttons: [
-        { label: 'Help (−5 ⛽)', cls: 'primary', disabled: S.fuel < 5, fn: () => {
+        { label: tx('map_help'), cls: 'primary', disabled: S.fuel < 5, fn: () => {
           S.fuel -= 5;
-          if (Math.random() < 0.18) { toast('Pirate ambush!', 'bad'); sfx('alarm'); return pirateEncounter(enc.danger + 0.15, done); }
+          if (Math.random() < 0.18) { toast(tx('map_ambush_toast'), 'bad'); sfx('alarm'); return pirateEncounter(enc.danger + 0.15, done); }
           const cr = randi(150, 400) + S.day * 4; repChange(fac, 6); earn(cr);
-          toast(`They pay you ${fmt(cr)} cr for the rescue`, 'good'); sfx('cash'); done();
+          toast(tx('map_rescue_paid', { n: fmt(cr) }), 'good'); sfx('cash'); done();
         } },
-        { label: 'Ignore', fn: () => { repChange(fac, -1, true); done(); } },
+        { label: tx('map_ignore'), fn: () => { repChange(fac, -1, true); done(); } },
       ] });
   } else if (k === 'trader') {
     const items = Object.keys(S.cargo);
     if (!items.length) return done();
     const it = pick(items); const n = S.cargo[it]; const price = Math.round(ITEMS[it].b * rand(1.15, 1.45));
-    showModal({ icon: '🧑‍🚀', title: 'Wandering trader', html: `An independent trader offers to buy your <b>${n} ${ITEMS[it].n}</b> for <b>${price} cr</b> each.`,
+    showModal({ icon: '🧑‍🚀', title: tx('map_trader_title'), html: tx('map_trader_html', { n, item: ITEMS[it].n, price }),
       buttons: [
-        { label: `Sell (${fmt(n * price)} cr)`, cls: 'primary', fn: () => { addCargo(it, -n); earn(n * price); sfx('cash'); done(); } },
-        { label: 'No thanks', fn: done },
+        { label: tx('map_sell', { n: fmt(n * price) }), cls: 'primary', fn: () => { addCargo(it, -n); earn(n * price); sfx('cash'); done(); } },
+        { label: tx('map_no_thanks'), fn: done },
       ] });
   } else if (k === 'meteor') {
     const dmg = Math.max(0, randi(4, 12) - ship.shieldMax * 0.2);
     S.hull = Math.max(1, S.hull - dmg);
-    showModal({ icon: '☄️', title: 'Micrometeor shower', html: dmg > 0 ? `You fly through a dust cloud. Your hull takes <b>${Math.round(dmg)}</b> damage.` : 'Your shields deflect every impact. Not a scratch!',
-      buttons: [{ label: 'Continue', cls: 'primary', fn: done }] });
+    showModal({ icon: '☄️', title: tx('map_meteor_title'), html: dmg > 0 ? tx('map_meteor_hit', { n: Math.round(dmg) }) : tx('map_meteor_ok'),
+      buttons: [{ label: tx('map_continue'), cls: 'primary', fn: done }] });
     sfx('hit');
   } else {
     const n = Math.min(cargoFree(), randi(6, 14));
-    showModal({ icon: '☄️', title: 'Comet on your path', html: `A small comet crosses your route. You can harvest <b>${n} Ice</b> for free.`,
+    showModal({ icon: '☄️', title: tx('map_comet_title'), html: tx('map_comet_html', { n, item: ITEMS.ice.n }),
       buttons: [
-        { label: 'Harvest ice', cls: 'primary', disabled: n <= 0, fn: () => { addCargo('ice', n); toast(`+${n} Ice`, 'good'); sfx('pickup'); done(); } },
-        { label: 'Keep flying', fn: done },
+        { label: tx('map_harvest_ice'), cls: 'primary', disabled: n <= 0, fn: () => { addCargo('ice', n); toast(`+${n} ${ITEMS.ice.n}`, 'good'); sfx('pickup'); done(); } },
+        { label: tx('map_keep_flying'), fn: done },
       ] });
   }
 }
@@ -576,20 +576,20 @@ function pirateEncounter(danger, done) {
   const friendly = S.rep.piratas >= 35;
   const flee = clamp(0.25 + S.lv.engine * 0.03 - fleet.length * 0.04, 0.1, 0.85);
   const threat = fleetThreat(fleet, z);
-  const tl = threat < 0.6 ? ['Low', '#6dffb0', 'Easy pickings — and nice loot.'] : threat < 1.2 ? ['Medium', '#ffc857', 'A fair fight. Keep moving!'] : threat < 2 ? ['High', '#ff934a', 'Dangerous. Upgrade guns & shields.'] : ['Extreme', '#ff4d6d', 'Run or pay!'];
+  const tl = threat < 0.6 ? [tx('map_thr_low'), '#6dffb0', tx('map_thr_low_d')] : threat < 1.2 ? [tx('map_thr_med'), '#ffc857', tx('map_thr_med_d')] : threat < 2 ? [tx('map_thr_high'), '#ff934a', tx('map_thr_high_d')] : [tx('map_thr_ext'), '#ff4d6d', tx('map_thr_ext_d')];
   sfx('alarm');
   const btns = [];
-  if (friendly) btns.push({ label: 'Hail the Syndicate', cls: 'primary', fn: () => { toast('They recognize you and let you pass', 'good'); done(); } });
-  btns.push({ label: '⚔ Fight!', cls: friendly ? '' : 'danger', fn: () => startBattle(fleet, false, done) });
-  btns.push({ label: `Run (${Math.round(flee * 100)}%)`, fn: () => {
-    if (Math.random() < flee) { toast('You escaped!', 'good'); sfx('warp'); done(); }
-    else { toast('Escape failed — they caught you!', 'bad'); startBattle(fleet, true, done); }
+  if (friendly) btns.push({ label: tx('map_hail'), cls: 'primary', fn: () => { toast(tx('map_let_pass'), 'good'); done(); } });
+  btns.push({ label: tx('map_fight'), cls: friendly ? '' : 'danger', fn: () => startBattle(fleet, false, done) });
+  btns.push({ label: tx('map_run', { n: Math.round(flee * 100) }), fn: () => {
+    if (Math.random() < flee) { toast(tx('map_escaped'), 'good'); sfx('warp'); done(); }
+    else { toast(tx('map_escape_fail'), 'bad'); startBattle(fleet, true, done); }
   } });
-  btns.push({ label: `Pay them off (${fmt(bribe)} cr)`, disabled: S.credits < bribe, fn: () => { S.credits -= bribe; repChange('piratas', 2, true); toast('The pirates take your money', 'good'); done(); } });
-  showModal({ icon: '☠️', title: 'Pirate ambush!', danger: true,
+  btns.push({ label: tx('map_pay_off', { n: fmt(bribe) }), disabled: S.credits < bribe, fn: () => { S.credits -= bribe; repChange('piratas', 2, true); toast(tx('map_paid'), 'good'); done(); } });
+  showModal({ icon: '☠️', title: tx('map_ambush_title'), danger: true,
     html: `<div class="fleet">${fleet.map(k => `<span class="chip bad">${ENEMIES[k].n}</span>`).join('')}</div>
-    <div class="threat">Threat: <b style="color:${tl[1]}">${tl[0]}</b> — ${tl[2]}</div>
-    <small>You fly and shoot: <b>hold the mouse</b> (or FIRE) to fire your guns. Destroyed ships drop credits.</small>`,
+    <div class="threat">${tx('map_threat')}: <b style="color:${tl[1]}">${tl[0]}</b> — ${tl[2]}</div>
+    <small>${tx(isTouch ? 'map_how_fight_touch' : 'map_how_fight')}</small>`,
     buttons: btns });
 }
 
@@ -598,12 +598,13 @@ function patrolEncounter(war, done) {
   const arms = S.cargo.arms || 0;
   sfx('alarm');
   if (!arms || S.rep[fac] >= 25) {
-    showModal({ icon: '🛡️', title: 'Military patrol', html: `A <b style="color:${FACTIONS[fac].c}">${FACTIONS[fac].n}</b> patrol scans your ship and waves you through.`, buttons: [{ label: 'Continue', cls: 'primary', fn: done }] });
+    showModal({ icon: '🛡️', title: tx('map_patrol_title'), html: tx('map_patrol_pass', { col: FACTIONS[fac].c, fac: FACTIONS[fac].n }), buttons: [{ label: tx('map_continue'), cls: 'primary', fn: done }] });
     return;
   }
-  showModal({ icon: '🛡️', title: 'Military patrol', danger: true, html: `The <b style="color:${FACTIONS[fac].c}">${FACTIONS[fac].n}</b> finds <b>${arms} Weapons</b> in your hold and demands you hand them over.`,
+  showModal({ icon: '🛡️', title: tx('map_patrol_title'), danger: true, html: tx('map_patrol_arms', { col: FACTIONS[fac].c, fac: FACTIONS[fac].n, n: arms, item: ITEMS.arms.n }),
     buttons: [
-      { label: 'Hand them over', cls: 'primary', fn: () => { addCargo('arms', -arms); toast('Weapons confiscated', 'bad'); done(); } },
-      { label: '⚔ Resist', cls: 'danger', fn: () => { repChange(fac, -12); startBattle(['patrol', 'patrol'], false, done); } },
+      { label: tx('map_hand_over'), cls: 'primary', fn: () => { addCargo('arms', -arms); toast(tx('map_confiscated'), 'bad'); done(); } },
+      { label: tx('map_resist'),
+ cls: 'danger', fn: () => { repChange(fac, -12); startBattle(['patrol', 'patrol'], false, done); } },
     ] });
 }

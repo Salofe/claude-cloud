@@ -15,32 +15,32 @@
 <div id="title" class="ui hidden">
   <div class="tbox">
     <h1><span>SOLAR</span>PROSPECTOR</h1>
-    <p class="tag">Mine · Upgrade · Cross the Galaxy</p>
+    <p class="tag" data-tx="main_tag">Mine · Upgrade · Cross the Galaxy</p>
     <div class="tbtns">
       <button id="cont" class="btn primary big hidden">▶ Continue</button>
-      <button id="newg" class="btn primary big">▶ PLAY</button>
-      <button id="howto" class="btn big">How to play</button>
+      <button id="newg" class="btn primary big" data-tx="main_play">▶ PLAY</button>
+      <button id="howto" class="btn big" data-tx="main_howto">How to play</button>
     </div>
-    <p class="foot">Mouse & keyboard or touch · Saves automatically</p>
+    <p class="foot" data-tx="main_foot">Mouse & keyboard or touch · Saves automatically</p>
   </div>
 </div>
 
 <div id="hud" class="hidden">
   <div class="topbar ui">
-    <div class="stat cr"><span class="lbl">Credits <small id="hRate" class="rate"></small></span><b id="hCr"></b></div>
-    <div class="stat day" data-need="1"><span class="lbl">Day</span><b id="hDay"></b><div class="meter dayclock"><i id="hDayT"></i></div></div>
-    <div class="stat bar"><span class="lbl"><em class="lg">Cargo</em><em class="sh">📦</em> <small id="hCargoT"></small></span><div class="meter cargo"><i id="hCargo"></i></div></div>
-    <div class="stat bar"><span class="lbl"><em class="lg">Hull</em><em class="sh">⬢</em> <small id="hHullT"></small></span><div class="meter hp"><i id="hHull"></i></div></div>
-    <div class="stat bar" data-need="1"><span class="lbl"><em class="lg">Fuel</em><em class="sh">⛽</em> <small id="hFuelT"></small></span><div class="meter fuel"><i id="hFuel"></i></div></div>
-    <div class="stat infl" data-need="6"><span class="lbl">Influence · <small id="hRank"></small></span><b id="hInfl"></b></div>
+    <div class="stat cr"><span class="lbl"><em data-tx="main_credits">Credits</em> <small id="hRate" class="rate"></small></span><b id="hCr"></b></div>
+    <div class="stat day" data-need="1"><span class="lbl" data-tx="main_day">Day</span><b id="hDay"></b><div class="meter dayclock"><i id="hDayT"></i></div></div>
+    <div class="stat bar"><span class="lbl"><em class="lg" data-tx="main_cargo">Cargo</em><em class="sh">📦</em> <small id="hCargoT"></small></span><div class="meter cargo"><i id="hCargo"></i></div></div>
+    <div class="stat bar"><span class="lbl"><em class="lg" data-tx="main_hull">Hull</em><em class="sh">⬢</em> <small id="hHullT"></small></span><div class="meter hp"><i id="hHull"></i></div></div>
+    <div class="stat bar" data-need="1"><span class="lbl"><em class="lg" data-tx="main_fuel">Fuel</em><em class="sh">⛽</em> <small id="hFuelT"></small></span><div class="meter fuel"><i id="hFuel"></i></div></div>
+    <div class="stat infl" data-need="6"><span class="lbl"><em data-tx="main_influence">Influence</em> · <small id="hRank"></small></span><b id="hInfl"></b></div>
     <div class="tbtns">
-      <button id="bShip" title="Ship">🚀<span>Ship</span></button>
-      <button id="bNews" title="News" data-need="4">📰<span>News</span></button>
-      <button id="bFac" title="Empire" data-need="1">🤖<span>Empire</span></button>
-      <button id="bProj" title="Megaprojects" data-need="2">🌌<span>Projects</span></button>
-      <button id="bGal" title="Galaxy" class="hidden">🌀<span>Galaxy</span></button>
-      <button id="bSnd" title="Sound">🔊</button>
-      <button id="bMenu" title="Menu">☰</button>
+      <button id="bShip" title="Ship" data-tx-title="main_ship">🚀<span data-tx="main_ship">Ship</span></button>
+      <button id="bNews" title="News" data-need="4" data-tx-title="main_news">📰<span data-tx="main_news">News</span></button>
+      <button id="bFac" title="Empire" data-need="1" data-tx-title="main_empire">🤖<span data-tx="main_empire">Empire</span></button>
+      <button id="bProj" title="Megaprojects" data-need="2" data-tx-title="main_megaprojects">🌌<span data-tx="main_projects">Projects</span></button>
+      <button id="bGal" title="Galaxy" class="hidden" data-tx-title="main_galaxy">🌀<span data-tx="main_galaxy">Galaxy</span></button>
+      <button id="bSnd" title="Sound" data-tx-title="main_sound">🔊</button>
+      <button id="bMenu" title="Menu" data-tx-title="main_menu">☰</button>
     </div>
   </div>
   <div id="objective" class="ui"></div>
@@ -49,7 +49,7 @@
 </div>
 
 <div id="mapTools" class="ui hidden">
-  <button id="zIn">＋</button><button id="zOut">－</button><button id="zHome" title="My ship">◎</button><button id="zAll" title="Whole system">✺</button>
+  <button id="zIn">＋</button><button id="zOut">－</button><button id="zHome" title="My ship" data-tx-title="main_myship">◎</button><button id="zAll" title="Whole system" data-tx-title="main_wholesys">✺</button>
 </div>
 <div id="locPanel" class="ui panel hidden"></div>
 <div id="galPanel" class="ui panel hidden"></div>
@@ -66,18 +66,18 @@
 <div id="touchUI" class="hidden">
   <div id="joyZone"></div>
   <div id="joyBase"><div id="joyKnob"></div></div>
-  <div id="fireBtn">FIRE</div>
-  <div id="toolBtn" class="tbtn hidden">DRILL</div>
-  <div id="pullBtn" class="tbtn hidden">PULL</div>
-  <div id="boostBtn" class="tbtn hidden">BOOST</div>
-  <div id="bombBtn" class="tbtn hidden">BOMB</div>
-  <div id="scanBtn" class="tbtn hidden">SCAN</div>
-  <div id="phaseBtn" class="tbtn hidden">PHASE</div>
+  <div id="fireBtn" data-tx="main_t_fire">FIRE</div>
+  <div id="toolBtn" class="tbtn hidden" data-tx="main_t_drill">DRILL</div>
+  <div id="pullBtn" class="tbtn hidden" data-tx="main_t_pull">PULL</div>
+  <div id="boostBtn" class="tbtn hidden" data-tx="main_t_boost">BOOST</div>
+  <div id="bombBtn" class="tbtn hidden" data-tx="main_t_bomb">BOMB</div>
+  <div id="scanBtn" class="tbtn hidden" data-tx="main_t_scan">SCAN</div>
+  <div id="phaseBtn" class="tbtn hidden" data-tx="main_t_phase">PHASE</div>
 </div>
 
 <div id="battleUI" class="ui hidden">
-  <div class="bt-title" id="btTitle">⚔ PIRATES</div>
-  <div class="bt-btns"><button id="btnWarp" class="btn">⚡ Warp out</button><button id="btnContinue" class="btn primary hidden">Continue ▶</button></div>
+  <div class="bt-title" id="btTitle" data-tx="main_bt_pirates">⚔ PIRATES</div>
+  <div class="bt-btns"><button id="btnWarp" class="btn" data-tx="main_bt_warp">⚡ Warp out</button><button id="btnContinue" class="btn primary hidden" data-tx="main_bt_continue">Continue ▶</button></div>
 </div>
 
 <div id="sheet" class="sheet ui hidden"></div>

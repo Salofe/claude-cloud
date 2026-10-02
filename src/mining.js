@@ -6,7 +6,76 @@ const MW = 1800, MH = 3400, DOCK_Y = MH - 240;
 const Z_HP = [1, 3.5, 6, 11, 16, 38];   // each new zone is tougher, but its ore is worth even more
 const mineScale = () => 1.35 - (S.lv.hull - 1) * 0.08;
 const shipR = () => shipLen(S.lv) * mineScale();
-const SPACE = { id: 'space', n: 'Deep Space', col: ['#6a7fb0', '#1b2340'], field: { n: 'Deep Space', z: 2, ores: { iron: 3, nickel: 1 }, count: 10 } };
+Object.assign(TXT, {
+  mine_deep_space: { en: 'Deep Space', es: 'Espacio profundo' },
+  mine_overdrive: { en: '⚡ OVERDRIVE!', es: '⚡ ¡SOBREMARCHA!' },
+  mine_scan_some: { en: '◈ Deep Scan: {n} geodes nearby!', es: '◈ Escáner profundo: ¡{n} geodas cerca!' },
+  mine_scan_one: { en: '◈ Deep Scan: 1 geode nearby!', es: '◈ Escáner profundo: ¡1 geoda cerca!' },
+  mine_scan_none: { en: '◈ Deep Scan: no geodes nearby', es: '◈ Escáner profundo: no hay geodas cerca' },
+  mine_tool_drill: { en: '⛏ Drill: 3× power, short range — cracks armored rocks', es: '⛏ Taladro: 3× potencia, corto alcance; rompe rocas blindadas' },
+  mine_tool_laser: { en: '✦ Laser: long range', es: '✦ Láser: largo alcance' },
+  mine_calmed_one: { en: '1 living rock calmed', es: '1 roca viva calmada' },
+  mine_calmed_some: { en: '{n} living rocks calmed', es: '{n} rocas vivas calmadas' },
+  mine_comet_toast: { en: '☄ A comet is crossing the field — break it before it escapes!', es: '☄ Un cometa cruza el campo: ¡rómpelo antes de que escape!' },
+  mine_comet_fl: { en: 'COMET! {n} {item}', es: '¡COMETA! {n} {item}' },
+  mine_jackpot: { en: 'JACKPOT!', es: '¡PREMIO GORDO!' },
+  mine_geode_fl: { en: 'GEODE! {n} {item}', es: '¡GEODA! {n} {item}' },
+  mine_relic_gold: { en: 'GOLDEN TOUCH: ×2 ore', es: 'TOQUE DORADO: ×2 mineral' },
+  mine_relic_lens: { en: 'GRAVITY LENS: giant magnet', es: 'LENTE GRAVITATORIA: imán gigante' },
+  mine_relic_beam: { en: 'ANCIENT BEAM: ×2 laser', es: 'RAYO ANTIGUO: ×2 láser' },
+  mine_relic_recharge: { en: 'RECHARGE: all tools ready!', es: 'RECARGA: ¡herramientas listas!' },
+  mine_horizon: { en: 'Too close to the event horizon! Fly down!', es: '¡Muy cerca del horizonte de eventos! ¡Baja!' },
+  mine_alive_pulse: { en: 'IT\'S ALIVE! It flees — calm it with the Tractor Pulse ({k})', es: '¡ESTÁ VIVA! Huye: cálmala con el Pulso tractor ({k})' },
+  mine_alive_chase: { en: 'IT\'S ALIVE! It flees — chase it!', es: '¡ESTÁ VIVA! Huye: ¡persíguela!' },
+  mine_armored_drill: { en: 'ARMORED — switch to the Drill ({k})', es: 'BLINDADA: cambia al Taladro ({k})' },
+  mine_armored_laser: { en: 'ARMORED — your laser barely scratches it', es: 'BLINDADA: tu láser apenas la raya' },
+  mine_black_hole: { en: 'A rock fell into the black hole — mine them before they drift up!', es: 'Una roca cayó al agujero negro: ¡mínalas antes de que suban!' },
+  mine_comet_escaped: { en: 'The comet escaped…', es: 'El cometa escapó…' },
+  mine_pulsar_phase: { en: '⚡ Pulsar beam incoming — Phase ({k}) to ride it!', es: '⚡ ¡Viene el rayo del púlsar! Usa Fase ({k}) para atravesarlo' },
+  mine_pulsar: { en: '⚡ Pulsar beam incoming!', es: '⚡ ¡Viene el rayo del púlsar!' },
+  mine_betel_warn: { en: '☀ Betelgeuse is about to pulse — get ready to mine!', es: '☀ Betelgeuse está por pulsar: ¡prepárate para minar!' },
+  mine_molten: { en: 'MOLTEN! 2× laser · +50% ore', es: '¡FUNDIDAS! 2× láser · +50% mineral' },
+  mine_warped: { en: 'Warped out!', es: '¡Saltaste fuera!' },
+  mine_warn_final: { en: '📡 Something huge is moving toward you…', es: '📡 Algo enorme se acerca a ti…' },
+  mine_warn_warlord: { en: '☠ The warlord\'s flagship is coming!', es: '☠ ¡Viene la nave insignia del caudillo!' },
+  mine_warn_pirates: { en: '⚠ Pirates incoming!', es: '⚠ ¡Se acercan piratas!' },
+  mine_pirates_leave: { en: 'Pirates recognize your ship and leave you alone', es: 'Los piratas reconocen tu nave y te dejan en paz' },
+  // coach hints
+  mine_c_guns_touch_pir: { en: 'Hold <b>FIRE</b> to shoot the pirates!', es: '¡Mantén <b>DISPARAR</b> para dispararles a los piratas!' },
+  mine_c_guns_touch_host: { en: 'Hold <b>FIRE</b> to shoot the hostiles!', es: '¡Mantén <b>DISPARAR</b> para dispararles a los enemigos!' },
+  mine_c_guns_pir: { en: 'Pirates! <b>Hold the mouse</b> to shoot your guns', es: '¡Piratas! <b>Mantén presionado el mouse</b> para disparar tus cañones' },
+  mine_c_guns_host: { en: 'Hostiles! <b>Hold the mouse</b> to shoot your guns', es: '¡Enemigos! <b>Mantén presionado el mouse</b> para disparar tus cañones' },
+  mine_c_boss_final: { en: '☠ The {name} arrives in <b>{n} s</b> — get ready, or fly <b>down</b> to escape', es: '☠ {name} llega en <b>{n} s</b>: prepárate, o vuela hacia <b>abajo</b> para escapar' },
+  mine_c_boss_warlord: { en: '☠ The warlord\'s flagship arrives in <b>{n} s</b> — get ready, or fly <b>down</b> to escape', es: '☠ La nave insignia del caudillo llega en <b>{n} s</b>: prepárate, o vuela hacia <b>abajo</b> para escapar' },
+  mine_c_move_touch: { en: 'Drag anywhere on the left side to fly', es: 'Arrastra en cualquier parte del lado izquierdo para volar' },
+  mine_c_move: { en: 'Fly with <b>WASD</b> or the <b>arrow keys</b>', es: 'Vuela con <b>WASD</b> o las <b>flechas</b>' },
+  mine_c_laser_touch: { en: 'Hold <b>LASER</b> — it aims at the nearest rock', es: 'Mantén <b>LÁSER</b>: apunta a la roca más cercana' },
+  mine_c_laser: { en: 'Hold the <b>mouse button</b> to fire your mining laser at a rock', es: 'Mantén presionado el <b>botón del mouse</b> para disparar tu láser minero a una roca' },
+  mine_c_scoop: { en: 'Fly close to the glowing crystals to scoop them up', es: 'Acércate a los cristales brillantes para recogerlos' },
+  mine_c_full: { en: '📦 Cargo full! Fly back <b>down</b> to the station ⬇', es: '📦 ¡Bodega llena! Vuelve <b>abajo</b> a la estación ⬇' },
+  mine_c_deep: { en: 'Tip: rocks get <b>richer</b> the farther up you fly ⬆', es: 'Consejo: las rocas son más <b>ricas</b> cuanto más arriba vuelas ⬆' },
+  // defeat / victory
+  mine_shot_down: { en: 'Your ship was shot down.', es: 'Derribaron tu nave.' },
+  mine_hull_collapsed: { en: 'Your hull collapsed.', es: 'Tu casco colapsó.' },
+  mine_victory: { en: '☠ Pirates destroyed! Grab the loot.', es: '☠ ¡Piratas destruidos! Recoge el botín.' },
+  mine_news_victory: { en: 'Pirate fleet destroyed', es: 'Flota pirata destruida' },
+  mine_raiders_cleared: { en: 'raiders cleared', es: 'asaltantes eliminados' },
+  mine_news_mined: { en: 'Mined at {name}: {list}', es: 'Minado en {name}: {list}' },
+  // canvas labels
+  mine_station_dist: { en: '▼ STATION {n} m ▼', es: '▼ ESTACIÓN {n} m ▼' },
+  mine_dock: { en: '▼ DOCK ▼', es: '▼ MUELLE ▼' },
+  mine_outpost_lv: { en: 'OUTPOST LV{n}', es: 'PUESTO NV{n}' },
+  mine_boss_final: { en: '{name} · guardian of {sys}', es: '{name} · guardián de {sys}' },
+  mine_boss_warlord: { en: 'PIRATE WARLORD · prize {n} cr', es: 'CAUDILLO PIRATA · premio {n} cr' },
+  // towed
+  mine_towed_title: { en: 'Towed to safety', es: 'Remolcado a salvo' },
+  mine_towed_html: { en: '{reason}<br>A tug brings you to <b>{station}</b>. You lost part of your cargo{fee}.', es: '{reason}<br>Un remolcador te lleva a <b>{station}</b>. Perdiste parte de tu carga{fee}.' },
+  mine_towed_fee: { en: ' and paid a <b>{n} cr</b> rescue fee', es: ' y pagaste <b>{n} cr</b> por el rescate' },
+  mine_continue: { en: 'Continue', es: 'Continuar' },
+});
+// key hint for tool tips: the key on desktop, the touch button's label on phones
+const mineKey = (key, en, es) => (isTouch ? L(en, es) : key);
+const SPACE = { id: 'space', n: tx('mine_deep_space'), col: ['#6a7fb0', '#1b2340'], field: { n: tx('mine_deep_space'), z: 2, ores: { iron: 3, nickel: 1 }, count: 10 } };
 
 const MineScene = {
   t: 0, loc: null, rocks: [], chunks: [], drones: [], odrones: [], enemies: [], bolts: [], parts: new Particles(), cam: { x: 0, y: 0 }, shake: 0,
@@ -98,7 +167,7 @@ const MineScene = {
   // Overdrive (Vega): 8 s of triple cutting power and a faster ship
   boost() {
     if (!hasTool('overdrive') || this.space || this.boostCd > 0) return;
-    this.boostT = 8; this.boostCd = 45; sfx('upgrade'); toast('⚡ OVERDRIVE!', 'good');
+    this.boostT = 8; this.boostCd = 45; sfx('upgrade'); toast(tx('mine_overdrive'), 'good');
   },
   // Mining charge (Altair): drop it, it blows 1.2 s later
   bomb() {
@@ -113,7 +182,7 @@ const MineScene = {
     let n = 0;
     for (const r of this.rocks) { const d = Math.hypot(r.x - this.p.x, r.y - this.p.y); if (d < 1800) { r.seen = 14; r.seenD = d / 2000; if (r.geode) n++; } }
     tone(300, 0.6, 'sine', 0.08, 1500); tone(1500, 0.5, 'sine', 0.04, null, 0.55);
-    toast(n ? `◈ Deep Scan: ${n} geode${n > 1 ? 's' : ''} nearby!` : '◈ Deep Scan: no geodes nearby', n ? 'good' : '');
+    toast(tx(n > 1 ? 'mine_scan_some' : n ? 'mine_scan_one' : 'mine_scan_none', { n }), n ? 'good' : '');
   },
   // Phase Shift (the Pulsar): 3 s as a ghost — no damage, and you fly through rocks
   phase() {
@@ -126,7 +195,7 @@ const MineScene = {
   toggleTool() {
     if (!hasTool('drill') || this.space) return;
     this.tool = this.tool === 'drill' ? 'laser' : 'drill'; sfx('click');
-    toast(this.tool === 'drill' ? '⛏ Drill: 3× power, short range — cracks armored rocks' : '✦ Laser: long range', 'good');
+    toast(tx(this.tool === 'drill' ? 'mine_tool_drill' : 'mine_tool_laser'), 'good');
   },
   // Tractor Pulse: pull every ore chunk in a wide radius
   pulse() {
@@ -136,7 +205,7 @@ const MineScene = {
     // living rocks are soothed by the pulse: they stop and drift toward you for a few seconds
     let calmed = 0;
     for (const r of this.rocks) if (r.living && Math.hypot(r.x - this.p.x, r.y - this.p.y) < this.pullRadius()) { r.calm = 6; r.flee = 0; calmed++; }
-    if (calmed) this.floaters.push({ x: this.p.x, y: this.p.y - 40, txt: `${calmed} living rock${calmed > 1 ? 's' : ''} calmed`, col: '#9fffe0', life: 1.6 });
+    if (calmed) this.floaters.push({ x: this.p.x, y: this.p.y - 40, txt: tx(calmed > 1 ? 'mine_calmed_some' : 'mine_calmed_one', { n: calmed }), col: '#9fffe0', life: 1.6 });
   },
   spawnComet() {
     const ores = Object.keys(this.loc.field.ores), best = ores.sort((a, b) => ITEMS[b].b - ITEMS[a].b)[0];
@@ -144,7 +213,7 @@ const MineScene = {
     const c = this.spawnRock(dir > 0 ? -40 : MW + 40, clamp(p.y + rand(-450, 250), 300, DOCK_Y - 500), 2, 'ice');
     Object.assign(c, { comet: 1, core: best, vx: dir * rand(150, 200), vy: rand(-25, 25), vr: rand(1.5, 3) * dir, rich: false, gold: false, cold: 1 });
     c.hp = c.maxhp = c.r * 0.7 * ITEMS[best].h * Z_HP[this.z] * sysDef().rock * 1.3; c.crystal = false;
-    toast('☄ A comet is crossing the field — break it before it escapes!', 'good'); sfx('event');
+    toast(tx('mine_comet_toast'), 'good'); sfx('event');
   },
   breakComet(r) {
     this.parts.burst(r.x, r.y, 60, '#bff6ff', 260, 1.1, 3);
@@ -153,7 +222,7 @@ const MineScene = {
     const n = Math.round(6 * ship.yieldMult * (built('herding') ? 2 : 1));
     for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.core);
     for (let i = 0; i < 5; i++) this.dropChunk(r.x, r.y, 'ice');
-    this.floaters.push({ x: r.x, y: r.y - 30, txt: `COMET! ${n} ${ITEMS[r.core].n}`, col: '#bff6ff', life: 2, big: 1 });
+    this.floaters.push({ x: r.x, y: r.y - 30, txt: tx('mine_comet_fl', { n, item: ITEMS[r.core].n }), col: '#bff6ff', life: 2, big: 1 });
     S.stats.comets = (S.stats.comets || 0) + 1;
   },
   // volatile rocks (Epsilon Eridani) blow up: they crack every rock nearby — chain reactions! — and singe you if you're close
@@ -180,14 +249,14 @@ const MineScene = {
     if (r.gold) {
       const v = ITEMS[r.ore].b * incomeMult() * 30 * r.tier;
       for (let i = 0; i < 6; i++) { const a = rand(0, TAU), s = rand(40, 120); this.chunks.push({ x: r.x, y: r.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, cr: v / 6, gold: 1, rot: rand(0, TAU), life: 60 }); }
-      this.floaters.push({ x: r.x, y: r.y - 30, txt: 'JACKPOT!', col: '#ffd24a', life: 2, big: 1 });
+      this.floaters.push({ x: r.x, y: r.y - 30, txt: tx('mine_jackpot'), col: '#ffd24a', life: 2, big: 1 });
       S.stats.jackpots++; sfx('win');
     }
     if (r.geode) {
       const n = Math.round((5 + r.tier * 3) * ship.yieldMult * (built('sonar') ? 2 : 1));
       for (let i = 0; i < n; i++) this.dropChunk(r.x, r.y, r.geode);
       this.parts.burst(r.x, r.y, 50, ITEMS[r.geode].c, 260, 1.1, 3.5); this.parts.burst(r.x, r.y, 20, '#ffffff', 180, 0.6, 2.5);
-      this.floaters.push({ x: r.x, y: r.y - 30, txt: `GEODE! ${n} ${ITEMS[r.geode].n}`, col: ITEMS[r.geode].c, life: 2.2, big: 1 });
+      this.floaters.push({ x: r.x, y: r.y - 30, txt: tx('mine_geode_fl', { n, item: ITEMS[r.geode].n }), col: ITEMS[r.geode].c, life: 2.2, big: 1 });
       S.stats.geodes = (S.stats.geodes || 0) + 1; sfx('win'); this.shake = Math.max(this.shake, 8);
     }
     if (r.magnetic) {   // magnetic burst: every ore chunk nearby flies to you
@@ -225,7 +294,7 @@ const MineScene = {
   oreBonus(r) { return (r.living ? 1.6 * (built('whisperer') ? 2 : 1) : 1) * (this.moltenT > 0 ? 1.5 : 1) * (r.magnetic && built('polarity') ? 2 : 1) * (r.charged > 0 ? (built('beamharvest') ? 3 : 2) : 1) * (this.relic && this.relic.k === 'gold' ? 2 : 1); },
   // ancient relics (Core Rim): break one for a 25 s power
   grantRelic(r) {
-    const k = pick(['gold', 'lens', 'beam', 'recharge']), L = { gold: 'GOLDEN TOUCH: ×2 ore', lens: 'GRAVITY LENS: giant magnet', beam: 'ANCIENT BEAM: ×2 laser', recharge: 'RECHARGE: all tools ready!' }[k];
+    const k = pick(['gold', 'lens', 'beam', 'recharge']), L = tx('mine_relic_' + k);
     if (k === 'recharge') { this.pullCd = this.boostCd = this.bombCd = this.scanCd = this.phaseCd = 0; }
     else this.relic = { k, t: 25 * (built('archive') ? 2 : 1), n: L.split(':')[0] };
     this.floaters.push({ x: r.x, y: r.y - 40, txt: L, col: '#ffe080', life: 2.6, big: 1 });
@@ -274,7 +343,7 @@ const MineScene = {
     if (this.gravity) {
       const g = (built('hawking') ? 35 : 70) * (1 + clamp(1 - p.y / 900, 0, 1) * 2);
       p.vy -= g * dt;
-      if (p.y < 300) { this.damage(ship.hpMax * 0.06 * dt, true); if (!this.horizonHint) { this.horizonHint = 1; toast('Too close to the event horizon! Fly down!', 'bad'); } }
+      if (p.y < 300) { this.damage(ship.hpMax * 0.06 * dt, true); if (!this.horizonHint) { this.horizonHint = 1; toast(tx('mine_horizon'), 'bad'); } }
     }
     const maxV = 360 * ship.thrust * (this.boostT > 0 ? 1.5 : 1) * (inInk ? 0.55 : 1);
     const v = Math.hypot(p.vx, p.vy);
@@ -326,7 +395,7 @@ const MineScene = {
         const drill = this.tool === 'drill';
         best.hp -= this.laserDmg(best, drill) * dt; best.hit = 0.05;
         if (best.living && !best.calm && !built('whisperer')) {
-          if (!(best.flee > 0)) { this.parts.burst(best.x, best.y, 10, '#9fffe0', 90, 0.5, 2); if (!this.livingHint) { this.livingHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('tractor') ? 'IT\'S ALIVE! It flees — calm it with the Tractor Pulse (E)' : 'IT\'S ALIVE! It flees — chase it!', col: '#9fffe0', life: 2.8, big: 1 }); } }
+          if (!(best.flee > 0)) { this.parts.burst(best.x, best.y, 10, '#9fffe0', 90, 0.5, 2); if (!this.livingHint) { this.livingHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('tractor') ? tx('mine_alive_pulse', { k: mineKey('E', 'PULL', 'ATRAER') }) : tx('mine_alive_chase'), col: '#9fffe0', life: 2.8, big: 1 }); } }
           best.flee = 2;
         }
         // Wide Beam (Betelgeuse): the laser forks into two more rocks near the target, at half power
@@ -336,7 +405,7 @@ const MineScene = {
           for (const r of near) { r.hp -= this.laserDmg(r, false) * 0.5 * dt; r.hit = 0.05; if (r.living && !r.calm && !built('whisperer')) r.flee = 2; }
           for (const r of near) if (r.hp <= 0 && this.rocks.includes(r)) this.breakRock(r);
         }
-        if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? 'ARMORED — switch to the Drill (Q)' : 'ARMORED — your laser barely scratches it', col: '#c8d0e0', life: 2.5, big: 1 }); }
+        if (best.armored && !drill && !this.armorHint) { this.armorHint = 1; this.floaters.push({ x: best.x, y: best.y - best.r - 14, txt: hasTool('drill') ? tx('mine_armored_drill', { k: mineKey('Q', 'DRILL', 'TALADRO') }) : tx('mine_armored_laser'), col: '#c8d0e0', life: 2.5, big: 1 }); }
         if (Math.random() < dt * 30) this.parts.add(hx, hy, -dx * 80 + rand(-60, 60), -dy * 80 + rand(-60, 60), 0.4, Math.random() < 0.5 ? ITEMS[best.ore].c : laserColor(laserTier()), 2, true);
         if (best.hp <= 0 && this.rocks.includes(best)) this.breakRock(best);
       }
@@ -394,9 +463,9 @@ const MineScene = {
       for (const r of this.rocks) if (r.swallowed) {
         this.parts.burst(r.x, r.y, 20, '#ffb060', 120, 0.8, 2.5); this.swallowed++;
         if (built('hawking')) { const v = ITEMS[r.ore].b * r.tier * 2 * incomeMult(); earn(v); this.floaters.push({ x: r.x, y: r.y + 40, txt: `+${fmt(v)} cr (Hawking)`, col: '#ffd24a', life: 1.4 }); }
-        else if (this.swallowed === 1) toast('A rock fell into the black hole — mine them before they drift up!');
+        else if (this.swallowed === 1) toast(tx('mine_black_hole'));
       }
-      if (this.rocks.some(r => r.gone && !r.swallowed)) toast('The comet escaped…');
+      if (this.rocks.some(r => r.gone && !r.swallowed)) toast(tx('mine_comet_escaped'));
       this.rocks = this.rocks.filter(r => !r.gone);
     }
     if (!this.space && has(U.OUTPOST)) { this.cometT -= dt; if (this.cometT <= 0) { this.cometT = rand(45, 80) / ((sysDef().comets || 1) * (built('herding') ? 3 : 1)); if (!this.rocks.some(r => r.comet) && !this.inCombat) this.spawnComet(); } }
@@ -411,7 +480,7 @@ const MineScene = {
     // the Pulsar's beam sweeps across the field: it charges rocks (×2 ore) and burns your hull
     if (sysDef().sweeps && !this.space) {
       this.sweepIn -= dt;
-      if (this.sweepIn < 2 && !this.sweepWarned) { this.sweepWarned = 1; toast(hasTool('phase') ? '⚡ Pulsar beam incoming — Phase (X) to ride it!' : '⚡ Pulsar beam incoming!', 'bad'); tone(1200, 0.15, 'square', 0.04); tone(1200, 0.15, 'square', 0.04, null, 0.3); }
+      if (this.sweepIn < 2 && !this.sweepWarned) { this.sweepWarned = 1; toast(hasTool('phase') ? tx('mine_pulsar_phase', { k: mineKey('X', 'PHASE', 'FASE') }) : tx('mine_pulsar'), 'bad'); tone(1200, 0.15, 'square', 0.04); tone(1200, 0.15, 'square', 0.04, null, 0.3); }
       if (this.sweepIn <= 0 && !this.sweep) { const dir = Math.random() < 0.5 ? 1 : -1; this.sweep = { t: 0, dur: 3, a0: Math.PI / 2 - 0.26 * dir, a1: Math.PI / 2 + 0.26 * dir, a: 0 }; sfx('warp'); }
       if (this.sweep) {
         const B = this.sweep; B.t += dt; B.a = lerp(B.a0, B.a1, B.t / B.dur);
@@ -426,12 +495,12 @@ const MineScene = {
     if (sysDef().pulses && !this.space) {
       this.moltenT = Math.max(0, this.moltenT - dt); if (this.waveT >= 0) { this.waveT += dt; if (this.waveT > 1.4) this.waveT = -1; }
       this.pulseIn -= dt;
-      if (this.pulseIn < 3 && !this.pulseWarned) { this.pulseWarned = 1; toast('☀ Betelgeuse is about to pulse — get ready to mine!', 'good'); tone(55, 2.8, 'sine', 0.3, 38); }
+      if (this.pulseIn < 3 && !this.pulseWarned) { this.pulseWarned = 1; toast(tx('mine_betel_warn'), 'good'); tone(55, 2.8, 'sine', 0.3, 38); }
       if (this.pulseIn <= 0) {
         const hs = built('starheart');
         this.pulseIn = rand(50, 70) / (hs ? 2 : 1); this.pulseWarned = 0;
         this.moltenT = 10 * (hs ? 1.5 : 1); this.waveT = 0; this.shake = Math.max(this.shake, 8);
-        sfx('boom'); this.floaters.push({ x: p.x, y: p.y - 70, txt: 'MOLTEN! 2× laser · +50% ore', col: '#ffb040', life: 2.4, big: 1 });
+        sfx('boom'); this.floaters.push({ x: p.x, y: p.y - 70, txt: tx('mine_molten'), col: '#ffb040', life: 2.4, big: 1 });
       }
     }
     for (const b of this.blasts) b.t += dt; this.blasts = this.blasts.filter(b => b.t < 0.5);
@@ -485,7 +554,7 @@ const MineScene = {
     if (this.clearT > 0) { this.clearT -= dt; if (this.clearT <= 0) this.finishSpace(true); }
     if (this.warp) {
       this.warp.t += dt;
-      if (this.warp.t >= ship.warpTime) { sfx('warp'); toast('Warped out!', 'good'); this.finishSpace(false); return; }
+      if (this.warp.t >= ship.warpTime) { sfx('warp'); toast(tx('mine_warped'), 'good'); this.finishSpace(false); return; }
     }
     // --- shields & hazards ---
     p.shT -= dt;
@@ -494,13 +563,13 @@ const MineScene = {
     // --- ambush ---
     if (this.ambush) {
       this.ambush.at -= dt;
-      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(this.ambush.boss === 'final' ? '📡 Something huge is moving toward you…' : this.ambush.boss ? '☠ The warlord\'s flagship is coming!' : '⚠ Pirates incoming!', 'bad'); sfx('alarm'); }
+      if (!this.ambush.warned && this.ambush.at < 3) { this.ambush.warned = true; toast(tx(this.ambush.boss === 'final' ? 'mine_warn_final' : this.ambush.boss ? 'mine_warn_warlord' : 'mine_warn_pirates'), 'bad'); sfx('alarm'); }
       if (this.ambush.at <= 0) {
         const boss = this.ambush.boss === 'final' || (this.ambush.boss && warlordAt(this.loc.id));
         const fleet = this.ambush.boss === 'final' ? sysDef().bossFleet : boss ? ['warlord', ...buildFleet(0.25)] : buildFleet(locDanger(this.loc.id));
         this.ambush = null;
         if (boss) Combat.spawn(this, fleet, this.z, true);
-        else if (S.rep.piratas >= 35) toast('Pirates recognize your ship and leave you alone', 'good');
+        else if (S.rep.piratas >= 35) toast(tx('mine_pirates_leave'), 'good');
         else Combat.spawn(this, fleet, this.z, true);
       }
     }
@@ -539,13 +608,13 @@ const MineScene = {
   coach() {
     const h = S.hints;
     let msg = '';
-    if (this.inCombat && !h.guns) { const who = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale) ? 'Hostiles' : 'Pirates'; msg = isTouch ? `Hold <b>FIRE</b> to shoot the ${who.toLowerCase()}!` : `${who}! <b>Hold the mouse</b> to shoot your guns`; }
-    else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = `☠ ${this.ambush.boss === 'final' ? `The ${ENEMIES[sysDef().boss].n}` : 'The warlord\'s flagship'} arrives in <b>${Math.ceil(this.ambush.at)} s</b> — get ready, or fly <b>down</b> to escape`;
-    else if (!h.move) msg = isTouch ? 'Drag anywhere on the left side to fly' : 'Fly with <b>WASD</b> or the <b>arrow keys</b>';
-    else if (!h.laser) msg = isTouch ? 'Hold <b>LASER</b> — it aims at the nearest rock' : 'Hold the <b>mouse button</b> to fire your mining laser at a rock';
-    else if (S.stats.mined < 4) msg = 'Fly close to the glowing crystals to scoop them up';
-    else if (!this.space && cargoFree() <= 0) msg = '📦 Cargo full! Fly back <b>down</b> to the station ⬇';
-    else if (!this.space && !h.deep && S.stats.docks >= 2 && this.p.y > DOCK_Y - 900) { msg = 'Tip: rocks get <b>richer</b> the farther up you fly ⬆'; }
+    if (this.inCombat && !h.guns) { const host = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale); msg = tx('mine_c_guns' + (isTouch ? '_touch' : '') + (host ? '_host' : '_pir')); }
+    else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = this.ambush.boss === 'final' ? tx('mine_c_boss_final', { name: ENEMIES[sysDef().boss].n, n: Math.ceil(this.ambush.at) }) : tx('mine_c_boss_warlord', { n: Math.ceil(this.ambush.at) });
+    else if (!h.move) msg = tx(isTouch ? 'mine_c_move_touch' : 'mine_c_move');
+    else if (!h.laser) msg = tx(isTouch ? 'mine_c_laser_touch' : 'mine_c_laser');
+    else if (S.stats.mined < 4) msg = tx('mine_c_scoop');
+    else if (!this.space && cargoFree() <= 0) msg = tx('mine_c_full');
+    else if (!this.space && !h.deep && S.stats.docks >= 2 && this.p.y > DOCK_Y - 900) { msg = tx('mine_c_deep'); }
     if (this.p.y < DOCK_Y - 1400) h.deep = 1;
     coach(msg);
   },
@@ -560,24 +629,24 @@ const MineScene = {
         S.stats.lost++;
         if (this.space && MapScene.travel) { MapScene.travel = null; $('travelBanner').classList.add('hidden'); }
         setScene(MapScene);
-        towShip(this.inCombat ? 'Your ship was shot down.' : 'Your hull collapsed.');
+        towShip(tx(this.inCombat ? 'mine_shot_down' : 'mine_hull_collapsed'));
       }
     }
   },
   onVictory() {
     sfx('win');
     const n = S.stats.kills;
-    toast('☠ Pirates destroyed! Grab the loot.', 'good');
+    toast(tx('mine_victory'), 'good');
     const tr = MapScene.travel, here = [S.loc, tr && tr.from, tr && tr.to];
     for (const c of [...S.active]) if (c.type === 'bounty' && (!c.at || here.includes(c.at))) { c.progress++; if (c.progress >= c.kills) completeContract(c); }
     repChange('piratas', -3, true);
     const near = LOC[S.loc].faction && LOC[S.loc].faction !== 'piratas' ? LOC[S.loc].faction : 'cinturon';
     repChange(near, 2, true);
     S.stats.won++;
-    addNews('🏆', `Pirate fleet destroyed`, '#6dffb0');
+    addNews('🏆', tx('mine_news_victory'), '#6dffb0');
     // clearing raiders in the war zone helps the side you back
     const w = backedWar();
-    if (w && here.some(id => id && w.locs.includes(id))) warPush(w, 6, 'raiders cleared');
+    if (w && here.some(id => id && w.locs.includes(id))) warPush(w, 6, tx('mine_raiders_cleared'));
     if (this.space) this.clearT = 4;
   },
   finishSpace(won) {
@@ -729,7 +798,14 @@ const MineScene = {
     ctx.textAlign = 'center';
     for (const f of this.floaters) {
       ctx.font = f.big ? '900 26px Orbitron, sans-serif' : '700 14px Rajdhani, sans-serif';
-      ctx.globalAlpha = Math.min(1, f.life * 2); ctx.fillStyle = f.col; ctx.fillText(f.txt, f.x, f.y);
+      // long hints shrink to fit narrow screens and stay inside the view
+      let fx = f.x;
+      if (f.big) {
+        let fw = ctx.measureText(f.txt).width;
+        if (fw > VW - 24) { ctx.font = `900 ${Math.max(12, Math.floor(26 * (VW - 24) / fw))}px Orbitron, sans-serif`; fw = ctx.measureText(f.txt).width; }
+        if (fw < VW - 12) fx = clamp(fx, cx + fw / 2 + 6, cx + VW - fw / 2 - 6);
+      }
+      ctx.globalAlpha = Math.min(1, f.life * 2); ctx.fillStyle = f.col; ctx.fillText(f.txt, fx, f.y);
     }
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -756,7 +832,7 @@ const MineScene = {
       ctx.globalAlpha = full ? 0.8 + 0.2 * Math.sin(t * 6) : 0.6;
       ctx.fillStyle = full ? '#ffd24a' : '#3de8ff';
       ctx.font = '700 15px Rajdhani, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(`▼ STATION ${dist} m ▼`, bx, by);
+      ctx.fillText(tx('mine_station_dist', { n: dist }), bx, by);
       ctx.globalAlpha = 1;
     }
     for (const e of [...this.enemies, ...this.rocks.filter(r => r.comet || (r.geode && r.seen > 0 && !(r.seenD > 0)))]) {
@@ -776,7 +852,9 @@ const MineScene = {
       ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.5; ctx.stroke();
       drawIcon(ctx, 'skull', bx + 8, by + 8, 16, '#ffd24a');
       ctx.fillStyle = '#ffd24a'; ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(ENEMIES[boss.k].final ? `${ENEMIES[boss.k].n.toUpperCase()} · guardian of ${sysName()}` : `PIRATE WARLORD · prize ${fmt(warlordPrize())} cr`, bx + 22, by + 8);
+      const bt = ENEMIES[boss.k].final ? tx('mine_boss_final', { name: ENEMIES[boss.k].n.toUpperCase(), sys: sysName() }) : tx('mine_boss_warlord', { n: fmt(warlordPrize()) });
+      for (let fs = 13; fs > 9 && ctx.measureText(bt).width > bw - 26; fs--) ctx.font = `700 ${fs - 1}px Rajdhani, sans-serif`;   // longer (Spanish) titles shrink to fit a phone
+      ctx.fillText(bt, bx + 22, by + 8, bw - 24);
       ctx.fillStyle = '#2a1018'; ctx.fillRect(bx, by + 19, bw, 9);
       ctx.fillStyle = '#ff4d6d'; ctx.fillRect(bx, by + 19, bw * clamp(boss.hp / boss.max, 0, 1), 9);
       ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);
@@ -807,7 +885,7 @@ const MineScene = {
     ctx.strokeStyle = `rgba(61,232,255,${0.5 + 0.3 * Math.sin(t * 3)})`; ctx.lineWidth = 3; ctx.setLineDash([18, 12]); ctx.lineDashOffset = -t * 30;
     ctx.beginPath(); ctx.moveTo(0, DOCK_Y); ctx.lineTo(MW, DOCK_Y); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(61,232,255,0.8)'; ctx.font = '700 16px Rajdhani, sans-serif'; ctx.textAlign = 'center';
-    for (let x = 150; x < MW; x += 300) ctx.fillText('▼ DOCK ▼', x, DOCK_Y - 12);
+    for (let x = 150; x < MW; x += 300) ctx.fillText(tx('mine_dock'), x, DOCK_Y - 12);
     // station body
     const sx = MW / 2, sy = MH - 70;
     glow(ctx, sx, sy, 380, col + '44', 0.8);
@@ -840,15 +918,15 @@ const MineScene = {
       ctx.fillStyle = '#4a5a74'; roundRect(ctx, ox - 70, oy - 30, 140, 60, 14); ctx.fill();
       ctx.strokeStyle = '#6dffb0'; ctx.lineWidth = 2; ctx.stroke();
       ctx.fillStyle = '#6dffb0'; ctx.font = '700 13px Rajdhani, sans-serif';
-      ctx.fillText(`OUTPOST LV${o.lv}`, ox + 9, oy - 4);
-      drawIcon(ctx, 'drone', ox - ctx.measureText(`OUTPOST LV${o.lv}`).width / 2 - 5, oy - 5, 15);
+      ctx.fillText(tx('mine_outpost_lv', { n: o.lv }), ox + 9, oy - 4);
+      drawIcon(ctx, 'drone', ox - ctx.measureText(tx('mine_outpost_lv', { n: o.lv })).width / 2 - 5, oy - 5, 15);
       ctx.fillStyle = '#ffd24a'; ctx.fillText(`+${fmt(outpostIncome(l.id))}/s`, ox, oy + 14);
     }
   },
   leave(toMap) {
     laserSound(false);
     const got = Object.entries(this.collected);
-    if (got.length) addNews('⛏️', `Mined at ${this.loc.field.n}: ${got.map(([k, n]) => `${n} ${ITEMS[k].n}`).join(', ')}`, '#ffd24a');
+    if (got.length) addNews('⛏️', tx('mine_news_mined', { name: this.loc.field.n, list: got.map(([k, n]) => `${n} ${ITEMS[k].n}`).join(', ') }), '#ffd24a');
     this.collected = {};
     for (const c of this.chunks) if (c.cr) earn(c.cr);
     save();
@@ -870,6 +948,6 @@ function towShip(reason) {
   S.credits -= fee; S.loc = best.id; S.hull = Math.max(S.hull, Math.round(ship.hpMax * 0.25));
   S.fuel = Math.max(S.fuel, 10);
   sfx('lose');
-  showModal({ icon: '🚨', title: 'Towed to safety', danger: true, html: `${reason}<br>A tug brings you to <b>${best.station}</b>. You lost part of your cargo${fee ? ` and paid a <b>${fmt(fee)} cr</b> rescue fee` : ''}.`,
-    buttons: [{ label: 'Continue', cls: 'primary', fn: () => { save(); openDock(); } }] });
+  showModal({ icon: '🚨', title: tx('mine_towed_title'), danger: true, html: tx('mine_towed_html', { reason, station: best.station, fee: fee ? tx('mine_towed_fee', { n: fmt(fee) }) : '' }),
+    buttons: [{ label: tx('mine_continue'), cls: 'primary', fn: () => { save(); openDock(); } }] });
 }

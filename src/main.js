@@ -135,6 +135,68 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
+// ---------- player-facing text (English + Spanish) ----------
+Object.assign(TXT, {
+  main_tag: { en: 'Mine · Upgrade · Cross the Galaxy', es: 'Mina · Mejora · Cruza la Galaxia' },
+  main_play: { en: '▶ PLAY', es: '▶ JUGAR' },
+  main_howto: { en: 'How to play', es: 'Cómo jugar' },
+  main_foot: { en: 'Mouse & keyboard or touch · Saves automatically', es: 'Mouse y teclado o táctil · Guardado automático' },
+  main_foot_touch: { en: 'Touch controls · Saves automatically', es: 'Controles táctiles · Guardado automático' },
+  main_credits: { en: 'Credits', es: 'Créditos' },
+  main_day: { en: 'Day', es: 'Día' },
+  main_cargo: { en: 'Cargo', es: 'Carga' },
+  main_hull: { en: 'Hull', es: 'Casco' },
+  main_fuel: { en: 'Fuel', es: 'Combust.' },
+  main_influence: { en: 'Influence', es: 'Influencia' },
+  main_ship: { en: 'Ship', es: 'Nave' },
+  main_news: { en: 'News', es: 'Noticias' },
+  main_empire: { en: 'Empire', es: 'Imperio' },
+  main_megaprojects: { en: 'Megaprojects', es: 'Megaproyectos' },
+  main_projects: { en: 'Projects', es: 'Proyectos' },
+  main_galaxy: { en: 'Galaxy', es: 'Galaxia' },
+  main_sound: { en: 'Sound', es: 'Sonido' },
+  main_menu: { en: 'Menu', es: 'Menú' },
+  main_myship: { en: 'My ship', es: 'Mi nave' },
+  main_wholesys: { en: 'Whole system', es: 'Todo el sistema' },
+  main_t_fire: { en: 'FIRE', es: 'DISPARAR' },
+  main_t_drill: { en: 'DRILL', es: 'TALADRO' },
+  main_t_pull: { en: 'PULL', es: 'ATRAER' },
+  main_t_boost: { en: 'BOOST', es: 'TURBO' },
+  main_t_bomb: { en: 'BOMB', es: 'BOMBA' },
+  main_t_scan: { en: 'SCAN', es: 'ESCANEAR' },
+  main_t_phase: { en: 'PHASE', es: 'FASE' },
+  main_bt_pirates: { en: '⚔ PIRATES', es: '⚔ PIRATAS' },
+  main_bt_warp: { en: '⚡ Warp out', es: '⚡ Escapar' },
+  main_bt_continue: { en: 'Continue ▶', es: 'Continuar ▶' },
+  main_meta_desc: { en: 'Mine asteroids, upgrade your ship, trade between planets and rule the Solar System.', es: 'Mina asteroides, mejora tu nave, comercia entre planetas y gobierna el Sistema Solar.' },
+  main_continue: { en: '▶ Continue', es: '▶ Continuar' },
+  main_conq1: { en: '1 system conquered', es: '1 sistema conquistado' },
+  main_conq: { en: '{n} systems conquered', es: '{n} sistemas conquistados' },
+  main_newgame: { en: 'New game', es: 'Nueva partida' },
+  main_new_title: { en: 'Start a new game?', es: '¿Empezar una nueva partida?' },
+  main_new_html: { en: 'Your saved game will be overwritten.', es: 'Tu partida guardada se va a sobrescribir.' },
+  main_new_ok: { en: 'Start over', es: 'Empezar de cero' },
+  main_cancel: { en: 'Cancel', es: 'Cancelar' },
+  main_thumb_tag: { en: 'MINE · TRADE · CROSS THE GALAXY', es: 'MINA · COMERCIA · CRUZA LA GALAXIA' },
+  main_wb_trib: { en: 'Your conquered systems sent <b>+{n} Tribute</b>.', es: 'Tus sistemas conquistados enviaron <b>+{n} de Tributo</b>.' },
+  main_wb_capped: { en: 'You were away <b>{t}</b>. Drones only work unsupervised for <b>{cap}</b>, so you were paid for the <b>last 8 hours</b>.', es: 'Estuviste fuera <b>{t}</b>. Los drones solo trabajan sin supervisión <b>{cap}</b>, así que te pagaron las <b>últimas 8 horas</b>.' },
+  main_wb_away: { en: 'You were away <b>{t}</b>.', es: 'Estuviste fuera <b>{t}</b>.' },
+  main_wb_day1: { en: '<b>1 day</b> passed in the system.', es: 'Pasó <b>1 día</b> en el sistema.' },
+  main_wb_days: { en: '<b>{n} days</b> passed in the system.', es: 'Pasaron <b>{n} días</b> en el sistema.' },
+  main_wb_title: { en: 'Welcome back!', es: '¡Bienvenido de vuelta!' },
+  main_wb_earned: { en: 'Your drones and freighters earned', es: 'Tus drones y cargueros ganaron' },
+  main_wb_rate: { en: '({pct}% of your income rate, max {cap})', es: '({pct}% de tu ritmo de ingresos, máx. {cap})' },
+  main_wb_collect: { en: 'Collect', es: 'Cobrar' },
+  main_toast_away: { en: '🤖 Drones earned +{n} cr while you were away', es: '🤖 Tus drones ganaron +{n} cr mientras no estabas' },
+});
+// static text in index.html: elements marked data-tx / data-tx-title get the player's language at boot
+function translateStatic() {
+  for (const el of document.querySelectorAll('[data-tx]')) el.textContent = tx(el.dataset.tx);
+  for (const el of document.querySelectorAll('[data-tx-title]')) el.title = tx(el.dataset.txTitle);
+  if (isTouch) document.querySelector('#title .foot').textContent = tx('main_foot_touch');
+  const md = document.querySelector('meta[name="description"]'); if (md) md.content = tx('main_meta_desc');
+}
+
 // ---------- pantalla de título ----------
 const TitleScene = {
   t: 0,
@@ -142,8 +204,8 @@ const TitleScene = {
     $('title').classList.remove('hidden'); $('hud').classList.add('hidden');
     const sv = hasSave();
     $('cont').classList.toggle('hidden', !sv);
-    if (sv) { const d = loadSave(); $('cont').innerHTML = `▶ Continue <small>${fmt(d.credits)} cr · ${(SYSTEMS[d.sys || 'sol'] || SYSTEMS.sol).n}${d.galaxy ? ` · ${d.galaxy.done.length} system${d.galaxy.done.length > 1 ? 's' : ''} conquered` : ''}</small>`; }
-    $('newg').textContent = sv ? 'New game' : '▶ PLAY';
+    if (sv) { const d = loadSave(); $('cont').innerHTML = `${tx('main_continue')} <small>${fmt(d.credits)} cr · ${(SYSTEMS[d.sys || 'sol'] || SYSTEMS.sol).n}${d.galaxy ? ` · ${tx(d.galaxy.done.length === 1 ? 'main_conq1' : 'main_conq', { n: d.galaxy.done.length })}` : ''}</small>`; }
+    $('newg').textContent = sv ? tx('main_newgame') : tx('main_play');
     $('newg').classList.toggle('primary', !sv);
   },
   exit() { $('title').classList.add('hidden'); $('hud').classList.remove('hidden'); },
@@ -198,6 +260,7 @@ function startGame(cont) {
 
 // ---------- inicio ----------
 function init() {
+  translateStatic();
   startIconizer();
   setupTouchControls();
   $('bGal').onclick = openGalaxy; $('bShip').onclick = openShip; $('bProj').onclick = openProjects; $('bFac').onclick = openFactions; $('bNews').onclick = openNews; $('bMenu').onclick = openMenu;
@@ -210,7 +273,7 @@ function init() {
   $('zAll').onclick = () => MapScene.zoomAll();
   $('btnWarp').onclick = () => { if (MineScene.space && !MineScene.warp) { MineScene.warp = { t: 0 }; sfx('warp'); } };
   $('btnContinue').onclick = () => MineScene.finishSpace(true);
-  $('newg').onclick = () => { if (hasSave()) { showModal({ icon: '⚠️', title: 'Start a new game?', html: 'Your saved game will be overwritten.', buttons: [{ label: 'Start over', cls: 'danger', fn: () => { S = null; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startGame(false); } }, { label: 'Cancel', fn: () => {} }] }); } else startGame(false); };
+  $('newg').onclick = () => { if (hasSave()) { showModal({ icon: '⚠️', title: tx('main_new_title'), html: tx('main_new_html'), buttons: [{ label: tx('main_new_ok'), cls: 'danger', fn: () => { S = null; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startGame(false); } }, { label: tx('main_cancel'), fn: () => {} }] }); } else startGame(false); };
   $('cont').onclick = () => startGame(true);
   $('howto').onclick = () => { openHelp(); };
   const params = new URLSearchParams(location.search);
@@ -270,7 +333,7 @@ function thumbMode(kind) {
     ctx.shadowBlur = 0;
     ctx.font = `600 ${Math.round(30 * s)}px Rajdhani, sans-serif`;
     ctx.fillStyle = '#ffd24a';
-    ctx.fillText('MINE · TRADE · CROSS THE GALAXY', 64 * s, 275 * s);
+    ctx.fillText(tx('main_thumb_tag'), 64 * s, 275 * s);
   }
   document.body.dataset.ready = '1';
 }
@@ -284,16 +347,16 @@ function dayClock(dt) {
   if (S.dayT >= DAY_SEC) { S.dayT -= DAY_SEC; tickDay(); updateHUD(); }
 }
 function welcomeBack(off) {
-  const trib = off.trib >= 1 ? `<p>Your conquered systems sent <b>+${Math.floor(off.trib)} Tribute</b>.</p>` : '';
+  const trib = off.trib >= 1 ? `<p>${tx('main_wb_trib', { n: Math.floor(off.trib) })}</p>` : '';
   const away = off.capped
-    ? `You were away <b>${fmtTime(off.real)}</b>. Drones only work unsupervised for <b>${fmtTime(OFFLINE_CAP)}</b>, so you were paid for the <b>last 8 hours</b>.`
-    : `You were away <b>${fmtTime(off.real)}</b>.`;
-  const days = off.days ? `<p class="hint"><b>${off.days} day${off.days > 1 ? 's' : ''}</b> passed in the system.</p>${off.news.length ? `<div class="wb-news">${off.news.map(n => `<div>${n.icon} ${n.html}</div>`).join('')}</div>` : ''}` : '';
-  showModal({ icon: '🤖', title: 'Welcome back!', html: `<p>${away}</p>${off.g >= 1 ? `<p>Your drones and freighters earned<br><b class="cr big-num">+${fmt(off.g)} cr</b>${off.capped ? `<br><small class="dim">(${Math.round(OFFLINE_RATE * 100)}% of your income rate, max ${fmtTime(OFFLINE_CAP)})</small>` : ''}</p>` : ''}${days}`,
-    buttons: [{ label: 'Collect', cls: 'primary', fn: () => {} }] });
+    ? tx('main_wb_capped', { t: fmtTime(off.real), cap: fmtTime(OFFLINE_CAP) })
+    : tx('main_wb_away', { t: fmtTime(off.real) });
+  const days = off.days ? `<p class="hint">${tx(off.days === 1 ? 'main_wb_day1' : 'main_wb_days', { n: off.days })}</p>${off.news.length ? `<div class="wb-news">${off.news.map(n => `<div>${n.icon} ${n.html}</div>`).join('')}</div>` : ''}` : '';
+  showModal({ icon: '🤖', title: tx('main_wb_title'), html: `<p>${away}</p>${off.g >= 1 ? `<p>${tx('main_wb_earned')}<br><b class="cr big-num">+${fmt(off.g)} cr</b>${off.capped ? `<br><small class="dim">${tx('main_wb_rate', { pct: Math.round(OFFLINE_RATE * 100), cap: fmtTime(OFFLINE_CAP) })}</small>` : ''}</p>` : ''}${days}`,
+    buttons: [{ label: tx('main_wb_collect'), cls: 'primary', fn: () => {} }] });
   if (trib) $('modal').querySelector('.mbody').insertAdjacentHTML('beforeend', trib);
 }
 function fmtTime(s) { s = Math.floor(s); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return d ? `${d}d${h ? ` ${h}h` : ''}` : h ? `${h}h${m ? ` ${m}m` : ''}` : m ? `${m}m` : `${s}s`; }
 window.addEventListener('pagehide', () => { save(); postPeak(); });
-document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) { save(); postPeak(); } else { const off = offlineGains(); if (!off) return; updateHUD(); if (off.real >= 300 && $('modal').classList.contains('hidden')) welcomeBack(off); else if (off.g >= 1) toast(`🤖 Drones earned +${fmt(off.g)} cr while you were away`, 'good'); } });
+document.addEventListener('visibilitychange', () => { if (!S) return; if (document.hidden) { save(); postPeak(); } else { const off = offlineGains(); if (!off) return; updateHUD(); if (off.real >= 300 && $('modal').classList.contains('hidden')) welcomeBack(off); else if (off.g >= 1) toast(tx('main_toast_away', { n: fmt(off.g) }), 'good'); } });
 window.addEventListener('load', init);
