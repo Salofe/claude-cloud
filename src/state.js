@@ -2,10 +2,35 @@
 // ============ STATE, ECONOMY & WORLD ============
 const SAVE_KEY = 'solar_prospector_v3';
 let S = null;
+// ---------- player-facing text (English + Spanish) ----------
+Object.assign(TXT, {
+  st_ship_name: { en: 'Pioneer', es: 'Pionera' },
+  st_news_start: { en: 'Your old mining ship is ready at {st}. Time to get rich.', es: 'Tu vieja nave minera te espera en {st}. Hora de hacerte rico.' },
+  st_dem_hungry: { en: 'Hungry', es: 'Ávido' },
+  st_dem_steady: { en: 'Steady', es: 'Estable' },
+  st_dem_low: { en: 'Low', es: 'Bajo' },
+  st_dem_saturated: { en: 'Saturated', es: 'Saturado' },
+  st_black_toast: { en: 'Black market sale: −{n} reputation with every faction', es: 'Venta en el mercado negro: −{n} de reputación con todas las facciones' },
+  st_rep_toast: { en: '{f}: {d} reputation', es: '{f}: {d} de reputación' },
+  st_outpost_news: { en: 'Drone outpost built at {field}', es: 'Puesto minero de drones construido en {field}' },
+  st_outpost_lv_news: { en: '{field} outpost upgraded to level {lv} (×2 output)', es: 'Puesto minero de {field} mejorado a nivel {lv} (producción ×2)' },
+  st_project_news: { en: '<b>{n}</b> completed. {fx}.', es: '<b>{n}</b> completado. {fx}.' },
+  st_c_deliver: { en: 'Deliver <b>{q} {item}</b> to <b>{st}</b> ({n})', es: 'Entrega <b>{q} {item}</b> en <b>{st}</b> ({n})' },
+  st_c_bounty_1: { en: 'Destroy <b>1</b> pirate fleet', es: 'Destruye <b>1</b> flota pirata' },
+  st_c_bounty_n: { en: 'Destroy <b>{k}</b> pirate fleets', es: 'Destruye <b>{k}</b> flotas piratas' },
+  st_c_bounty_at: { en: ' at <b>{at}</b> (the warlord\'s field or routes through it)', es: ' en <b>{at}</b> (el campo del caudillo o las rutas que lo cruzan)' },
+  st_max_contracts: { en: 'Max 5 active contracts', es: 'Máximo 5 contratos activos' },
+  st_contract_accepted: { en: 'Contract accepted', es: 'Contrato aceptado' },
+  st_contract_done: { en: 'Contract complete: +{n} cr', es: 'Contrato cumplido: +{n} cr' },
+  st_event_over: { en: 'Over: {t}', es: 'Terminó: {t}' },
+  st_contract_expired_news: { en: 'Contract expired. Reputation −4', es: 'Contrato vencido. Reputación −4' },
+  st_contract_expired_toast: { en: 'A contract expired', es: 'Un contrato venció' },
+});
+
 
 function newGame() {
   S = {
-    v: 3, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: 'Pioneer',
+    v: 3, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: tx('st_ship_name'),
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
@@ -16,7 +41,7 @@ function newGame() {
   };
   for (const l of NODES) if (l.market) { S.sat[l.id] = {}; S.drift[l.id] = {}; for (const k in l.market) { S.sat[l.id][k] = 1; S.drift[l.id][k] = rand(-0.06, 0.06); } }
   if (typeof resetLocs === 'function') resetLocs();
-  addNews('📡', `Your old mining ship is ready at ${LOC.luna.station}. Time to get rich.`, '#3de8ff');
+  addNews('📡', tx('st_news_start', { st: LOC.luna.station }), '#3de8ff');
   return S;
 }
 // ---------- Clawcade leaderboard: the most credits you've ever held ----------
@@ -35,7 +60,7 @@ function loadSave() {
     d.projects = d.projects || {};
     d.lv.extractor = d.lv.extractor || 1;
     d.stock = d.stock || {}; d.freighters = d.freighters || []; d.cd = d.cd || {}; d.nuked = d.nuked || []; d.loans = d.loans || []; d.peace = d.peace || 0;
-    for (const e of d.events || []) if (/^Pirate warlord at/.test(e.title || '') && !e.warlord && e.locs) { e.kind = 'warlord'; e.warlord = e.locs[0]; } d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
+    for (const e of d.events || []) if (/^(Pirate warlord at|Caudillo pirata en)/.test(e.title || '') && !e.warlord && e.locs) { e.kind = 'warlord'; e.warlord = e.locs[0]; } d.demand = d.demand || {}; d.allies = d.allies || {}; d.spoils = d.spoils || {};
     if (d.won && !d.signal) d.signal = 1;   // saves that already won get the Oort signal
     if (!d.bal) { for (const id in d.outposts) d.outposts[id].n = Math.min(d.outposts[id].n, outpostCap(d.outposts[id].lv)); d.bal = 2; }
     // bal 3: black-market sales used to wipe reputation (−0.02 per unit); undo that once, unless a planet was nuked
@@ -183,7 +208,7 @@ function useDemand(locId, item, units) {
 }
 const DEMAND_REGEN = 0.03;
 function demandDays(locId, item) { return Math.ceil((1 - demandOf(locId, item)) / DEMAND_REGEN); }
-function demandLabel(d) { return d >= 0.75 ? ['Hungry', 'good'] : d >= 0.45 ? ['Steady', 'mid'] : d >= 0.2 ? ['Low', 'low'] : ['Saturated', 'bad']; }
+function demandLabel(d) { return d >= 0.75 ? [tx('st_dem_hungry'), 'good'] : d >= 0.45 ? [tx('st_dem_steady'), 'mid'] : d >= 0.2 ? [tx('st_dem_low'), 'low'] : [tx('st_dem_saturated'), 'bad']; }
 // permanent war alliances: +15% for ore at an ally's stations per star (max 3)
 function allyMult(locId) { const f = LOC[locId].faction; return 1 + 0.15 * ((S.allies || {})[f] || 0); }
 function spoilCount(kind) { let n = 0; for (const f in S.spoils || {}) if (S.spoils[f].includes(kind)) n++; return n; }
@@ -232,7 +257,7 @@ function doSell(locId, item, n) {
       const other = e.war.find(f => f !== l.faction); repChange(other, -(2 + 8 * frac)); gain += 2 + 8 * frac;
     }
     repChange(l.faction, gain, true);
-    if (l.black) { const loss = blackMarketLoss(n); for (const f in FACTIONS) if (f !== 'piratas') repChange(f, -loss, true); if (loss >= 1) toast(`Black market sale: −${Math.round(loss)} reputation with every faction`, 'bad'); }
+    if (l.black) { const loss = blackMarketLoss(n); for (const f in FACTIONS) if (f !== 'piratas') repChange(f, -loss, true); if (loss >= 1) toast(tx('st_black_toast', { n: Math.round(loss) }), 'bad'); }
   }
   earn(total);
   if (n > 0 && typeof warSalePush === 'function') warSalePush(locId, item, total);
@@ -259,7 +284,7 @@ const blackMarketLoss = n => 1 + 5 * Math.min(1, n / Math.max(100, ship.cargoMax
 function repChange(f, d, silent) {
   const before = S.rep[f];
   S.rep[f] = clamp(S.rep[f] + d, -100, 100);
-  if (!silent && Math.abs(d) >= 1) toast(`${FACTIONS[f].n}: ${d > 0 ? '+' : ''}${Math.round(d)} reputation`, d > 0 ? 'good' : 'bad');
+  if (!silent && Math.abs(d) >= 1) toast(tx('st_rep_toast', { f: FACTIONS[f].n, d: (d > 0 ? '+' : '') + Math.round(d) }), d > 0 ? 'good' : 'bad');
   return S.rep[f] - before;
 }
 
@@ -320,7 +345,7 @@ function outpostLvCost(id) { const o = S.outposts[id]; if (!o || o.lv >= OUTPOST
 function buildOutpost(id) {
   const c = buildCost(id); if (S.credits < c || S.outposts[id]) return false;
   S.credits -= c; S.outposts[id] = { lv: 1, n: 1 };
-  addNews('🤖', `Drone outpost built at ${LOC[id].field.n}`, '#6dffb0');
+  addNews('🤖', tx('st_outpost_news', { field: LOC[id].field.n }), '#6dffb0');
   return true;
 }
 function maxAffordableDrones(id) {
@@ -340,7 +365,7 @@ function buyDrones(id, k) {
 function upgradeOutpost(id) {
   const c = outpostLvCost(id); if (c == null || S.credits < c) return false;
   S.credits -= c; S.outposts[id].lv++;
-  addNews('🏭', `${LOC[id].field.n} outpost upgraded to level ${S.outposts[id].lv} (×2 output)`, '#6dffb0');
+  addNews('🏭', tx('st_outpost_lv_news', { field: LOC[id].field.n, lv: S.outposts[id].lv }), '#6dffb0');
   return true;
 }
 // real-time drone income
@@ -404,7 +429,7 @@ function buildProject(id) {
   if (built(id) || !projectOpen(p) || S.credits < p.cost) return false;
   S.credits -= p.cost; S.projects[id] = S.day || 1;
   if (id === 'terraform') { repChange('marte', 50, true); delete TEX.marte; }
-  addNews(p.icon, `<b>${p.n}</b> completed. ${p.fx}.`, '#ffd24a');
+  addNews(p.icon, tx('st_project_news', { n: p.n, fx: p.fx }), '#ffd24a');
   save();
   return true;
 }
@@ -455,19 +480,19 @@ function genContracts(locId) {
   S.nextContracts[locId] = S.day + randi(8, 14);
 }
 function contractText(c) {
-  if (c.type === 'deliver') return `Deliver <b>${c.qty} ${ITEMS[c.item].n}</b> to <b>${LOC[c.to].station}</b> (${LOC[c.to].n})`;
-  return `Destroy <b>${c.kills}</b> pirate fleet${c.kills > 1 ? 's' : ''}${c.at ? ` at <b>${LOC[c.at].field ? LOC[c.at].field.n : LOC[c.at].n}</b> (the warlord's field or routes through it)` : ''}` + (c.progress != null ? ` (${c.progress}/${c.kills})` : '');
+  if (c.type === 'deliver') return tx('st_c_deliver', { q: c.qty, item: ITEMS[c.item].n, st: LOC[c.to].station, n: LOC[c.to].n });
+  return (c.kills > 1 ? tx('st_c_bounty_n', { k: c.kills }) : tx('st_c_bounty_1')) + (c.at ? tx('st_c_bounty_at', { at: LOC[c.at].field ? LOC[c.at].field.n : LOC[c.at].n }) : '') + (c.progress != null ? ` (${c.progress}/${c.kills})` : '');
 }
 function acceptContract(locId, cid) {
   const list = S.contracts[locId]; const i = list.findIndex(c => c.id === cid);
   if (i < 0) return;
-  if (S.active.length >= 5) { toast('Max 5 active contracts', 'bad'); return; }
+  if (S.active.length >= 5) { toast(tx('st_max_contracts'), 'bad'); return; }
   const c = list.splice(i, 1)[0];
   c.deadline = S.day + c.days;
   if (c.type === 'bounty') c.progress = 0;
   S.active.push(c);
   sfx('click');
-  toast('Contract accepted', 'good');
+  toast(tx('st_contract_accepted'), 'good');
 }
 function canDeliver(c) { return c.type === 'deliver' && S.loc === c.to && (S.cargo[c.item] || 0) >= c.qty; }
 function completeContract(c) {
@@ -475,7 +500,7 @@ function completeContract(c) {
   S.stats.contracts++;
   if (c.faction) repChange(c.faction, c.rep);
   S.active = S.active.filter(x => x !== c);
-  addNews('✅', `Contract complete: +${fmt(c.reward)} cr`, '#6dffb0');
+  addNews('✅', tx('st_contract_done', { n: fmt(c.reward) }), '#6dffb0');
   earn(c.reward);
   sfx('cash');
 }
@@ -499,7 +524,7 @@ function tickDay() {
   for (const f of S.freighters || []) if (freighterIncome(f) > 0) useDemand(f.to, f.g, FREIGHT.cap() / routeCycle(f.from, f.to));
   if (has(U.TRADE)) {
     const ended = S.events.filter(e => e.end <= S.day);
-    for (const e of ended) { addNews('🕊️', `Over: ${e.title}`, '#8fa3c7'); onEventEnd(e); }
+    for (const e of ended) { addNews('🕊️', tx('st_event_over', { t: e.title }), '#8fa3c7'); onEventEnd(e); }
     S.events = S.events.filter(e => e.end > S.day);
     if (S.day >= S.nextEvent) {
       if (S.events.filter(e => !e.mine).length < 4) spawnEvent();
@@ -509,8 +534,8 @@ function tickDay() {
     for (const c of [...S.active]) if (S.day > c.deadline) {
       S.active = S.active.filter(x => x !== c);
       if (c.faction) repChange(c.faction, -4, true);
-      addNews('❌', `Contract expired. Reputation −4`, '#ff6b7d');
-      toast('A contract expired', 'bad');
+      addNews('❌', tx('st_contract_expired_news'), '#ff6b7d');
+      toast(tx('st_contract_expired_toast'), 'bad');
     }
   }
   politicsDay();
