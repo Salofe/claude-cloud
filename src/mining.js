@@ -51,7 +51,7 @@ Object.assign(TXT, {
   mine_c_move: { en: 'Fly with <b>WASD</b> or the <b>arrow keys</b>', es: 'Vuela con <b>WASD</b> o las <b>flechas</b>' },
   mine_c_laser_touch: { en: 'Hold <b>LASER</b> — it aims at the nearest rock', es: 'Mantén <b>LÁSER</b>: apunta a la roca más cercana' },
   mine_c_laser: { en: 'Hold the <b>mouse button</b> to fire your mining laser at a rock', es: 'Mantén presionado el <b>botón del mouse</b> para disparar tu láser minero a una roca' },
-  mine_c_scoop: { en: 'Fly close to the glowing crystals to scoop them up', es: 'Acércate a los cristales brillantes para recogerlos' },
+  mine_c_scoop: { en: 'Fly over the glowing ore to collect it — then sell it at the station', es: 'Pasa sobre el mineral brillante para recogerlo — luego véndelo en la estación' },
   mine_c_full: { en: '📦 Cargo full! Fly back <b>down</b> to the station ⬇', es: '📦 ¡Bodega llena! Vuelve <b>abajo</b> a la estación ⬇' },
   mine_c_deep: { en: 'Tip: rocks get <b>richer</b> the farther up you fly ⬆', es: 'Consejo: las rocas son más <b>ricas</b> cuanto más arriba vuelas ⬆' },
   // defeat / victory
@@ -105,11 +105,15 @@ const MineScene = {
       for (let i = 0; i < f.count; i++) { let x, y; do { x = rand(100, MW - 100); y = rand(100, MH - 100); } while (Math.hypot(x - this.p.x, y - this.p.y) < 300); this.spawnRock(x, y, pick([1, 2, 2, 3])); }
       Combat.spawn(this, this.space.fleet, this.space.z, false);
     } else {
+      // a brand-new run starts with three big rocks right above the station, the middle one rich in a pricier ore,
+      // so the very first trip pays for a couple of upgrades
+      const fresh = !S.stats.docks && !S.stats.mined;
       for (let i = 0; i < this.target; i++) {
         let x, y;
-        if (i < 3) { x = MW / 2 + (i - 1) * 260 + rand(-40, 40); y = DOCK_Y - rand(380, 520); }
+        if (i < 3) { x = MW / 2 + (i - 1) * (fresh ? 230 : 260) + rand(-30, 30); y = DOCK_Y - (fresh ? rand(270, 330) : rand(380, 520)); }
         else { x = rand(120, MW - 120); y = rand(120, DOCK_Y - 380); }
-        this.spawnRock(x, y, i < 3 ? 3 : pick([3, 3, 2, 2, 1]), null, rich);
+        const r = this.spawnRock(x, y, i < 3 ? 3 : pick([3, 3, 2, 2, 1]), fresh && i === 1 ? (f.ores.titanium ? 'titanium' : Object.keys(f.ores).sort((a, b) => ITEMS[a].b - ITEMS[b].b)[Math.min(2, Object.keys(f.ores).length - 1)]) : null, rich);
+        if (fresh && i < 3) { r.rich = false; r.gold = false; r.vx *= 0.3; r.vy *= 0.3; r.hp = r.maxhp = r.maxhp * 0.4; r.starter = 1; }
       }
     }
     this.escorts = built('fleet') ? [0, 1].map(i => ({ i, x: 0, y: 0, a: 0, gcd: rand(0, 1) })) : [];
@@ -279,7 +283,7 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
-        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; }
+        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; } if (r.starter) { c.starter = 1; c.hp = c.maxhp = c.maxhp * 0.4; }
       }
       const m = 0.5 * ship.yieldMult * this.oreBonus(r);
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
@@ -612,6 +616,7 @@ const MineScene = {
     let msg = '';
     if (this.inCombat && !h.guns) { const host = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale); msg = tx('mine_c_guns' + (isTouch ? '_touch' : '') + (host ? '_host' : '_pir')); }
     else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = this.ambush.boss === 'final' ? tx('mine_c_boss_final', { name: ENEMIES[sysDef().boss].n, n: Math.ceil(this.ambush.at) }) : tx('mine_c_boss_warlord', { n: Math.ceil(this.ambush.at) });
+    else if (!h.laser && this.rocks.some(r => Math.hypot(r.x - this.p.x, r.y - this.p.y) - r.r < this.toolRange() + 60)) msg = tx(isTouch ? 'mine_c_laser_touch' : 'mine_c_laser');
     else if (!h.move) msg = tx(isTouch ? 'mine_c_move_touch' : 'mine_c_move');
     else if (!h.laser) msg = tx(isTouch ? 'mine_c_laser_touch' : 'mine_c_laser');
     else if (S.stats.mined < 4) msg = tx('mine_c_scoop');
@@ -671,7 +676,7 @@ const MineScene = {
     if (bgLoc && bgLoc.nuked) glow(ctx, W * 0.8 - cx * 0.03, H * 0.25 - (cy - MH) * 0.03, Math.min(W, H) * 0.5, '#ff5a2a55', 0.9);
     else if (bgLoc && bgLoc.col) {
       const bx = W * 0.8 - cx * 0.03, by = H * 0.25 - (cy - MH) * 0.03;
-      drawPlanet(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
+      drawPlanetCached(ctx, bx, by, Math.min(W, H) * (bgLoc.size > 12 ? 0.28 : 0.16), bgLoc, Math.atan2(-by, -bx - W), t);
     }
     if (this.loc.field.hazard === 'heat') drawSun(ctx, -cx * 0.02 - 40, H * 0.5 - (cy - MH) * 0.02, 120, t, sysDef().star);
     if (sysDef().gravity) drawBlackHole(ctx, W * 0.3 - cx * 0.015, H * 0.16 - (cy - MH) * 0.012, Math.min(W, H) * 0.07, t);
@@ -799,15 +804,19 @@ const MineScene = {
     }
     ctx.textAlign = 'center';
     for (const f of this.floaters) {
-      ctx.font = f.big ? '900 26px Orbitron, sans-serif' : '700 14px Rajdhani, sans-serif';
+      // floating numbers keep the same size on screen even when the camera zooms out (phones)
+      const fsz = Math.round((f.big ? 26 : 17) / vz);
+      ctx.font = f.big ? `900 ${fsz}px Orbitron, sans-serif` : `700 ${fsz}px Rajdhani, sans-serif`;
       // long hints shrink to fit narrow screens and stay inside the view
       let fx = f.x;
       if (f.big) {
         let fw = ctx.measureText(f.txt).width;
-        if (fw > VW - 24) { ctx.font = `900 ${Math.max(12, Math.floor(26 * (VW - 24) / fw))}px Orbitron, sans-serif`; fw = ctx.measureText(f.txt).width; }
+        if (fw > VW - 24) { ctx.font = `900 ${Math.max(12, Math.floor(fsz * (VW - 24) / fw))}px Orbitron, sans-serif`; fw = ctx.measureText(f.txt).width; }
         if (fw < VW - 12) fx = clamp(fx, cx + fw / 2 + 6, cx + VW - fw / 2 - 6);
       }
-      ctx.globalAlpha = Math.min(1, f.life * 2); ctx.fillStyle = f.col; ctx.fillText(f.txt, fx, f.y);
+      ctx.globalAlpha = Math.min(1, f.life * 2);
+      ctx.lineWidth = 3.5 / vz; ctx.strokeStyle = 'rgba(0,0,10,0.75)'; ctx.lineJoin = 'round'; ctx.strokeText(f.txt, fx, f.y);
+      ctx.fillStyle = f.col; ctx.fillText(f.txt, fx, f.y);
     }
     ctx.globalAlpha = 1;
     ctx.restore();

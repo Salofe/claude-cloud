@@ -315,7 +315,11 @@ Object.assign(TXT, {
   ui_menu_t: { en: '☰ Menu', es: '☰ Menú' },
   ui_resume: { en: 'Resume', es: 'Continuar' },
   ui_how_to_play: { en: 'How to play', es: 'Cómo jugar' },
+  ui_first_sale: { en: '🎉 First sale! Now buy an <b>upgrade</b> below — it makes your next trip faster', es: '🎉 ¡Primera venta! Ahora compra una <b>mejora</b> aquí abajo: tu próximo viaje será más rápido' },
   ui_music_on: { en: '🎵 Music: on', es: '🎵 Música: sí' },
+  ui_gfx_auto: { en: '✺ Graphics: auto', es: '✺ Gráficos: automático' },
+  ui_gfx_high: { en: '✺ Graphics: high', es: '✺ Gráficos: altos' },
+  ui_gfx_low: { en: '✺ Graphics: smooth (light)', es: '✺ Gráficos: fluidos (ligeros)' },
   ui_music_off: { en: '🎵 Music: off', es: '🎵 Música: no' },
   ui_new_game: { en: 'New game', es: 'Nueva partida' },
   ui_new_game_q: { en: 'Start a new game?', es: '¿Empezar una nueva partida?' },
@@ -642,7 +646,8 @@ function openDock() {
   lastDock = dockAtStation();
   dockTab = 'upg';
   renderDock(true);
-  if (lastDock.total > 0) sfx('cash');
+  if (lastDock.total > 0) { sfx('cash'); for (let i = 1; i < Math.min(6, 2 + Math.log10(lastDock.total)); i++) tone(1318 + i * 120, 0.08, 'square', 0.04, null, i * 0.12); }
+  document.body.classList.toggle('newbie', S.stats.docks <= 4);
 }
 function renderDock(fresh) {
   const l = LOC[S.loc];
@@ -655,6 +660,7 @@ function renderDock(fresh) {
   if (fresh && r && (r.sold.length || r.fuel || r.repair)) {
     receipt = `<div class="receipt">
       ${r.sold.length ? `<div class="rc-main"><div><small>${tx('ui_sold')}</small><span>${r.sold.map(([k, n]) => `<i class="sw" style="background:${ITEMS[k].c}"></i>${n} ${ITEMS[k].n}`).join(' &nbsp; ')}</span></div><b class="cr" id="rcTotal" data-v="${r.total}">+0 cr</b></div>` : ''}
+      ${r.total > 0 && S.stats.docks <= 1 ? `<div class="rc-first">${tx('ui_first_sale')}</div>` : ''}
       ${marketClosed(S.loc) ? `<div class="rc-sub badt">${tx('ui_strike_nosale')}</div>` : ''}
       ${r.fuel || r.repair ? `<div class="rc-sub">${r.fuel ? tx('ui_refueled', { n: r.fuel, c: fmt(r.fuelCost) }) : ''} ${r.repair ? tx('ui_repaired', { n: r.repair, c: fmt(r.repairCost) }) : ''}</div>` : ''}
     </div>`;
@@ -748,7 +754,7 @@ function dockBody(tab) {
       const cost = maxed ? 0 : upgCost(k, lv);
       const can = !maxed && S.credits >= cost;
       const nMax = maxed ? 0 : affordableLevels(k);
-      h += `<div class="upg ${maxed ? 'maxed' : ''} ${can ? 'can' : ''}">
+      h += `<div class="upg ${maxed ? 'maxed' : ''} ${can ? 'can' : ''} ${k === lastBought ? 'just' : ''}">
         ${!S.seenUpg[k] ? `<span class="newb">${tx('ui_newb')}</span>` : ''}
         <div class="uh"><span class="uicon">${u.icon}</span><b>${u.n}</b><span class="lvl">${k === 'hull' ? u.names[lv - 1] : tx('ui_lv') + ' ' + lv + `<small>/${u.max}</small>`}</span></div>
         <div class="lvbar"><i style="width:${lv / u.max * 100}%"></i></div>
@@ -876,6 +882,7 @@ function drawShipPreview(id, lv, t) {
 }
 function mktSell(k, n) { if (marketClosed(S.loc)) return; const before = S.credits; doSell(S.loc, k, n); const got = S.credits - before; if (got) { sfx('cash'); toast(`+${fmt(got)} cr`, 'good'); } renderDock(); }
 function mktBuy(k, n) { if (marketClosed(S.loc)) return; if (cargoFree() <= 0) { toast(tx('ui_cargo_full'), 'bad'); return; } const b = doBuy(S.loc, k, n); if (b) sfx('click'); else toast(tx('ui_no_credits'), 'bad'); renderDock(); }
+let lastBought = null;
 function buyUpg(k, n) {
   n = n || 1;
   let bought = 0;
@@ -885,6 +892,7 @@ function buyUpg(k, n) {
     S.credits -= cost; S.lv[k]++; bought++;
   }
   if (!bought) return;
+  lastBought = k; setTimeout(() => { if (lastBought === k) lastBought = null; }, 900);
   if (k === 'hull') S.hull = ship.hpMax;
   if (k === 'tank' && has(U.MAP)) S.fuel = ship.fuelMax;
   sfx('upgrade');
@@ -1059,6 +1067,7 @@ function openMenu() {
   openSheet(tx('ui_menu_t'), `<div class="menu">
     <button class="btn primary big" onclick="closeSheet()">${tx('ui_resume')}</button>
     <button class="btn big" onclick="openHelp()">${tx('ui_how_to_play')}</button>
+    <button class="btn big" id="gfxBtn" onclick="setQuality({ auto: 'high', high: 'low', low: 'auto' }[QUALITY.mode] || 'auto'); this.textContent = tx('ui_gfx_' + QUALITY.mode)">${tx('ui_gfx_' + (QUALITY.mode || 'auto'))}</button>
     <button class="btn big" id="musicBtn" onclick="audioInit(); MUSIC.setOn(!MUSIC.on); this.textContent = MUSIC.on ? tx('ui_music_on') : tx('ui_music_off')">${typeof MUSIC !== 'undefined' && MUSIC.on ? tx('ui_music_on') : tx('ui_music_off')}</button>
     <button class="btn big danger" onclick="confirmNew()">${tx('ui_new_game')}</button></div>`);
 }

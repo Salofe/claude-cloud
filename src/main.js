@@ -11,7 +11,7 @@ let touchFire = false;
 const joy = { active: false, dx: 0, dy: 0, id: null, ox: 0, oy: 0 };
 
 function resize() {
-  DPR = Math.min(2, window.devicePixelRatio || 1);
+  DPR = Math.min(QUALITY.low ? 1 : 2, window.devicePixelRatio || 1);
   W = window.innerWidth; H = window.innerHeight;
   canvas.width = W * DPR; canvas.height = H * DPR;
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
@@ -119,7 +119,20 @@ function setupTouchControls() {
 
 // ---------- bucle ----------
 let last = performance.now(), hudT = 0, saveT = 0, peakT = 0, postT = 0;
+// auto quality: if a busy scene stays below ~38 fps for a few seconds, drop to low graphics (once)
+const perfMon = { t: 0, n: 0, slow: 0 };
+function watchPerf(rawDt) {
+  if (QUALITY.mode !== 'auto' || QUALITY.low || document.hidden || (scene !== TitleScene && isBlocking())) { perfMon.t = perfMon.n = 0; return; }
+  if (rawDt > 0.25) return;   // tab switches and hitches don't count
+  perfMon.t += rawDt; perfMon.n++;
+  if (perfMon.t >= 2) {
+    const fps = perfMon.n / perfMon.t; perfMon.t = perfMon.n = 0;
+    perfMon.slow = fps < 38 ? perfMon.slow + 1 : 0;
+    if (perfMon.slow >= 2) { QUALITY.low = true; resize(); toast(tx('main_low_gfx'), 'good'); }
+  }
+}
 function frame(now) {
+  watchPerf((now - last) / 1000);
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (scene) {
@@ -137,6 +150,7 @@ function frame(now) {
 
 // ---------- player-facing text (English + Spanish) ----------
 Object.assign(TXT, {
+  main_low_gfx: { en: 'Smooth mode on: lighter graphics for this device (change it in the menu)', es: 'Modo fluido activado: gráficos más ligeros para este equipo (cámbialo en el menú)' },
   main_tag: { en: 'Mine · Upgrade · Cross the Galaxy', es: 'Mina · Mejora · Cruza la Galaxia' },
   main_play: { en: '▶ PLAY', es: '▶ JUGAR' },
   main_howto: { en: 'How to play', es: 'Cómo jugar' },

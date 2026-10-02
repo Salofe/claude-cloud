@@ -6,6 +6,10 @@ const PAL = {
   enemy: '#ff4d6d', enemyDark: '#4a1422', enemyMid: '#b83450', military: '#9bbf6a', militaryDark: '#34462a',
 };
 
+// graphics quality: 'auto' switches to low by itself when frames get slow (old laptops, integrated graphics)
+const QUALITY = { mode: 'auto', low: false };
+try { QUALITY.mode = localStorage.getItem('sp_quality') || 'auto'; QUALITY.low = QUALITY.mode === 'low'; } catch (e) {}
+function setQuality(mode) { QUALITY.mode = mode; QUALITY.low = mode === 'low'; try { localStorage.setItem('sp_quality', mode); } catch (e) {} if (typeof resize === 'function') resize(); }
 // phones see more of the field: the mining camera zooms out on small touch screens
 function viewZoom() { return typeof isTouch !== 'undefined' && isTouch ? clamp(Math.min(W, H) / 640, 0.62, 1) : 1; }
 // bottom edge of the top HUD bar (touch layouts put the minimap right under it)
@@ -121,16 +125,20 @@ const STARS = makeStars(260, 2000, 2000, 7);
 
 function drawSpaceBg(ctx, W, H, camX, camY, t, tint) {
   const key = skyKey(), backdrop = BACKDROPS[key] || (BACKDROPS[key] = makeBackdrop(key));
-  const sc = 2.2, tw = BD * sc;
+  const sc = 2.2, tw = Math.round(BD * sc);
+  // the sky is drawn from a tile already scaled up once, so each frame is a plain copy
+  if (!drawSpaceBg.big || drawSpaceBg.bigKey !== key) { const c = document.createElement('canvas'); c.width = c.height = tw; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.drawImage(backdrop, 0, 0, tw, tw); drawSpaceBg.big = c; drawSpaceBg.bigKey = key; }
   const ox = -(((camX * 0.06) % tw) + tw) % tw, oy = -(((camY * 0.06) % tw) + tw) % tw;
-  ctx.imageSmoothingEnabled = true;
-  for (let x = ox; x < W; x += tw) for (let y = oy; y < H; y += tw) ctx.drawImage(backdrop, x, y, tw, tw);
+  for (let x = Math.round(ox); x < W; x += tw) for (let y = Math.round(oy); y < H; y += tw) ctx.drawImage(drawSpaceBg.big, x, y);
   if (tint) { ctx.globalAlpha = 0.35; ctx.fillStyle = tint; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+  if (!QUALITY.low) {
   // vignette
   const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75);
   g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,6,0.55)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  for (const s of STARS) {
+  }
+  for (let si = 0; si < STARS.length; si += QUALITY.low ? 2 : 1) {
+    const s = STARS[si];
     const px = ((s.x - camX * s.z * 0.25) % 2000 + 2000) % 2000;
     const py = ((s.y - camY * s.z * 0.25) % 2000 + 2000) % 2000;
     for (let ox2 = 0; ox2 < W; ox2 += 2000) for (let oy2 = 0; oy2 < H; oy2 += 2000) {
@@ -146,7 +154,7 @@ function drawSpaceBg(ctx, W, H, camX, camY, t, tint) {
   }
   // now and then a shooting star streaks across the sky
   const per = 9, n = Math.floor(t / per), f = (t / per) % 1;
-  if (f < 0.09) {
+  if (f < 0.09 && !QUALITY.low) {
     const k = f / 0.09, ang = 0.35 + hash2(n, 3, 5) * 0.5, L = 120 + hash2(n, 4, 5) * 140;
     const x0 = hash2(n, 1, 5) * W * 0.8, y0 = hash2(n, 2, 5) * H * 0.5;
     const hx = x0 + Math.cos(ang) * L * 2.2 * k, hy = y0 + Math.sin(ang) * L * 2.2 * k;
@@ -160,6 +168,7 @@ function drawSpaceBg(ctx, W, H, camX, camY, t, tint) {
 // foreground dust: drifts past faster than the camera, so you feel your speed
 const DUST = makeStars(70, 1600, 1600, 23);
 function drawDust(ctx, W, H, camX, camY, vx, vy, col) {
+  if (QUALITY.low) return;
   const sp = Math.hypot(vx, vy), L = clamp(sp * 0.035, 0, 26), ux = sp ? vx / sp : 0, uy = sp ? vy / sp : 0;
   ctx.strokeStyle = col || '#cfe6ff'; ctx.fillStyle = col || '#cfe6ff'; ctx.lineCap = 'round';
   for (const d of DUST) {
@@ -176,13 +185,31 @@ function drawDust(ctx, W, H, camX, camY, vx, vy, col) {
 }
 // soft light from the system's star washing over the scene, tinted to its color
 function starWash(ctx, W, H, pal, t) {
+  if (QUALITY.low) return;
   if (pal === 'hole') return glow(ctx, W * 0.5, -H * 0.3, Math.max(W, H) * 0.9, '#ff8a3a55', 0.35);
   const P = STAR_PAL[pal] || STAR_PAL.sol;
   glow(ctx, -W * 0.05, -H * 0.1, Math.max(W, H) * 0.95, P.g2, 0.22 + 0.03 * Math.sin(t * 0.3));
 }
 
+// glows are drawn from small pre-rendered sprites (one per color): much cheaper than a fresh gradient each time
+const GLOW_SPR = new Map();
+function glowSprite(color) {
+  let c = GLOW_SPR.get(color); if (c) return c;
+  c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  if (GLOW_SPR.size > 400) GLOW_SPR.clear();
+  GLOW_SPR.set(color, c); return c;
+}
 function glow(ctx, x, y, r, color, a) {
   if (!(r > 0)) return;
+  if (r < 160 || QUALITY.low) {
+    const pa = ctx.globalAlpha, op = ctx.globalCompositeOperation;
+    ctx.globalAlpha = pa * (a == null ? 1 : a); ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(glowSprite(color), x - r, y - r, r * 2, r * 2);
+    ctx.globalCompositeOperation = op === 'lighter' ? 'lighter' : 'source-over'; ctx.globalAlpha = pa;
+    return;
+  }
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, color);
   g.addColorStop(1, 'rgba(0,0,0,0)');
@@ -329,6 +356,19 @@ function planetTex(loc) {
 }
 const ATMO = { tierra: '#6fb8ff', venus: '#ffd59a', titan: '#ffb35c', marte: '#ff9a70', jupiter: '#ffd9b0', saturno: '#fff0c0', europa: '#dff4ff' };
 
+// big background planets change very slowly: draw them into a bitmap and refresh it now and then
+const PLANET_CACHE = { key: '', c: null, t: -1e9 };
+function drawPlanetCached(ctx, x, y, r, loc, lightAng, t) {
+  const R = Math.ceil(r * 2.6), key = loc.id + ':' + Math.round(r) + ':' + (loc.nuked ? 1 : 0) + ':' + skyKey();
+  const now = performance.now();
+  if (PLANET_CACHE.key !== key || now - PLANET_CACHE.t > (QUALITY.low ? 4000 : 500)) {
+    const c = PLANET_CACHE.c && PLANET_CACHE.key === key ? PLANET_CACHE.c : document.createElement('canvas');
+    c.width = c.height = R * 2; const x2 = c.getContext('2d'); x2.clearRect(0, 0, R * 2, R * 2);
+    drawPlanet(x2, R, R, r, loc, lightAng, t);
+    Object.assign(PLANET_CACHE, { key, c, t: now });
+  }
+  ctx.drawImage(PLANET_CACHE.c, Math.round(x - R), Math.round(y - R));
+}
 function drawPlanet(ctx, x, y, r, loc, lightAng, t) {
   const [c0, c1] = loc.col;
   const atmo = ATMO[loc.id];
@@ -1011,6 +1051,7 @@ function drawArmoredRock(ctx, a, t) {
 // world-fixed light from the upper left: darken the far side, rim-light the near edge
 const LIGHT_A = -2.3;
 function shadeRock(ctx, a, path) {
+  if (QUALITY.low) return;
   const la = LIGHT_A - a.rot, lx = Math.cos(la) * a.r, ly = Math.sin(la) * a.r;
   const g = ctx.createLinearGradient(lx, ly, -lx, -ly);
   g.addColorStop(0, 'rgba(255,236,210,0.16)'); g.addColorStop(0.45, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,12,0.6)');
@@ -1178,7 +1219,8 @@ class Particles {
   update(dt) {
     for (const p of this.list) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.98; p.vy *= 0.98; p.life -= dt; }
     this.list = this.list.filter(p => p.life > 0);
-    if (this.list.length > 900) this.list.splice(0, this.list.length - 900);
+    const cap = QUALITY.low ? 260 : 900;
+    if (this.list.length > cap) this.list.splice(0, this.list.length - cap);
   }
   draw(ctx) {
     ctx.globalCompositeOperation = 'lighter';
@@ -1186,7 +1228,8 @@ class Particles {
       const k = p.life / p.max;
       ctx.globalAlpha = k;
       ctx.fillStyle = p.col;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.4 + k * 0.6), 0, TAU); ctx.fill();
+      const r = p.size * (0.4 + k * 0.6);
+      if (QUALITY.low) ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2); else { ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, TAU); ctx.fill(); }
     }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
