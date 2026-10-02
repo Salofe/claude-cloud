@@ -10,6 +10,9 @@ function viewZoom() { return typeof isTouch !== 'undefined' && isTouch ? clamp(M
 // bottom edge of the top HUD bar (touch layouts put the minimap right under it)
 let hudB = 0, hudBT = 0;
 function hudBottom() { const n = performance.now(); if (n - hudBT > 1500) { hudBT = n; const el = document.querySelector('.topbar'); hudB = el ? el.getBoundingClientRect().bottom : 60; } return hudB; }
+// a DOM panel's box, refreshed every half second (canvas overlays use it to avoid sitting under panels)
+const _pr = {};
+function panelRect(sel) { const n = performance.now(), c = _pr[sel]; if (c && n - c.t < 500) return c.r; const el = document.querySelector(sel); const r = el && el.offsetParent ? el.getBoundingClientRect() : null; _pr[sel] = { t: n, r }; return r; }
 // short vibrations on touch devices make hits and breaks feel physical
 let hapticT = 0;
 function haptic(ms) { if (typeof isTouch === 'undefined' || !isTouch || muted || !navigator.vibrate) return; const n = performance.now(); if (n - hapticT < 60) return; hapticT = n; try { navigator.vibrate(ms); } catch (e) {} }

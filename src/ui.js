@@ -96,6 +96,7 @@ function updateHUD() {
   } else if (!S.gateOpen) o.innerHTML = `<small>FINAL GUARDIAN</small><b>📡 Find the source in ${LOC.oort.n}</b><span>Mine there to draw it out. Bring good guns and shields.</span>`;
   else o.innerHTML = `<small>THE GATE IS OPEN</small><b>🌀 The galaxy awaits</b><span>Open the Galaxy map to jump — or stay and earn more Tribute first.</span>`;
   $('bGal').classList.toggle('hidden', !(S.gateOpen || (S.galaxy && S.galaxy.done.length)));
+  { const la = legacyAffordable(); $('bGal').classList.toggle('notify', !!la); $('bGal').dataset.n = la ? Math.floor(S.galaxy.tribute) : ''; $('bGal').title = la ? `Galaxy — ${Math.floor(S.galaxy.tribute)} Tribute to spend on Legacy` : 'Galaxy'; }
   if (!S.won && has(U.SATURN) && inf >= 100 && !isBlocking()) victory();
   if (pendingUnlocks.length && $('modal').classList.contains('hidden') && !(scene === MineScene && (MineScene.inCombat || MineScene.space)) && !(MapScene.travel)) showUnlock(pendingUnlocks.shift());
   else if (pendingChoices.length && $('modal').classList.contains('hidden') && $('sheet').classList.contains('hidden') && scene !== MineScene && !MapScene.travel) showChoice(pendingChoices.shift());

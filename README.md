@@ -81,6 +81,12 @@ Defeating a system's final guardian opens its **jump gate**. The **Galaxy** map 
 
 Difficulty keeps rising gently (rocks ~×1.09, pirates ~×1.1 per system) so that, with the Legacy you'd have by then, every system takes the simulator ~145–150 minutes.
 
+## Every system has its own shape
+
+Systems share the same roles (a start moon, a capital, ore fields, a black market…) but not the same layout. `LAYOUT` in `src/galaxy.js` decides which worlds are moons of what, orbit sizes, stretched (`ecc`) and tilted (`tilt`) orbits, the star's size, the shape and colors of the belts (`ring`, `double`, `wide`, `arcs`, `spiral`, or a ring around a giant) and the system's sights on the map (dust disk, comets, nebula, pulsar beams, an ancient ring, solar flares, an accretion spiral). Examples: Centauri's Pandora is a moon of the giant Typhon; Barnard's red dwarf keeps its worlds huddled close; Sirius' belt is a ring around Argent; Tau Ceti has twin worlds; Kepler's capital and two more cities are moons of Maelstrom; the Pulsar runs like clockwork; Betelgeuse's star fills the middle of the map. On arrival, the welcome screen shows an animated portrait of the new system.
+
+**Tribute:** when you arrive in a new system the welcome screen offers to spend your Tribute right away, the Galaxy button glows with the amount while you can afford a Legacy upgrade, and plans bought mid-system apply immediately.
+
 ## Mobile
 
 - Menus scroll with a finger through the game's own kinetic scroller, so they also work in full screen (where the host page blocks native scrolling); a drag never presses the button it started on.

@@ -3371,6 +3371,45 @@ Object.assign(SYSTEMS, {
  }
 });
 
+// ---------- every system has its own shape ----------
+// Layout overrides on top of each system's names: which worlds are moons of what, orbit sizes,
+// stretched (ecc) and tilted orbits, the star's size, how the belts look and the sights on the map.
+const LAYOUT = {
+  centauri: { sys: { belts: { ceres: { style: 'double', w: 30 } }, tour: 'Pandora is no planet: it is a <b>moon of the gas giant Typhon</b>, with its own tiny moon Tethys. The Halcyon belt is split in two rings.' },
+    locs: { jupiter: { r: 220, size: 22, period: 600 }, tierra: { parent: 'jupiter', r: 40, period: 30, a0: 1, desc: 'An ocean moon of the giant Typhon, with its own little moon. Pays well for every metal.' }, luna: { parent: 'tierra', r: 15 }, europa: { parent: 'jupiter', r: 64, period: 18 },
+      venus: { r: 120, ecc: 0.1 }, mercurio: { r: 70, ecc: 0.25, tilt: 0.6 }, marte: { r: 300, ecc: 0.12, tilt: 2 }, ceres: { r: 345 }, saturno: { r: 455 }, troyanos: { follow: 'saturno', offset: -1.05 }, pluton: { r: 565, ecc: 0.35, tilt: 2.4 }, kuiper: { r: 625 }, oort: { r: 780 } } },
+  barnard: { sys: { starScale: 0.7, belts: { ceres: { style: 'wide', w: 26 }, kuiper: { style: 'wide', w: 40 } }, tour: 'A small, dim red dwarf: its worlds <b>huddle close together</b>, so hops between them are short and cheap — and everything orbits fast.' },
+    locs: { mercurio: { r: 40, period: 40 }, venus: { r: 64, period: 70 }, tierra: { r: 92, period: 110 }, luna: { r: 12 }, marte: { r: 126, period: 170 }, ceres: { r: 170, period: 260 }, jupiter: { r: 228, period: 420 }, saturno: { r: 290, period: 600 }, pluton: { r: 352, ecc: 0.2, period: 900 }, kuiper: { r: 400 }, oort: { r: 520 } } },
+  sirius: { sys: { starScale: 1.3, mapfx: ['glare'], belts: { ceres: { w: 12, n: 700 }, kuiper: { style: 'arcs', w: 50 } }, tour: 'The brightest star in the sky. Its worlds keep far away, and the Ironheart belt is <b>a ring around the giant Argent</b>.' },
+    locs: { mercurio: { r: 95 }, venus: { r: 150 }, tierra: { r: 205 }, marte: { r: 262, ecc: 0.2, tilt: 1.2 }, jupiter: { r: 335, size: 22 }, ceres: { parent: 'jupiter', r: 50, period: 40, desc: 'A station inside the great ring around Argent. Iron, nickel, cobalt… and pirates.' }, europa: { parent: 'jupiter', r: 78 },
+      saturno: { r: 470 }, troyanos: { follow: 'saturno', offset: 1.05 }, pluton: { r: 590, ecc: 0.3, tilt: 2.8 }, kuiper: { r: 650 }, oort: { r: 800 } } },
+  tauceti: { sys: { belts: { ceres: { w: 12, n: 1000 }, kuiper: { style: 'double', w: 50 } }, tour: 'Aurum and Silk are <b>twin worlds circling each other</b>, and the black market of Freeport hides <b>among the moons of Crown</b>.' },
+    locs: { mercurio: { r: 75 }, tierra: { r: 150 }, venus: { parent: 'tierra', r: 30, period: 20, size: 8 }, luna: { r: 14 }, marte: { r: 205, ecc: 0.1 }, ceres: { r: 252 }, jupiter: { r: 332 }, saturno: { r: 425 }, titan: { r: 30 }, pluton: { parent: 'saturno', r: 50, period: 26 }, kuiper: { r: 560 }, oort: { r: 720 } } },
+  eridani: { sys: { mapfx: ['disk'], belts: { ceres: { style: 'wide', w: 40 }, kuiper: { style: 'wide', w: 80 } }, tour: 'A thick <b>dust disk</b> fills the whole system. Even the corsair den of Snuff hides inside it, close to the star.' },
+    locs: { mercurio: { r: 60 }, venus: { r: 105 }, tierra: { r: 150 }, marte: { r: 205 }, pluton: { r: 248, ecc: 0.15, period: 520 }, ceres: { r: 295 }, jupiter: { r: 365 }, saturno: { r: 445 }, kuiper: { r: 565 }, oort: { r: 740 } } },
+  vega: { sys: { mapfx: ['comets'], belts: { ceres: { style: 'arcs', w: 40 }, kuiper: { style: 'arcs', w: 70 } }, tour: 'Everything here spins fast on <b>tilted, stretched orbits</b>, the belts are herds of ice, and comets streak across the map.' },
+    locs: { mercurio: { r: 70, ecc: 0.2, tilt: 0.3, period: 40 }, venus: { r: 112, ecc: 0.15, tilt: 1.4, period: 66 }, tierra: { r: 158, ecc: 0.1, tilt: 2.3, period: 105 }, marte: { r: 212, ecc: 0.25, tilt: 0.9, period: 180 }, ceres: { r: 272, ecc: 0.2, tilt: 0.5, period: 300 },
+      jupiter: { r: 352, ecc: 0.15, tilt: 1.8, period: 550 }, saturno: { r: 442, ecc: 0.2, tilt: 2.6, period: 900 }, pluton: { r: 545, ecc: 0.45, tilt: 0.2, period: 1500 }, kuiper: { r: 612, ecc: 0.3, tilt: 1.1 }, oort: { r: 770, ecc: 0.2 } } },
+  altair: { sys: { belts: { ceres: { style: 'arcs', w: 36 } }, tour: 'Tortuga, the pirate capital, <b>swings in on a stretched orbit right past Haven</b>. Ambush Alley trails behind Bulwark, and the great storm-giant is the outermost world.' },
+    locs: { tierra: { r: 140 }, pluton: { r: 180, ecc: 0.35, tilt: 1, period: 240 }, marte: { r: 225 }, troyanos: { follow: 'marte', offset: 1.05 }, ceres: { r: 282 }, saturno: { r: 345 }, jupiter: { r: 455, size: 24 }, kuiper: { r: 585 }, oort: { r: 760 } } },
+  kepler: { sys: { tour: 'Thalassa, Pearlhaze and Undertow are all <b>moons of the giant Maelstrom</b> — a little system inside the system — and Wreckreef hides among Coralring\'s moons.' },
+    locs: { jupiter: { r: 215, size: 24, period: 640 }, tierra: { parent: 'jupiter', r: 44, period: 28, desc: 'An ocean moon of the giant Maelstrom. No land at all: the cities float.' }, luna: { parent: 'tierra', r: 14 }, venus: { parent: 'jupiter', r: 72, period: 45, desc: 'A shimmering cloud moon of Maelstrom. Its people love pearls.' }, europa: { parent: 'jupiter', r: 98, period: 60 },
+      mercurio: { r: 90 }, marte: { r: 295 }, ceres: { r: 345 }, saturno: { r: 455 }, troyanos: { follow: 'saturno', offset: -1.05 }, pluton: { parent: 'saturno', r: 54, period: 30 }, kuiper: { r: 600 }, oort: { r: 760 } } },
+  rigel: { sys: { starScale: 1.9, mapfx: ['glare'], belts: { ceres: { style: 'double', w: 30 } }, tour: 'Rigel is <b>enormous</b> — so big and bright that its worlds keep their distance.' },
+    locs: { mercurio: { r: 120 }, venus: { r: 175 }, tierra: { r: 235 }, marte: { r: 295 }, ceres: { r: 350 }, jupiter: { r: 425 }, saturno: { r: 505 }, pluton: { r: 600 }, kuiper: { r: 665 }, oort: { r: 820 } } },
+  betelgeuse: { sys: { starScale: 3.2, mapfx: ['flares'], belts: { ceres: { style: 'wide', w: 30 } }, tour: 'The star is <b>so swollen</b> it fills the middle of the map — Pyre orbits just above its boiling surface.' },
+    locs: { mercurio: { r: 78, period: 50 }, venus: { r: 140 }, tierra: { r: 192 }, marte: { r: 250, ecc: 0.15 }, ceres: { r: 302 }, jupiter: { r: 372 }, saturno: { r: 452 }, pluton: { r: 560, ecc: 0.3, tilt: 2 }, kuiper: { r: 620 }, oort: { r: 790 } } },
+  orion: { sys: { mapfx: ['nebula'], belts: { ceres: { style: 'arcs', w: 44 }, kuiper: { style: 'arcs', w: 70 } }, tour: 'Newborn worlds on <b>wild, stretched orbits</b> inside glowing clouds; the belts are still clumping together.' },
+    locs: { mercurio: { r: 80, ecc: 0.35, tilt: 2.5 }, venus: { r: 122, ecc: 0.3, tilt: 0.4 }, tierra: { r: 166, ecc: 0.25, tilt: 1.6 }, marte: { r: 226, ecc: 0.4, tilt: 2.9 }, ceres: { r: 282, ecc: 0.2, tilt: 0.8 }, jupiter: { r: 362, ecc: 0.3, tilt: 2.1 }, saturno: { r: 452, ecc: 0.25, tilt: 1.2 }, pluton: { r: 545, ecc: 0.5, tilt: 0.1 }, kuiper: { r: 612, ecc: 0.25, tilt: 1.9 }, oort: { r: 780, ecc: 0.3 } } },
+  pulsar: { sys: { starScale: 0.55, mapfx: ['beams'], belts: { ceres: { w: 10, n: 800 }, kuiper: { w: 14, n: 600 } }, tour: 'Its worlds orbit in <b>perfect clockwork</b>: perfectly round, evenly spaced orbits, like the marks on a clock face — while the pulsar\'s beams sweep over them.' },
+    locs: { mercurio: { r: 70, period: 40, a0: 0.0 }, venus: { r: 125, period: 80, a0: 0.785 }, tierra: { r: 180, period: 120, a0: 1.57 }, marte: { r: 235, period: 160, a0: 2.355 }, ceres: { r: 290, period: 240, a0: 3.14 }, jupiter: { r: 345, period: 320, a0: 3.925 }, saturno: { r: 400, period: 400, a0: 4.71 }, pluton: { r: 455, period: 480, a0: 5.495 }, kuiper: { r: 510, period: 640 }, oort: { r: 640, a0: 0 } } },
+  rim: { sys: { mapfx: ['artring'], belts: { ceres: { style: 'arcs', w: 30 } }, tour: 'A <b>golden ring built by the ancients</b> circles the whole star — Ringwork rides right on it.' },
+    locs: { mercurio: { r: 75 }, venus: { r: 130 }, tierra: { r: 185 }, marte: { r: 240 }, ceres: { r: 300 }, jupiter: { r: 380 }, saturno: { r: 470 }, pluton: { r: 560 }, kuiper: { r: 630 }, oort: { r: 790 } } },
+  sgra: { sys: { mapfx: ['spiral'], belts: { ceres: { style: 'spiral', w: 30 }, kuiper: { style: 'spiral', w: 50 } }, tour: 'Everything <b>spirals inward</b>: fast, stretched orbits and glowing arms of gas falling toward the black hole.' },
+    locs: { mercurio: { r: 92, ecc: 0.3, period: 30 }, venus: { r: 140, ecc: 0.25, tilt: 1, period: 55 }, tierra: { r: 196, ecc: 0.2, tilt: 2, period: 90 }, marte: { r: 250, ecc: 0.3, tilt: 3, period: 140 }, ceres: { r: 300, period: 190 }, jupiter: { r: 372, ecc: 0.2, tilt: 0.5, period: 280 }, saturno: { r: 452, ecc: 0.25, tilt: 1.5, period: 400 }, pluton: { r: 545, ecc: 0.5, tilt: 2.4, period: 600 }, kuiper: { r: 602, period: 900 }, oort: { r: 770 } } },
+};
+for (const id in LAYOUT) Object.assign(SYSTEMS[id], LAYOUT[id].sys, { layout: LAYOUT[id].locs });
+
 // the road to the core: 15 systems from the rim to the black hole
 const GALAXY = [
   { id: 'sol', n: 'Sol', star: 'sol', x: -0.78, y: 0.42 },
@@ -3398,7 +3437,7 @@ const nextSystem = () => GALAXY[GALAXY.findIndex(g => g.id === sysId()) + 1];
 function applySystem(id) {
   const D = SYSTEMS[id] || SYSTEMS.sol, base = SOL_SNAP;
   for (const l of LOCS) {
-    const b = base.locs.find(x => x.id === l.id), o = (D.locs || {})[l.id] || {};
+    const b = base.locs.find(x => x.id === l.id), o = { ...((D.locs || {})[l.id] || {}), ...((D.layout || {})[l.id] || {}) };
     for (const k of Object.keys(l)) if (k !== 'id') delete l[k];
     Object.assign(l, JSON.parse(JSON.stringify(b)), JSON.parse(JSON.stringify({ ...o, field: undefined })));
     if (b.field || o.field) l.field = { ...(b.field || {}), ...(o.field || {}) };
@@ -3430,6 +3469,13 @@ const LEGACY = {
   cargoPlan: { icon: '▣', n: 'Cargo Plans', d: 'Start each system with +5 cargo bay levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
   extrPlan:  { icon: '⚗', n: 'Extractor Plans', d: 'Start each system with +5 extractor levels', max: 3, cost: lv => 6 * Math.pow(2, lv) },
 };
+// the cheapest Legacy upgrade you could buy right now (null if none)
+function legacyAffordable() {
+  const G = S && S.galaxy; if (!G) return null;
+  let best = null;
+  for (const k in LEGACY) { const L = LEGACY[k], lv = G.legacy[k] || 0; if (L.max && lv >= L.max) continue; const c = L.cost(lv); if (c <= G.tribute && (!best || c < best.c)) best = { k, c }; }
+  return best;
+}
 const legacyLv = k => (S && S.galaxy && S.galaxy.legacy[k]) || 0;
 // tools found in the galaxy stay with you forever (drill from Barnard, tractor pulse from Tau Ceti)
 const hasTool = k => !!(S && S.galaxy && S.galaxy.tools && S.galaxy.tools[k]);
@@ -3440,7 +3486,12 @@ function buyLegacy(k) {
   const L = LEGACY[k], G = S.galaxy, lv = G.legacy[k] || 0;
   if (L.max && lv >= L.max) return false;
   const c = L.cost(lv); if (G.tribute < c) return false;
-  G.tribute -= c; G.legacy[k] = lv + 1; save(); return true;
+  G.tribute -= c; G.legacy[k] = lv + 1;
+  // start bonuses also apply right away in the system you're in
+  if (k === 'laserPlan') S.lv.laser += 5; if (k === 'cargoPlan') S.lv.cargo += 5; if (k === 'extrPlan') S.lv.extractor += 5;
+  if (k === 'quick') { S.credits += 50000; S.stats.earned = Math.max(S.stats.earned, UNLOCKS[U.MAP].at); checkUnlocks(); }
+  if (typeof recalcShip === 'function') recalcShip();
+  save(); updateHUD(); return true;
 }
 // one-off Tribute for leaving a system: the more you achieved there, the more it pays
 // megaprojects pay Tribute by how big they are: 2 for the Mass Driver … 15 for the Nova Cannon
@@ -3482,8 +3533,54 @@ function jumpTo(id) {
   shownCredits = S.credits;
   setScene(MineScene, 'luna');
   updateHUD(); updateTicker();
-  setTimeout(() => showModal({ icon: '🌀', title: `Welcome to ${D.n}`, cls: 'unlock', html: `<div class="unl-tag">SYSTEM ${GALAXY.findIndex(g => g.id === id) + 1} / ${GALAXY.length}</div><p>${D.intro || ''}</p><p class="hint">+${bonus} Tribute for leaving ${SYSTEMS[from].n}. Conquered systems keep paying Tribute every minute — spend it on Legacy in the <b>Galaxy</b> map.</p>`, buttons: [{ label: 'Let\'s mine', cls: 'primary', fn: () => {} }] }), 400);
+  setTimeout(() => { showModal({ icon: '', title: `Welcome to ${D.n}`, cls: 'unlock', html: `<div class="unl-tag">SYSTEM ${GALAXY.findIndex(g => g.id === id) + 1} / ${GALAXY.length}</div><canvas id="sysPortrait" class="sys-portrait" width="460" height="230"></canvas>${D.tour ? `<p class="tour">${D.tour}</p>` : ''}<p>${D.intro || ''}</p><div class="trib-call">⬢ <b>${Math.floor(G.tribute)} Tribute</b> to spend (+${bonus} for leaving ${SYSTEMS[from].n}). Spend it on <b>Legacy</b> now — permanent bonuses that make ${D.n} much faster.</div>`,
+    buttons: legacyAffordable() ? [{ label: '⬢ Spend Tribute on Legacy', cls: 'primary', fn: () => setTimeout(() => { GalaxyScene.sel = id; openGalaxy(); }, 50) }, { label: 'Later', fn: () => {} }] : [{ label: 'Let\'s mine', cls: 'primary', fn: () => {} }] }); startPortrait(); }, 400);
   return true;
+}
+
+// an animated portrait of the system you just arrived in: its star, orbits, belts and worlds
+function startPortrait() {
+  const c = $('sysPortrait'); if (!c) return;
+  const x = c.getContext('2d'), w = c.width, h = c.height, t0 = performance.now();
+  let maxR = 0; for (const l of NODES) if (!l.secret) { const p = locPos(l, 0); maxR = Math.max(maxR, Math.hypot(p.x, p.y)); }
+  const sc = Math.min(w * 0.48, h * 0.9) / (maxR + 30);
+  const frame = () => {
+    if (!document.body.contains(c)) return;
+    const t = (performance.now() - t0) / 1000, day = t * 6;
+    x.fillStyle = '#04060f'; x.fillRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2;
+    x.save(); x.translate(cx, cy); x.scale(1, 0.62); x.translate(-cx, -cy);   // a tilted view
+    for (const f of sysDef().mapfx || []) if (f === 'disk' || f === 'nebula' || f === 'spiral' || f === 'glare') glow(x, cx, cy, maxR * sc * 1.1, f === 'nebula' ? '#ff7ac833' : f === 'glare' ? '#9cc8ff33' : '#ff9a5a33', 0.9);
+    if ((sysDef().mapfx || []).includes('artring')) { x.strokeStyle = 'rgba(255,210,120,0.6)'; x.lineWidth = 3; x.beginPath(); x.arc(cx, cy, 470 * sc, 0, TAU); x.stroke(); }
+    for (const l of LOCS) if (!l.parent && !l.follow && !l.secret && l.r) { x.strokeStyle = 'rgba(120,170,255,0.22)'; x.lineWidth = 1; x.beginPath(); x.ellipse(cx, cy, l.r * sc, l.r * sc * (1 - (l.ecc || 0)), l.tilt || 0, 0, TAU); x.stroke(); }
+    for (const id of ['ceres', 'kuiper']) {
+      const b = LOC[id], B = Object.assign({}, BELT_DEF[id], (sysDef().belts || {})[id] || {}); if (B.style === 'none') continue;
+      const cols = beltCols(id), c0 = b.parent ? locPos(b.parent, day) : { x: 0, y: 0 }, R = b.parent ? b.r * 1.6 : b.r + B.dr;
+      for (let i = 0; i < 420; i++) {
+        const q = BELTP[i]; let a = q.a + day / B.period * TAU * q.sp, rr = R + q.u * B.w;
+        if (B.style === 'arcs') { a = q.k * TAU / 3 + q.u * 0.55 + day / B.period * TAU; rr = R + (q.v - 0.5) * B.w * 0.8; }
+        else if (B.style === 'double') rr = R + (q.k === 0 ? -1 : 1) * B.w * 0.75 + q.u * B.w * 0.25;
+        else if (B.style === 'spiral') { a = q.v * TAU * 1.5 + (q.k % 2) * Math.PI + day / B.period * TAU; rr = R * (0.35 + q.v * 0.9) + q.u * B.w * 0.3; }
+        else if (B.style === 'wide') rr = R + q.u * B.w * 2.6;
+        const p = orbitXY(b.parent ? {} : b, a, rr); x.fillStyle = cols[Math.floor(q.c * cols.length)]; x.globalAlpha = 0.7; x.fillRect(cx + (c0.x + p.x) * sc, cy + (c0.y + p.y) * sc, 1.2, 1.2);
+      }
+      x.globalAlpha = 1;
+    }
+    x.restore();
+    drawSun(x, cx, cy, 9 * (sysDef().starScale || 1), t, sysDef().star);
+    if (sysDef().companion) drawSun(x, cx + 34, cy - 14, 5, t, sysDef().companion);
+    for (const l of LOCS) {
+      if (l.secret || l.id === 'troyanos') continue;
+      // moons spread out so you can see them
+      const pp = o => { const r0 = locPos(o, day); if (!o.parent) return r0; const q0 = locPos(o.parent, day), q = pp(LOC[o.parent]); return { x: q.x + (r0.x - q0.x) * 2.6, y: q.y + (r0.y - q0.y) * 2.6 }; };
+      const p = pp(l);
+      const px = cx + p.x * sc, py = cy + p.y * sc * 0.62, r = Math.max(2.5, l.size * 0.55);
+      drawPlanet(x, px, py, r, l, Math.atan2(cy - py, cx - px), t);
+      if (!l.parent) { x.fillStyle = 'rgba(220,235,255,0.75)'; x.font = '600 10px Rajdhani, sans-serif'; x.textAlign = 'center'; x.fillText(l.n, px, py + r + 10); }
+    }
+    requestAnimationFrame(frame);
+  };
+  frame();
 }
 
 // ---------- the final boss of each system opens its gate ----------
@@ -3587,6 +3684,17 @@ function renderGalaxyPanel() {
   const done = G ? G.done : [], cur = sysId(), nx = nextSystem();
   let h = `<div class="lp-head"><div><h3>The Galaxy</h3><small>${done.length} of ${GALAXY.length} systems conquered</small></div><button class="x" onclick="closeGalaxy()">✕</button></div>`;
   h += `<div class="gal-trib"><div><small>TRIBUTE</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? `+${tributeRate()} / min from ${conquered()} conquered system${conquered() > 1 ? 's' : ''}` : 'Conquer a system to earn Tribute'}</span></div>`;
+  const legacyHtml = () => {
+    let x = `<div class="sub">Legacy <small class="dim">· permanent, all systems · bought plans also apply right now</small></div><div class="legacy">`;
+    for (const k in LEGACY) {
+      const L = LEGACY[k], lv = G.legacy[k] || 0, maxed = L.max && lv >= L.max, c = L.cost(lv);
+      x += `<div class="lg-row ${!maxed && G.tribute >= c ? 'can' : ''}"><span>${L.icon} <b>${L.n}</b> ${L.max === 1 ? (lv ? '<small class="good">owned</small>' : '') : `<small>Lv ${lv}${L.max ? '/' + L.max : ''}</small>`}<br><small class="dim">${L.d}</small></span>
+        <button class="btn small-btn" ${maxed || G.tribute < c ? 'disabled' : ''} onclick="buyLegacy('${k}') && (sfx('upgrade'), renderGalaxyPanel())">${maxed ? 'Max' : `${c} ⬢`}</button></div>`;
+    }
+    return x + '</div>';
+  };
+  const spendFirst = G && legacyAffordable();
+  if (spendFirst) h += `<div class="trib-call">⬢ You have <b>${Math.floor(G.tribute)} Tribute</b> to spend. Legacy upgrades are permanent and make every system faster.</div>` + legacyHtml();
   // selected star
   h += `<div class="sub">${g.n} <small class="dim">· system ${i + 1}</small></div>`;
   if (g.id === cur) h += `<p class="hint">You are here.${S.gateOpen ? '' : ' Rule this system and defeat its guardian to open the gate.'}</p>`;
@@ -3612,21 +3720,14 @@ function renderGalaxyPanel() {
     if (jb.left.length) h += `<div class="trib-left">${jb.left.slice(0, 8).map(x => `<div class="srow"><span>${x.n}${x.cost ? ` <small class="dim">${fmt(x.cost)} cr</small>` : ''}</span><b>+${x.t}</b></div>`).join('')}</div>`;
   }
   // legacy shop
-  if (G) {
-    h += '<div class="sub">Legacy <small class="dim">· permanent, all systems</small></div><div class="legacy">';
-    for (const k in LEGACY) {
-      const L = LEGACY[k], lv = G.legacy[k] || 0, maxed = L.max && lv >= L.max, c = L.cost(lv);
-      h += `<div class="lg-row"><span>${L.icon} <b>${L.n}</b> ${L.max === 1 ? (lv ? '<small class="good">owned</small>' : '') : `<small>Lv ${lv}${L.max ? '/' + L.max : ''}</small>`}<br><small class="dim">${L.d}</small></span>
-        <button class="btn small-btn" ${maxed || G.tribute < c ? 'disabled' : ''} onclick="buyLegacy('${k}') && (sfx('upgrade'), renderGalaxyPanel())">${maxed ? 'Max' : `${c} ⬢`}</button></div>`;
-    }
-    h += '</div>';
-  } else h += '<p class="hint">Legacy upgrades unlock after your first jump: spend Tribute on permanent bonuses for every system.</p>';
+  if (G) { if (!spendFirst) h += legacyHtml(); }
+  else h += '<p class="hint">Legacy upgrades unlock after your first jump: spend Tribute on permanent bonuses for every system.</p>';
   $('galPanel').innerHTML = h;
 }
 function openGalaxy() { sfx('click'); closeSheet(true); GalaxyScene.prev = scene === GalaxyScene ? GalaxyScene.prev : scene === MineScene ? null : scene; setScene(GalaxyScene); }
 function closeGalaxy() { sfx('click'); setScene(has(U.MAP) ? MapScene : MineScene, has(U.MAP) ? undefined : S.loc); }
 function confirmJump(id) {
   const D = SYSTEMS[id];
-  showModal({ icon: '🌀', title: `Jump to ${D.n}?`, html: `<p>Everything you built in <b>${sysName()}</b> stays behind and becomes part of your empire: it pays <b>Tribute</b> every minute.</p><p>You start fresh in ${D.n}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there — but ore is worth more.</p>`,
+  showModal({ icon: '🌀', title: `Jump to ${D.n}?`, html: `<p>Everything you built in <b>${sysName()}</b> stays behind and becomes part of your empire: it pays <b>Tribute</b> every minute.</p><p>You start fresh in ${D.n}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there.</p><div class="trib-call">You'll arrive with <b>${Math.floor((S.galaxy ? S.galaxy.tribute : 0) + jumpBonus().b)} Tribute</b>. Spend it on <b>Legacy</b> as soon as you land (Galaxy button) — it's what makes each new system faster.</div>`,
     buttons: [{ label: 'Jump!', cls: 'primary', fn: () => { sfx('win'); jumpTo(id); } }, { label: 'Not yet', fn: () => {} }] });
 }

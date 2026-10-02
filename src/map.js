@@ -1,12 +1,16 @@
 'use strict';
 // ============ SCENE: SOLAR SYSTEM MAP ============
-const BELT = []; const KUIPER = [];
+// belt particles: positions are relative (angle + radial offset); each system gives its belts a shape and colors
+const BELTP = [];
 (function () {
   let s = 3; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  const cols = ['#c9b8a0', '#a89a88', '#d9c6a8', '#8f8577', '#b7a58c'];
-  for (let i = 0; i < 900; i++) BELT.push({ a: r() * TAU, r: 238 + (r() + r() + r() - 1.5) * 34, s: 0.6 + r() * 1.6, sp: 0.9 + r() * 0.2, c: cols[Math.floor(r() * cols.length)] });
-  for (let i = 0; i < 600; i++) KUIPER.push({ a: r() * TAU, r: 585 + (r() + r() - 1) * 60, s: 0.6 + r() * 1.5, sp: 0.95 + r() * 0.1, c: r() > 0.5 ? '#a9c2ff' : '#d0dcff' });
+  for (let i = 0; i < 1000; i++) BELTP.push({ a: r() * TAU, u: (r() + r() + r() - 1.5) / 1.5, s: 0.6 + r() * 1.6, sp: 0.9 + r() * 0.2, c: r(), k: Math.floor(r() * 3), v: r() });
 })();
+const BELT_DEF = { ceres: { style: 'ring', w: 34, dr: -24, n: 900, period: 560 }, kuiper: { style: 'ring', w: 60, dr: -15, n: 600, period: 3300 } };
+function beltCols(id) {
+  const f = LOC[id] && LOC[id].field, base = id === 'kuiper' ? ['#a9c2ff', '#d0dcff', '#8fa8e0'] : ['#c9b8a0', '#a89a88', '#d9c6a8', '#8f8577'];
+  return f ? [...base, ...Object.keys(f.ores).map(k => ITEMS[k].c)] : base;
+}
 
 const MapScene = {
   cam: { x: 0, y: 0, z: 1 }, camT: null, sel: null, travel: null, t: 0, hover: null, drag: null, trail: new Particles(),
@@ -37,7 +41,7 @@ const MapScene = {
       const par = LOC[loc.parent];
       const pp = this.spos(par, day);
       const a = loc.a0 + day / loc.period * TAU;
-      const d = Math.max(loc.r * this.cam.z, this.pr(par) + this.pr(loc) + 14);
+      const d = Math.max(loc.r * this.cam.z, this.pr(par) + this.pr(loc) + 14 + loc.r * 0.45);
       return { x: pp.x + Math.cos(a) * d, y: pp.y + Math.sin(a) * d };
     }
     const p = locPos(loc, day);
@@ -128,24 +132,26 @@ const MapScene = {
       if (l.parent || l.follow || !locVisible(l.id)) continue;
       const R = l.r * z, open = locOpen(l.id);
       ctx.strokeStyle = open ? 'rgba(120,170,255,0.16)' : 'rgba(120,170,255,0.06)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(sun.x, sun.y, R, 0, TAU); ctx.stroke();
+      const ry = R * (1 - (l.ecc || 0)), tl = l.tilt || 0;
+      ctx.beginPath(); ctx.ellipse(sun.x, sun.y, R, ry, tl, 0, TAU); ctx.stroke();
       if (open && l.id !== 'kuiper' && l.id !== 'oort') {
         const a = l.a0 + day / l.period * TAU;
         for (let i = 0; i < 12; i++) {
           ctx.strokeStyle = `rgba(120,200,255,${0.32 * (1 - i / 12)})`; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(sun.x, sun.y, R, a - (i + 1) * 0.05, a - i * 0.05); ctx.stroke();
+          ctx.beginPath(); ctx.ellipse(sun.x, sun.y, R, ry, tl, a - (i + 1) * 0.05, a - i * 0.05); ctx.stroke();
         }
       }
     }
-    // belts
-    const beltOpen = has(U.BELT), kOpen = has(U.FRONTIER);
-    for (const b of BELT) { const a = b.a + day / 560 * TAU * b.sp; ctx.globalAlpha = beltOpen ? 0.75 : 0.3; ctx.fillStyle = b.c; ctx.fillRect(sun.x + Math.cos(a) * b.r * z, sun.y + Math.sin(a) * b.r * z, b.s, b.s); }
-    for (const b of KUIPER) { const a = b.a + day / 3300 * TAU * b.sp; ctx.globalAlpha = kOpen ? 0.6 : 0.2; ctx.fillStyle = b.c; ctx.fillRect(sun.x + Math.cos(a) * b.r * z, sun.y + Math.sin(a) * b.r * z, b.s, b.s); }
+    // belts (each system shapes its own) and the system's own sights
+    this.drawMapFx(ctx, t, day, sun, z, 'back');
+    this.drawBelt(ctx, 'ceres', day, sun, z, has(U.BELT) ? 0.75 : 0.3);
+    this.drawBelt(ctx, 'kuiper', day, sun, z, has(U.FRONTIER) ? 0.6 : 0.2);
     ctx.globalAlpha = 1;
     const tp = this.spos('troyanos', day);
     ctx.fillStyle = locOpen('troyanos') ? 'rgba(210,190,160,0.75)' : 'rgba(210,190,160,0.25)';
     for (let i = 0; i < 50; i++) { const a = i * 2.4 + t * 0.02, rr = (i % 9) * 2.6 * clamp(z, 0.8, 2.2); ctx.fillRect(tp.x + Math.cos(a) * rr, tp.y + Math.sin(a) * rr * 0.8, 1.6, 1.6); }
-    drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36), t, sysDef().star);
+    drawSun(ctx, sun.x, sun.y, clamp(15 * z, 10, 36) * (sysDef().starScale || 1), t, sysDef().star);
+    this.drawMapFx(ctx, t, day, sun, z, 'front');
     if (sysDef().companion) { const a = t * 0.05, d = clamp(15 * z, 10, 36) * 3.2; drawSun(ctx, sun.x + Math.cos(a) * d, sun.y + Math.sin(a) * d * 0.6, clamp(9 * z, 6, 20), t, sysDef().companion); }
     if (built('dyson')) {
       const R = clamp(15 * z, 10, 36) * 2.6;
@@ -327,6 +333,43 @@ const MapScene = {
           ctx.beginPath(); ctx.arc(fx + Math.cos(i * 2.1) * 5, fy + Math.sin(i * 2.1) * 5, rr, 0, TAU); ctx.stroke();
         }
         ctx.globalAlpha = 1;
+      }
+    }
+  },
+  drawBelt(ctx, id, day, sun, z, alpha) {
+    const base = LOC[id]; if (!base || !base.r) return;
+    const B = Object.assign({}, BELT_DEF[id], (sysDef().belts || {})[id] || {});
+    if (B.style === 'none') return;
+    const cols = beltCols(id), c0 = base.parent ? this.spos(base.parent, day) : sun, R = (base.parent ? base.r * 1.6 : base.r + B.dr), W = B.w;
+    const orb = base.parent ? {} : base;
+    ctx.globalAlpha = alpha;
+    for (let i = 0; i < B.n; i++) {
+      const b = BELTP[i % BELTP.length];
+      let a = b.a + day / B.period * TAU * b.sp, rr = R + b.u * W;
+      if (B.style === 'arcs') { a = b.k * TAU / 3 + b.u * 0.55 + day / B.period * TAU; rr = R + (b.v - 0.5) * W * 0.8; }
+      else if (B.style === 'double') rr = R + (b.k === 0 ? -1 : 1) * W * 0.75 + b.u * W * 0.25;
+      else if (B.style === 'spiral') { const arm = b.k % 2; a = b.v * TAU * 1.5 + arm * Math.PI + day / B.period * TAU; rr = R * (0.35 + b.v * 0.9) + b.u * W * 0.3; }
+      else if (B.style === 'wide') rr = R + b.u * W * 2.6;
+      const p = orbitXY(orb, a, rr);
+      ctx.fillStyle = cols[Math.floor(b.c * cols.length)];
+      ctx.fillRect(c0.x + p.x * z, c0.y + p.y * z, b.s, b.s);
+    }
+    ctx.globalAlpha = 1;
+  },
+  // each star system's own sights on the map
+  drawMapFx(ctx, t, day, sun, z, layer) {
+    const fx = sysDef().mapfx || [], R = clamp(15 * z, 10, 36) * (sysDef().starScale || 1);
+    for (const f of fx) {
+      if (layer === 'back') {
+        if (f === 'disk') { for (let k = 0; k < 3; k++) { ctx.save(); ctx.translate(sun.x, sun.y); ctx.scale(1, 0.55); glow(ctx, 0, 0, (260 + k * 140) * z, ['#c0804a33', '#a0603a22', '#80402a18'][k], 0.9); ctx.restore(); } }
+        if (f === 'nebula') { const C = ['#ff7ac855', '#7a9aff44', '#7affd044', '#c080ff44']; for (let k = 0; k < 7; k++) { const a = k * 2.1 + t * 0.01, d = (180 + k * 70) * z; glow(ctx, sun.x + Math.cos(a) * d, sun.y + Math.sin(a) * d * 0.7, (120 + (k % 3) * 60) * z, C[k % 4], 0.8); } }
+        if (f === 'glare') glow(ctx, sun.x, sun.y, 520 * z, '#9cc8ff33', 1);
+        if (f === 'spiral') { ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (let arm = 0; arm < 2; arm++) for (let i = 0; i < 90; i++) { const k = i / 90, a = arm * Math.PI + k * TAU * 1.4 - t * 0.15, rr = (40 + k * 620) * z; ctx.fillStyle = `rgba(255,${150 + k * 80},${80 + k * 100},${0.35 * (1 - k)})`; ctx.beginPath(); ctx.arc(sun.x + Math.cos(a) * rr, sun.y + Math.sin(a) * rr * 0.8, (3 + k * 10) * z, 0, TAU); ctx.fill(); } ctx.restore(); }
+        if (f === 'artring') { const rr = 470 * z; ctx.strokeStyle = 'rgba(255,210,120,0.25)'; ctx.lineWidth = Math.max(3, 10 * z); ctx.beginPath(); ctx.arc(sun.x, sun.y, rr, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(255,224,128,0.8)'; for (let i = 0; i < 48; i++) { const a = i / 48 * TAU + t * 0.01; ctx.fillRect(sun.x + Math.cos(a) * rr - 2, sun.y + Math.sin(a) * rr - 2, 4, 4); } }
+        if (f === 'comets') { for (let k = 0; k < 6; k++) { const o = { ecc: 0.75, tilt: k * 1.05 }, a = t * 0.08 * (1 + k * 0.2) + k * 2, rr = 520 + k * 40, p = orbitXY(o, a, rr), q = orbitXY(o, a - 0.04, rr), x = sun.x + p.x * z, y = sun.y + p.y * z, dx = x - sun.x, dy = y - sun.y, dl = Math.hypot(dx, dy) || 1; const g = ctx.createLinearGradient(x, y, x + dx / dl * 50, y + dy / dl * 50); g.addColorStop(0, 'rgba(191,246,255,0.7)'); g.addColorStop(1, 'rgba(191,246,255,0)'); ctx.strokeStyle = g; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx / dl * 50, y + dy / dl * 50); ctx.stroke(); ctx.fillStyle = '#ffffff'; ctx.fillRect(x - 1.5, y - 1.5, 3, 3); } }
+      } else {
+        if (f === 'beams') { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const a = t * 1.4; for (const k of [0, Math.PI]) { const L = 900 * z, g = ctx.createLinearGradient(sun.x, sun.y, sun.x + Math.cos(a + k) * L, sun.y + Math.sin(a + k) * L); g.addColorStop(0, 'rgba(200,235,255,0.55)'); g.addColorStop(1, 'rgba(200,235,255,0)'); ctx.strokeStyle = g; ctx.lineWidth = 14 * Math.max(0.6, z); ctx.beginPath(); ctx.moveTo(sun.x, sun.y); ctx.lineTo(sun.x + Math.cos(a + k) * L, sun.y + Math.sin(a + k) * L); ctx.stroke(); } ctx.restore(); }
+        if (f === 'flares') { ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (let i = 0; i < 5; i++) { const a = i * 1.3 + Math.sin(t * 0.3 + i) * 0.3, h = (0.5 + 0.5 * Math.sin(t * 0.7 + i * 2)) * R * 0.9; ctx.strokeStyle = 'rgba(255,120,60,0.5)'; ctx.lineWidth = R * 0.12; ctx.beginPath(); ctx.arc(sun.x + Math.cos(a) * R, sun.y + Math.sin(a) * R, h * 0.6, a - 1.6, a + 1.6); ctx.stroke(); } ctx.restore(); }
       }
     }
   },

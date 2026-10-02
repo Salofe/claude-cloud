@@ -783,7 +783,11 @@ const MineScene = {
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     }
     // minimap
-    const mh = isTouch ? 110 : 150, mw = mh * MW / MH, mx = W - mw - (isTouch ? 8 : 14), my = isTouch ? hudBottom() + 8 : H - mh - 40;
+    const mh = isTouch ? 110 : 150, mw = mh * MW / MH;
+    // the minimap never hides under the cargo panel: right side if free, else bottom left
+    let mx = W - mw - (isTouch ? 8 : 14), my = isTouch ? hudBottom() + 8 : H - mh - 40;
+    const mb = panelRect('.minebox');
+    if (mb && mx < mb.right && mx + mw > mb.left && my < mb.bottom && my + mh > mb.top) { if (isTouch) my = mb.bottom + 8; else { mx = 14; my = H - mh - 40; } }
     ctx.fillStyle = 'rgba(8,14,34,0.75)'; ctx.strokeStyle = 'rgba(61,232,255,0.35)'; ctx.lineWidth = 1;
     ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh);
     if (!this.space) { ctx.fillStyle = 'rgba(61,232,255,0.35)'; ctx.fillRect(mx, my + DOCK_Y / MH * mh, mw, mh - DOCK_Y / MH * mh); }

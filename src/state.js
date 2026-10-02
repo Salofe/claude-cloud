@@ -107,19 +107,26 @@ const oreTier = k => clamp(Math.ceil(Math.log10(ITEMS[k].b) * 1.2), 1, 5);
 const oreStars = k => '◆'.repeat(oreTier(k)) + '<i class="off">' + '◆'.repeat(5 - oreTier(k)) + '</i>';
 
 // ---------- orbital positions ----------
+// orbits can be elliptical (ecc squashes them) and tilted (tilt rotates them) — every star system has its own layout
+function orbitXY(o, a, r) {
+  r = r == null ? o.r : r;
+  const e = o.ecc || 0, tl = o.tilt || 0, x0 = Math.cos(a) * r, y0 = Math.sin(a) * r * (1 - e);
+  return { x: x0 * Math.cos(tl) - y0 * Math.sin(tl), y: x0 * Math.sin(tl) + y0 * Math.cos(tl) };
+}
 function locPos(loc, day) {
   if (typeof loc === 'string') loc = LOC[loc];
   if (loc.follow) {
     const f = LOC[loc.follow];
-    const a = f.a0 + day / f.period * TAU + loc.offset;
-    return { x: Math.cos(a) * f.r, y: Math.sin(a) * f.r };
+    const p = orbitXY(f, f.a0 + day / f.period * TAU + loc.offset);
+    if (f.parent) { const q = locPos(LOC[f.parent], day); p.x += q.x; p.y += q.y; }
+    return p;
   }
   const a = loc.a0 + day / loc.period * TAU;
   if (loc.parent) {
     const p = locPos(LOC[loc.parent], day);
     return { x: p.x + Math.cos(a) * loc.r, y: p.y + Math.sin(a) * loc.r };
   }
-  return { x: Math.cos(a) * loc.r, y: Math.sin(a) * loc.r };
+  return orbitXY(loc, a);
 }
 function locDist(a, b, day) { const p = locPos(a, day), q = locPos(b, day); return Math.hypot(p.x - q.x, p.y - q.y); }
 // a full hold is heavy: empty ships burn 60% of the fuel, full ones 140%
