@@ -876,7 +876,8 @@ const MineScene = {
       ctx.fillStyle = '#ff9ec0'; ctx.fillRect(bx, by + 29, bw * clamp(boss.sp / Math.max(1, boss.spMax), 0, 1), 3);
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     }
-    // minimap
+    // minimap (window.NO_MINIMAP: clean frames for trailer capture)
+    if (!window.NO_MINIMAP) {
     const mh = isTouch ? 110 : 150, mw = mh * MW / MH;
     // the minimap never hides under the cargo panel: right side if free, else bottom left
     let mx = W - mw - (isTouch ? 8 : 14), my = isTouch ? hudBottom() + 8 : H - mh - 40;
@@ -888,6 +889,7 @@ const MineScene = {
     for (const r of this.rocks) { ctx.fillStyle = r.comet ? '#bff6ff' : r.geode && r.seen > 0 ? ITEMS[r.geode].c : r.living ? '#9fffe0' : r.gold ? '#ffd24a' : r.rich && S.lv.scanner >= 2 ? ITEMS[r.ore].c : 'rgba(200,190,170,0.7)'; ctx.fillRect(mx + r.x / MW * mw - 1, my + r.y / MH * mh - 1, r.tier * 0.8 + 0.6, r.tier * 0.8 + 0.6); }
     ctx.fillStyle = '#ff4d6d'; for (const e of this.enemies) ctx.fillRect(mx + e.x / MW * mw - 1.5, my + e.y / MH * mh - 1.5, 3, 3);
     ctx.fillStyle = '#3de8ff'; ctx.fillRect(mx + p.x / MW * mw - 2, my + p.y / MH * mh - 2, 4, 4);
+    }
     if (this.flashAt) { const k = 1 - (performance.now() - this.flashAt) / 900; if (k > 0) { ctx.fillStyle = `rgba(255,255,255,${k})`; ctx.fillRect(0, 0, W, H); } else this.flashAt = 0; }
     if (this.loc.field.hazard === 'heat' && ship.shieldMax <= 0) { ctx.fillStyle = `rgba(255,120,40,${0.08 + 0.05 * Math.sin(t * 4)})`; ctx.fillRect(0, 0, W, H); }
   },
