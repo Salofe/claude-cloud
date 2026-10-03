@@ -25,6 +25,7 @@ export const Shot: React.FC<Props> = ({ clip, trim = 0, zoom = [1.04, 1.12], pan
         trimBefore={trim}
         playbackRate={rate}
         muted
+        objectFit="cover"
         premountFor={fps}
         style={{
           width: "100%",

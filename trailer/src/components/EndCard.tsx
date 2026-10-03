@@ -5,7 +5,8 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 
 /** Title card: logo slam with a light sweep, tagline, where to play. */
-export const EndCard: React.FC<{ readonly url: string; readonly tagline: string; readonly cta: string; readonly platforms: string }> = ({ url, tagline, cta, platforms }) => {
+export const EndCard: React.FC<{ readonly url: string; readonly tagline: string; readonly cta: string; readonly platforms: string; readonly vertical?: boolean }> = ({ url, tagline, cta, platforms, vertical = false }) => {
+  const k = vertical ? 0.54 : 1;
   const frame = useCurrentFrame();
   const sweep = interpolate(frame, [8, 40], [-30, 130], clamp);
   return (
@@ -22,11 +23,11 @@ export const EndCard: React.FC<{ readonly url: string; readonly tagline: string;
             opacity: interpolate(frame, [0, 4], [0, 1], clamp),
           }}
         >
-          <div style={{ fontSize: 150, color: "white", letterSpacing: 10, textShadow: "0 0 40px rgba(255,255,255,.35)" }}>SOLAR</div>
+          <div style={{ fontSize: 150 * k, color: "white", letterSpacing: 10 * k, textShadow: "0 0 40px rgba(255,255,255,.35)" }}>SOLAR</div>
           <div
             style={{
-              fontSize: 196,
-              letterSpacing: 6,
+              fontSize: 196 * k,
+              letterSpacing: 6 * k,
               color: CYAN,
               textShadow: `0 0 60px ${CYAN}, 0 0 8px #fff`,
               WebkitMaskImage: `linear-gradient(100deg, rgba(0,0,0,.82) ${sweep - 12}%, #000 ${sweep}%, rgba(0,0,0,.82) ${sweep + 12}%)`,
@@ -40,8 +41,9 @@ export const EndCard: React.FC<{ readonly url: string; readonly tagline: string;
             marginTop: 34,
             fontFamily: BODY,
             fontWeight: 700,
-            fontSize: 50,
-            letterSpacing: 12,
+            fontSize: vertical ? 40 : 50,
+            letterSpacing: vertical ? 5 : 12,
+            padding: vertical ? "0 60px" : 0,
             color: GOLD,
             textTransform: "uppercase",
             opacity: interpolate(frame, [14, 24], [0, 1], clamp),
@@ -51,7 +53,7 @@ export const EndCard: React.FC<{ readonly url: string; readonly tagline: string;
           {tagline}
         </div>
         <div style={{ marginTop: 56, opacity: interpolate(frame, [30, 40], [0, 1], clamp), translate: interpolate(frame, [30, 44], ["0px 24px", "0px 0px"], { ...clamp, easing: ease }) }}>
-          <div style={{ fontFamily: HEAD, fontWeight: 700, fontSize: 54, color: "white", textShadow: "0 4px 20px #000" }}>{cta}</div>
+          <div style={{ fontFamily: HEAD, fontWeight: 700, fontSize: vertical ? 52 : 54, color: "white", textShadow: "0 4px 20px #000" }}>{cta}</div>
           <div
             style={{
               display: "inline-block",
@@ -63,14 +65,14 @@ export const EndCard: React.FC<{ readonly url: string; readonly tagline: string;
               boxShadow: `0 0 ${interpolate(frame % 60, [0, 30, 60], [18, 40, 18])}px ${CYAN}88`,
               fontFamily: BODY,
               fontWeight: 700,
-              fontSize: 52,
+              fontSize: vertical ? 46 : 52,
               color: CYAN,
               letterSpacing: 2,
             }}
           >
             {url}
           </div>
-          <div style={{ marginTop: 22, fontFamily: BODY, fontWeight: 600, fontSize: 40, color: "#c9d6f5", letterSpacing: 4 }}>{platforms}</div>
+          <div style={{ marginTop: 22, fontFamily: BODY, fontWeight: 600, fontSize: vertical ? 36 : 40, color: "#c9d6f5", letterSpacing: vertical ? 2 : 4 }}>{platforms}</div>
         </div>
       </div>
     </AbsoluteFill>

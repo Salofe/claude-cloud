@@ -76,11 +76,11 @@ export const Headline: React.FC<{ readonly kicker?: string; readonly text: strin
 };
 
 /** System lower-third: "SISTEMA 7 / 15" + name, top-left. */
-export const SystemTag: React.FC<{ readonly n: number; readonly name: string; readonly sub?: string; readonly color?: string }> = ({ n, name, sub, color = CYAN }) => {
+export const SystemTag: React.FC<{ readonly n: number; readonly name: string; readonly sub?: string; readonly color?: string; readonly pad?: string; readonly nameSize?: number }> = ({ n, name, sub, color = CYAN, pad = "110px 0 0 130px", nameSize = 84 }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   return (
-    <AbsoluteFill style={{ padding: "110px 0 0 130px" }}>
+    <AbsoluteFill style={{ padding: pad }}>
       <div style={{ opacity: interpolate(frame, [0, 4, durationInFrames - 4, durationInFrames], [0, 1, 1, 0], clamp) }}>
         <div style={{ fontFamily: BODY, fontWeight: 700, fontSize: 34, letterSpacing: 7, color, textShadow: "0 2px 10px #000" }}>
           SISTEMA {n} / 15
@@ -89,7 +89,7 @@ export const SystemTag: React.FC<{ readonly n: number; readonly name: string; re
           style={{
             fontFamily: HEAD,
             fontWeight: 900,
-            fontSize: 84,
+            fontSize: nameSize,
             color: "white",
             textShadow: `0 0 26px ${color}99, 0 6px 22px #000`,
             translate: interpolate(frame, [0, 10], ["-30px 0px", "0px 0px"], { ...clamp, easing: Easing.bezier(0.16, 1, 0.3, 1) }),
