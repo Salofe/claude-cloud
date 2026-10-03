@@ -14,6 +14,7 @@ async function open(opts = {}) {
   const p = await c.newPage();
   p.errs = []; p.on('pageerror', e => p.errs.push(e.message + ' ' + (e.stack || '').split('\n')[1]));
   await p.clock.install({ time: new Date('2026-10-03T12:00:00Z') });
+  await p.clock.pauseAt(new Date('2026-10-03T12:00:01Z'));   // time only moves when we step it
   await p.goto(opts.url || GAME);
   await p.clock.runFor(800);
   await p.addScriptTag({ path: path.join(__dirname, 'page.js') });
