@@ -43,7 +43,7 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
           <Slam text="VENDE" color={GOLD} />
         </Sequence>
         <Sequence name="MEJORA" from={bar(6)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="dock-sell" trim={55} zoom={[1.0, 1.03]} />
+          <Shot clip="dock-sell" trim={58} zoom={[1.0, 1.03]} />
           <Slam text="MEJORA" />
         </Sequence>
         {/* ---------- 7 the turn ---------- */}
@@ -83,7 +83,7 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
           <Headline kicker="Piratas · Guerras · Alianzas" text="DEFIÉNDELO" color={RED} />
         </Sequence>
         <Sequence name="BossSol" from={bar(16)} durationInFrames={120} premountFor={fps}>
-          <Shot clip="boss-sol" trim={30} zoom={[1.05, 1.18]} />
+          <Shot clip="boss-sol" trim={0} zoom={[1.05, 1.18]} />
           <Headline kicker="Nube de Oort" text="EL GUARDIÁN FINAL" color={RED} />
         </Sequence>
         {/* ---------- 18-19 the jump ---------- */}
@@ -100,31 +100,31 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
         </Sequence>
         {/* ---------- 22-31 systems montage, cut on the beat ---------- */}
         <Sequence name="Centauri" from={bar(22)} durationInFrames={30} premountFor={fps}>
-          <Shot clip="map-centauri" trim={20} />
+          <Shot clip="map-centauri" trim={20} zoom={[1.2, 1.4]} />
           <SystemTag n={2} name="ALFA CENTAURI" />
         </Sequence>
         <Sequence name="Barnard" from={bar(22, 2)} durationInFrames={30} premountFor={fps}>
-          <Shot clip="map-barnard" trim={20} />
+          <Shot clip="map-barnard" trim={20} zoom={[1.2, 1.4]} />
           <SystemTag n={3} name="ESTRELLA DE BARNARD" />
         </Sequence>
         <Sequence name="Sirius" from={bar(23)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="boss-sirius" trim={40} />
+          <Shot clip="boss-sirius" trim={50} />
           <SystemTag n={4} name="SIRIO" sub="La Serpiente" color={RED} />
         </Sequence>
         <Sequence name="TauCeti" from={bar(24)} durationInFrames={30} premountFor={fps}>
-          <Shot clip="map-tauceti" trim={20} />
+          <Shot clip="map-tauceti" trim={20} zoom={[1.2, 1.4]} />
           <SystemTag n={5} name="TAU CETI" />
         </Sequence>
         <Sequence name="Eridani" from={bar(24, 2)} durationInFrames={30} premountFor={fps}>
-          <Shot clip="map-eridani" trim={20} />
+          <Shot clip="map-eridani" trim={20} zoom={[1.2, 1.4]} />
           <SystemTag n={6} name="ÉPSILON ERIDANI" />
         </Sequence>
         <Sequence name="Vega" from={bar(25)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="boss-vega" trim={40} />
+          <Shot clip="boss-vega" trim={110} />
           <SystemTag n={7} name="VEGA" sub="El Leviatán" color={RED} />
         </Sequence>
         <Sequence name="Altair" from={bar(26)} durationInFrames={30} premountFor={fps}>
-          <Shot clip="map-altair" trim={20} />
+          <Shot clip="map-altair" trim={20} zoom={[1.2, 1.4]} />
           <SystemTag n={8} name="ALTAIR" />
         </Sequence>
         <Sequence name="Kepler" from={bar(26, 2)} durationInFrames={30} premountFor={fps}>
@@ -132,11 +132,11 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
           <SystemTag n={9} name="KEPLER" sub="Rocas vivas" />
         </Sequence>
         <Sequence name="Rigel" from={bar(27)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="boss-rigel" trim={40} />
+          <Shot clip="boss-rigel" trim={20} />
           <SystemTag n={10} name="RIGEL" sub="El Radiante" color={RED} />
         </Sequence>
         <Sequence name="Betelgeuse" from={bar(28)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="boss-betelgeuse" trim={40} />
+          <Shot clip="boss-betelgeuse" trim={0} />
           <SystemTag n={11} name="BETELGEUSE" sub="El Fénix" color={RED} />
         </Sequence>
         <Sequence name="Orion" from={bar(29)} durationInFrames={30} premountFor={fps}>
@@ -148,7 +148,7 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
           <SystemTag n={13} name="EL PÚLSAR" />
         </Sequence>
         <Sequence name="Rim" from={bar(30)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="boss-rim" trim={40} />
+          <Shot clip="boss-rim" trim={0} />
           <SystemTag n={14} name="BORDE DEL NÚCLEO" sub="El Arconte" color={RED} />
         </Sequence>
         <Sequence name="SgrMap" from={bar(31)} durationInFrames={60} premountFor={fps}>
@@ -157,7 +157,7 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
         </Sequence>
         {/* ---------- 32-35 finale ---------- */}
         <Sequence name="Devourer" from={bar(32)} durationInFrames={240} premountFor={fps}>
-          <Shot clip="boss-sgra" trim={30} zoom={[1.05, 1.25]} />
+          <Shot clip="boss-sgra" trim={0} zoom={[1.05, 1.25]} />
           <Sequence from={30} durationInFrames={180}>
             <Line text="¿Llegarás al centro de la galaxia?" size={76} />
           </Sequence>
