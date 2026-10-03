@@ -39,11 +39,11 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
           <Slam text="MINA" />
         </Sequence>
         <Sequence name="VENDE" from={bar(5)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="dock-sell" trim={0} zoom={[1.0, 1.03]} />
+          <Shot clip="dock-sell" trim={0} zoom={[1.0, 1.03]} dim={0.45} blur={2} />
           <Slam text="VENDE" color={GOLD} />
         </Sequence>
         <Sequence name="MEJORA" from={bar(6)} durationInFrames={60} premountFor={fps}>
-          <Shot clip="dock-sell" trim={58} zoom={[1.0, 1.03]} />
+          <Shot clip="dock-sell" trim={58} zoom={[1.0, 1.03]} dim={0.45} blur={2} />
           <Slam text="MEJORA" />
         </Sequence>
         {/* ---------- 7 the turn ---------- */}
@@ -89,8 +89,8 @@ export const Trailer: React.FC<TrailerProps> = ({ startBar }) => {
         {/* ---------- 18-19 the jump ---------- */}
         <Sequence name="Jump" from={bar(18)} durationInFrames={120} premountFor={fps}>
           <Shot clip="jump" trim={0} zoom={[1.0, 1.25]} />
-          <Sequence from={10} durationInFrames={100}>
-            <Line text="Y cuando el Sol sea tuyo…" size={80} />
+          <Sequence from={4} durationInFrames={44}>
+            <Line text="Y cuando el Sol sea tuyo…" size={80} stagger={3} />
           </Sequence>
         </Sequence>
         {/* ---------- 20-21 galaxy reveal ---------- */}

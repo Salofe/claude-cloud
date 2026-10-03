@@ -35,7 +35,8 @@ export const Headline: React.FC<{ readonly kicker?: string; readonly text: strin
   const out = interpolate(frame, [durationInFrames - 8, durationInFrames], [1, 0], clamp);
   return (
     <AbsoluteFill style={{ justifyContent: "flex-end", padding: "0 0 120px 130px" }}>
-      <div style={{ opacity: out }}>
+      <AbsoluteFill style={{ opacity: out * interpolate(frame, [0, 8], [0, 1], clamp), background: "linear-gradient(0deg, rgba(2,4,12,.88) 0%, rgba(2,4,12,.55) 26%, rgba(2,4,12,0) 46%)" }} />
+      <div style={{ opacity: out, position: "relative" }}>
         {kicker ? (
           <div
             style={{
