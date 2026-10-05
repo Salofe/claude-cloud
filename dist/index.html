@@ -10633,8 +10633,8 @@ Object.assign(TXT, {
   gal_title: { en: 'The Galaxy', es: 'La Galaxia' },
   gal_conquered_count: { en: '{n} of {total} systems conquered', es: '{n} de {total} sistemas conquistados' },
   gal_tribute: { en: 'TRIBUTE', es: 'TRIBUTO' },
-  gal_trib_rate1: { en: '+{rate} / min from 1 conquered system', es: '+{rate} / min de 1 sistema conquistado' },
-  gal_trib_rate: { en: '+{rate} / min from {n} conquered systems', es: '+{rate} / min de {n} sistemas conquistados' },
+  gal_trib_rate1: { en: '+{rate} / hour from 1 conquered system', es: '+{rate} / hora de 1 sistema conquistado' },
+  gal_trib_rate: { en: '+{rate} / hour from {n} conquered systems', es: '+{rate} / hora de {n} sistemas conquistados' },
   gal_trib_none: { en: 'Conquer a system to earn Tribute', es: 'Conquista un sistema para ganar Tributo' },
   gal_legacy_head: { en: 'Legacy <small class="dim">· permanent, all systems · bought plans also apply right now</small>', es: 'Legado <small class="dim">· permanente, en todos los sistemas · los planos comprados también aplican ya</small>' },
   gal_owned: { en: 'owned', es: 'tuyo' },
@@ -10644,7 +10644,7 @@ Object.assign(TXT, {
   gal_system_n: { en: 'system {n}', es: 'sistema {n}' },
   gal_here: { en: 'You are here.', es: 'Estás aquí.' },
   gal_here_gate: { en: ' Rule this system and defeat its guardian to open the gate.', es: ' Gobierna este sistema y derrota a su guardián para abrir el portal.' },
-  gal_conquered: { en: 'Conquered. It pays you Tribute every minute.', es: 'Conquistado. Te paga Tributo cada minuto.' },
+  gal_conquered: { en: 'Conquered. It keeps sending you a little Tribute.', es: 'Conquistado. Te sigue enviando un poco de Tributo.' },
   gal_hole: { en: 'The supermassive black hole at the heart of the galaxy. The end of the road — and maybe a door to something beyond.', es: 'El agujero negro supermasivo en el corazón de la galaxia. El final del camino… y quizás una puerta a algo más allá.' },
   gal_uncharted: { en: 'Uncharted. Arrives in a future update.', es: 'Sin explorar. Llegará en una futura actualización.' },
   gal_uncharted_next: { en: 'The gate points here, but this system isn\'t charted yet — coming in a future update.', es: 'El portal apunta aquí, pero este sistema aún no está cartografiado: llegará en una futura actualización.' },
@@ -10658,7 +10658,7 @@ Object.assign(TXT, {
   gal_leaving: { en: 'Tribute for leaving {name} <small class="dim">· {b} of {max} possible</small>', es: 'Tributo por dejar {name} <small class="dim">· {b} de {max} posibles</small>' },
   gal_legacy_locked: { en: 'Legacy upgrades unlock after your first jump: spend Tribute on permanent bonuses for every system.', es: 'Las mejoras de Legado se desbloquean tras tu primer salto: gasta Tributo en bonos permanentes para todos los sistemas.' },
   gal_confirm_title: { en: 'Jump to {name}?', es: '¿Saltar a {name}?' },
-  gal_confirm_html: { en: '<p>Everything you built in <b>{here}</b> stays behind and becomes part of your empire: it pays <b>Tribute</b> every minute.</p><p>You start fresh in {name}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there.</p><div class="trib-call">You\'ll arrive with <b>{trib} Tribute</b>. Spend it on <b>Legacy</b> as soon as you land (Galaxy button) — it\'s what makes each new system faster.</div>', es: '<p>Todo lo que construiste en <b>{here}</b> se queda y pasa a formar parte de tu imperio: te paga <b>Tributo</b> cada minuto.</p><p>Empiezas de cero en {name}: créditos, mejoras de nave, puestos mineros, cargueros y reputación se reinician. Conservas el <b>Tributo, el Legado, el historial de alianzas y tus récords</b>.</p><p class="hint">Allí los piratas y las rocas son más duros.</p><div class="trib-call">Llegarás con <b>{trib} de Tributo</b>. Gástalo en <b>Legado</b> apenas aterrices (botón Galaxia): es lo que acelera cada nuevo sistema.</div>' },
+  gal_confirm_html: { en: '<p>Everything you built in <b>{here}</b> stays behind and becomes part of your empire: it keeps sending you a little <b>Tribute</b>.</p><p>You start fresh in {name}: credits, ship upgrades, outposts, freighters and reputation reset. You keep <b>Tribute, Legacy, alliances history and your records</b>.</p><p class="hint">Pirates and rocks are tougher there.</p><div class="trib-call">You\'ll arrive with <b>{trib} Tribute</b>. Spend it on <b>Legacy</b> as soon as you land (Galaxy button) — it\'s what makes each new system faster.</div>', es: '<p>Todo lo que construiste en <b>{here}</b> se queda y pasa a formar parte de tu imperio: te sigue enviando un poco de <b>Tributo</b>.</p><p>Empiezas de cero en {name}: créditos, mejoras de nave, puestos mineros, cargueros y reputación se reinician. Conservas el <b>Tributo, el Legado, el historial de alianzas y tus récords</b>.</p><p class="hint">Allí los piratas y las rocas son más duros.</p><div class="trib-call">Llegarás con <b>{trib} de Tributo</b>. Gástalo en <b>Legado</b> apenas aterrices (botón Galaxia): es lo que acelera cada nuevo sistema.</div>' },
   gal_btn_jump: { en: 'Jump!', es: '¡Saltar!' },
   gal_btn_notyet: { en: 'Not yet', es: 'Todavía no' },
 });
@@ -10685,7 +10685,9 @@ const legacyLv = k => (S && S.galaxy && S.galaxy.legacy[k]) || 0;
 // tools found in the galaxy stay with you forever (drill from Barnard, tractor pulse from Tau Ceti)
 const hasTool = k => !!(S && S.galaxy && S.galaxy.tools && S.galaxy.tools[k]);
 const conquered = () => (S && S.galaxy ? S.galaxy.done.length : 0);
-const tributeRate = () => conquered();   // per minute: each conquered system pays 1 Tribute a minute
+// per minute: a trickle, so jumping well (boss, allies, megaprojects) stays the main source of Tribute.
+// Each conquered system adds 12 / hour, up to 120 / hour.
+const tributeRate = () => Math.min(2, 0.2 * conquered());
 function tributeTick(dt) { if (S && S.galaxy && conquered()) S.galaxy.tribute += tributeRate() * dt / 60; }
 function buyLegacy(k) {
   const L = LEGACY[k], G = S.galaxy, lv = G.legacy[k] || 0;
@@ -10951,7 +10953,7 @@ function renderGalaxyPanel() {
   const G = S.galaxy, g = GALAXY.find(x => x.id === GalaxyScene.sel), i = GALAXY.indexOf(g);
   const done = G ? G.done : [], cur = sysId(), nx = nextSystem();
   let h = `<div class="lp-head"><div><h3>${tx('gal_title')}</h3><small>${tx('gal_conquered_count', { n: done.length, total: GALAXY.length })}</small></div><button class="x" onclick="closeGalaxy()">✕</button></div>`;
-  h += `<div class="gal-trib"><div><small>${tx('gal_tribute')}</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? tx(conquered() > 1 ? 'gal_trib_rate' : 'gal_trib_rate1', { rate: tributeRate(), n: conquered() }) : tx('gal_trib_none')}</span></div>`;
+  h += `<div class="gal-trib"><div><small>${tx('gal_tribute')}</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? tx(conquered() > 1 ? 'gal_trib_rate' : 'gal_trib_rate1', { rate: Math.round(tributeRate() * 60), n: conquered() }) : tx('gal_trib_none')}</span></div>`;
   const legacyHtml = () => {
     let x = `<div class="sub">${tx('gal_legacy_head')}</div><div class="legacy">`;
     for (const k in LEGACY) {
