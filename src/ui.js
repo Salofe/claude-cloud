@@ -133,6 +133,8 @@ Object.assign(TXT, {
   ui_sold: { en: 'SOLD', es: 'VENDIDO' },
   ui_strike_nosale: { en: 'Market closed by a strike — ore not sold.', es: 'Mercado cerrado por huelga: no se vendió el mineral.' },
   ui_refueled: { en: '⛽ Refueled +{n} (−{c} cr)', es: '⛽ Recargado +{n} (−{c} cr)' },
+  ui_rec: { en: '★ Buy this first', es: '★ Compra esto primero' },
+  ui_laser_boost: { en: '✦ Laser +{p}% stronger! {a} → {b}', es: '✦ ¡Láser {p}% más fuerte! {a} → {b}' },
   ui_repaired_patch: { en: '🔧 Emergency patch +{n} (free)', es: '🔧 Parche de emergencia +{n} (gratis)' },
   ui_repaired_free: { en: '🔧 Repaired +{n} (free for new pilots)', es: '🔧 Reparado +{n} (gratis para pilotos nuevos)' },
   ui_repaired: { en: '🔧 Repaired +{n} (−{c} cr)', es: '🔧 Reparado +{n} (−{c} cr)' },
@@ -691,6 +693,7 @@ function renderDock(fresh) {
     <div class="tabbody">${body}</div>
     <div class="dock-foot">${foot.join('')}</div>`, 'dock');
   const nb = $('sheet').querySelector('.tabbody'); if (nb) nb.scrollTop = sc;
+  if (fresh) { const rc = $('sheet').querySelector('.upg.rec'); if (rc) setTimeout(() => rc.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350); }
   const rt = $('rcTotal');
   if (rt) countUp(rt, +rt.dataset.v);
   for (const k of UPG_KEYS) if (upgOpen(k)) S.seenUpg[k] = 1;
@@ -756,8 +759,9 @@ function dockBody(tab) {
       const cost = maxed ? 0 : upgCost(k, lv);
       const can = !maxed && S.credits >= cost;
       const nMax = maxed ? 0 : affordableLevels(k);
-      h += `<div class="upg ${maxed ? 'maxed' : ''} ${can ? 'can' : ''} ${k === lastBought ? 'just' : ''}">
-        ${!S.seenUpg[k] ? `<span class="newb">${tx('ui_newb')}</span>` : ''}
+      const rec = recUpg() === k;
+      h += `<div class="upg ${maxed ? 'maxed' : ''} ${can ? 'can' : ''} ${k === lastBought ? 'just' : ''} ${rec ? 'rec' : ''}">
+        ${rec ? `<span class="recb">${tx('ui_rec')}</span>` : !S.seenUpg[k] ? `<span class="newb">${tx('ui_newb')}</span>` : ''}
         <div class="uh"><span class="uicon">${u.icon}</span><b>${u.n}</b><span class="lvl">${k === 'hull' ? u.names[lv - 1] : tx('ui_lv') + ' ' + lv + `<small>/${u.max}</small>`}</span></div>
         <div class="lvbar"><i style="width:${lv / u.max * 100}%"></i></div>
         <div class="ud">${maxed ? `<b>${tx('ui_maxed')}</b>` : upgDelta(k, lv, lv + 1)}</div>
@@ -885,6 +889,8 @@ function drawShipPreview(id, lv, t) {
 function mktSell(k, n) { if (marketClosed(S.loc)) return; const before = S.credits; doSell(S.loc, k, n); const got = S.credits - before; if (got) { sfx('cash'); toast(`+${fmt(got)} cr`, 'good'); } renderDock(); }
 function mktBuy(k, n) { if (marketClosed(S.loc)) return; if (cargoFree() <= 0) { toast(tx('ui_cargo_full'), 'bad'); return; } const b = doBuy(S.loc, k, n); if (b) sfx('click'); else toast(tx('ui_no_credits'), 'bad'); renderDock(); }
 let lastBought = null;
+// the one upgrade a new player should buy first: the Mining Laser, for its first two levels
+const recUpg = () => newbie() && S.stats.docks <= 3 && S.lv.laser < 3 && S.credits >= upgCost('laser', S.lv.laser) ? 'laser' : null;
 function buyUpg(k, n) {
   n = n || 1;
   let bought = 0;
@@ -894,6 +900,8 @@ function buyUpg(k, n) {
     S.credits -= cost; S.lv[k]++; bought++;
   }
   if (!bought) return;
+  const boost = k === 'laser' && newbie() && S.lv.laser <= 3;
+  if (boost) { const a = laserDpsAt(S.lv.laser - bought), b = laserDpsAt(S.lv.laser); toast(tx('ui_laser_boost', { a: fmt(a), b: fmt(b), p: Math.round((b / a - 1) * 100) }), 'good big'); }
   lastBought = k; setTimeout(() => { if (lastBought === k) lastBought = null; }, 900);
   if (k === 'hull') S.hull = ship.hpMax;
   if (k === 'tank' && has(U.MAP)) S.fuel = ship.fuelMax;
@@ -904,7 +912,7 @@ function buyUpg(k, n) {
     showModal({ icon: '', title: tx('ui_new_ship_t', { n: UPG.hull.names[S.lv.hull - 1] }), cls: 'unlock', html: `<canvas id="newShip" width="420" height="200"></canvas><p>${tx('ui_new_ship_stats', { c: fmt(ship.cargoMax), a: fmt(ship.hpMax) })}</p>`,
       buttons: [{ label: tx('ui_nice'), cls: 'primary', fn: () => {} }],
       after: () => { const t0 = performance.now(); const anim = () => { if ($('newShip')) { drawShipPreview('newShip', shipLv(), (performance.now() - t0) / 1000); requestAnimationFrame(anim); } }; anim(); } });
-  } else toast(`${UPG[k].n} → ${tx('ui_lv')} ${S.lv[k]}${bought > 1 ? ` (+${bought})` : ''}`, 'good');
+  } else if (!boost) toast(`${UPG[k].n} → ${tx('ui_lv')} ${S.lv[k]}${bought > 1 ? ` (+${bought})` : ''}`, 'good');
 }
 function outpostBody(id) {
   const l = LOC[id], o = S.outposts[id], z = l.field.z;

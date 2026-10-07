@@ -11,7 +11,8 @@ const QUALITY = { mode: 'auto', low: false };
 try { QUALITY.mode = localStorage.getItem('sp_quality') || 'auto'; QUALITY.low = QUALITY.mode === 'low'; } catch (e) {}
 function setQuality(mode) { QUALITY.mode = mode; QUALITY.low = mode === 'low'; try { localStorage.setItem('sp_quality', mode); } catch (e) {} if (typeof resize === 'function') resize(); }
 // phones see more of the field: the mining camera zooms out on small touch screens
-function viewZoom() { return typeof isTouch !== 'undefined' && isTouch ? clamp(Math.min(W, H) / 640, 0.62, 1) : 1; }
+// phones see more of the field; on a new player's first trip the camera sits closer so rocks and ship read clearly
+function viewZoom() { if (!(typeof isTouch !== 'undefined' && isTouch)) return 1; const z = clamp(Math.min(W, H) / 640, 0.62, 1); return typeof firstTrip === 'function' && firstTrip() ? Math.min(1, z * 1.25) : z; }
 // bottom edge of the top HUD bar (touch layouts put the minimap right under it)
 let hudB = 0, hudBT = 0;
 function hudBottom() { const n = performance.now(); if (n - hudBT > 1500) { hudBT = n; const el = document.querySelector('.topbar'); hudB = el ? el.getBoundingClientRect().bottom : 60; } return hudB; }

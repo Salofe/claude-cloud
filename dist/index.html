@@ -554,6 +554,16 @@ html[lang=es] .tbtn { font-size: 9.5px; letter-spacing: -0.2px; }
 /* the first visits to the station: celebrate the sale and point at the upgrades */
 .rc-first { margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(61,232,255,.12); border: 1px solid rgba(61,232,255,.45); font-size: 14px; text-align: center; animation: pop .35s ease-out; }
 body.newbie .upg.can .btn.primary:not(.maxb) { animation: pulseglow 1.1s infinite; }
+/* first docks: one clearly recommended purchase instead of every button pulsing */
+body.newbie .upgs:has(.upg.rec) .upg:not(.rec) .btn.primary { animation: none; }
+.upg.rec { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255,200,87,.55), 0 0 26px rgba(255,200,87,.35); animation: recpulse 1.2s ease-in-out infinite; position: relative; }
+.upg.rec .btn.primary:not(.maxb) { animation: pulseglow 0.9s infinite; }
+.recb { position: absolute; top: -11px; left: 14px; background: var(--gold); color: #1a1205; font-weight: 800; font-size: 13px; padding: 2px 10px; border-radius: 10px; letter-spacing: .5px; }
+@keyframes recpulse { 50% { box-shadow: 0 0 0 3px rgba(255,200,87,.9), 0 0 40px rgba(255,200,87,.55); } }
+.toast.big { font-size: 19px; border-left-color: var(--gold); padding: 11px 18px; }
+#coach .cgoal { font-weight: 800; color: var(--gold); font-size: 1.05em; letter-spacing: .3px; }
+@media (pointer: coarse) { #coach:has(.cgoal) { max-width: 92vw; width: max-content; } #coach .cgoal { font-size: .88em; margin-bottom: 2px; } }
+@media (pointer: coarse) and (orientation: portrait) { #coach:has(.cgoal) { top: 162px; } }
 .upg.just { animation: justbought .7s ease-out; }
 @keyframes justbought { 0% { box-shadow: 0 0 0 0 rgba(255,210,74,.9); transform: scale(1.02); } 100% { box-shadow: 0 0 0 14px rgba(255,210,74,0); transform: scale(1); } }
 </style>
@@ -4169,7 +4179,8 @@ const QUALITY = { mode: 'auto', low: false };
 try { QUALITY.mode = localStorage.getItem('sp_quality') || 'auto'; QUALITY.low = QUALITY.mode === 'low'; } catch (e) {}
 function setQuality(mode) { QUALITY.mode = mode; QUALITY.low = mode === 'low'; try { localStorage.setItem('sp_quality', mode); } catch (e) {} if (typeof resize === 'function') resize(); }
 // phones see more of the field: the mining camera zooms out on small touch screens
-function viewZoom() { return typeof isTouch !== 'undefined' && isTouch ? clamp(Math.min(W, H) / 640, 0.62, 1) : 1; }
+// phones see more of the field; on a new player's first trip the camera sits closer so rocks and ship read clearly
+function viewZoom() { if (!(typeof isTouch !== 'undefined' && isTouch)) return 1; const z = clamp(Math.min(W, H) / 640, 0.62, 1); return typeof firstTrip === 'function' && firstTrip() ? Math.min(1, z * 1.25) : z; }
 // bottom edge of the top HUD bar (touch layouts put the minimap right under it)
 let hudB = 0, hudBT = 0;
 function hudBottom() { const n = performance.now(); if (n - hudBT > 1500) { hudBT = n; const el = document.querySelector('.topbar'); hudB = el ? el.getBoundingClientRect().bottom : 60; } return hudB; }
@@ -5641,13 +5652,13 @@ function sfx(name) {
 }
 // Láser continuo
 let laserNode = null;
-function laserSound(on, lv) {
+function laserSound(on, lv, vol = 1) {
   if (!AC) return;
   if (on && !laserNode) {
     const o = AC.createOscillator(), o2 = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter();
     o.type = 'sawtooth'; o.frequency.value = 110 + lv * 20; o2.type = 'sine'; o2.frequency.value = 220 + lv * 40;
     f.type = 'lowpass'; f.frequency.value = 900;
-    g.gain.value = 0.0001; g.gain.exponentialRampToValueAtTime(0.05, AC.currentTime + 0.05);
+    g.gain.value = 0.0001; g.gain.exponentialRampToValueAtTime(0.05 * vol, AC.currentTime + 0.05);
     o.connect(f); o2.connect(f); f.connect(g); g.connect(master); o.start(); o2.start();
     laserNode = { o, o2, g };
   } else if (!on && laserNode) {
@@ -5924,7 +5935,7 @@ Object.assign(TXT, {
 
 function newGame() {
   S = {
-    v: 3, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: tx('st_ship_name'),
+    v: 3, nb: 1, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: tx('st_ship_name'),
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
@@ -5975,12 +5986,27 @@ const econScale = () => S.unlock < 5 ? 1 : 5 * Math.pow(2, S.unlock - 5);
 const itemBase = k => ITEMS[k].ore ? ITEMS[k].b : ITEMS[k].b * econScale();
 
 // ---------- derived stats ----------
+// brand-new players (saves created with the new opening, first star system only) get a guided first minute:
+// a short first trip (8 cargo), soft starter rocks and a laser whose first two upgrades hit hard.
+// Saves made before this have no `nb` flag and keep the old behaviour.
+const newbie = () => !!(S && S.nb && !S.galaxy);
+const firstTrip = () => newbie() && !S.stats.docks;
+// Mining Laser: +17% per level. New players get +60% and +40% for levels 2-3, then +6% a level until the
+// normal curve catches up at level 8 — from there it is identical.
+function laserDpsAt(lv) {
+  const base = 12 * Math.pow(1.17, lv - 1);
+  if (!(S && S.nb)) return base;
+  const fast = lv <= 1 ? 12 : lv === 2 ? 19.2 : 26.9 * Math.pow(1.06, lv - 3);
+  return Math.max(base, fast);
+}
+// how much punchier the beam looks/sounds for new players' first laser upgrades (0, 1 or 2)
+const laserPunch = () => (S && S.nb ? Math.min(2, S.lv.laser - 1) : 0);
 const ship = {
-  get cargoMax() { return Math.floor(UPG.hull.cargo[S.lv.hull - 1] * (1 + 0.25 * (S.lv.cargo - 1))); },
+  get cargoMax() { const c = Math.floor(UPG.hull.cargo[S.lv.hull - 1] * (1 + 0.25 * (S.lv.cargo - 1))); return firstTrip() ? Math.min(8, c) : c; },
   get hpMax() { return UPG.hull.hp[S.lv.hull - 1]; },
   get mass() { return UPG.hull.mass[S.lv.hull - 1]; },
   get fuelMax() { return Math.round(60 * Math.pow(1.22, S.lv.tank - 1)); },
-  get laserDps() { return 12 * Math.pow(1.17, S.lv.laser - 1); },
+  get laserDps() { return laserDpsAt(S.lv.laser); },
   get yieldMult() { return (1 + 0.15 * (S.lv.extractor - 1)) * (1 + 0.1 * spoilCount('rights')); },
   get laserRange() { return 190 + Math.min(190, (S.lv.laser - 1) * 6); },
   get thrust() { return Math.min(2.2, 1 + 0.06 * (S.lv.engine - 1)); },
@@ -11665,6 +11691,8 @@ Object.assign(TXT, {
   mine_c_boss_final: { en: '☠ The {name} arrives in <b>{n} s</b> — get ready, or fly <b>down</b> to escape', es: '☠ {name} llega en <b>{n} s</b>: prepárate, o vuela hacia <b>abajo</b> para escapar' },
   mine_c_boss_warlord: { en: '☠ The warlord\'s flagship arrives in <b>{n} s</b> — get ready, or fly <b>down</b> to escape', es: '☠ La nave insignia del caudillo llega en <b>{n} s</b>: prepárate, o vuela hacia <b>abajo</b> para escapar' },
   mine_c_move_touch: { en: 'Drag anywhere on the left side to fly', es: 'Arrastra en cualquier parte del lado izquierdo para volar' },
+  mine_goal: { en: 'Mine rocks → sell at the station → upgrade your ship', es: 'Mina rocas → vende en la estación → mejora tu nave' },
+  mine_c_both: { en: 'Fly with <b>WASD</b> or the <b>arrows</b> · hold the <b>mouse</b> to fire the laser', es: 'Vuela con <b>WASD</b> o las <b>flechas</b> · mantén el <b>mouse</b> para disparar el láser' },
   mine_c_move: { en: 'Fly with <b>WASD</b> or the <b>arrow keys</b>', es: 'Vuela con <b>WASD</b> o las <b>flechas</b>' },
   mine_c_laser_touch: { en: 'Hold <b>LASER</b> — it aims at the nearest rock', es: 'Mantén <b>LÁSER</b>: apunta a la roca más cercana' },
   mine_c_laser: { en: 'Hold the <b>mouse button</b> to fire your mining laser at a rock', es: 'Mantén presionado el <b>botón del mouse</b> para disparar tu láser minero a una roca' },
@@ -11725,12 +11753,22 @@ const MineScene = {
       // a brand-new run starts with three big rocks right above the station, the middle one rich in a pricier ore,
       // so the very first trip pays for a couple of upgrades
       const fresh = !S.stats.docks && !S.stats.mined;
-      for (let i = 0; i < this.target; i++) {
+      // new players: five soft, ore-rich rocks in an arc right above the dock — each breaks in ~1.5 s
+      // with the level-1 laser, and the first 8-unit hold fills in a couple of rocks
+      if (firstTrip()) {
+        const ores = Object.keys(f.ores).sort((a, b) => ITEMS[a].b - ITEMS[b].b), best = f.ores.titanium ? 'titanium' : ores[Math.min(2, ores.length - 1)];
+        for (let i = 0; i < 5; i++) {
+          const d = i - 2, r = this.spawnRock(MW / 2 + d * 165 + rand(-15, 15), DOCK_Y - 250 - Math.abs(d) * 55 + rand(-15, 15), 2, d === 0 ? best : ores[Math.min(ores.length - 1, Math.abs(d) - 1)]);   // titanium in the middle, cheap ore around it
+          Object.assign(r, { rich: true, gold: false, crystal: false, armored: false, volatile: false, living: false, magnetic: false, relic: false, geode: null, starter: 2 });
+          r.vx *= 0.15; r.vy *= 0.15; r.hp = r.maxhp = ship.laserDps * 1.5;
+        }
+      }
+      for (let i = firstTrip() ? 5 : 0; i < this.target; i++) {
         let x, y;
-        if (i < 3) { x = MW / 2 + (i - 1) * (fresh ? 230 : 260) + rand(-30, 30); y = DOCK_Y - (fresh ? rand(270, 330) : rand(380, 520)); }
+        if (i < 3 && !firstTrip()) { x = MW / 2 + (i - 1) * (fresh ? 230 : 260) + rand(-30, 30); y = DOCK_Y - (fresh ? rand(270, 330) : rand(380, 520)); }
         else { x = rand(120, MW - 120); y = rand(120, DOCK_Y - 380); }
         const r = this.spawnRock(x, y, i < 3 ? 3 : pick([3, 3, 2, 2, 1]), fresh && i === 1 ? (f.ores.titanium ? 'titanium' : Object.keys(f.ores).sort((a, b) => ITEMS[a].b - ITEMS[b].b)[Math.min(2, Object.keys(f.ores).length - 1)]) : null, rich);
-        if (fresh && i < 3) { r.rich = false; r.gold = false; r.vx *= 0.3; r.vy *= 0.3; r.hp = r.maxhp = r.maxhp * 0.4; r.starter = 1; }
+        if (fresh && i < 3 && !firstTrip()) { r.rich = false; r.gold = false; r.vx *= 0.3; r.vy *= 0.3; r.hp = r.maxhp = r.maxhp * 0.4; r.starter = 1; }
       }
     }
     this.escorts = built('fleet') ? [0, 1].map(i => ({ i, x: 0, y: 0, a: 0, gcd: rand(0, 1) })) : [];
@@ -11866,6 +11904,7 @@ const MineScene = {
     this.parts.burst(r.x, r.y, 14 + r.tier * 8, r.gold ? '#ffd24a' : '#c9b8a6', 120 + r.tier * 40, 0.8, 2.5);
     this.parts.burst(r.x, r.y, 6 + r.tier * 3, ITEMS[r.ore].c, 90, 1, 2.5);
     sfx('break'); this.shake = Math.max(this.shake, r.tier * 3);
+    if (laserPunch()) { const pp = laserPunch(); this.parts.burst(r.x, r.y, 12 * pp + r.tier * 6, '#ffffff', 170 + 50 * pp, 0.55, 2.2); this.parts.burst(r.x, r.y, 8 * pp, laserColor(laserTier()), 220, 0.5, 2); this.shake = Math.max(this.shake, r.tier * 3 + 2 * pp); }
     S.hints.laser = 1;
     if (r.gold) {
       const v = ITEMS[r.ore].b * incomeMult() * 30 * r.tier;
@@ -11900,7 +11939,7 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
-        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; } if (r.starter) { c.starter = 1; c.hp = c.maxhp = c.maxhp * 0.4; }
+        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; } if (r.starter) { c.starter = r.starter; c.hp = c.maxhp = r.starter === 2 ? ship.laserDps * 0.45 : c.maxhp * 0.4; }
       }
       const m = 0.5 * ship.yieldMult * this.oreBonus(r);
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
@@ -12039,7 +12078,7 @@ const MineScene = {
       }
     }
     const lOn = firing && !combat;
-    if (lOn !== this.laserOn) { this.laserOn = lOn; laserSound(lOn, laserTier()); }
+    if (lOn !== this.laserOn) { this.laserOn = lOn; laserSound(lOn, laserTier(), 1 + 0.35 * laserPunch()); }
     // --- rocks ---
     for (const r of this.rocks) {
       r.x += r.vx * dt; r.y += r.vy * dt; r.rot += r.vr * dt; r.hit = Math.max(0, r.hit - dt);
@@ -12238,6 +12277,7 @@ const MineScene = {
     let msg = '';
     if (this.inCombat && !h.guns) { const host = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale); msg = tx('mine_c_guns' + (isTouch ? '_touch' : '') + (host ? '_host' : '_pir')); }
     else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = this.ambush.boss === 'final' ? tx('mine_c_boss_final', { name: ENEMIES[sysDef().boss].n, n: Math.ceil(this.ambush.at) }) : tx('mine_c_boss_warlord', { n: Math.ceil(this.ambush.at) });
+    else if (!isTouch && (!h.move || !h.laser)) msg = tx('mine_c_both');   // desktop: both controls at once
     else if (!h.laser && this.rocks.some(r => Math.hypot(r.x - this.p.x, r.y - this.p.y) - r.r < this.toolRange() + 60)) msg = tx(isTouch ? 'mine_c_laser_touch' : 'mine_c_laser');
     else if (!h.move) msg = tx(isTouch ? 'mine_c_move_touch' : 'mine_c_move');
     else if (!h.laser) msg = tx(isTouch ? 'mine_c_laser_touch' : 'mine_c_laser');
@@ -12245,6 +12285,8 @@ const MineScene = {
     else if (!this.space && cargoFree() <= 0) msg = tx('mine_c_full');
     else if (!this.space && !h.deep && S.stats.docks >= 2 && this.p.y > DOCK_Y - 900) { msg = tx('mine_c_deep'); }
     if (this.p.y < DOCK_Y - 1400) h.deep = 1;
+    // a new player's first trip always says what the game is about
+    if (firstTrip() && !this.space && !this.inCombat) msg = `<div class="cgoal">${tx('mine_goal')}</div>${msg}`;
     coach(msg);
   },
   damage(n, heat) {
@@ -12374,13 +12416,14 @@ const MineScene = {
       const L = this.laserHit, col = this.tool === 'drill' ? '#ffa030' : laserColor(laserTier());
       const nx = p.x + Math.cos(L.dir) * shipR() * 0.9, ny = p.y + Math.sin(L.dir) * shipR() * 0.9;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = (this.tool === 'drill' ? 16 : 7 + laserTier()) + Math.sin(t * 50) * 2;
+      const pu = this.tool === 'drill' ? 0 : laserPunch();
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.35 + 0.1 * pu; ctx.lineWidth = (this.tool === 'drill' ? 16 : 7 + laserTier() + 4 * pu) + Math.sin(t * 50) * (2 + pu);
       if (this.tool === 'drill' && L.rock && Math.random() < 0.6) this.parts.add(L.x, L.y, rand(-120, 120), rand(-120, 120), 0.3, Math.random() < 0.5 ? '#ffd080' : '#ffffff', 2, true);
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
-      ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
+      ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8 + 1.2 * pu;
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
       ctx.globalCompositeOperation = 'source-over';
-      glow(ctx, L.x, L.y, L.rock ? 26 : 10, col, 0.9);
+      glow(ctx, L.x, L.y, (L.rock ? 26 : 10) * (1 + 0.35 * pu), col, 0.9);
       if (this.forks) {
         ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = col;
         for (const f of this.forks) {
@@ -13020,6 +13063,8 @@ Object.assign(TXT, {
   ui_sold: { en: 'SOLD', es: 'VENDIDO' },
   ui_strike_nosale: { en: 'Market closed by a strike — ore not sold.', es: 'Mercado cerrado por huelga: no se vendió el mineral.' },
   ui_refueled: { en: '⛽ Refueled +{n} (−{c} cr)', es: '⛽ Recargado +{n} (−{c} cr)' },
+  ui_rec: { en: '★ Buy this first', es: '★ Compra esto primero' },
+  ui_laser_boost: { en: '✦ Laser +{p}% stronger! {a} → {b}', es: '✦ ¡Láser {p}% más fuerte! {a} → {b}' },
   ui_repaired_patch: { en: '🔧 Emergency patch +{n} (free)', es: '🔧 Parche de emergencia +{n} (gratis)' },
   ui_repaired_free: { en: '🔧 Repaired +{n} (free for new pilots)', es: '🔧 Reparado +{n} (gratis para pilotos nuevos)' },
   ui_repaired: { en: '🔧 Repaired +{n} (−{c} cr)', es: '🔧 Reparado +{n} (−{c} cr)' },
@@ -13578,6 +13623,7 @@ function renderDock(fresh) {
     <div class="tabbody">${body}</div>
     <div class="dock-foot">${foot.join('')}</div>`, 'dock');
   const nb = $('sheet').querySelector('.tabbody'); if (nb) nb.scrollTop = sc;
+  if (fresh) { const rc = $('sheet').querySelector('.upg.rec'); if (rc) setTimeout(() => rc.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350); }
   const rt = $('rcTotal');
   if (rt) countUp(rt, +rt.dataset.v);
   for (const k of UPG_KEYS) if (upgOpen(k)) S.seenUpg[k] = 1;
@@ -13643,8 +13689,9 @@ function dockBody(tab) {
       const cost = maxed ? 0 : upgCost(k, lv);
       const can = !maxed && S.credits >= cost;
       const nMax = maxed ? 0 : affordableLevels(k);
-      h += `<div class="upg ${maxed ? 'maxed' : ''} ${can ? 'can' : ''} ${k === lastBought ? 'just' : ''}">
-        ${!S.seenUpg[k] ? `<span class="newb">${tx('ui_newb')}</span>` : ''}
+      const rec = recUpg() === k;
+      h += `<div class="upg ${maxed ? 'maxed' : ''} ${can ? 'can' : ''} ${k === lastBought ? 'just' : ''} ${rec ? 'rec' : ''}">
+        ${rec ? `<span class="recb">${tx('ui_rec')}</span>` : !S.seenUpg[k] ? `<span class="newb">${tx('ui_newb')}</span>` : ''}
         <div class="uh"><span class="uicon">${u.icon}</span><b>${u.n}</b><span class="lvl">${k === 'hull' ? u.names[lv - 1] : tx('ui_lv') + ' ' + lv + `<small>/${u.max}</small>`}</span></div>
         <div class="lvbar"><i style="width:${lv / u.max * 100}%"></i></div>
         <div class="ud">${maxed ? `<b>${tx('ui_maxed')}</b>` : upgDelta(k, lv, lv + 1)}</div>
@@ -13772,6 +13819,8 @@ function drawShipPreview(id, lv, t) {
 function mktSell(k, n) { if (marketClosed(S.loc)) return; const before = S.credits; doSell(S.loc, k, n); const got = S.credits - before; if (got) { sfx('cash'); toast(`+${fmt(got)} cr`, 'good'); } renderDock(); }
 function mktBuy(k, n) { if (marketClosed(S.loc)) return; if (cargoFree() <= 0) { toast(tx('ui_cargo_full'), 'bad'); return; } const b = doBuy(S.loc, k, n); if (b) sfx('click'); else toast(tx('ui_no_credits'), 'bad'); renderDock(); }
 let lastBought = null;
+// the one upgrade a new player should buy first: the Mining Laser, for its first two levels
+const recUpg = () => newbie() && S.stats.docks <= 3 && S.lv.laser < 3 && S.credits >= upgCost('laser', S.lv.laser) ? 'laser' : null;
 function buyUpg(k, n) {
   n = n || 1;
   let bought = 0;
@@ -13781,6 +13830,8 @@ function buyUpg(k, n) {
     S.credits -= cost; S.lv[k]++; bought++;
   }
   if (!bought) return;
+  const boost = k === 'laser' && newbie() && S.lv.laser <= 3;
+  if (boost) { const a = laserDpsAt(S.lv.laser - bought), b = laserDpsAt(S.lv.laser); toast(tx('ui_laser_boost', { a: fmt(a), b: fmt(b), p: Math.round((b / a - 1) * 100) }), 'good big'); }
   lastBought = k; setTimeout(() => { if (lastBought === k) lastBought = null; }, 900);
   if (k === 'hull') S.hull = ship.hpMax;
   if (k === 'tank' && has(U.MAP)) S.fuel = ship.fuelMax;
@@ -13791,7 +13842,7 @@ function buyUpg(k, n) {
     showModal({ icon: '', title: tx('ui_new_ship_t', { n: UPG.hull.names[S.lv.hull - 1] }), cls: 'unlock', html: `<canvas id="newShip" width="420" height="200"></canvas><p>${tx('ui_new_ship_stats', { c: fmt(ship.cargoMax), a: fmt(ship.hpMax) })}</p>`,
       buttons: [{ label: tx('ui_nice'), cls: 'primary', fn: () => {} }],
       after: () => { const t0 = performance.now(); const anim = () => { if ($('newShip')) { drawShipPreview('newShip', shipLv(), (performance.now() - t0) / 1000); requestAnimationFrame(anim); } }; anim(); } });
-  } else toast(`${UPG[k].n} → ${tx('ui_lv')} ${S.lv[k]}${bought > 1 ? ` (+${bought})` : ''}`, 'good');
+  } else if (!boost) toast(`${UPG[k].n} → ${tx('ui_lv')} ${S.lv[k]}${bought > 1 ? ` (+${bought})` : ''}`, 'good');
 }
 function outpostBody(id) {
   const l = LOC[id], o = S.outposts[id], z = l.field.z;

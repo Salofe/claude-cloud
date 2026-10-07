@@ -67,13 +67,13 @@ function sfx(name) {
 }
 // Láser continuo
 let laserNode = null;
-function laserSound(on, lv) {
+function laserSound(on, lv, vol = 1) {
   if (!AC) return;
   if (on && !laserNode) {
     const o = AC.createOscillator(), o2 = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter();
     o.type = 'sawtooth'; o.frequency.value = 110 + lv * 20; o2.type = 'sine'; o2.frequency.value = 220 + lv * 40;
     f.type = 'lowpass'; f.frequency.value = 900;
-    g.gain.value = 0.0001; g.gain.exponentialRampToValueAtTime(0.05, AC.currentTime + 0.05);
+    g.gain.value = 0.0001; g.gain.exponentialRampToValueAtTime(0.05 * vol, AC.currentTime + 0.05);
     o.connect(f); o2.connect(f); f.connect(g); g.connect(master); o.start(); o2.start();
     laserNode = { o, o2, g };
   } else if (!on && laserNode) {

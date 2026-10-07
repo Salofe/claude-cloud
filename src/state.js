@@ -30,7 +30,7 @@ Object.assign(TXT, {
 
 function newGame() {
   S = {
-    v: 3, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: tx('st_ship_name'),
+    v: 3, nb: 1, day: 0, credits: 0, loc: 'luna', fuel: 60, hull: 60, shipName: tx('st_ship_name'),
     lv: { hull: 1, laser: 1, magnet: 1, cargo: 1, extractor: 1, refinery: 1, engine: 1, tank: 1, shield: 1, weapons: 1, scanner: 1 },
     cargo: {},
     rep: { tierra: 5, marte: 0, cinturon: 0, exterior: 0, piratas: -10 },
@@ -81,12 +81,27 @@ const econScale = () => S.unlock < 5 ? 1 : 5 * Math.pow(2, S.unlock - 5);
 const itemBase = k => ITEMS[k].ore ? ITEMS[k].b : ITEMS[k].b * econScale();
 
 // ---------- derived stats ----------
+// brand-new players (saves created with the new opening, first star system only) get a guided first minute:
+// a short first trip (8 cargo), soft starter rocks and a laser whose first two upgrades hit hard.
+// Saves made before this have no `nb` flag and keep the old behaviour.
+const newbie = () => !!(S && S.nb && !S.galaxy);
+const firstTrip = () => newbie() && !S.stats.docks;
+// Mining Laser: +17% per level. New players get +60% and +40% for levels 2-3, then +6% a level until the
+// normal curve catches up at level 8 — from there it is identical.
+function laserDpsAt(lv) {
+  const base = 12 * Math.pow(1.17, lv - 1);
+  if (!(S && S.nb)) return base;
+  const fast = lv <= 1 ? 12 : lv === 2 ? 19.2 : 26.9 * Math.pow(1.06, lv - 3);
+  return Math.max(base, fast);
+}
+// how much punchier the beam looks/sounds for new players' first laser upgrades (0, 1 or 2)
+const laserPunch = () => (S && S.nb ? Math.min(2, S.lv.laser - 1) : 0);
 const ship = {
-  get cargoMax() { return Math.floor(UPG.hull.cargo[S.lv.hull - 1] * (1 + 0.25 * (S.lv.cargo - 1))); },
+  get cargoMax() { const c = Math.floor(UPG.hull.cargo[S.lv.hull - 1] * (1 + 0.25 * (S.lv.cargo - 1))); return firstTrip() ? Math.min(8, c) : c; },
   get hpMax() { return UPG.hull.hp[S.lv.hull - 1]; },
   get mass() { return UPG.hull.mass[S.lv.hull - 1]; },
   get fuelMax() { return Math.round(60 * Math.pow(1.22, S.lv.tank - 1)); },
-  get laserDps() { return 12 * Math.pow(1.17, S.lv.laser - 1); },
+  get laserDps() { return laserDpsAt(S.lv.laser); },
   get yieldMult() { return (1 + 0.15 * (S.lv.extractor - 1)) * (1 + 0.1 * spoilCount('rights')); },
   get laserRange() { return 190 + Math.min(190, (S.lv.laser - 1) * 6); },
   get thrust() { return Math.min(2.2, 1 + 0.06 * (S.lv.engine - 1)); },

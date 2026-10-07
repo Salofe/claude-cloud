@@ -48,6 +48,8 @@ Object.assign(TXT, {
   mine_c_boss_final: { en: '☠ The {name} arrives in <b>{n} s</b> — get ready, or fly <b>down</b> to escape', es: '☠ {name} llega en <b>{n} s</b>: prepárate, o vuela hacia <b>abajo</b> para escapar' },
   mine_c_boss_warlord: { en: '☠ The warlord\'s flagship arrives in <b>{n} s</b> — get ready, or fly <b>down</b> to escape', es: '☠ La nave insignia del caudillo llega en <b>{n} s</b>: prepárate, o vuela hacia <b>abajo</b> para escapar' },
   mine_c_move_touch: { en: 'Drag anywhere on the left side to fly', es: 'Arrastra en cualquier parte del lado izquierdo para volar' },
+  mine_goal: { en: 'Mine rocks → sell at the station → upgrade your ship', es: 'Mina rocas → vende en la estación → mejora tu nave' },
+  mine_c_both: { en: 'Fly with <b>WASD</b> or the <b>arrows</b> · hold the <b>mouse</b> to fire the laser', es: 'Vuela con <b>WASD</b> o las <b>flechas</b> · mantén el <b>mouse</b> para disparar el láser' },
   mine_c_move: { en: 'Fly with <b>WASD</b> or the <b>arrow keys</b>', es: 'Vuela con <b>WASD</b> o las <b>flechas</b>' },
   mine_c_laser_touch: { en: 'Hold <b>LASER</b> — it aims at the nearest rock', es: 'Mantén <b>LÁSER</b>: apunta a la roca más cercana' },
   mine_c_laser: { en: 'Hold the <b>mouse button</b> to fire your mining laser at a rock', es: 'Mantén presionado el <b>botón del mouse</b> para disparar tu láser minero a una roca' },
@@ -108,12 +110,22 @@ const MineScene = {
       // a brand-new run starts with three big rocks right above the station, the middle one rich in a pricier ore,
       // so the very first trip pays for a couple of upgrades
       const fresh = !S.stats.docks && !S.stats.mined;
-      for (let i = 0; i < this.target; i++) {
+      // new players: five soft, ore-rich rocks in an arc right above the dock — each breaks in ~1.5 s
+      // with the level-1 laser, and the first 8-unit hold fills in a couple of rocks
+      if (firstTrip()) {
+        const ores = Object.keys(f.ores).sort((a, b) => ITEMS[a].b - ITEMS[b].b), best = f.ores.titanium ? 'titanium' : ores[Math.min(2, ores.length - 1)];
+        for (let i = 0; i < 5; i++) {
+          const d = i - 2, r = this.spawnRock(MW / 2 + d * 165 + rand(-15, 15), DOCK_Y - 250 - Math.abs(d) * 55 + rand(-15, 15), 2, d === 0 ? best : ores[Math.min(ores.length - 1, Math.abs(d) - 1)]);   // titanium in the middle, cheap ore around it
+          Object.assign(r, { rich: true, gold: false, crystal: false, armored: false, volatile: false, living: false, magnetic: false, relic: false, geode: null, starter: 2 });
+          r.vx *= 0.15; r.vy *= 0.15; r.hp = r.maxhp = ship.laserDps * 1.5;
+        }
+      }
+      for (let i = firstTrip() ? 5 : 0; i < this.target; i++) {
         let x, y;
-        if (i < 3) { x = MW / 2 + (i - 1) * (fresh ? 230 : 260) + rand(-30, 30); y = DOCK_Y - (fresh ? rand(270, 330) : rand(380, 520)); }
+        if (i < 3 && !firstTrip()) { x = MW / 2 + (i - 1) * (fresh ? 230 : 260) + rand(-30, 30); y = DOCK_Y - (fresh ? rand(270, 330) : rand(380, 520)); }
         else { x = rand(120, MW - 120); y = rand(120, DOCK_Y - 380); }
         const r = this.spawnRock(x, y, i < 3 ? 3 : pick([3, 3, 2, 2, 1]), fresh && i === 1 ? (f.ores.titanium ? 'titanium' : Object.keys(f.ores).sort((a, b) => ITEMS[a].b - ITEMS[b].b)[Math.min(2, Object.keys(f.ores).length - 1)]) : null, rich);
-        if (fresh && i < 3) { r.rich = false; r.gold = false; r.vx *= 0.3; r.vy *= 0.3; r.hp = r.maxhp = r.maxhp * 0.4; r.starter = 1; }
+        if (fresh && i < 3 && !firstTrip()) { r.rich = false; r.gold = false; r.vx *= 0.3; r.vy *= 0.3; r.hp = r.maxhp = r.maxhp * 0.4; r.starter = 1; }
       }
     }
     this.escorts = built('fleet') ? [0, 1].map(i => ({ i, x: 0, y: 0, a: 0, gcd: rand(0, 1) })) : [];
@@ -249,6 +261,7 @@ const MineScene = {
     this.parts.burst(r.x, r.y, 14 + r.tier * 8, r.gold ? '#ffd24a' : '#c9b8a6', 120 + r.tier * 40, 0.8, 2.5);
     this.parts.burst(r.x, r.y, 6 + r.tier * 3, ITEMS[r.ore].c, 90, 1, 2.5);
     sfx('break'); this.shake = Math.max(this.shake, r.tier * 3);
+    if (laserPunch()) { const pp = laserPunch(); this.parts.burst(r.x, r.y, 12 * pp + r.tier * 6, '#ffffff', 170 + 50 * pp, 0.55, 2.2); this.parts.burst(r.x, r.y, 8 * pp, laserColor(laserTier()), 220, 0.5, 2); this.shake = Math.max(this.shake, r.tier * 3 + 2 * pp); }
     S.hints.laser = 1;
     if (r.gold) {
       const v = ITEMS[r.ore].b * incomeMult() * 30 * r.tier;
@@ -283,7 +296,7 @@ const MineScene = {
         const c = this.spawnRock(r.x + rand(-10, 10), r.y + rand(-10, 10), r.tier - 1, r.ore);
         const a = rand(0, TAU); c.vx = r.vx + Math.cos(a) * 50; c.vy = r.vy + Math.sin(a) * 50; c.rich = r.rich; c.gold = false; c.hp = c.maxhp = c.maxhp;
         if (r.armored && !c.armored) { c.armored = true; c.crystal = false; }
-        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; } if (r.starter) { c.starter = 1; c.hp = c.maxhp = c.maxhp * 0.4; }
+        c.volatile = false; c.geode = null; c.relic = false; c.magnetic = r.magnetic; c.living = r.living; if (r.living) { c.flee = 2; c.wa = a; } if (r.starter) { c.starter = r.starter; c.hp = c.maxhp = r.starter === 2 ? ship.laserDps * 0.45 : c.maxhp * 0.4; }
       }
       const m = 0.5 * ship.yieldMult * this.oreBonus(r);
       for (let i = 0; i < Math.floor(m) + (Math.random() < m % 1 ? 1 : 0); i++) this.dropChunk(r.x, r.y, r.ore);
@@ -422,7 +435,7 @@ const MineScene = {
       }
     }
     const lOn = firing && !combat;
-    if (lOn !== this.laserOn) { this.laserOn = lOn; laserSound(lOn, laserTier()); }
+    if (lOn !== this.laserOn) { this.laserOn = lOn; laserSound(lOn, laserTier(), 1 + 0.35 * laserPunch()); }
     // --- rocks ---
     for (const r of this.rocks) {
       r.x += r.vx * dt; r.y += r.vy * dt; r.rot += r.vr * dt; r.hit = Math.max(0, r.hit - dt);
@@ -621,6 +634,7 @@ const MineScene = {
     let msg = '';
     if (this.inCombat && !h.guns) { const host = this.enemies.some(e => ENEMIES[e.k].alien || ENEMIES[e.k].hive || ENEMIES[e.k].whale); msg = tx('mine_c_guns' + (isTouch ? '_touch' : '') + (host ? '_host' : '_pir')); }
     else if (this.ambush && this.ambush.boss && this.ambush.at > 0) msg = this.ambush.boss === 'final' ? tx('mine_c_boss_final', { name: ENEMIES[sysDef().boss].n, n: Math.ceil(this.ambush.at) }) : tx('mine_c_boss_warlord', { n: Math.ceil(this.ambush.at) });
+    else if (!isTouch && (!h.move || !h.laser)) msg = tx('mine_c_both');   // desktop: both controls at once
     else if (!h.laser && this.rocks.some(r => Math.hypot(r.x - this.p.x, r.y - this.p.y) - r.r < this.toolRange() + 60)) msg = tx(isTouch ? 'mine_c_laser_touch' : 'mine_c_laser');
     else if (!h.move) msg = tx(isTouch ? 'mine_c_move_touch' : 'mine_c_move');
     else if (!h.laser) msg = tx(isTouch ? 'mine_c_laser_touch' : 'mine_c_laser');
@@ -628,6 +642,8 @@ const MineScene = {
     else if (!this.space && cargoFree() <= 0) msg = tx('mine_c_full');
     else if (!this.space && !h.deep && S.stats.docks >= 2 && this.p.y > DOCK_Y - 900) { msg = tx('mine_c_deep'); }
     if (this.p.y < DOCK_Y - 1400) h.deep = 1;
+    // a new player's first trip always says what the game is about
+    if (firstTrip() && !this.space && !this.inCombat) msg = `<div class="cgoal">${tx('mine_goal')}</div>${msg}`;
     coach(msg);
   },
   damage(n, heat) {
@@ -757,13 +773,14 @@ const MineScene = {
       const L = this.laserHit, col = this.tool === 'drill' ? '#ffa030' : laserColor(laserTier());
       const nx = p.x + Math.cos(L.dir) * shipR() * 0.9, ny = p.y + Math.sin(L.dir) * shipR() * 0.9;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = (this.tool === 'drill' ? 16 : 7 + laserTier()) + Math.sin(t * 50) * 2;
+      const pu = this.tool === 'drill' ? 0 : laserPunch();
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.35 + 0.1 * pu; ctx.lineWidth = (this.tool === 'drill' ? 16 : 7 + laserTier() + 4 * pu) + Math.sin(t * 50) * (2 + pu);
       if (this.tool === 'drill' && L.rock && Math.random() < 0.6) this.parts.add(L.x, L.y, rand(-120, 120), rand(-120, 120), 0.3, Math.random() < 0.5 ? '#ffd080' : '#ffffff', 2, true);
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
-      ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
+      ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8 + 1.2 * pu;
       ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(L.x, L.y); ctx.stroke();
       ctx.globalCompositeOperation = 'source-over';
-      glow(ctx, L.x, L.y, L.rock ? 26 : 10, col, 0.9);
+      glow(ctx, L.x, L.y, (L.rock ? 26 : 10) * (1 + 0.35 * pu), col, 0.9);
       if (this.forks) {
         ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = col;
         for (const f of this.forks) {
