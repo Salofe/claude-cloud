@@ -10648,6 +10648,12 @@ Object.assign(TXT, {
   gal_btn_open_map: { en: 'Open the Galaxy map', es: 'Abrir mapa de la Galaxia' },
   gal_news_end: { en: '<b>The Devourer is gone.</b> You crossed the whole Milky Way, from the rim to its heart.', es: '<b>El Devorador ya no existe.</b> Cruzaste toda la Vía Láctea, del borde hasta su corazón.' },
   gal_end_title: { en: 'The heart of the galaxy', es: 'El corazón de la galaxia' },
+  gal_end_sub: { en: 'Sagittarius A* · system 15 / 15', es: 'Sagitario A* · sistema 15 / 15' },
+  gal_end_count: { en: '{n} / {total} systems', es: '{n} / {total} sistemas' },
+  gal_end_yours: { en: 'THE GALAXY IS YOURS', es: 'LA GALAXIA ES TUYA' },
+  gal_end_thanks: { en: 'Thanks for playing Solar Prospector', es: 'Gracias por jugar Solar Prospector' },
+  gal_end_skip: { en: 'tap to skip', es: 'toca para saltar' },
+  gal_btn_replay_end: { en: '🎬 Watch the ending again', es: '🎬 Ver el final otra vez' },
   gal_end_p1: { en: 'From a little moon in the Solar System to the black hole at the center of the Milky Way: <b>15 star systems</b>, all yours.', es: 'De una pequeña luna del Sistema Solar al agujero negro en el centro de la Vía Láctea: <b>15 sistemas estelares</b>, todos tuyos.' },
   gal_end_earned: { en: 'credits earned', es: 'créditos ganados' },
   gal_end_mined: { en: 'ore mined', es: 'mineral extraído' },
@@ -10891,19 +10897,131 @@ function finalBossKilled() {
 }
 
 // ---------- the end of the road: the heart of the galaxy ----------
+// Beating the Devourer at Sagittarius A* plays a short cinematic (EndingScene), then the final card with your run.
 function showEnding() {
-  const G = S.galaxy || { done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 }, tribute: 0 };
+  const G = S.galaxy || (S.galaxy = { tribute: 0, legacy: {}, done: [], life: { earned: 0, mined: 0, kills: 0, days: 0 } });
   G.finished = 1; if (!G.done.includes(sysId())) G.done.push(sysId());
-  const L = G.life, earned = L.earned + S.stats.earned, mined = L.mined + S.stats.mined, kills = L.kills + S.stats.kills, days = L.days + S.day;
   addNews('🌌', tx('gal_news_end'), '#ffd24a');
+  // credits still floating from the boss fight are yours
+  if (scene === MineScene) for (const c of MineScene.chunks) if (c.cr) earn(c.cr);
   save();
-  if (typeof pendingChoices !== 'undefined') pendingChoices.push({ icon: '🌌', title: tx('gal_end_title'), html: `<p>${sysDef().gate}</p>
-    <p>${tx('gal_end_p1')}</p>
+  setTimeout(() => setScene(EndingScene), 2200);   // let the Devourer's death play out first
+}
+function endingCard() {
+  const G = S.galaxy, L = G.life;
+  const earned = L.earned + S.stats.earned, mined = L.mined + S.stats.mined, kills = L.kills + S.stats.kills, days = L.days + S.day;
+  showModal({ icon: '🌌', title: tx('gal_end_title'), cls: 'unlock', html: `<p>${tx('gal_end_p1')}</p>
     <div class="ending-stats"><div><b>${fmt(earned)}</b><small>${tx('gal_end_earned')}</small></div><div><b>${fmt(mined)}</b><small>${tx('gal_end_mined')}</small></div><div><b>${fmt(kills)}</b><small>${tx('gal_end_kills')}</small></div><div><b>${fmt(days)}</b><small>${tx('gal_end_days')}</small></div></div>
     <p class="hint">${tx('gal_end_andromeda')}</p>
     <p>${tx('gal_end_keep')}</p>`,
-    choices: [{ label: tx('gal_btn_keep'), cost: 0, fn: () => {} }, { label: tx('gal_btn_open_map'), cost: 0, fn: () => setTimeout(() => setScene(GalaxyScene), 50) }] });
+    buttons: [{ label: tx('gal_btn_keep'), cls: 'primary', fn: () => setScene(MapScene) }, { label: tx('gal_btn_open_map'), fn: () => setScene(GalaxyScene) }] });
 }
+const EndingScene = {
+  t: 0, dust: null, lit: 0, carded: false,
+  // 0-7 s the black hole up close · 7-9 s pull back to the whole galaxy · 9-18 s your route lights up, system by system · 18 s+ "the galaxy is yours"
+  T_OUT: 7, T_ROUTE: 9, T_ALL: 18, T_CARD: 22.5,
+  enter() {
+    this.t = 0; this.lit = 0; this.carded = false; this.lv = shipLv();
+    if (!this.dust) {
+      let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+      this.dust = Array.from({ length: 1600 }, () => {
+        const arm = Math.floor(r() * 3), d = Math.pow(r(), 0.7), a = arm * TAU / 3 + d * 5.2 + (r() - 0.5) * 0.7 * (1 - d * 0.5);
+        return { a, d, s: r() * 1.6 + 0.4, c: r() < 0.15 ? '#ffd2f0' : r() < 0.4 ? '#bcd4ff' : '#ffffff', o: r() * 0.6 + 0.2 };
+      });
+      this.motes = Array.from({ length: 220 }, () => ({ a: Math.random() * TAU, d: 0.3 + Math.random() * 0.7, s: 0.3 + Math.random() }));
+    }
+    $('hud').classList.add('hidden'); if (typeof showMineUI === 'function') showMineUI(false); laserSound(false); closeModal();
+    sfx('warp'); tone(55, 4, 'sawtooth', 0.04, 110);
+    this.skip = () => { if (this.t < this.T_OUT) this.t = this.T_OUT; else if (this.t < this.T_ALL) { this.t = this.T_ALL; this.lit = GALAXY.length; } else if (!this.carded) this.t = this.T_CARD; };
+    canvas.addEventListener('pointerdown', this.skip);
+  },
+  exit() { canvas.removeEventListener('pointerdown', this.skip); $('hud').classList.remove('hidden'); },
+  update(dt) {
+    this.t += dt;
+    // light one system every 0.6 s along the route you flew
+    const n = this.t < this.T_ROUTE ? 0 : Math.min(GALAXY.length, 1 + Math.floor((this.t - this.T_ROUTE) / 0.6));
+    while (this.lit < n) { this.lit++; tone(330 * Math.pow(2, this.lit / 12), 0.35, 'sine', 0.05); }
+    if (this.t >= this.T_ALL && !this.allSound) { this.allSound = 1; sfx('win'); }
+    if (this.t >= this.T_CARD && !this.carded) { this.carded = true; this.allSound = 0; endingCard(); }
+  },
+  draw(ctx) {
+    const t = this.t, m = Math.min(W, H), cx = W / 2, cy = H / 2;
+    const out = clamp((t - this.T_OUT) / (this.T_ROUTE - this.T_OUT), 0, 1), ease = out * out * (3 - 2 * out);
+    const R = m * 0.44;                                   // galaxy radius
+    drawSpaceBg(ctx, W, H, t * 6, t * 3, t);
+    // the galaxy fades in as the camera pulls back
+    if (ease > 0) {
+      ctx.globalAlpha = ease;
+      for (const p of this.dust) {
+        const a = p.a + t * 0.012, r = p.d * R * 1.15;
+        ctx.globalAlpha = ease * p.o * (0.4 + 0.6 * (1 - p.d)); ctx.fillStyle = p.c;
+        ctx.fillRect(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.92, p.s, p.s);
+      }
+      ctx.globalAlpha = 1;
+      glow(ctx, cx, cy, R * 0.5, '#ffb07a33', 0.9 * ease);
+    }
+    // close-up: matter spiralling into Sagittarius A*
+    const bhR = lerp(m * 0.16, m * 0.028, ease);
+    if (ease < 1) {
+      ctx.globalCompositeOperation = 'lighter';
+      for (const q of this.motes) {
+        q.d -= 0.0009 * (1.4 - q.d); if (q.d < 0.12) { q.d = 0.6 + Math.random() * 0.4; q.a = Math.random() * TAU; }
+        const a = q.a + t * (0.4 / q.d), rr = q.d * m * 0.75;
+        ctx.globalAlpha = (1 - ease) * Math.min(1, (1 - q.d) * 1.5) * 0.8; ctx.fillStyle = q.d < 0.3 ? '#ffe6b0' : '#ff9a5a';
+        ctx.fillRect(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.32, 1.5 * q.s, 1.5 * q.s);
+      }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    }
+    drawBlackHole(ctx, cx, cy, bhR, t);
+    // your ship drifts in, settles into orbit, then is lost in the scale of the galaxy
+    if (ease < 1) {
+      const k = clamp(t / 4, 0, 1), orb = t * 0.5;
+      const sx = cx + Math.cos(orb + 1.2) * m * lerp(0.6, 0.32, k), sy = cy + m * lerp(0.45, 0.2, k) * Math.sin(orb + 1.2) * 0.5 + m * 0.05;
+      ctx.globalAlpha = 1 - ease;
+      drawPlayerShip(ctx, this.lv, sx, sy, orb + 1.2 + Math.PI, lerp(1.4, 0.8, k), 1, t);
+      ctx.globalAlpha = 1;
+    }
+    // the route: Sol → … → Sagittarius A*, one star at a time
+    if (t >= this.T_ROUTE - 0.3) {
+      const pts = GALAXY.map(g => ({ g, x: cx + g.x * R, y: cy + g.y * R * 0.92 }));
+      ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(255,210,120,0.55)';
+      ctx.beginPath(); for (let i = 0; i < this.lit; i++) { const p = pts[i]; if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); } ctx.stroke(); ctx.setLineDash([]);
+      ctx.textAlign = 'center';
+      const dimLbl = 1 - 0.85 * clamp((t - this.T_ALL) / 0.6, 0, 1);   // names step back for the final title
+      for (let i = 0; i < this.lit; i++) {
+        const { g, x, y } = pts[i], pop = clamp((t - this.T_ROUTE - i * 0.6) / 0.4, 0, 1);
+        const pal = STAR_PAL[g.star] || STAR_PAL.sol, col = g.star === 'hole' ? '#ffb070' : pal.core[2];
+        glow(ctx, x, y, 22 + 26 * (1 - pop), col + '99', 1);
+        if (g.star !== 'hole') { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, TAU); ctx.fill(); }
+        ctx.globalAlpha = pop * dimLbl; ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.font = `700 ${Math.round(clamp(m * 0.024, 11, 17))}px Rajdhani, sans-serif`;
+        ctx.fillText(SYSTEMS[g.id].n, x, y + (g.y > 0.5 ? 22 : -14));
+        ctx.globalAlpha = 1;
+      }
+      if (t < this.T_ALL + 0.5) {
+        ctx.fillStyle = 'rgba(255,210,120,0.95)'; ctx.font = `800 ${Math.round(m * 0.032)}px Orbitron, sans-serif`;
+        ctx.fillText(tx('gal_end_count', { n: this.lit, total: GALAXY.length }), cx, H - m * 0.07);
+      }
+    }
+    // titles
+    ctx.textAlign = 'center';
+    const title = (txt, y, size, a, col) => { if (a <= 0) return; ctx.globalAlpha = a; ctx.fillStyle = col; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 12; ctx.font = `900 ${Math.round(size)}px Orbitron, sans-serif`; ctx.fillText(txt, cx, y); ctx.shadowBlur = 0; ctx.globalAlpha = 1; };
+    const fadeIO = (a, b) => clamp((t - a) / 0.8, 0, 1) * clamp((b - t) / 0.8, 0, 1);
+    title(tx('gal_end_title').toUpperCase(), cy - m * 0.3, Math.min(m * 0.055, W * 0.06), fadeIO(1.2, this.T_OUT), '#ffe2b0');
+    title(tx('gal_end_sub'), cy - m * 0.23, Math.min(m * 0.028, W * 0.035), fadeIO(2, this.T_OUT), 'rgba(217,179,255,0.95)');
+    const win = clamp((t - this.T_ALL) / 0.6, 0, 1);
+    if (win > 0) {
+      glow(ctx, cx, cy, R * (0.6 + 0.1 * Math.sin(t * 2)), '#ffd24a33', win);
+      const band = ctx.createLinearGradient(0, cy - m * 0.12, 0, cy + m * 0.11); band.addColorStop(0, 'rgba(2,4,12,0)'); band.addColorStop(0.5, `rgba(2,4,12,${0.7 * win})`); band.addColorStop(1, 'rgba(2,4,12,0)');
+      ctx.fillStyle = band; ctx.fillRect(0, cy - m * 0.12, W, m * 0.23);
+      title(tx('gal_end_yours'), cy - R * 0.02, Math.min(m * 0.07, W * 0.075), win, '#ffd24a');
+      title(tx('gal_end_thanks'), cy + m * 0.06, Math.min(m * 0.03, W * 0.04), clamp((t - this.T_ALL - 1.2) / 0.8, 0, 1), '#ffffff');
+    }
+    // white flash in from the boss explosion
+    if (t < 1) { ctx.fillStyle = `rgba(255,255,255,${1 - t})`; ctx.fillRect(0, 0, W, H); }
+    if (t > 1.5 && !this.carded) { ctx.globalAlpha = 0.55; ctx.fillStyle = '#fff'; ctx.font = `600 ${Math.round(clamp(m * 0.02, 11, 14))}px Rajdhani, sans-serif`; ctx.fillText(tx('gal_end_skip'), cx, H - 14); ctx.globalAlpha = 1; }
+  },
+};
 
 // ---------- the Galaxy map ----------
 const GalaxyScene = {
@@ -10979,6 +11097,7 @@ function renderGalaxyPanel() {
   const G = S.galaxy, g = GALAXY.find(x => x.id === GalaxyScene.sel), i = GALAXY.indexOf(g);
   const done = G ? G.done : [], cur = sysId(), nx = nextSystem();
   let h = `<div class="lp-head"><div><h3>${tx('gal_title')}</h3><small>${tx('gal_conquered_count', { n: done.length, total: GALAXY.length })}</small></div><button class="x" onclick="closeGalaxy()">✕</button></div>`;
+  if (G && G.finished) h += `<button class="btn gal-replay" onclick="closeGalaxy();setScene(EndingScene)">${tx('gal_btn_replay_end')}</button>`;
   h += `<div class="gal-trib"><div><small>${tx('gal_tribute')}</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? tx(conquered() > 1 ? 'gal_trib_rate' : 'gal_trib_rate1', { rate: Math.round(tributeRate() * 60), n: conquered() }) : tx('gal_trib_none')}</span></div>`;
   const legacyHtml = () => {
     let x = `<div class="sub">${tx('gal_legacy_head')}</div><div class="legacy">`;
