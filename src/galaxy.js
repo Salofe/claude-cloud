@@ -9,7 +9,9 @@
 applyEsBase();
 const SOL_SNAP = JSON.parse(JSON.stringify({ locs: LOCS, factions: FACTIONS, unlocks: UNLOCKS, projects: PROJECTS.map(p => ({ id: p.id, icon: p.icon, n: p.n, d: p.d, fx: p.fx })) }));
 
-const SYSTEMS = {
+// Andromeda systems ('and1', 'and2', …) don't exist in the table: they are generated the first time they're asked for
+const SYSTEMS = new Proxy({}, { get(t, k) { if (!(k in t) && typeof k === 'string' && /^and\d+$/.test(k)) t[k] = genAndromeda(+k.slice(3)); return t[k]; } });
+Object.assign(SYSTEMS, {
   sol: {
     n: 'Sol', star: 'sol', rock: 1, enemy: 1, value: 1,
     boss: 'sentinel', bossFleet: ['sentinel', 'adrone', 'adrone', 'adrone'],
@@ -67,7 +69,7 @@ const SYSTEMS = {
       nova: { icon: "⚡", n: "Binary Nova Lance", d: "Both suns fire through a single crystal lens. Planets do not survive it.", fx: "Lets you DESTROY planets (from the Star Map)" },
     },
   },
-};
+});
 
 // systems 3–5
 Object.assign(SYSTEMS, {
@@ -3434,7 +3436,68 @@ applyEsSystems();
 const sysId = () => (S && S.sys) || 'sol';
 const sysDef = () => SYSTEMS[sysId()];
 const sysName = () => sysDef().n;
-const nextSystem = () => GALAXY[GALAXY.findIndex(g => g.id === sysId()) + 1];
+// ---------- Andromeda: an endless galaxy after the Milky Way ----------
+// Each Andromeda system is built from one of the 14 Milky Way systems (its layout, fields, projects and story)
+// with every name replaced, one extra mechanic borrowed from another system, a different guardian, and
+// tougher rocks, pirates and richer ore the deeper you go. The same number always gives the same system.
+const andK = id => (/^and\d+$/.test(id || '') ? +id.slice(3) : 0);
+const inAndromeda = () => andK(sysId()) > 0;
+function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const AND_SYL = ['za', 'ry', 'ko', 'vel', 'thar', 'nis', 'qo', 'ul', 'ma', 'ri', 'xen', 'do', 'shi', 'van', 'or', 'ke', 'lu', 'phae', 'ty', 'ess', 'gal', 'ion', 'ze', 'mor', 'ra', 'quil', 'ny', 'sa', 'tor', 'ae'];
+const AND_FIELD_MECH = { living: 0.3, explosive: 0.12, armored: 0.25, crystal: 0.3, magnetic: 0.08, relics: 0.04, geodes: 0.06 };
+const AND_SYS_MECH = { comets: 3, pulses: 1, sweeps: 1 };
+function genAndromeda(k) {
+  const rnd = seeded(k * 7919 + 17), pick = a => a[Math.floor(rnd() * a.length)];
+  const used = new Set(), name = () => { for (;;) { let w = '', prev = ''; const n = 2 + (rnd() < 0.3 ? 1 : 0); for (let i = 0; i < n; i++) { let sy = pick(AND_SYL); while (sy === prev || (i && /^[aeiouy]/.test(sy) && /[aeiouy]$/.test(w))) sy = pick(AND_SYL); w += sy; prev = sy; } w = w[0].toUpperCase() + w.slice(1); if (w.length <= 10 && !used.has(w)) { used.add(w); return w; } } };
+  const pool = GALAXY.slice(1).map(g => g.id);
+  const tid = pool[(k * 5 + Math.floor(rnd() * 3)) % pool.length], T = SYSTEMS[tid];
+  const D = JSON.parse(JSON.stringify(T));
+  // every proper name in the template gets a fresh one, everywhere it's mentioned
+  const swap = [[T.n, null]];
+  for (const id in (D.locs || {})) { const L = D.locs[id]; if (L.n) swap.push([L.n, null]); if (L.station) swap.push([L.station, null]); if (L.field && L.field.n) swap.push([L.field.n, null]); }
+  for (const f in (D.factions || {})) if (D.factions[f].n) swap.push([D.factions[f].n, null]);
+  const sysN = name(); swap[0][1] = sysN;
+  for (const id in (D.locs || {})) {
+    const L = D.locs[id], base = name();
+    if (L.n) { swap.find(x => x[0] === L.n && !x[1]) && (swap.find(x => x[0] === L.n && !x[1])[1] = base); L.n = base; }
+    if (L.station) { const v = tx('and_station', { n: L.n || base }); const e = swap.find(x => x[0] === L.station && !x[1]); if (e) e[1] = v; L.station = v; }
+    if (L.field && L.field.n) { const v = tx('and_field', { n: L.n || base }); const e = swap.find(x => x[0] === L.field.n && !x[1]); if (e) e[1] = v; L.field.n = v; }
+    if (L.desc) L.desc = tx('and_desc', { sys: sysN });
+  }
+  const FAC = ['and_fac_a', 'and_fac_b', 'and_fac_c', 'and_fac_d', 'and_fac_e'];
+  Object.keys(D.factions || {}).forEach((f, i) => { const v = tx(FAC[i % FAC.length], { n: name() }); const e = swap.find(x => x[0] === D.factions[f].n && !x[1]); if (e) e[1] = v; D.factions[f].n = v; });
+  const reps = swap.filter(x => x[0] && x[1] && x[0] !== x[1]).sort((a, b) => b[0].length - a[0].length);
+  const fix = o => { for (const key in o) { if (typeof o[key] === 'string') { let v = o[key]; for (const [from, to] of reps) v = v.split(from).join(to); o[key] = v; } else if (o[key] && typeof o[key] === 'object') fix(o[key]); } };
+  for (const key of ['unlocks', 'projects', 'tour']) if (D[key]) { if (typeof D[key] === 'string') { const w = { v: D[key] }; fix(w); D[key] = w.v; } else fix(D[key]); }
+  // borrow one more mechanic from elsewhere in the galaxy
+  const fieldMechs = Object.keys(AND_FIELD_MECH).filter(m => !Object.values(D.locs || {}).some(L => L.field && L.field[m]));
+  const sysMechs = Object.keys(AND_SYS_MECH).filter(m => !D[m]);
+  const extra = rnd() < 0.65 && fieldMechs.length ? pick(fieldMechs) : sysMechs.length ? pick(sysMechs) : pick(fieldMechs);
+  if (AND_FIELD_MECH[extra]) { for (const id in (D.locs || {})) if (D.locs[id].field) D.locs[id].field[extra] = AND_FIELD_MECH[extra]; }
+  else D[extra] = AND_SYS_MECH[extra];
+  const mechs = Object.keys(AND_FIELD_MECH).filter(m => Object.values(D.locs || {}).some(L => L.field && L.field[m])).concat(Object.keys(AND_SYS_MECH).filter(m => D[m])).concat(D.gravity ? ['gravity'] : []);
+  // a different guardian, with the fleet it brought in its own system
+  const bossSys = SYSTEMS[pick(pool.filter(id => SYSTEMS[id].boss !== T.boss))];
+  D.boss = bossSys.boss; D.bossFleet = bossSys.bossFleet.slice();
+  // the deeper, the harder — and the richer
+  D.rock = SYSTEMS.sgra.rock * Math.pow(1.12, k); D.enemy = SYSTEMS.sgra.enemy * Math.pow(1.1, k); D.value = Math.pow(1.1, k);
+  // the same layout, nudged so no two systems look alike
+  for (const id in (D.layout || {})) { const L = D.layout[id]; if (L.r && !L.parent && !L.follow) L.r = Math.round(L.r * (0.9 + rnd() * 0.2)); if (L.r && !L.parent && !L.follow && rnd() < 0.4) { L.ecc = Math.round(rnd() * 25) / 100; L.tilt = Math.round(rnd() * 31) / 10; } }
+  delete D.gift; delete D.intro; delete D.signal; delete D.gate;
+  D.n = sysN; D.andromeda = k;
+  if (typeof isTouch !== 'undefined' && isTouch && typeof touchify === 'function') { const tw = o => { for (const key in o) { if (typeof o[key] === 'string') o[key] = touchify(o[key]); else if (o[key] && typeof o[key] === 'object') tw(o[key]); } }; tw(D.unlocks || {}); tw(D.projects || {}); }
+  const mtxt = mechs.map(m => tx('and_m_' + m)).filter(Boolean).join(' ');
+  D.intro = tx('and_intro', { name: sysN, k, mech: mtxt, x: fmt(Math.round(Math.pow(1.1, k) * 100) / 100) });
+  D.gate = tx('and_gate', { boss: ENEMIES[D.boss].n });
+  D.signal = { title: tx('and_signal_t'), text: tx('and_signal', { boss: ENEMIES[D.boss].n }) };
+  return D;
+}
+const andSys = k => ({ id: 'and' + k, n: SYSTEMS['and' + k].n, star: SYSTEMS['and' + k].star });
+// the next stop on the road: the Milky Way in order, then Andromeda one system after another
+const nextSystem = () => { const k = andK(sysId()); if (k) return andSys(k + 1); return GALAXY[GALAXY.findIndex(g => g.id === sysId()) + 1]; };
+// conquered = every system whose guardian you beat (the leaderboard score)
+const systemsConquered = () => { const G = S && S.galaxy, n = G ? G.done.length : 0; return n + (S && S.gateOpen && !(G && G.done.includes(sysId())) ? 1 : 0); };
+const andBest = () => Math.max(0, ...((S && S.galaxy ? S.galaxy.done : []).map(andK)), inAndromeda() && S.gateOpen ? andK(sysId()) : 0);
 
 // rebuild the world for a star system: start from Sol, then apply that system's overrides
 function applySystem(id) {
@@ -3497,7 +3560,39 @@ Object.assign(TXT, {
   gal_end_mined: { en: 'ore mined', es: 'mineral extraído' },
   gal_end_kills: { en: 'pirates defeated', es: 'piratas derrotados' },
   gal_end_days: { en: 'days in space', es: 'días en el espacio' },
-  gal_end_andromeda: { en: 'Far beyond the galaxy\'s edge, your dishes catch a new signal… from <b>Andromeda</b>. A new galaxy is coming in a future update.', es: 'Mucho más allá del borde de la galaxia, tus antenas captan una nueva señal… desde <b>Andrómeda</b>. Una nueva galaxia llegará en una futura actualización.' },
+  gal_end_andromeda: { en: 'Beyond the edge of the galaxy, a gate you never noticed wakes up. Its signal comes from <b>Andromeda</b> — a galaxy with no end. How far will you go?', es: 'Más allá del borde de la galaxia despierta un portal que nunca habías visto. Su señal viene de <b>Andrómeda</b>, una galaxia sin fin. ¿Hasta dónde llegarás?' },
+  gal_end_board: { en: '🏆 <b>{n} systems conquered</b> — your score is on the leaderboard.', es: '🏆 <b>{n} sistemas conquistados</b>: tu puntaje ya está en la tabla.' },
+  gal_end_like: { en: 'Enjoyed it? Tap ❤ on this game\'s Clawcade page.', es: '¿Te gustó? Dale ❤ en la página del juego en Clawcade.' },
+  and_go: { en: '🌌 Travel to Andromeda', es: '🌌 Viajar a Andrómeda' },
+  and_title: { en: 'Andromeda', es: 'Andrómeda' },
+  and_here: { en: 'You are in system {n}: {name}', es: 'Estás en el sistema {n}: {name}' },
+  and_open: { en: 'The gate to an endless galaxy is open.', es: 'El portal a una galaxia sin fin está abierto.' },
+  and_best: { en: 'Deepest: {n}', es: 'Más lejos: {n}' },
+  and_system_tag: { en: 'ANDROMEDA · SYSTEM {n}', es: 'ANDRÓMEDA · SISTEMA {n}' },
+  and_jumping: { en: 'JUMPING · ANDROMEDA {n}', es: 'SALTANDO · ANDRÓMEDA {n}' },
+  and_station: { en: '{n} Port', es: 'Puerto {n}' },
+  and_field: { en: '{n} Fields', es: 'Campos de {n}' },
+  and_desc: { en: 'A world of {sys}, deep in Andromeda.', es: 'Un mundo de {sys}, en lo profundo de Andrómeda.' },
+  and_fac_a: { en: 'Union of {n}', es: 'Unión de {n}' },
+  and_fac_b: { en: 'Free Worlds of {n}', es: 'Mundos Libres de {n}' },
+  and_fac_c: { en: '{n} Mining Pact', es: 'Pacto Minero de {n}' },
+  and_fac_d: { en: '{n} Outer League', es: 'Liga Exterior de {n}' },
+  and_fac_e: { en: '{n} Raiders', es: 'Saqueadores de {n}' },
+  and_m_living: { en: 'Living rocks flee from your laser: calm them with the tractor pulse.', es: 'Las rocas vivas huyen de tu láser: cálmalas con el pulso tractor.' },
+  and_m_explosive: { en: 'Volatile rocks explode and crack everything around them.', es: 'Las rocas volátiles explotan y rompen todo a su alrededor.' },
+  and_m_armored: { en: 'Armored rocks need the drill.', es: 'Las rocas blindadas necesitan el taladro.' },
+  and_m_crystal: { en: 'Crystals shatter into shards you have to chase.', es: 'Los cristales estallan en esquirlas que hay que perseguir.' },
+  and_m_magnetic: { en: 'Magnetic rocks pull loose ore toward you.', es: 'Las rocas magnéticas atraen el mineral suelto hacia ti.' },
+  and_m_relics: { en: 'Ancient relics grant short powers.', es: 'Las reliquias antiguas te dan poderes por un rato.' },
+  and_m_geodes: { en: 'Geodes hide piles of the best ore: find them with the scanner.', es: 'Las geodas esconden montones del mejor mineral: búscalas con el escáner.' },
+  and_m_comets: { en: 'Comets rain on every field.', es: 'Llueven cometas en todos los campos.' },
+  and_m_pulses: { en: 'The star pulses and melts the rocks: molten rocks give more ore.', es: 'La estrella late y funde las rocas: las rocas fundidas dan más mineral.' },
+  and_m_sweeps: { en: 'Radiation beams sweep the fields: phase through them.', es: 'Rayos de radiación barren los campos: atraviésalos en fase.' },
+  and_m_gravity: { en: 'Gravity drags everything toward the bottom of the field.', es: 'La gravedad arrastra todo hacia el fondo del campo.' },
+  and_intro: { en: '<b>Andromeda · system {k}</b>. A galaxy no one has mapped. {mech} Rocks and pirates are tougher here, and ore pays ×{x}.', es: '<b>Andrómeda · sistema {k}</b>. Una galaxia que nadie ha cartografiado. {mech} Aquí las rocas y los piratas son más duros, y el mineral paga ×{x}.' },
+  and_gate: { en: '{boss} falls. Another ancient gate wakes up, leading deeper into Andromeda.', es: '{boss} cae. Otro portal antiguo despierta y lleva más adentro de Andrómeda.' },
+  and_signal_t: { en: 'A signal from deeper in', es: 'Una señal desde más adentro' },
+  and_signal: { en: 'Something beyond the outer cloud is calling. Its guardian, <b>{boss}</b>, is waiting.', es: 'Algo más allá de la nube exterior te llama. Su guardián, <b>{boss}</b>, te espera.' },
   gal_end_keep: { en: 'You can keep playing here as long as you like — your Tribute keeps flowing.', es: 'Puedes seguir jugando aquí todo lo que quieras: tu Tributo sigue llegando.' },
   gal_btn_keep: { en: 'Keep playing', es: 'Seguir jugando' },
   gal_title: { en: 'The Galaxy', es: 'La Galaxia' },
@@ -3606,12 +3701,12 @@ function jumpTo(id) {
   if (G.legacy.quick) { S.credits = 50000; S.stats.earned = UNLOCKS[U.MAP].at; checkUnlocks(); pendingUnlocks = []; }
   S.fuel = ship.fuelMax; S.hull = ship.hpMax;
   S.news = []; addNews('🌀', tx('gal_news_arrive', { name: D.n }), '#d9b3ff');
-  save();
+  save(); postPeak();
   shownCredits = S.credits;
   setScene(MineScene, 'luna');
   updateHUD(); updateTicker();
-  setTimeout(() => { showModal({ icon: '', title: tx('gal_welcome_title', { name: D.n }), cls: 'unlock', html: `<div class="unl-tag">${tx('gal_system_tag', { n: GALAXY.findIndex(g => g.id === id) + 1, total: GALAXY.length })}</div><canvas id="sysPortrait" class="sys-portrait" width="460" height="230"></canvas>${D.tour ? `<p class="tour">${D.tour}</p>` : ''}<p>${D.intro || ''}</p><div class="trib-call">${tx('gal_welcome_trib', { trib: Math.floor(G.tribute), bonus, from: SYSTEMS[from].n, name: D.n })}</div>`,
-    buttons: legacyAffordable() ? [{ label: tx('gal_btn_spend'), cls: 'primary', fn: () => setTimeout(() => { GalaxyScene.sel = id; openGalaxy(); }, 50) }, { label: tx('gal_btn_later'), fn: () => {} }] : [{ label: tx('gal_btn_mine'), cls: 'primary', fn: () => {} }] }); startPortrait(); }, 400);
+  setTimeout(() => { showModal({ icon: '', title: tx('gal_welcome_title', { name: D.n }), cls: 'unlock', html: `<div class="unl-tag">${(andK(id) ? tx('and_system_tag', { n: andK(id) }) : tx('gal_system_tag', { n: GALAXY.findIndex(g => g.id === id) + 1, total: GALAXY.length }))}</div><canvas id="sysPortrait" class="sys-portrait" width="460" height="230"></canvas>${D.tour ? `<p class="tour">${D.tour}</p>` : ''}<p>${D.intro || ''}</p><div class="trib-call">${tx('gal_welcome_trib', { trib: Math.floor(G.tribute), bonus, from: SYSTEMS[from].n, name: D.n })}</div>`,
+    buttons: legacyAffordable() ? [{ label: tx('gal_btn_spend'), cls: 'primary', fn: () => setTimeout(() => { if (!andK(id)) GalaxyScene.sel = id; openGalaxy(); }, 50) }, { label: tx('gal_btn_later'), fn: () => {} }] : [{ label: tx('gal_btn_mine'), cls: 'primary', fn: () => {} }] }); startPortrait(); }, 400);
   return true;
 }
 
@@ -3716,7 +3811,7 @@ const JumpScene = {
       ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,0.9)';
       ctx.font = `900 ${Math.round(m * 0.05)}px Orbitron, sans-serif`; ctx.fillText(D.n.toUpperCase(), cx, cy - m * 0.28);
       ctx.font = `700 ${Math.round(m * 0.028)}px Rajdhani, sans-serif`; ctx.fillStyle = 'rgba(217,179,255,0.9)';
-      ctx.fillText(tx('gal_jumping', { n: GALAXY.findIndex(g => g.id === this.to) + 1, total: GALAXY.length }), cx, cy - m * 0.21);
+      ctx.fillText(andK(this.to) ? tx('and_jumping', { n: andK(this.to) }) : tx('gal_jumping', { n: GALAXY.findIndex(g => g.id === this.to) + 1, total: GALAXY.length }), cx, cy - m * 0.21);
       // arrival flash
       if (t > 3.7) { ctx.fillStyle = `rgba(255,255,255,${clamp((t - 3.7) / 0.5, 0, 1)})`; ctx.fillRect(0, 0, W, H); }
     }
@@ -3727,6 +3822,7 @@ const JumpScene = {
 function finalBossKilled() {
   if (S.gateOpen) return;
   S.gateOpen = 1;
+  postPeak();   // the leaderboard counts conquered systems
   const nx = nextSystem();
   if (!nx) return showEnding();
   addNews('🌀', tx('gal_news_guardian', { name: LOC.oort.n }), '#d9b3ff');
@@ -3750,9 +3846,9 @@ function endingCard() {
   const earned = L.earned + S.stats.earned, mined = L.mined + S.stats.mined, kills = L.kills + S.stats.kills, days = L.days + S.day;
   showModal({ icon: '🌌', title: tx('gal_end_title'), cls: 'unlock', html: `<p>${tx('gal_end_p1')}</p>
     <div class="ending-stats"><div><b>${fmt(earned)}</b><small>${tx('gal_end_earned')}</small></div><div><b>${fmt(mined)}</b><small>${tx('gal_end_mined')}</small></div><div><b>${fmt(kills)}</b><small>${tx('gal_end_kills')}</small></div><div><b>${fmt(days)}</b><small>${tx('gal_end_days')}</small></div></div>
-    <p class="hint">${tx('gal_end_andromeda')}</p>
-    <p>${tx('gal_end_keep')}</p>`,
-    buttons: [{ label: tx('gal_btn_keep'), cls: 'primary', fn: () => setScene(MapScene) }, { label: tx('gal_btn_open_map'), fn: () => setScene(GalaxyScene) }] });
+    <p class="end-and">${tx('gal_end_andromeda')}</p>
+    <p class="end-cta">${tx('gal_end_board', { n: systemsConquered() })}<br>${tx('gal_end_like')}</p>`,
+    buttons: (sysId() === 'sgra' ? [{ label: tx('and_go'), cls: 'primary', fn: () => setTimeout(() => confirmJump('and1'), 50) }] : []).concat([{ label: tx('gal_btn_keep'), cls: sysId() === 'sgra' ? '' : 'primary', fn: () => setScene(MapScene) }]) });
 }
 const EndingScene = {
   t: 0, dust: null, lit: 0, carded: false,
@@ -3873,7 +3969,8 @@ const GalaxyScene = {
         return { a, d, s: r() * 1.6 + 0.4, c: r() < 0.15 ? '#ffd2f0' : r() < 0.4 ? '#bcd4ff' : '#ffffff', o: r() * 0.6 + 0.2 };
       });
     }
-    this.sel = this.sel || (nextSystem() || GALAXY[0]).id;
+    const nx0 = nextSystem();
+    if (!GALAXY.some(g => g.id === this.sel)) this.sel = (nx0 && GALAXY.some(g => g.id === nx0.id) ? nx0 : GALAXY[inAndromeda() || (S.galaxy && S.galaxy.finished) ? GALAXY.length - 1 : 0]).id;
     document.body.classList.add('galaxy');
     $('galPanel').classList.remove('hidden');
     renderGalaxyPanel();
@@ -3932,10 +4029,15 @@ const GalaxyScene = {
   },
 };
 function renderGalaxyPanel() {
-  const G = S.galaxy, g = GALAXY.find(x => x.id === GalaxyScene.sel), i = GALAXY.indexOf(g);
+  const G = S.galaxy, g = GALAXY.find(x => x.id === GalaxyScene.sel) || GALAXY[GALAXY.length - 1], i = GALAXY.indexOf(g);
   const done = G ? G.done : [], cur = sysId(), nx = nextSystem();
   let h = `<div class="lp-head"><div><h3>${tx('gal_title')}</h3><small>${tx('gal_conquered_count', { n: done.length, total: GALAXY.length })}</small></div><button class="x" onclick="closeGalaxy()">✕</button></div>`;
-  if (G && G.finished) h += `<button class="btn gal-replay" onclick="closeGalaxy();setScene(EndingScene)">${tx('gal_btn_replay_end')}</button>`;
+  if (G && G.finished) {
+    const k = andK(cur), nxA = k ? (S.gateOpen ? 'and' + (k + 1) : null) : cur === 'sgra' ? 'and1' : null;
+    h += `<div class="and-box"><div><b>🌌 ${tx('and_title')}</b><small>${k ? tx('and_here', { n: k, name: sysName() }) : tx('and_open')}</small></div><span>${tx('and_best', { n: andBest() })}</span>
+      ${nxA ? `<button class="btn primary big" onclick="confirmJump('${nxA}')">${tx('gal_jump_btn', { name: SYSTEMS[nxA].n })}</button>` : k ? `<p class="hint">${tx('gal_locked', { name: sysName() })}</p>` : ''}</div>`;
+    h += `<button class="btn gal-replay" onclick="closeGalaxy();setScene(EndingScene)">${tx('gal_btn_replay_end')}</button>`;
+  }
   h += `<div class="gal-trib"><div><small>${tx('gal_tribute')}</small><b>${Math.floor(G ? G.tribute : 0)}</b></div><span>${conquered() ? tx(conquered() > 1 ? 'gal_trib_rate' : 'gal_trib_rate1', { rate: Math.round(tributeRate() * 60), n: conquered() }) : tx('gal_trib_none')}</span></div>`;
   const legacyHtml = () => {
     let x = `<div class="sub">${tx('gal_legacy_head')}</div><div class="legacy">`;

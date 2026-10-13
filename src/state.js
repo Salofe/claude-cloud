@@ -44,13 +44,14 @@ function newGame() {
   addNews('📡', tx('st_news_start', { st: LOC.luna.station }), '#3de8ff');
   return S;
 }
-// ---------- Clawcade leaderboard: the most credits you've ever held ----------
+// ---------- Clawcade leaderboard: systems conquered (15 in the Milky Way, then one per Andromeda system, no limit) ----------
 function trackPeak() { if (S && S.credits > (S.stats.peak || 0)) S.stats.peak = Math.floor(S.credits); }
-let postedPeak = 0;
+let postedScore = 0;
 function postPeak() {
-  if (!S || !S.stats.peak || S.stats.peak <= postedPeak) return;
-  postedPeak = S.stats.peak;
-  try { if (window.parent && window.parent !== window) window.parent.postMessage({ clawcade: 'score', score: S.stats.peak }, '*'); } catch (e) {}
+  const n = typeof systemsConquered === 'function' ? systemsConquered() : 0;
+  if (!S || n <= postedScore) return;
+  postedScore = n;
+  try { if (window.parent && window.parent !== window) window.parent.postMessage({ clawcade: 'score', score: n }, '*'); } catch (e) {}
 }
 function save() { if (!S) return; trackPeak(); S.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave() {
