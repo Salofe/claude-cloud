@@ -1,0 +1,18 @@
+# Solo el código es público. Resultados, decisiones y reportes con datos personales quedan locales.
+/*
+!/.gitignore
+!/scripts/
+# Nunca versionar genotipos
+*.txt
+*.vcf
+*.vcf.gz
+*.bcf
+*.bed
+*.bim
+*.fam
+*.pgen
+*.pvar
+*.psam
+*.tbi
+*.csi
+__pycache__/
