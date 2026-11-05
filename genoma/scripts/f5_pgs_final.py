@@ -11,15 +11,16 @@ pop = {}
 for l in open(S + '/ref/integrated_call_samples_v3.20130502.ALL.panel'):
     f = l.split()
     if f[0] != 'sample': pop[f[0]] = (f[1], f[2])
-kg = None; ids = None; sant = collections.Counter(); nv = collections.Counter(); pids = None
+kg = {}; ids = None; sant = collections.Counter(); nv = collections.Counter()
 for c in chrs:
     lines = open(f'{W}/kg_chr{c}{SUF}.sscore').read().splitlines()
     hdr = lines[0].split('\t'); cols = [h.replace('_SUM', '') for h in hdr[1:]]
     m = np.array([[float(x) for x in l.split('\t')[1:]] for l in lines[1:]])
     cid = [l.split('\t')[0] for l in lines[1:]]
-    if kg is None: kg = m; ids = cid; pids = cols
-    else:
-        assert cid == ids and cols == pids; kg += m
+    if ids is None: ids = cid
+    assert cid == ids
+    # un score pequeño puede no tener variantes en algún cromosoma: sumar por nombre de columna
+    for j, pid in enumerate(cols): kg[pid] = kg.get(pid, 0) + m[:, j]
     for l in open(f'{W}/sant_chr{c}{SUF}.tsv'):
         pid, v, n = l.split('\t'); sant[pid] += float(v); nv[pid] += int(n)
 # PCs
@@ -38,8 +39,9 @@ for f in glob.glob(PGSR + '/PGS*_hmPOS_GRCh37.txt.gz'):
         if '=' in l: k, v = l[1:].strip().split('=', 1); d[k] = v
     meta[pid] = d
 res = {}
-for j, pid in enumerate(pids):
-    y = kg[:, j]
+pids = sorted(kg)
+for pid in pids:
+    y = kg[pid]
     beta, *_ = np.linalg.lstsq(Xd, y, rcond=None)
     resid = y - Xd @ beta
     # varianza dependiente de PCs: modelar log(resid^2)
