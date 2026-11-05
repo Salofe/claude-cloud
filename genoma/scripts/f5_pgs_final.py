@@ -1,9 +1,10 @@
 """Agrega PGS por cromosoma y normaliza: (1) Z ajustado por ancestría (media y varianza modeladas con PCs de 1000G,
 como pgsc_calc/Khera 2019); (2) percentil contra poblaciones de 1000G. Usa la proyección PCA de Santiago."""
-import glob, os, sys, collections, json
+import os, glob, os, sys, collections, json
 import numpy as np
 S = '/tmp/claude-0/-home-user-claude-cloud/a79c4d0a-93d9-512a-8620-3273e0be7d84/scratchpad'
-W = S + '/pgs/work'; A = S + '/anc/kg'
+PGSR = os.environ.get('PGSROOT', S + '/pgs')
+W = PGSR + '/work'; A = S + '/anc/kg'
 SUF = sys.argv[1] if len(sys.argv) > 1 else ''
 chrs = sorted(int(os.path.basename(f)[8:].split('_')[0].split('.')[0]) for f in glob.glob(W + f'/sant_chr*{SUF}.tsv') if (SUF or '_med' not in f))
 pop = {}
@@ -29,7 +30,7 @@ for l in _L[1:]:
 X = np.array([pcs[i] for i in ids]); Xs = pcs['SANTIAGO']
 Xd = np.column_stack([np.ones(len(ids)), X]); xs = np.concatenate([[1], Xs])
 meta = {}
-for f in glob.glob(S + '/pgs/PGS*_hmPOS_GRCh37.txt.gz'):
+for f in glob.glob(PGSR + '/PGS*_hmPOS_GRCh37.txt.gz'):
     import gzip
     pid = os.path.basename(f).split('_')[0]; d = {}
     for l in gzip.open(f, 'rt'):
@@ -56,4 +57,4 @@ for j, pid in enumerate(pids):
                     used=nv[pid], cover=round(nv[pid] / float(meta[pid].get('variants_number', 1)), 3),
                     z_ancestry=round(float(z), 2), pct_ancestry=round(50 * (1 + erf(z / sqrt(2))), 1), raw=sant[pid], **pct)
     print(f"{pid:10s} {res[pid]['trait'][:28]:28s} uso {nv[pid]:>8} ({res[pid]['cover']:.0%}) Zanc={z:+.2f} pct={res[pid]['pct_ancestry']:5.1f} | IBS {pct['IBS']:5.1f} MXL {pct['MXL']:5.1f} PEL {pct['PEL']:5.1f} CEU {pct['CEU']:5.1f}")
-json.dump(dict(chrs=chrs, res=res), open(S + f'/pgs/pgs_resultados{SUF}.json', 'w'), indent=1)
+json.dump(dict(chrs=chrs, res=res), open(PGSR + f'/pgs_resultados{SUF}.json', 'w'), indent=1)

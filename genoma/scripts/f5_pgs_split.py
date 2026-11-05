@@ -1,11 +1,12 @@
 """Divide los scoring files armonizados (GRCh37) por cromosoma: pos, effect, other, PGS, weight.
 Usa hm_chr/hm_pos/effect_allele/other_allele (o hm_inferOtherAllele). Excluye filas sin posición armonizada."""
-import gzip, glob, os, collections, sys
+import os, gzip, glob, os, collections, sys
 S = '/tmp/claude-0/-home-user-claude-cloud/a79c4d0a-93d9-512a-8620-3273e0be7d84/scratchpad'
-out = S + '/pgs/bychr'; os.makedirs(out, exist_ok=True)
+PGSR = os.environ.get('PGSROOT', S + '/pgs')
+out = PGSR + '/bychr'; os.makedirs(out, exist_ok=True)
 fh = {}
 stats = {}
-for f in sorted(glob.glob(S + '/pgs/PGS*_hmPOS_GRCh37.txt.gz')):
+for f in sorted(glob.glob(PGSR + '/PGS*_hmPOS_GRCh37.txt.gz')):
     pid = os.path.basename(f).split('_')[0]
     n = collections.Counter(); hdr = None
     meta = {}

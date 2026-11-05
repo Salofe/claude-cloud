@@ -1,16 +1,17 @@
 """PGS por cromosoma para Santiago (dosis imputadas) y los 2,504 de 1000G (genotipos), mismas variantes.
 Pesos expresados respecto al alelo ALT (la constante se cancela al comparar con la referencia).
 Filtros: SNPs bialélicos, no palindrómicos, MAF>=1% en 1000G (plink2 --maf 0.01)."""
-import sys, os, subprocess, collections
+import os, sys, os, subprocess, collections
 c = sys.argv[1]
 MODE = sys.argv[2] if len(sys.argv) > 2 else 'imp'   # 'med' = solo variantes medidas en el chip
 SUF = '' if MODE == 'imp' else '_med'
 S = '/tmp/claude-0/-home-user-claude-cloud/a79c4d0a-93d9-512a-8620-3273e0be7d84/scratchpad'
-W = f'{S}/pgs/work'; os.makedirs(W, exist_ok=True)
+PGSR = os.environ.get('PGSROOT', S + '/pgs')
+W = f'{PGSR}/work'; os.makedirs(W, exist_ok=True)
 BT = '/opt/mm/bt/bin/bcftools'; P2 = '/opt/mm/bt/bin/plink2'
 comp = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
 rows = collections.defaultdict(list); pids = set()
-for l in open(f'{S}/pgs/bychr/chr{c}.tsv'):
+for l in open(f'{PGSR}/bychr/chr{c}.tsv'):
     p, ea, oa, pid, w = l.rstrip('\n').split('\t')
     rows[int(p)].append((ea, oa, pid, float(w))); pids.add(pid)
 pids = sorted(pids)
