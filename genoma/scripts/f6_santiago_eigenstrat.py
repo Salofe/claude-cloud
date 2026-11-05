@@ -1,5 +1,5 @@
 """Genotipo de Santiago en los SNPs de un .snp EIGENSTRAT (AADR).
-Modo 'medido': solo genotipos del chip. Modo 'imputado': medido + imputado (MAF>=1% y |DS-entero|<=0.1).
+Modo 'medido': solo genotipos del chip. Modo 'imputado': medido + imputado (|DS-entero|<=0.1; SNPs HO ya ascertados como comunes).
 Salida: columna .geno (conteo del alelo de la col. 5 del .snp; 9 = falta)."""
 import sys, gzip, os, subprocess
 snpfile, mode, outgeno = sys.argv[1:4]
@@ -34,7 +34,8 @@ if mode == 'imputado':
             i = want[c].get(int(p))
             if i is None or i in gt: continue
             af = float(af); ds = float(ds)
-            if min(af, 1 - af) < 0.01 or abs(ds - round(ds)) > 0.1: continue
+            # OJO: INFO/AF de Beagle con 1 muestra = dosis propia; no sirve como MAF. Los SNPs HO ya son comunes.
+            if abs(ds - round(ds)) > 0.1: continue
             k = int(round(ds))
             if c == '23': k = min(k, 1) * 2  # X haploide como homocigoto
             gt[i] = ('i', r * (2 - k) + a * k if c != '23' else (a * 2 if k else r * 2))
