@@ -16,3 +16,5 @@
 *.tbi
 *.csi
 __pycache__/
+# Contiene resultados personales: solo en el repo privado
+/scripts/report/build_report.py

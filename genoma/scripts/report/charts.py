@@ -39,20 +39,27 @@ def stacked_bar(parts):
     return f'<div class="bar" role="img" aria-label="{", ".join(f"{l} {100*f:.1f}%" for l, f, k in parts)}">{spans}</div>'
 
 def pgs_dots(rows, width=760):
-    """rows: lista dict(label, pct, lo, hi, note). Percentil 0-100 en eje x, con banda de incertidumbre."""
-    rh, left, right, top = 34, 250, 30, 30
-    W = width; H = top + rh * len(rows) + 40
-    X = lambda p: left + (W - left - right) * p / 100
-    o = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Percentiles de scores poligénicos" xmlns="http://www.w3.org/2000/svg" style="min-width:600px">']
+    """rows: dict(label, pct (medido), pct2 (imputado), conf). Punto lleno = solo variantes medidas; anillo = imputado."""
+    rh, left, right, top = 36, 270, 24, 34
+    W = width; H = top + rh * len(rows) + 46
+    X = lambda p: left + (W - left - right) * max(0, min(100, p)) / 100
+    o = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Percentiles de scores poligénicos ajustados por ancestría" xmlns="http://www.w3.org/2000/svg" style="min-width:620px">']
     for p in (0, 25, 50, 75, 100):
-        o.append(f'<line x1="{X(p):.1f}" x2="{X(p):.1f}" y1="{top-8}" y2="{H-30}" stroke="var(--rule)" stroke-width="1" {"" if p!=50 else "stroke-dasharray=\'4 3\'"}/>')
-        o.append(f'<text x="{X(p):.1f}" y="{H-12}" font-size="11" text-anchor="middle" class="muted">{p}</text>')
-    o.append(f'<text x="{X(50):.1f}" y="{top-14}" font-size="11" text-anchor="middle" class="muted">percentil (50 = promedio de tu ancestría)</text>')
+        dash = ' stroke-dasharray="4 3"' if p == 50 else ''
+        o.append(f'<line x1="{X(p):.1f}" x2="{X(p):.1f}" y1="{top-6}" y2="{H-34}" stroke="var(--rule)" stroke-width="1"{dash}/>')
+        o.append(f'<text x="{X(p):.1f}" y="{H-16}" font-size="11" text-anchor="middle" class="muted">{p}</text>')
+    o.append(f'<text x="{X(50):.1f}" y="{top-16}" font-size="11" text-anchor="middle" class="muted">percentil ajustado por ancestría (50 = promedio esperado para tu mezcla)</text>')
     for i, r in enumerate(rows):
         y = top + i * rh + rh / 2
-        o.append(f'<text x="{left-12}" y="{y+4:.1f}" font-size="12.5" text-anchor="end">{r["label"]}</text>')
-        o.append(f'<rect x="{X(r["lo"]):.1f}" y="{y-5:.1f}" width="{max(X(r["hi"])-X(r["lo"]),2):.1f}" height="10" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width=".6"/>')
-        o.append(f'<circle cx="{X(r["pct"]):.1f}" cy="{y:.1f}" r="5.5" fill="var(--accent)"/>')
-        o.append(f'<text x="{min(X(r["pct"])+10, W-right-30):.1f}" y="{y-8:.1f}" font-size="11" class="muted">{r["pct"]:.0f}</text>')
+        if i % 2 == 0: o.append(f'<rect x="0" y="{y-rh/2:.1f}" width="{W}" height="{rh}" fill="var(--bg)" opacity=".55"/>')
+        o.append(f'<text x="{left-14}" y="{y+4:.1f}" font-size="12.5" text-anchor="end">{r["label"]}</text>')
+        x1, x2 = X(r["pct"]), X(r["pct2"])
+        o.append(f'<line x1="{min(x1,x2):.1f}" x2="{max(x1,x2):.1f}" y1="{y:.1f}" y2="{y:.1f}" stroke="var(--accent)" stroke-width="2" opacity=".35"/>')
+        o.append(f'<circle cx="{x2:.1f}" cy="{y:.1f}" r="5" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.8"/>')
+        o.append(f'<circle cx="{x1:.1f}" cy="{y:.1f}" r="5.5" fill="var(--accent)"/>')
+        if max(x1, x2) > X(85):
+            o.append(f'<text x="{min(x1,x2)-10:.1f}" y="{y+4:.1f}" font-size="11" text-anchor="end" class="muted">{r["pct"]:.0f}</text>')
+        else:
+            o.append(f'<text x="{max(x1,x2)+10:.1f}" y="{y+4:.1f}" font-size="11" class="muted">{r["pct"]:.0f}</text>')
     o.append('</svg>')
     return '\n'.join(o)
