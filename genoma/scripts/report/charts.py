@@ -6,8 +6,9 @@ CEN = {1:125.0,2:93.3,3:91.0,4:50.4,5:48.4,6:61.0,7:59.9,8:45.6,9:49.0,10:40.2,1
        18:17.2,19:26.5,20:27.5,21:13.2,22:14.7,'X':60.6}
 COL = {'EUR':'var(--eur)','NAT':'var(--nat)','AFR':'var(--afr)','UNK':'var(--unk)'}
 
-def ideogram(segs, title='Ideograma'):
-    """segs: lista de (chr, start, end, hap(0/1), anc). Dibuja 22 autosomas (2 haplotipos) + X (1)."""
+def ideogram(segs, title='Ideograma', x_haps=1, nota=None, etiquetas=None):
+    """segs: lista de (chr, start, end, hap(0/1), anc). Dibuja 22 autosomas (2 haplotipos) + X (x_haps: 1 en hombres, 2 en mujeres).
+    etiquetas: par de textos para la barra izquierda y derecha de cada cromosoma (p. ej. copia materna / paterna)."""
     chrs = list(range(1, 23)) + ['X']
     colw, barw, gap = 42, 11, 3
     H, top = 300, 30
@@ -17,7 +18,7 @@ def ideogram(segs, title='Ideograma'):
     for i, c in enumerate(chrs):
         x0 = 10 + i * colw + (colw - (2*barw+gap)) / 2
         L = CHRLEN[c] * scale
-        nh = 1 if c == 'X' else 2
+        nh = x_haps if c == 'X' else 2
         for h in range(nh):
             x = x0 + h * (barw + gap) + (barw/2+gap/2 if nh == 1 else 0)
             out.append(f'<rect x="{x:.1f}" y="{top}" width="{barw}" height="{L:.1f}" rx="5" fill="var(--unk)"/>')
@@ -29,7 +30,9 @@ def ideogram(segs, title='Ideograma'):
         cy = top + CEN[c] * 1e6 * scale
         out.append(f'<line x1="{x0-2:.1f}" x2="{x0+2*barw+gap+2:.1f}" y1="{cy:.1f}" y2="{cy:.1f}" stroke="var(--bg)" stroke-width="2"/>')
         out.append(f'<text x="{x0+barw+gap/2:.1f}" y="{top-10}" text-anchor="middle" font-size="12">{c}</text>')
-    out.append(f'<text x="10" y="{top+H+28}" font-size="11" class="muted">Cada par de barras = tus dos copias de ese cromosoma (X: una sola). Escala: cromosoma 1 = 249 Mb. Gris = sin llamada.</text>')
+    if nota is None: nota = 'Cada par de barras = tus dos copias de ese cromosoma (X: una sola). Escala: cromosoma 1 = 249 Mb. Gris = sin llamada.'
+    if etiquetas: nota = f'Barra izquierda = {etiquetas[0]}; barra derecha = {etiquetas[1]}. ' + nota
+    out.append(f'<text x="10" y="{top+H+28}" font-size="11" class="muted">{nota}</text>')
     out.append('</svg>')
     return '\n'.join(out)
 

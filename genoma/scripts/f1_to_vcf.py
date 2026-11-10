@@ -3,6 +3,8 @@ Autosomas diploides; X no-PAR, Y y MT haploides (hombre). Indels I/D se excluyen
 Escribe estadísticas de QC en stdout."""
 import sys, pysam, collections
 genome, fasta, out = sys.argv[1:4]
+SAMPLE = sys.argv[4] if len(sys.argv) > 4 else 'SANTIAGO'
+SEX = sys.argv[5] if len(sys.argv) > 5 else 'M'   # 'F': X diploide en todo el cromosoma, sin Y
 fa = pysam.FastaFile(fasta)
 PAR = [(60001, 2699520), (154931044, 155260560)]
 comp = str.maketrans('ACGT', 'TGCA')
@@ -23,7 +25,8 @@ for line in open(genome):
     fch = 'MT' if ch == 'MT' else ch
     ref = fa.fetch(fch, pos - 1, pos).upper()
     al = list(gt)
-    haploid = ch in ('Y', 'MT') or (ch == 'X' and not any(a <= pos <= b for a, b in PAR))
+    if SEX == 'F' and ch == 'Y': st['Y_en_mujer'] += 1; continue
+    haploid = ch in ('Y', 'MT') or (SEX == 'M' and ch == 'X' and not any(a <= pos <= b for a, b in PAR))
     if haploid and len(al) == 2:
         if al[0] != al[1]: st['het_en_haploide'] += 1; continue
         al = al[:1]
@@ -42,7 +45,7 @@ with open(out, 'w') as o:
     o.write('##fileformat=VCFv4.2\n##reference=human_g1k_v37\n')
     for c in order: o.write(f'##contig=<ID={c},length={fa.get_reference_length(c)}>\n')
     o.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
-    o.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSANTIAGO\n')
+    o.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t' + SAMPLE + '\n')
     for c in order:
         for pos, rs, ref, alt, g in sorted(recs[c]):
             o.write(f'{c}\t{pos}\t{rs}\t{ref}\t{alt}\t.\tPASS\t.\tGT\t{g}\n')

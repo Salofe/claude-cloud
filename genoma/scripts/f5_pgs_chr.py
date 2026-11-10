@@ -19,7 +19,9 @@ pids = sorted(pids)
 reg = f'{W}/reg{c}.txt'
 with open(reg, 'w') as o:
     for p in sorted(rows): o.write(f'{c}\t{p}\n')
-q = subprocess.run([BT, 'query', '-R', reg, '-i', 'TYPE="snp"', '-f', '%POS\t%REF\t%ALT\t[%DS]\t%INFO/IMP\n', f'{S}/imp/imp_chr{c}.vcf.gz'],
+IMPF = os.environ.get('GIMP', S + '/imp/imp_chr{c}.vcf.gz').format(c=c)   # VCF imputado (GIMP admite {c})
+SMP = ['-s', os.environ['GSAMPLE']] if os.environ.get('GSAMPLE') else []      # muestra, si el VCF tiene varias
+q = subprocess.run([BT, 'query', '-R', reg, *SMP, '-i', 'TYPE="snp"', '-f', '%POS\t%REF\t%ALT\t[%DS]\t%INFO/IMP\n', IMPF],
                    capture_output=True, text=True, check=True).stdout
 sites = {}
 for line in q.splitlines():
@@ -54,12 +56,18 @@ cmd = [P2, '--vcf', f'{S}/ref/1kg/chr{c}.vcf.gz', '--set-all-var-ids', '@:#:$r:$
        '--extract', f'{W}/extract_chr{c}{SUF}.txt', '--maf', '0.01', '--threads', '2', '--memory', '3000',
        '--score', sf, '1', '2', 'header-read', 'cols=scoresums', 'list-variants', '--score-col-nums', f'3-{len(pids)+2}',
        '--out', f'{W}/kg_chr{c}{SUF}']
-r = subprocess.run(cmd, capture_output=True, text=True)
-if r.returncode != 0: print(r.stdout[-2000:], r.stderr[-2000:]); sys.exit(1)
+REUSE = os.environ.get('GKGREUSE')
+if REUSE and os.path.exists(f'{REUSE}/kg_chr{c}{SUF}.sscore.vars'):
+    import shutil
+    for ext in ('.sscore', '.sscore.vars'): shutil.copy(f'{REUSE}/kg_chr{c}{SUF}{ext}', f'{W}/kg_chr{c}{SUF}{ext}')
+else:
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0: print(r.stdout[-2000:], r.stderr[-2000:]); sys.exit(1)
 used = set(open(f'{W}/kg_chr{c}{SUF}.sscore.vars').read().split())
 # Santiago
 tot = collections.Counter(); nvar = collections.Counter()
 for vid in used:
+    if vid not in score: continue
     for pid, wa in score[vid].items():
         tot[pid] += wa * dose[vid]
         if wa != 0: nvar[pid] += 1

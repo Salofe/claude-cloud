@@ -1,7 +1,7 @@
 """Fase 4: construye VCF GRCh38 para PharmCAT a partir de genotipos 23andMe (GRCh37) mapeando por rsID
 al archivo de posiciones de PharmCAT. Solo incluye posiciones MEDIDAS (o imputadas si se da un TSV extra).
 Comprueba que los alelos del genotipo estén en {REF, ALT} (o su complemento) y reporta discordancias."""
-import sys, gzip
+import sys, gzip, os
 positions, genome, out = sys.argv[1:4]
 extra = sys.argv[4] if len(sys.argv) > 4 else None  # TSV rsid\tgenotipo (imputado)
 comp = str.maketrans('ACGT', 'TGCA')
@@ -48,7 +48,7 @@ with open(out, 'w') as o:
         if not h.startswith('##fileformat'): o.write(h)
     if not any(h.startswith('##FORMAT=<ID=GT') for h in hdr):
         o.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
-    o.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSANTIAGO\n')
+    o.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t' + os.environ.get('GSAMPLE', 'SANTIAGO') + '\n')
     order = {f'chr{i}': i for i in range(1, 23)}; order['chrX'] = 23; order['chrY'] = 24; order['chrM'] = 25
     for ch, pos, ids, ref, alt, gts, s in sorted(lines, key=lambda x: (order.get(x[0], 99), x[1])):
         o.write(f'{ch}\t{pos}\t{ids}\t{ref}\t{alt}\t.\tPASS\t.\tGT\t{gts}\n')

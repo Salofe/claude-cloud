@@ -13,7 +13,8 @@ shuf --random-source=<(yes) $TG | split -n l/$NF -d - tf
 for f in tf*; do
   [ -s out_$f.tsv ] && continue
   bcftools view -S ^$f $PANEL -Oz -o ref.vcf.gz
-  bcftools view -S $f $CHIP | bcftools +setGT -- -t a -n u 2>/dev/null | bcftools view -Oz -o tg.vcf.gz
+  if [ -n "$PHASED" ]; then bcftools view -S $f $CHIP -Oz -o tg.vcf.gz   # objetivos con su fase real (caso de un dúo/trío)
+  else bcftools view -S $f $CHIP | bcftools +setGT -- -t a -n u 2>/dev/null | bcftools view -Oz -o tg.vcf.gz; fi
   java -Xmx6g -jar /opt/mm/gen/share/beagle-5.5_27Feb25.75f-0/beagle.jar ref=ref.vcf.gz gt=tg.vcf.gz map=$MAP out=imp nthreads=4 impute=true gp=false ap=false seed=11 > log_$f.txt 2>&1
   bcftools index -f imp.vcf.gz
   bcftools query -R raras_nochip.pos -f '%POS\t%REF\t%ALT[\t%DS]\n' imp.vcf.gz > ds.tsv
