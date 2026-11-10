@@ -19,3 +19,4 @@ __pycache__/
 # Contiene resultados personales: solo en el repo privado
 /scripts/report/build_report.py
 /scripts/report/build_report_mama.py
+/scripts/report/build_sencillo.py
