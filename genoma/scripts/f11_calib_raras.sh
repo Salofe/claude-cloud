@@ -6,7 +6,7 @@ set -e
 PANEL=$1; CHIP=$2; MAP=$3; TG=$4; NF=$5; O=$6
 export PATH=/opt/mm/bt/bin:/opt/mm/gen/bin:$PATH
 mkdir -p $O; cd $O
-bcftools view -G -c 4 -C 12 -v snps -m2 -M2 $PANEL | bcftools query -f '%CHROM\t%POS\n' | sort -u -k1,1 -k2,2n > raras.pos
+bcftools view -G -c ${MACMIN:-4} -C ${MACMAX:-12} -v snps -m2 -M2 $PANEL | bcftools query -f '%CHROM\t%POS\n' | sort -u -k1,1 -k2,2n > raras.pos
 bcftools query -f '%CHROM\t%POS\n' $CHIP > chip.pos
 awk 'NR==FNR{c[$2]=1;next} !($2 in c)' chip.pos raras.pos > raras_nochip.pos; wc -l < raras_nochip.pos
 shuf --random-source=<(yes) $TG | split -n l/$NF -d - tf
