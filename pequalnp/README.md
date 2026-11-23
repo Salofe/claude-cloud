@@ -46,6 +46,15 @@ So the exact value is 6 (Laplace is optimal) and the limit value is 5: a fully m
 example where this rank drops in the limit. For comparison the 4 × 4 determinant needs exactly 3
 ([Lampert–Moshkovitz](https://arxiv.org/abs/2509.06294); also in Lean here, `DetFour.lean`).
 
+### Best known values at the middle layer
+
+| size | Laplace | exact sums: best upper bound | limits: lower bound .. upper bound |
+|---|---|---|---|
+| 4 × 4 | 6 | 6, optimal (Lean) | 5 .. 5 (Lean) |
+| 6 × 6 | 20 | 20 | 8 (paper + certificates) .. 15 (Lean) |
+| 8 × 8 | 70 | 47 (paper + exact check); 73 in Lean | 9 (paper + certificates) .. 41 (paper + exact check); 53 in Lean |
+| 10 × 10 | 252 | 186 (paper); 228 in Lean | 10 (paper) .. 156 (paper); 176 in Lean |
+
 ### General size
 
 Upper bounds:
@@ -55,6 +64,7 @@ Upper bounds:
 | `2k × 2k`, every `k ≥ 1`, any field: limit of sums of `N + T_k` terms (`T_k` the central trinomial coefficient 1, 3, 7, 19, 51, …), and of `N + T_k − 1` when `2^(k−1) ≠ 1` in the field: 5, 16, 53, 176 for `k = 2..5`, about half of Laplace | Lean | `SquaresBound.lean`, `borderMixedSplit_perm_fin`, `borderMixedSplit_perm_fin_sub_one` |
 | `2k × 2k`: exact sum of `N + 2T_k` terms; at 10 × 10 this is 228 < 252, so Laplace is not optimal for exact sums | Lean | `mixedSplit_perm_fin`, `exists_mixedSplit_perm_ten_lt_laplace` |
 | 6 × 6: limit of sums of 15 (Laplace: 20) | Lean | `FifteenTerm.lean`, `borderMixedSplit_perm_six` |
+| `2k × 2k`, `k` even: limit of sums of `N + C(k, k/2)` terms and exact sum of `N + 2C(k, k/2)`; at 8 × 8 this is 41 and 47 (Laplace: 70). For odd `k` the extra count is `(k+1)/2 · C(k, (k−1)/2)` | paper; exact check on the full tensors for `k ≤ 4` | `notes/extra_terms.md`, `python3 garbage_general.py verify 4` |
 
 Lower bounds:
 
@@ -134,6 +144,7 @@ Exact checks, each a few seconds to a few minutes:
     python3 checks/gr_dual.py 3 4 5       # codimension certificates (add 6: about 10 minutes)
     python3 checks/sum_matrix_referee.py  # the sum-matrix lemma
     python3 exact4.py all                 # ingredients of the 4 x 4 exact proof
+    python3 garbage_general.py verify 4   # 8 x 8: limit of 41, exact sum of 47 (15 s, 1.5 GB)
     python3 pairs.py theorem6             # certificates for the 6 x 6 lower bound (25 s)
     python3 pairs.py theorem8             # certificates for the 8 x 8 lower bound (3 min)
     python3 checks/det_canonical.py 2 4 6
@@ -143,7 +154,7 @@ Exact checks, each a few seconds to a few minutes:
 - `lean/PvsNP/`: the Lean development. `SplitRank.lean` holds the uniform definitions
   (`IsSplitProduct`, `MixedSplitLE`, `BorderMixedSplitLE`) and the main statements.
 - `notes/`: paper proofs and reports (`linear_lower_bound.md`, `exact_five_terms_4x4.md`,
-  `pairs_bound.md`, `determinant.md`, `next_steps.md`) and the reports of independent referee
+  `pairs_bound.md`, `extra_terms.md`, `determinant.md`, `next_steps.md`) and the reports of independent referee
   agents (`referee_exact_five_terms.md`, `referee_pairs_bound.md`).
 - `checks/`: exact and numerical checks written by independent referee agents.
 - `pairs.py`: the two-free-rows method (certificates, enumeration).
