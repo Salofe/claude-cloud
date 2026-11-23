@@ -119,8 +119,9 @@ theorem permanent_sub_eq_five_split (lam : K) (hlam : lam ≠ 0) :
 
 end Field
 
-/-- **The limit.** Over the reals, the five split products of `permanent_sub_eq_five_split`
-converge to the permanent as `lam → 0`. -/
+/-- The error term of `permanent_sub_eq_five_split` vanishes as `lam → 0` (continuity of a
+polynomial of degree one in `lam`). See `tendsto_five_split_strong` for the statement about the
+five split products themselves. -/
 theorem tendsto_five_split (A : Matrix (Fin 4) (Fin 4) ℝ) :
     Filter.Tendsto (fun lam : ℝ => A.permanent - lam * (altPair A 2 3 0 1 * altPair A 2 3 2 3))
       (nhdsWithin 0 {0}ᶜ) (nhds A.permanent) := by
@@ -129,5 +130,30 @@ theorem tendsto_five_split (A : Matrix (Fin 4) (Fin 4) ℝ) :
   have h0 := hc.tendsto 0
   simp only [zero_mul, sub_zero] at h0
   exact h0.mono_left nhdsWithin_le_nhds
+
+/-- **The limit, as a statement about the five split products.** There is a family, indexed by `lam`, of five
+split products (three for `01|23`, one for `02|13`, one for `03|12`) whose sum converges to the
+permanent as `lam → 0`. -/
+theorem tendsto_five_split_strong :
+    ∃ t : ℝ → Fin 5 → Matrix (Fin 4) (Fin 4) ℝ → ℝ,
+      (∀ lam : ℝ, lam ≠ 0 → IsSplit 0 1 2 3 (t lam 0) ∧ IsSplit 0 1 2 3 (t lam 1) ∧
+        IsSplit 0 1 2 3 (t lam 2) ∧ IsSplit 0 2 1 3 (t lam 3) ∧ IsSplit 0 3 1 2 (t lam 4)) ∧
+      ∀ A : Matrix (Fin 4) (Fin 4) ℝ,
+        Filter.Tendsto (fun lam : ℝ => ∑ i, t lam i A) (nhdsWithin 0 {0}ᶜ) (nhds A.permanent) := by
+  classical
+  have h := fun (lam : ℝ) (hlam : lam ≠ 0) => permanent_sub_eq_five_split lam hlam
+  choose t₁ t₂ t₃ t₄ t₅ h₁ h₂ h₃ h₄ h₅ hsum using h
+  refine ⟨fun lam => if hl : lam ≠ 0 then
+      ![t₁ lam hl, t₂ lam hl, t₃ lam hl, t₄ lam hl, t₅ lam hl] else fun _ _ => 0, ?_, ?_⟩
+  · intro lam hl
+    simp only [dite_eq_left hl]
+    exact ⟨h₁ lam hl, h₂ lam hl, h₃ lam hl, h₄ lam hl, h₅ lam hl⟩
+  · intro A
+    refine (tendsto_five_split A).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with lam hl
+    have hl' : lam ≠ 0 := hl
+    simp only [dite_eq_left hl', Fin.sum_univ_five]
+    rw [hsum lam hl' A]
+    rfl
 
 end PvsNP

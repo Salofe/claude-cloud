@@ -16,6 +16,14 @@ rows `S` on the second block (both are zero unless `S` has exactly `card κ` ele
 In the first sum `S` and `Sᶜ` give the same product, so it has half as many distinct terms as
 the Laplace expansion; the last sum carries a factor `lam ^ 2`. This is the polarisation of
 `2 * lam * q₁ * q₂ = (q₁ + lam * q₂) ^ 2 - q₁ ^ 2 - lam ^ 2 * q₂ ^ 2`.
+
+* `mul_permanent_eq_squares_half`: the same identity with one term per pairing `{S, Sᶜ}` (the
+  sets containing a fixed row) and no factor `2`.
+
+What is *not* in this file: the middle sum `∑ S, q₁ S * q₁ Sᶜ` still runs over all pairings.
+Re-expanding it along one fixed splitting into fewer products (the central trinomial number of
+them) is what gives a saving over Laplace; that step is formalised only for `k = 3`
+(`SixBySix.lean`) and `k = 2` (`FiveTerm.lean`).
 -/
 
 namespace PvsNP
@@ -132,6 +140,34 @@ theorem two_mul_permanent_eq_squares (A : Matrix (κ ⊕ κ) (κ ⊕ κ) R) (lam
     refine Finset.sum_congr rfl fun S _ => ?_
     ring
   rw [expand, ← h1, ← h2]
+  ring
+
+/-! ### One term per pairing, and no factor `2` -/
+
+/-- A sum over all sets is a sum over the sets containing a fixed element `r₀` of the value at
+the set plus the value at its complement. -/
+theorem sum_eq_sum_half (r₀ : κ ⊕ κ) (g : Finset (κ ⊕ κ) → R) :
+    ∑ S, g S = ∑ S ∈ Finset.univ.filter (fun S : Finset (κ ⊕ κ) => r₀ ∈ S), (g S + g Sᶜ) := by
+  rw [Finset.sum_add_distrib,
+    ← Finset.sum_filter_add_sum_filter_not Finset.univ (fun S : Finset (κ ⊕ κ) => r₀ ∈ S)]
+  congr 1
+  refine Finset.sum_nbij' (fun S => Sᶜ) (fun S => Sᶜ) ?_ ?_ ?_ ?_ ?_ <;> simp
+
+/-- **Square construction with one term per pairing.** The sets containing a fixed row `r₀`
+are a set of representatives of the pairings `{S, Sᶜ}`. No factor `2`, so this is usable in
+every characteristic. -/
+theorem mul_permanent_eq_squares_half (r₀ : κ ⊕ κ) (A : Matrix (κ ⊕ κ) (κ ⊕ κ) R) (lam : R) :
+    lam * A.permanent =
+      ∑ S ∈ Finset.univ.filter (fun S : Finset (κ ⊕ κ) => r₀ ∈ S),
+          (blockForm A Sum.inl S + lam * blockForm A Sum.inr S)
+            * (blockForm A Sum.inl Sᶜ + lam * blockForm A Sum.inr Sᶜ)
+        - ∑ S ∈ Finset.univ.filter (fun S : Finset (κ ⊕ κ) => r₀ ∈ S),
+            blockForm A Sum.inl S * blockForm A Sum.inl Sᶜ
+        - lam ^ 2 * ∑ S ∈ Finset.univ.filter (fun S : Finset (κ ⊕ κ) => r₀ ∈ S),
+            blockForm A Sum.inr S * blockForm A Sum.inr Sᶜ := by
+  rw [permanent_eq_sum_blockForm, sum_eq_sum_half r₀]
+  simp only [compl_compl, Finset.mul_sum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun S _ => ?_
   ring
 
 end PvsNP
