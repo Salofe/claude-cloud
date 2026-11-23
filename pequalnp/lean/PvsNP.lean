@@ -7,3 +7,6 @@ import PvsNP.Squares
 import PvsNP.FirstLayer
 import PvsNP.SplitBridge
 import PvsNP.FifteenTerm
+import PvsNP.SixBySixForms
+import PvsNP.FifteenForms
+import PvsNP.FourByFourLower

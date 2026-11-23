@@ -3,7 +3,46 @@ import PvsNP.FiveTerm
 /-!
 # Lower bounds for mixed split decompositions of the `4 × 4` permanent
 
-PLACEHOLDER
+A *split product* is a bilinear form in two rows of a `4 × 4` matrix times a bilinear form in
+the other two rows; the two pairs of rows form one of the three pairings `01|23`, `02|13`,
+`03|12`. Laplace expansion writes the permanent with six split products of one pairing, and
+`PvsNP.FiveTerm` shows that sums of *five* split products (three pairings mixed) converge to
+the permanent. This file proves that this is optimal.
+
+## Main results
+
+* `five_le_card_of_permanent_eq_sum_split`, `permanent_ne_sum_four_isSplit`: over a field of
+  characteristic zero the permanent is **not a sum of four split products**, whatever pairings
+  the terms use.
+* `not_tendsto_sum_split_four`, `not_tendsto_sum_four_isSplit`,
+  `not_tendsto_sum_four_isSplit_complex`: over `ℝ` and over `ℂ`, the permanent is **not a
+  limit of sums of four split products** (pairings and factors may vary along the sequence).
+  So the border value of the mixed split rank of the `4 × 4` permanent is exactly five.
+* `gamma_not_split`, `twoBlock_no_211`, `twoBlock_five_le`: the same lower bound inside the
+  *two-block model* (each factor is a form on columns `{0,1}` plus a form on columns `{2,3}`;
+  the weight-(2,0) part must cancel and the weight-(1,1) part must be the permanent), by a
+  direct computation with `2 × 2 × 2 × 2` tensors. This is a special case of the limit
+  theorem, kept because its proof is elementary and independent.
+
+## The idea
+
+Put the all-ones vector in row `0`. The permanent becomes
+`E3 w x y = ∑_{i, j, k distinct} w i * x j * y k` in the other three rows, and every split
+product becomes a *slice*: a linear form in one of `w, x, y` (the row paired with row `0`)
+times a bilinear form in the other two. Hence a sum of split products with `a`, `b`, `c`
+terms of the three pairings vanishes on `U₁ × U₂ × U₃` for subspaces of codimension at most
+`a`, `b`, `c`: the common kernels of those linear forms. The key lemmas (`slice_211`,
+`slice_220`, `slice_310`, combined in `slicePt_of_le`) say that `E3` does not vanish on such
+a product when `a + b + c ≤ 4` and `a, b, c ≤ 3`. Behind them: the symmetric matrix
+`B_u = E3 u · ·` has zero diagonal and entries `u_c + u_d`; it has rank `≤ 1` only for `u = 0`
+and rank `≤ 2` only on ten lines (`thin_C`, `thin_KB`, `kb_one` are the versions used here,
+valid over every field of characteristic zero). The remaining case, four terms of the same
+pairing, is excluded by the rank of the flattening (`no_rank_four_01`, `det_sum_rank_one`).
+
+For limits, "vanishes on a product of subspaces of given codimensions" is a closed condition
+because Grassmannians are compact: `Csl`, `isClosed_Csl` (subspaces are given by orthonormal
+families of covectors, `IsFrame`, produced by Gram–Schmidt, `gram_schmidt3`), and "four
+terms of the same pairing" is excluded for large `n` by a `5 × 5` minor (`detJ`).
 -/
 
 namespace PvsNP
@@ -11,6 +50,19 @@ namespace PvsNP
 open Matrix
 
 section TwoBlock
+
+/-! ### The two-block model
+
+Columns are split into the blocks `{0,1}` and `{2,3}`, and every factor of every term is a
+form on the first block plus a form on the second block. Grading by the number of rows that
+use the first block, the weight-(2,0) part of the sum must cancel and the weight-(1,1) part
+must be the permanent (the weight-(0,2) part is free: rescaling the second block by `lam`
+and dividing by `lam` turns such data into a limit decomposition). On each block the
+permanent of two rows is the symmetric form `s` with coefficient table `ne2`.
+
+A pairing with a single term contributes a nonzero multiple `c` of `s ⊗ s` to the weight-(2,0)
+part (`single_term_block`), so with one term per pairing that part is
+`Γ(c) = c₁ s(01)s(23) + c₂ s(02)s(13) + c₃ s(03)s(12)` with all `c_i ≠ 0`. -/
 
 variable {K : Type*} [Field K]
 
@@ -21,6 +73,8 @@ def ne2 (a b : Fin 2) : K := if a = b then 0 else 1
 def gammaT (c₁ c₂ c₃ : K) (a b c d : Fin 2) : K :=
   c₁ * (ne2 a b * ne2 c d) + c₂ * (ne2 a c * ne2 b d) + c₃ * (ne2 a d * ne2 b c)
 
+/-- If `Γ(c)` is a split product for the pairing `01|23`, then `c₂ + c₃ = 0` and `c₁ c₂ = 0`:
+compare coefficients (the flattening must have rank one). -/
 theorem gamma_split_01 (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (F G : Fin 2 → Fin 2 → K)
     (h : ∀ a b c d, gammaT c₁ c₂ c₃ a b c d = F a b * G c d) :
     c₂ + c₃ = 0 ∧ c₁ * c₂ = 0 := by
@@ -50,6 +104,7 @@ theorem gamma_split_01 (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (F G : Fin 2 �
     linear_combination -hb
   simpa [h2] using h4
 
+/-- The same for the pairing `02|13`. -/
 theorem gamma_split_02 (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (F G : Fin 2 → Fin 2 → K)
     (h : ∀ a b c d, gammaT c₁ c₂ c₃ a b c d = F a c * G b d) :
     c₁ + c₃ = 0 ∧ c₂ * c₁ = 0 := by
@@ -60,6 +115,7 @@ theorem gamma_split_02 (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (F G : Fin 2 �
   have : (if c = b then (0:K) else 1) = if b = c then 0 else 1 := by simp [eq_comm]
   rw [this]; ring
 
+/-- The same for the pairing `03|12`. -/
 theorem gamma_split_03 (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (F G : Fin 2 → Fin 2 → K)
     (h : ∀ a b c d, gammaT c₁ c₂ c₃ a b c d = F a d * G b c) :
     c₂ + c₁ = 0 ∧ c₃ * c₂ = 0 := by
@@ -72,7 +128,8 @@ theorem gamma_split_03 (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (F G : Fin 2 �
   have e3 : (if c = b then (0:K) else 1) = if b = c then 0 else 1 := by simp [eq_comm]
   rw [e1, e2, e3]; ring
 
-/-- T1 -/
+/-- **No single split product cancels `Γ(c)`.** For nonzero `c₁, c₂, c₃` there is no split
+product `F ⊗ G`, of any of the three pairings, with `Γ(c) + F ⊗ G = 0`. -/
 theorem gamma_not_split (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (hc₁ : c₁ ≠ 0) (hc₂ : c₂ ≠ 0)
     (hc₃ : c₃ ≠ 0) (F G : Fin 2 → Fin 2 → K) :
     ¬ ((∀ a b c d, gammaT c₁ c₂ c₃ a b c d + F a b * G c d = 0) ∨
@@ -89,7 +146,10 @@ theorem gamma_not_split (h2 : (2 : K) ≠ 0) (c₁ c₂ c₃ : K) (hc₁ : c₁ 
       (fun a b c d => by linear_combination h a b c d)).2
     exact (mul_ne_zero hc₃ hc₂) this
 
-/-- core of the (2,1,1) case -/
+/-- Core of the pattern (2,1,1): two terms of the pairing `01|23` cannot have weight-(1,1)
+parts `s ⊗ s` (twice) and a weight-(2,0) part cancelling `c₂ s(02)s(13) + c₃ s(03)s(12)` with
+`c₂, c₃ ≠ 0`. (A Gram determinant forces `c₃ = -c₂`; then Cauchy–Binet in dimension two gives
+`4 c₂² = 0`.) -/
 theorem twoBlock_core [CharZero K] (F1 F2 G1 G2 : Fin 2 → Fin 2 → Fin 2 → K) (c₂ c₃ : K)
     (hc₂ : c₂ ≠ 0) (hc₃ : c₃ ≠ 0)
     (h11 : ∀ a b c d, F1 0 a b * G2 0 c d + F1 1 a b * G2 1 c d = ne2 a b * ne2 c d)
@@ -173,7 +233,10 @@ theorem twoBlock_no_211 [CharZero K] (F1 F2 G1 G2 : Fin 2 → Fin 2 → Fin 2 �
   rw [e₂ a c b d, e₃ a d b c] at this
   exact this
 
-/-- **The two-block model needs five terms at `4 × 4`.** -/
+/-- **The two-block model needs five terms at `4 × 4`.** With `n₁`, `n₂`, `n₃` terms of the
+pairings `01|23`, `02|13`, `03|12` (tables `A1/A2`, `B1/B2`: the two blocks of the two factors
+of a term of the first pairing, and so on), if the weight-(1,1) part is the permanent and the
+weight-(2,0) part cancels, then `n₁ + n₂ + n₃ ≥ 5`. -/
 theorem twoBlock_five_le [CharZero K] (n₁ n₂ n₃ : ℕ)
     (A1 A2 B1 B2 : Fin n₁ → Fin 2 → Fin 2 → K) (C1 C2 D1 D2 : Fin n₂ → Fin 2 → Fin 2 → K)
     (E1 E2 H1 H2 : Fin n₃ → Fin 2 → Fin 2 → K)
@@ -871,5 +934,554 @@ theorem five_le_card_of_permanent_eq_sum_split {ι : Type*} [Fintype ι] (π : �
     · simp [splitTerm, hr2, h2]
 
 end Main
+
+
+noncomputable section Limit
+
+open Filter Topology
+
+/-! ### Limits of sums of four split products (over `ℝ` or `ℂ`) -/
+
+variable {𝕜 : Type*} [RCLike 𝕜]
+
+lemma dot4_smul_left (s : 𝕜) (a z : Fin 4 → 𝕜) : dot4 (s • a) z = s * dot4 a z := by
+  simp only [dot4_eq, Pi.smul_apply, smul_eq_mul]; ring
+
+lemma dot4_smul_right (s : 𝕜) (a z : Fin 4 → 𝕜) : dot4 a (s • z) = s * dot4 a z := by
+  simp only [dot4_eq, Pi.smul_apply, smul_eq_mul]; ring
+
+lemma dot4_sub_left (a b z : Fin 4 → 𝕜) : dot4 (a - b) z = dot4 a z - dot4 b z := by
+  simp only [dot4_eq, Pi.sub_apply]; ring
+
+lemma dot4_sub_right (a x y : Fin 4 → 𝕜) : dot4 a (x - y) = dot4 a x - dot4 a y := by
+  simp only [dot4_eq, Pi.sub_apply]; ring
+
+lemma dot4_zero_right (a : Fin 4 → 𝕜) : dot4 a 0 = 0 := by simp [dot4]
+
+lemma dot4_star_symm (a b : Fin 4 → 𝕜) : dot4 b (star a) = star (dot4 a (star b)) := by
+  simp only [dot4_eq, Pi.star_apply, star_add, star_mul', star_star]; ring
+
+/-- Squared Hermitian norm of a vector of `𝕜⁴`. -/
+def N2 (b : Fin 4 → 𝕜) : ℝ := ‖b 0‖ ^ 2 + ‖b 1‖ ^ 2 + ‖b 2‖ ^ 2 + ‖b 3‖ ^ 2
+
+lemma dot4_star_self (b : Fin 4 → 𝕜) : dot4 b (star b) = (N2 b : 𝕜) := by
+  simp only [dot4_eq, Pi.star_apply, RCLike.star_def, RCLike.mul_conj, N2]
+  push_cast
+  ring
+
+lemma N2_eq_zero {b : Fin 4 → 𝕜} (h : N2 b = 0) : b = 0 := by
+  unfold N2 at h
+  have h0 := sq_nonneg ‖b 0‖
+  have h1 := sq_nonneg ‖b 1‖
+  have h2 := sq_nonneg ‖b 2‖
+  have h3 := sq_nonneg ‖b 3‖
+  refine eq_zero_of_coords ⟨?_, ?_, ?_, ?_⟩ <;>
+    exact norm_eq_zero.mp ((pow_eq_zero_iff two_ne_zero).mp (by linarith))
+
+lemma N2_smul (c : 𝕜) (r : Fin 4 → 𝕜) : N2 (c • r) = ‖c‖ ^ 2 * N2 r := by
+  simp only [N2, Pi.smul_apply, smul_eq_mul, norm_mul, mul_pow]; ring
+
+/-- Normalise a vector (the zero vector stays zero). -/
+lemma exists_unit_or_zero (r : Fin 4 → 𝕜) :
+    ∃ (b : Fin 4 → 𝕜) (s t : 𝕜), b = s • r ∧ r = t • b ∧ (N2 b = 0 ∨ N2 b = 1) := by
+  by_cases hr : r = 0
+  · exact ⟨0, 0, 0, by simp, by simp [hr], Or.inl (by simp [N2])⟩
+  · have h0 : 0 ≤ N2 r := by unfold N2; positivity
+    have hpos : 0 < N2 r := lt_of_le_of_ne h0 (fun h => hr (N2_eq_zero h.symm))
+    have hN : 0 < Real.sqrt (N2 r) := Real.sqrt_pos.mpr hpos
+    have hN2 : Real.sqrt (N2 r) * Real.sqrt (N2 r) = N2 r := Real.mul_self_sqrt h0
+    refine ⟨(((Real.sqrt (N2 r))⁻¹ : ℝ) : 𝕜) • r, (((Real.sqrt (N2 r))⁻¹ : ℝ) : 𝕜),
+      ((Real.sqrt (N2 r) : ℝ) : 𝕜), rfl, ?_, Or.inr ?_⟩
+    · rw [smul_smul, ← RCLike.ofReal_mul, mul_inv_cancel₀ hN.ne', RCLike.ofReal_one, one_smul]
+    · rw [N2_smul, RCLike.norm_ofReal, sq_abs]
+      have e : ((Real.sqrt (N2 r))⁻¹) ^ 2 * (Real.sqrt (N2 r) * Real.sqrt (N2 r)) = 1 := by
+        field_simp
+      rw [hN2] at e
+      exact e
+
+/-- Gram–Schmidt for three covectors, allowing zero vectors in the output. -/
+lemma gram_schmidt3 (g₀ g₁ g₂ : Fin 4 → 𝕜) : ∃ b₀ b₁ b₂ : Fin 4 → 𝕜,
+    dot4 b₀ (star b₁) = 0 ∧ dot4 b₀ (star b₂) = 0 ∧ dot4 b₁ (star b₂) = 0 ∧
+    (N2 b₀ = 0 ∨ N2 b₀ = 1) ∧ (N2 b₁ = 0 ∨ N2 b₁ = 1) ∧ (N2 b₂ = 0 ∨ N2 b₂ = 1) ∧
+    (g₀ = 0 → b₀ = 0) ∧ (g₁ = 0 → b₁ = 0) ∧ (g₂ = 0 → b₂ = 0) ∧
+    ∀ z, dot4 b₀ z = 0 → dot4 b₁ z = 0 → dot4 b₂ z = 0 →
+      dot4 g₀ z = 0 ∧ dot4 g₁ z = 0 ∧ dot4 g₂ z = 0 := by
+  have key : ∀ b : Fin 4 → 𝕜, (N2 b = 0 ∨ N2 b = 1) →
+      ∀ z, dot4 z (star b) * (1 - (N2 b : 𝕜)) = 0 := by
+    intro b hb z
+    rcases hb with h | h
+    · rw [N2_eq_zero h, star_zero, dot4_zero_right]; ring
+    · rw [h]; simp
+  obtain ⟨b₀, s₀, t₀, hb₀, hr₀, hn₀⟩ := exists_unit_or_zero g₀
+  obtain ⟨b₁, s₁, t₁, hb₁, hr₁, hn₁⟩ := exists_unit_or_zero (g₁ - dot4 g₁ (star b₀) • b₀)
+  have o₁ : dot4 (g₁ - dot4 g₁ (star b₀) • b₀) (star b₀) = 0 := by
+    rw [dot4_sub_left, dot4_smul_left, dot4_star_self]
+    linear_combination key b₀ hn₀ g₁
+  have h10 : dot4 b₁ (star b₀) = 0 := by
+    rw [hb₁, dot4_smul_left, o₁, mul_zero]
+  have h01 : dot4 b₀ (star b₁) = 0 := by rw [dot4_star_symm, h10, star_zero]
+  obtain ⟨b₂, s₂, t₂, hb₂, hr₂, hn₂⟩ :=
+    exists_unit_or_zero (g₂ - dot4 g₂ (star b₀) • b₀ - dot4 g₂ (star b₁) • b₁)
+  have o₂ : dot4 (g₂ - dot4 g₂ (star b₀) • b₀ - dot4 g₂ (star b₁) • b₁) (star b₀) = 0 := by
+    rw [dot4_sub_left, dot4_sub_left, dot4_smul_left, dot4_smul_left, dot4_star_self, h10]
+    linear_combination key b₀ hn₀ g₂
+  have o₂' : dot4 (g₂ - dot4 g₂ (star b₀) • b₀ - dot4 g₂ (star b₁) • b₁) (star b₁) = 0 := by
+    rw [dot4_sub_left, dot4_sub_left, dot4_smul_left, dot4_smul_left, dot4_star_self, h01]
+    linear_combination key b₁ hn₁ g₂
+  have h20 : dot4 b₂ (star b₀) = 0 := by
+    rw [hb₂, dot4_smul_left, o₂, mul_zero]
+  have h21 : dot4 b₂ (star b₁) = 0 := by
+    rw [hb₂, dot4_smul_left, o₂', mul_zero]
+  have h02 : dot4 b₀ (star b₂) = 0 := by rw [dot4_star_symm, h20, star_zero]
+  have h12 : dot4 b₁ (star b₂) = 0 := by rw [dot4_star_symm, h21, star_zero]
+  refine ⟨b₀, b₁, b₂, h01, h02, h12, hn₀, hn₁, hn₂, ?_, ?_, ?_, ?_⟩
+  · intro h; rw [hb₀, h, smul_zero]
+  · intro h
+    have : g₁ - dot4 g₁ (star b₀) • b₀ = 0 := by
+      rw [h]; simp [dot4]
+    rw [hb₁, this, smul_zero]
+  · intro h
+    have : g₂ - dot4 g₂ (star b₀) • b₀ - dot4 g₂ (star b₁) • b₁ = 0 := by
+      rw [h]; simp [dot4]
+    rw [hb₂, this, smul_zero]
+  · intro z z0 z1 z2
+    have e0 : dot4 g₀ z = 0 := by rw [hr₀, dot4_smul_left, z0, mul_zero]
+    have e1 : dot4 (g₁ - dot4 g₁ (star b₀) • b₀) z = 0 := by
+      rw [hr₁, dot4_smul_left, z1, mul_zero]
+    have e2 : dot4 (g₂ - dot4 g₂ (star b₀) • b₀ - dot4 g₂ (star b₁) • b₁) z = 0 := by
+      rw [hr₂, dot4_smul_left, z2, mul_zero]
+    rw [dot4_sub_left, dot4_smul_left, z0] at e1
+    rw [dot4_sub_left, dot4_sub_left, dot4_smul_left, dot4_smul_left, z0, z1] at e2
+    exact ⟨e0, by linear_combination e1, by linear_combination e2⟩
+
+/-- Three covectors, pairwise orthogonal for the Hermitian form, each zero or of norm one,
+those of index `≥ a` zero. -/
+def IsFrame (a : ℕ) (b : Fin 3 → Fin 4 → 𝕜) : Prop :=
+  (dot4 (b 0) (star (b 1)) = 0 ∧ dot4 (b 0) (star (b 2)) = 0 ∧ dot4 (b 1) (star (b 2)) = 0) ∧
+  (∀ i, N2 (b i) = 0 ∨ N2 (b i) = 1) ∧ ∀ i : Fin 3, a ≤ (i : ℕ) → b i = 0
+
+/-- Projection onto the common kernel of the covectors of a frame. -/
+def prj (b : Fin 3 → Fin 4 → 𝕜) (x : Fin 4 → 𝕜) : Fin 4 → 𝕜 :=
+  x - dot4 (b 0) x • star (b 0) - dot4 (b 1) x • star (b 1) - dot4 (b 2) x • star (b 2)
+
+lemma dot4_prj {a : ℕ} {b : Fin 3 → Fin 4 → 𝕜} (hb : IsFrame a b) (x : Fin 4 → 𝕜) (i : Fin 3) :
+    dot4 (b i) (prj b x) = 0 := by
+  obtain ⟨⟨h01, h02, h12⟩, hn, -⟩ := hb
+  have key : ∀ i, dot4 (b i) x * (1 - (N2 (b i) : 𝕜)) = 0 := by
+    intro i
+    rcases hn i with h | h
+    · rw [N2_eq_zero h]; simp [dot4]
+    · rw [h]; simp
+  have h10 : dot4 (b 1) (star (b 0)) = 0 := by rw [dot4_star_symm, h01, star_zero]
+  have h20 : dot4 (b 2) (star (b 0)) = 0 := by rw [dot4_star_symm, h02, star_zero]
+  have h21 : dot4 (b 2) (star (b 1)) = 0 := by rw [dot4_star_symm, h12, star_zero]
+  fin_cases i
+  · simp only [prj, dot4_sub_right, dot4_smul_right, Fin.zero_eta, dot4_star_self, h01, h02]
+    linear_combination key 0
+  · simp only [prj, dot4_sub_right, dot4_smul_right, Fin.mk_one, dot4_star_self, h10, h12]
+    linear_combination key 1
+  · simp only [prj, dot4_sub_right, dot4_smul_right, Fin.reduceFinMk, dot4_star_self, h20, h21]
+    linear_combination key 2
+
+lemma prj_eq_self {b : Fin 3 → Fin 4 → 𝕜} {x : Fin 4 → 𝕜} (h : ∀ i, dot4 (b i) x = 0) :
+    prj b x = x := by
+  simp [prj, h]
+
+lemma isCompact_frames (a : ℕ) : IsCompact {b : Fin 3 → Fin 4 → 𝕜 | IsFrame a b} := by
+  apply Metric.isCompact_of_isClosed_isBounded
+  · have hc : ∀ i j : Fin 3, Continuous fun b : Fin 3 → Fin 4 → 𝕜 => dot4 (b i) (star (b j)) := by
+      intro i j
+      simp only [dot4_eq, Pi.star_apply]
+      fun_prop
+    have hN : ∀ i : Fin 3, Continuous fun b : Fin 3 → Fin 4 → 𝕜 => N2 (b i) := by
+      intro i
+      simp only [N2]
+      fun_prop
+    have h3 : ∀ i : Fin 3, IsClosed {b : Fin 3 → Fin 4 → 𝕜 | a ≤ (i : ℕ) → b i = 0} := by
+      intro i
+      by_cases h : a ≤ (i : ℕ)
+      · simp only [h, forall_true_left]
+        exact isClosed_eq (continuous_apply i) continuous_const
+      · simp [h]
+    have h2 : ∀ i : Fin 3, IsClosed {b : Fin 3 → Fin 4 → 𝕜 |
+        N2 (b i) = 0 ∨ N2 (b i) = 1} := fun i =>
+      (isClosed_eq (hN i) continuous_const).union (isClosed_eq (hN i) continuous_const)
+    have : {b : Fin 3 → Fin 4 → 𝕜 | IsFrame a b} =
+        ({b | dot4 (b 0) (star (b 1)) = 0} ∩ {b | dot4 (b 0) (star (b 2)) = 0} ∩
+          {b | dot4 (b 1) (star (b 2)) = 0}) ∩
+        (⋂ i : Fin 3, {b | N2 (b i) = 0 ∨ N2 (b i) = 1}) ∩
+        (⋂ i : Fin 3, {b | a ≤ (i : ℕ) → b i = 0}) := by
+      ext b
+      simp [IsFrame, and_assoc]
+    rw [this]
+    exact ((((isClosed_eq (hc 0 1) continuous_const).inter (isClosed_eq (hc 0 2) continuous_const)).inter
+      (isClosed_eq (hc 1 2) continuous_const)).inter (isClosed_iInter h2)).inter (isClosed_iInter h3)
+  · refine (Metric.isBounded_closedBall (x := (0 : Fin 3 → Fin 4 → 𝕜)) (r := 1)).subset ?_
+    intro b hb
+    rw [mem_closedBall_zero_iff]
+    refine (pi_norm_le_iff_of_nonneg zero_le_one).mpr fun i =>
+      (pi_norm_le_iff_of_nonneg zero_le_one).mpr fun l => ?_
+    have hle : N2 (b i) ≤ 1 := by
+      rcases hb.2.1 i with h | h
+      · rw [h]; norm_num
+      · rw [h]
+    unfold N2 at hle
+    have h0 := sq_nonneg ‖b i 0‖
+    have h1 := sq_nonneg ‖b i 1‖
+    have h2 := sq_nonneg ‖b i 2‖
+    have h3 := sq_nonneg ‖b i 3‖
+    have key : ∀ t : ℝ, 0 ≤ t → t ^ 2 ≤ 1 → t ≤ 1 := fun t ht h => by nlinarith
+    apply key _ (norm_nonneg _)
+    fin_cases l
+    · show ‖b i 0‖ ^ 2 ≤ 1
+      linarith
+    · show ‖b i 1‖ ^ 2 ≤ 1
+      linarith
+    · show ‖b i 2‖ ^ 2 ≤ 1
+      linarith
+    · show ‖b i 3‖ ^ 2 ≤ 1
+      linarith
+
+/-- Coefficient tensors of trilinear forms in three vectors of `𝕜⁴`. -/
+abbrev T3 (𝕜 : Type*) := Fin 4 → Fin 4 → Fin 4 → 𝕜
+
+/-- The trilinear form with coefficient tensor `c`. -/
+def tri (c : T3 𝕜) (w x y : Fin 4 → 𝕜) : 𝕜 := ∑ i, ∑ j, ∑ k, c i j k * (w i * x j * y k)
+
+/-- Trilinear forms vanishing on a product of three subspaces, the common kernels of at most
+`a₁`, `a₂`, `a₃` covectors. Compactness of the Grassmannians makes this a closed condition. -/
+def Csl (a₁ a₂ a₃ : ℕ) : Set (T3 𝕜) :=
+  {c | ∃ b₁ b₂ b₃ : Fin 3 → Fin 4 → 𝕜, IsFrame a₁ b₁ ∧ IsFrame a₂ b₂ ∧ IsFrame a₃ b₃ ∧
+    ∀ w x y, tri c (prj b₁ w) (prj b₂ x) (prj b₃ y) = 0}
+
+lemma isClosed_Csl (a₁ a₂ a₃ : ℕ) : IsClosed (Csl a₁ a₂ a₃ : Set (T3 𝕜)) := by
+  apply IsSeqClosed.isClosed
+  intro c c₀ hc hlim
+  choose b₁ b₂ b₃ h₁ h₂ h₃ hv using hc
+  have hK := (isCompact_frames (𝕜 := 𝕜) a₁).prod
+    ((isCompact_frames (𝕜 := 𝕜) a₂).prod (isCompact_frames (𝕜 := 𝕜) a₃))
+  obtain ⟨p, hp, φ, hφ, hpl⟩ := hK.tendsto_subseq (x := fun n => (b₁ n, b₂ n, b₃ n))
+    (fun n => ⟨h₁ n, h₂ n, h₃ n⟩)
+  refine ⟨p.1, p.2.1, p.2.2, hp.1, hp.2.1, hp.2.2, fun w x y => ?_⟩
+  have hcont : Continuous fun q : T3 𝕜 × ((Fin 3 → Fin 4 → 𝕜) × (Fin 3 → Fin 4 → 𝕜) ×
+      (Fin 3 → Fin 4 → 𝕜)) => tri q.1 (prj q.2.1 w) (prj q.2.2.1 x) (prj q.2.2.2 y) := by
+    simp only [tri, prj, dot4_eq, Pi.sub_apply, Pi.smul_apply, smul_eq_mul, Pi.star_apply]
+    fun_prop
+  have hlim2 : Tendsto (fun n => (c (φ n), (b₁ (φ n), b₂ (φ n), b₃ (φ n)))) atTop (𝓝 (c₀, p)) :=
+    (hlim.comp hφ.tendsto_atTop).prodMk_nhds hpl
+  have h3 := (hcont.tendsto (c₀, p)).comp hlim2
+  refine tendsto_nhds_unique h3 ?_
+  have : ((fun q : T3 𝕜 × ((Fin 3 → Fin 4 → 𝕜) × (Fin 3 → Fin 4 → 𝕜) × (Fin 3 → Fin 4 → 𝕜)) =>
+      tri q.1 (prj q.2.1 w) (prj q.2.2.1 x) (prj q.2.2.2 y)) ∘
+      fun n => (c (φ n), (b₁ (φ n), b₂ (φ n), b₃ (φ n)))) = fun _ => 0 := by
+    funext n
+    exact hv (φ n) w x y
+  rw [this]
+  exact tendsto_const_nhds
+
+/-- Coefficient tensor of `E3`. -/
+def cE : T3 𝕜 := fun i j k => if i ≠ j ∧ i ≠ k ∧ j ≠ k then 1 else 0
+
+lemma tri_cE (w x y : Fin 4 → 𝕜) : tri cE w x y = E3 w x y := by
+  simp only [tri, cE, E3, ite_mul, one_mul, zero_mul]
+
+/-- `E3` is not in any of the closed sets `Csl a₁ a₂ a₃` with `a₁ + a₂ + a₃ ≤ 4`. -/
+lemma cE_not_mem (a₁ a₂ a₃ : ℕ) (h : a₁ + a₂ + a₃ ≤ 4) (h₁ : a₁ ≤ 3) (h₂ : a₂ ≤ 3)
+    (h₃ : a₃ ≤ 3) : (cE : T3 𝕜) ∉ Csl a₁ a₂ a₃ := by
+  rintro ⟨b₁, b₂, b₃, f₁, f₂, f₃, hv⟩
+  have ext : ∀ b : Fin 3 → Fin 4 → 𝕜, ∃ g : ℕ → Fin 4 → 𝕜, ∀ i : Fin 3, g i = b i := fun b =>
+    ⟨fun i => if h : i < 3 then b ⟨i, h⟩ else 0, fun i => by simp⟩
+  obtain ⟨g₁, e₁⟩ := ext b₁
+  obtain ⟨g₂, e₂⟩ := ext b₂
+  obtain ⟨g₃, e₃⟩ := ext b₃
+  obtain ⟨w, x, y, hw, hx, hy, hE⟩ := slicePt_of_le (K := 𝕜) a₁ a₂ a₃ h h₁ h₂ h₃ g₁ g₂ g₃
+  have kw : ∀ i : Fin 3, dot4 (b₁ i) w = 0 := by
+    intro i
+    by_cases hi : (i : ℕ) < a₁
+    · rw [← e₁ i]; exact hw i hi
+    · rw [f₁.2.2 i (by omega)]; simp
+  have kx : ∀ i : Fin 3, dot4 (b₂ i) x = 0 := by
+    intro i
+    by_cases hi : (i : ℕ) < a₂
+    · rw [← e₂ i]; exact hx i hi
+    · rw [f₂.2.2 i (by omega)]; simp
+  have ky : ∀ i : Fin 3, dot4 (b₃ i) y = 0 := by
+    intro i
+    by_cases hi : (i : ℕ) < a₃
+    · rw [← e₃ i]; exact hy i hi
+    · rw [f₃.2.2 i (by omega)]; simp
+  have := hv w x y
+  rw [prj_eq_self kw, prj_eq_self kx, prj_eq_self ky, tri_cE] at this
+  exact hE this
+
+/-! #### From decompositions to the closed sets -/
+
+/-- Coefficient tensor of a function of matrices along `rowsMat`. -/
+def coef (D : Matrix (Fin 4) (Fin 4) 𝕜 → 𝕜) : T3 𝕜 := fun i j k =>
+  D (rowsMat (Pi.single i 1) (Pi.single j 1) (Pi.single k 1))
+
+lemma splitTerm_rowsMat (π : Fin 3) (F G : Matrix (Fin 4) (Fin 4) 𝕜) (w x y : Fin 4 → 𝕜) :
+    splitTerm π F G (rowsMat w x y) = tri (coef (splitTerm π F G)) w x y := by
+  fin_cases π <;>
+  · simp [splitTerm, tri, coef, rowForm, rowsMat, Fin.sum_univ_four, Pi.single_apply]
+    ring
+
+lemma tri_add (c c' : T3 𝕜) (w x y : Fin 4 → 𝕜) :
+    tri (fun i j k => c i j k + c' i j k) w x y = tri c w x y + tri c' w x y := by
+  simp only [tri, add_mul, Finset.sum_add_distrib]
+
+lemma tri_sum {ι : Type*} (s : Finset ι) (c : ι → T3 𝕜) (w x y : Fin 4 → 𝕜) :
+    tri (fun i j k => ∑ v ∈ s, c v i j k) w x y = ∑ v ∈ s, tri (c v) w x y := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [tri]
+  | insert a s ha ih =>
+    simp only [Finset.sum_insert ha]
+    rw [tri_add (c a) (fun i j k => ∑ v ∈ s, c v i j k), ih]
+
+lemma sum_split_rowsMat {ι : Type*} [Fintype ι] (π : ι → Fin 3)
+    (F G : ι → Matrix (Fin 4) (Fin 4) 𝕜) (w x y : Fin 4 → 𝕜) :
+    ∑ v, splitTerm (π v) (F v) (G v) (rowsMat w x y) =
+      tri (coef fun A => ∑ v, splitTerm (π v) (F v) (G v) A) w x y := by
+  have : coef (fun A => ∑ v, splitTerm (π v) (F v) (G v) A) =
+      fun i j k => ∑ v ∈ Finset.univ, coef (splitTerm (π v) (F v) (G v)) i j k := rfl
+  rw [this, tri_sum]
+  exact Finset.sum_congr rfl fun v _ => splitTerm_rowsMat _ _ _ _ _ _
+
+lemma exists_frame {ι : Type*} (S : Finset ι) (f : ι → Fin 4 → 𝕜) :
+    ∃ b : Fin 3 → Fin 4 → 𝕜, IsFrame S.card b ∧
+      (S.card ≤ 3 → ∀ z, (∀ i, dot4 (b i) z = 0) → ∀ v ∈ S, dot4 (f v) z = 0) := by
+  obtain ⟨g, hg, hz⟩ := exists_pad_covectors S f
+  obtain ⟨p0, p1, p2, o01, o02, o12, n0, n1, n2, z0, z1, z2, hker⟩ :=
+    gram_schmidt3 (g 0) (g 1) (g 2)
+  refine ⟨![p0, p1, p2], ⟨⟨o01, o02, o12⟩, ?_, ?_⟩, ?_⟩
+  · intro i
+    fin_cases i
+    · exact n0
+    · exact n1
+    · exact n2
+  · intro i hi
+    fin_cases i
+    · exact z0 (hz 0 hi)
+    · exact z1 (hz 1 hi)
+    · exact z2 (hz 2 hi)
+  · intro hS z hb v hv
+    obtain ⟨e0, e1, e2⟩ := hker z (hb 0) (hb 1) (hb 2)
+    refine hg z (fun i hi => ?_) v hv
+    have : i < 3 := by omega
+    interval_cases i
+    · exact e0
+    · exact e1
+    · exact e2
+
+/-- Index data of the `5 × 5` minor of the flattening used for the rank argument. -/
+def pa : Fin 5 → Fin 4 := ![0, 0, 0, 1, 1]
+/-- See `pa`. -/
+def pb : Fin 5 → Fin 4 := ![1, 2, 3, 2, 3]
+/-- See `pa`. -/
+def pc : Fin 5 → Fin 4 := ![2, 1, 1, 0, 0]
+/-- See `pa`. -/
+def pd : Fin 5 → Fin 4 := ![3, 3, 2, 3, 2]
+
+/-- Rows `e_a, e_b` in the first pair and `e_c, e_d` in the second pair of the pairing `j`. -/
+def idxMat (j : Fin 3) (k k' : Fin 5) : Fin 4 → Fin 4 :=
+  (![![pa k, pb k, pc k', pd k'], ![pa k, pc k', pb k, pd k'], ![pa k, pc k', pd k', pb k]] :
+    Fin 3 → Fin 4 → Fin 4) j
+
+lemma splitTerm_selMat (j : Fin 3) (F G : Matrix (Fin 4) (Fin 4) 𝕜) (k k' : Fin 5) :
+    splitTerm j F G (selMat (idxMat j k k')) = F (pa k) (pb k) * G (pc k') (pd k') := by
+  fin_cases j <;> simp [splitTerm, idxMat, rowForm_selMat]
+
+lemma permanent_selMat_idx (j : Fin 3) (k k' : Fin 5) :
+    (selMat (idxMat j k k') : Matrix (Fin 4) (Fin 4) 𝕜).permanent = if k = k' then 1 else 0 := by
+  fin_cases j <;> fin_cases k <;> fin_cases k' <;>
+    simp [idxMat, pa, pb, pc, pd, permanent_fin_four, selMat]
+
+/-- A `5 × 5` matrix that is a sum of at most four rank-one matrices has determinant zero. -/
+lemma det_sum_rank_one {ι : Type*} [Fintype ι] (hι : Fintype.card ι ≤ 4) (P Q : ι → Fin 5 → 𝕜) :
+    Matrix.det (Matrix.of fun k k' : Fin 5 => ∑ v, P v k * Q v k') = 0 := by
+  let e := Fintype.equivFin ι
+  let M : Matrix (Fin 5) (Fin 5) 𝕜 := fun i k =>
+    if hi : (i : ℕ) < Fintype.card ι then P (e.symm ⟨i, hi⟩) k else 0
+  have h4 : ¬ ((4 : Fin 5) : ℕ) < Fintype.card ι := by
+    have : ((4 : Fin 5) : ℕ) = 4 := rfl
+    omega
+  have hdet : M.det = 0 := by
+    apply Matrix.det_eq_zero_of_row_eq_zero 4
+    intro k
+    simp only [M, h4, ↓reduceDIte]
+  obtain ⟨lam, hlam, hM⟩ := Matrix.exists_mulVec_eq_zero_iff.mpr hdet
+  have hv : ∀ v : ι, ∑ k, P v k * lam k = 0 := by
+    intro v
+    have := congrFun hM ⟨e v, by have := (e v).isLt; omega⟩
+    simpa [M, Matrix.mulVec, dotProduct] using this
+  apply Matrix.exists_vecMul_eq_zero_iff.mp
+  refine ⟨lam, hlam, ?_⟩
+  funext k'
+  simp only [Matrix.vecMul, dotProduct, Matrix.of_apply, Pi.zero_apply, Finset.mul_sum]
+  rw [Finset.sum_comm]
+  refine Finset.sum_eq_zero fun v _ => ?_
+  have : ∑ k, lam k * (P v k * Q v k') = (∑ k, P v k * lam k) * Q v k' := by
+    rw [Finset.sum_mul]
+    exact Finset.sum_congr rfl fun k _ => by ring
+  rw [this, hv, zero_mul]
+
+/-- The `5 × 5` minor of the flattening of `D` for the pairing `j`. -/
+def detJ (j : Fin 3) (D : Matrix (Fin 4) (Fin 4) 𝕜 → 𝕜) : 𝕜 :=
+  Matrix.det (Matrix.of fun k k' : Fin 5 => D (selMat (idxMat j k k')))
+
+lemma detJ_eq_zero {ι : Type*} [Fintype ι] (hι : Fintype.card ι ≤ 4) (j : Fin 3)
+    (F G : ι → Matrix (Fin 4) (Fin 4) 𝕜) :
+    detJ j (fun A => ∑ v, splitTerm j (F v) (G v) A) = 0 := by
+  simp only [detJ, splitTerm_selMat]
+  exact det_sum_rank_one hι _ _
+
+lemma tendsto_detJ (j : Fin 3) (D : ℕ → Matrix (Fin 4) (Fin 4) 𝕜 → 𝕜)
+    (h : ∀ A : Matrix (Fin 4) (Fin 4) 𝕜, Tendsto (fun n => D n A) atTop (𝓝 A.permanent)) :
+    Tendsto (fun n => detJ j (D n)) atTop (𝓝 1) := by
+  have h1 : Tendsto (fun n => (Matrix.of fun k k' : Fin 5 => D n (selMat (idxMat j k k')) :
+      Matrix (Fin 5) (Fin 5) 𝕜)) atTop (𝓝 (1 : Matrix (Fin 5) (Fin 5) 𝕜)) := by
+    refine tendsto_pi_nhds.mpr fun k => tendsto_pi_nhds.mpr fun k' => ?_
+    have := h (selMat (idxMat j k k'))
+    rw [permanent_selMat_idx] at this
+    simpa [Matrix.one_apply] using this
+  have h2 := (continuous_id.matrix_det.tendsto (1 : Matrix (Fin 5) (Fin 5) 𝕜)).comp h1
+  simpa [detJ, Function.comp_def] using h2
+
+/-- A sum of at most four split products whose three `5 × 5` minors do not vanish (so the terms
+do not all have the same pairing) lies in one of the closed sets `Csl`. -/
+lemma coef_mem_Csl {ι : Type*} [Fintype ι] (hι : Fintype.card ι ≤ 4) (π : ι → Fin 3)
+    (F G : ι → Matrix (Fin 4) (Fin 4) 𝕜)
+    (hdet : ∀ j, detJ j (fun A => ∑ v, splitTerm (π v) (F v) (G v) A) ≠ 0) :
+    ∃ a₁ a₂ a₃ : ℕ, a₁ + a₂ + a₃ ≤ 4 ∧ a₁ ≤ 3 ∧ a₂ ≤ 3 ∧ a₃ ≤ 3 ∧
+      coef (fun A => ∑ v, splitTerm (π v) (F v) (G v) A) ∈ Csl a₁ a₂ a₃ := by
+  classical
+  let S : Fin 3 → Finset ι := fun j => Finset.univ.filter fun v => π v = j
+  have hc : (S 0).card + (S 1).card + (S 2).card = Fintype.card ι := by
+    have := Finset.card_eq_sum_card_fiberwise (f := π) (s := Finset.univ) (t := Finset.univ)
+      (fun _ _ => Finset.mem_univ _)
+    rw [Fin.sum_univ_three] at this
+    rw [← Finset.card_univ, this]
+  have hsmall : ∀ j, (S j).card ≤ 3 := by
+    intro j
+    by_contra hj
+    have hSj : S j = Finset.univ := by
+      apply Finset.eq_univ_of_card
+      have := Finset.card_le_univ (S j)
+      omega
+    have hall : ∀ v, π v = j := by
+      intro v
+      have : v ∈ S j := by rw [hSj]; exact Finset.mem_univ v
+      simpa [S] using this
+    apply hdet j
+    have : (fun A : Matrix (Fin 4) (Fin 4) 𝕜 => ∑ v, splitTerm (π v) (F v) (G v) A) =
+        fun A => ∑ v, splitTerm j (F v) (G v) A := by
+      funext A
+      exact Finset.sum_congr rfl fun v _ => by rw [hall v]
+    rw [this]
+    exact detJ_eq_zero hι j F G
+  obtain ⟨b₁, f₁, k₁⟩ := exists_frame (S 0) (fun v => colSum (F v))
+  obtain ⟨b₂, f₂, k₂⟩ := exists_frame (S 1) (fun v => colSum (F v))
+  obtain ⟨b₃, f₃, k₃⟩ := exists_frame (S 2) (fun v => colSum (F v))
+  refine ⟨(S 0).card, (S 1).card, (S 2).card, by omega, hsmall 0, hsmall 1, hsmall 2,
+    b₁, b₂, b₃, f₁, f₂, f₃, fun w x y => ?_⟩
+  rw [← sum_split_rowsMat]
+  refine Finset.sum_eq_zero fun v _ => ?_
+  have h0 := k₁ (hsmall 0) (prj b₁ w) (fun i => dot4_prj f₁ w i) v
+  have h1 := k₂ (hsmall 1) (prj b₂ x) (fun i => dot4_prj f₂ x i) v
+  have h2 := k₃ (hsmall 2) (prj b₃ y) (fun i => dot4_prj f₃ y i) v
+  simp only [S, Finset.mem_filter, Finset.mem_univ, true_and] at h0 h1 h2
+  obtain ⟨hr0, hr1, hr2⟩ := rowForm_rowsMat (F v) (prj b₁ w) (prj b₂ x) (prj b₃ y)
+  obtain ⟨j, hj⟩ : ∃ j, π v = j := ⟨_, rfl⟩
+  rw [hj] at h0 h1 h2 ⊢
+  fin_cases j
+  · simp [splitTerm, hr0, h0]
+  · simp [splitTerm, hr1, h1]
+  · simp [splitTerm, hr2, h2]
+
+lemma E3_single (i j k : Fin 4) :
+    E3 (Pi.single i 1 : Fin 4 → 𝕜) (Pi.single j 1) (Pi.single k 1) = cE i j k := by
+  fin_cases i <;> fin_cases j <;> fin_cases k <;> simp [E3_eq, cE]
+
+/-- **The `4 × 4` permanent is not a limit of sums of four split products** (over `ℝ` or `ℂ`):
+no sequence of sums of at most four split products, with arbitrary and varying pairings,
+converges pointwise to the permanent. -/
+theorem not_tendsto_sum_split_four {ι : Type*} [Fintype ι] (hι : Fintype.card ι ≤ 4)
+    (π : ℕ → ι → Fin 3) (F G : ℕ → ι → Matrix (Fin 4) (Fin 4) 𝕜) :
+    ¬ ∀ A : Matrix (Fin 4) (Fin 4) 𝕜,
+      Tendsto (fun n => ∑ v, splitTerm (π n v) (F n v) (G n v) A) atTop (𝓝 A.permanent) := by
+  intro h
+  let I := {a : Fin 4 × Fin 4 × Fin 4 // (a.1 : ℕ) + a.2.1 + a.2.2 ≤ 4}
+  have hclosed : IsClosed (⋃ a : I, (Csl a.1.1 a.1.2.1 a.1.2.2 : Set (T3 𝕜))) :=
+    isClosed_iUnion_of_finite fun a => isClosed_Csl _ _ _
+  have hcoef : Tendsto (fun n => coef fun A => ∑ v, splitTerm (π n v) (F n v) (G n v) A)
+      atTop (𝓝 (cE : T3 𝕜)) := by
+    refine tendsto_pi_nhds.mpr fun i => tendsto_pi_nhds.mpr fun j => tendsto_pi_nhds.mpr fun k => ?_
+    have := h (rowsMat (Pi.single i 1) (Pi.single j 1) (Pi.single k 1))
+    rw [permanent_rowsMat, E3_single] at this
+    exact this
+  have hev : ∀ᶠ n in atTop, (coef fun A => ∑ v, splitTerm (π n v) (F n v) (G n v) A) ∈
+      ⋃ a : I, (Csl a.1.1 a.1.2.1 a.1.2.2 : Set (T3 𝕜)) := by
+    have hd : ∀ j : Fin 3, ∀ᶠ n in atTop,
+        detJ j (fun A => ∑ v, splitTerm (π n v) (F n v) (G n v) A) ≠ 0 := fun j =>
+      (tendsto_detJ j (fun n A => ∑ v, splitTerm (π n v) (F n v) (G n v) A) h).eventually_ne
+        one_ne_zero
+    filter_upwards [hd 0, hd 1, hd 2] with n h0 h1 h2
+    have hall : ∀ j, detJ j (fun A => ∑ v, splitTerm (π n v) (F n v) (G n v) A) ≠ 0 := by
+      intro j
+      fin_cases j
+      · exact h0
+      · exact h1
+      · exact h2
+    obtain ⟨a₁, a₂, a₃, hs, l₁, l₂, l₃, hmem⟩ := coef_mem_Csl hι (π n) (F n) (G n) hall
+    exact Set.mem_iUnion.mpr ⟨⟨(⟨a₁, by omega⟩, ⟨a₂, by omega⟩, ⟨a₃, by omega⟩), hs⟩, hmem⟩
+  obtain ⟨a, ha⟩ := Set.mem_iUnion.mp (hclosed.mem_of_tendsto hcoef hev)
+  exact cE_not_mem _ _ _ a.2 (by omega) (by omega) (by omega) ha
+
+omit [RCLike 𝕜] in
+/-- Every split product in the sense of `IsSplit` (file `FiveTerm`) is a `splitTerm`. -/
+lemma exists_splitTerm_of_isSplit {K : Type*} [Field K] {t : Matrix (Fin 4) (Fin 4) K → K}
+    (ht : IsSplit 0 1 2 3 t ∨ IsSplit 0 2 1 3 t ∨ IsSplit 0 3 1 2 t) :
+    ∃ (p : Fin 3) (F G : Matrix (Fin 4) (Fin 4) K), ∀ A, t A = splitTerm p F G A := by
+  rcases ht with ⟨F, G, h⟩ | ⟨F, G, h⟩ | ⟨F, G, h⟩
+  · exact ⟨0, F, G, fun A => by simpa [splitTerm] using h A⟩
+  · exact ⟨1, F, G, fun A => by simpa [splitTerm] using h A⟩
+  · exact ⟨2, F, G, fun A => by simpa [splitTerm] using h A⟩
+
+omit [RCLike 𝕜] in
+/-- **Exact lower bound, in the language of `FiveTerm`.** Over a field of characteristic zero
+the `4 × 4` permanent is not a sum of four split products, whatever pairings they use. -/
+theorem permanent_ne_sum_four_isSplit {K : Type*} [Field K] [CharZero K]
+    (t : Fin 4 → Matrix (Fin 4) (Fin 4) K → K)
+    (ht : ∀ v, IsSplit 0 1 2 3 (t v) ∨ IsSplit 0 2 1 3 (t v) ∨ IsSplit 0 3 1 2 (t v)) :
+    ¬ ∀ A : Matrix (Fin 4) (Fin 4) K, A.permanent = ∑ v, t v A := by
+  intro h
+  choose p F G hpFG using fun v => exists_splitTerm_of_isSplit (ht v)
+  have := five_le_card_of_permanent_eq_sum_split p F G (fun A => by rw [h A]; simp [hpFG])
+  simp at this
+
+/-- **Border lower bound, in the language of `FiveTerm`.** Over `ℝ` or `ℂ`, no sequence of sums
+of four split products (pairings and factors may change along the sequence) converges
+pointwise to the `4 × 4` permanent. Together with `tendsto_five_split_strong` (five split
+products do converge to it) this says that five is the least number of split products whose
+sums approximate the permanent. -/
+theorem not_tendsto_sum_four_isSplit (t : ℕ → Fin 4 → Matrix (Fin 4) (Fin 4) 𝕜 → 𝕜)
+    (ht : ∀ n v, IsSplit 0 1 2 3 (t n v) ∨ IsSplit 0 2 1 3 (t n v) ∨ IsSplit 0 3 1 2 (t n v)) :
+    ¬ ∀ A : Matrix (Fin 4) (Fin 4) 𝕜,
+      Tendsto (fun n => ∑ v, t n v A) atTop (𝓝 A.permanent) := by
+  intro h
+  choose p F G hpFG using fun n v => exists_splitTerm_of_isSplit (ht n v)
+  refine not_tendsto_sum_split_four (ι := Fin 4) (by simp) p F G fun A => ?_
+  have := h A
+  simpa [hpFG] using this
+
+/-- The border lower bound over the complex numbers. -/
+theorem not_tendsto_sum_four_isSplit_complex (t : ℕ → Fin 4 → Matrix (Fin 4) (Fin 4) ℂ → ℂ)
+    (ht : ∀ n v, IsSplit 0 1 2 3 (t n v) ∨ IsSplit 0 2 1 3 (t n v) ∨ IsSplit 0 3 1 2 (t n v)) :
+    ¬ ∀ A : Matrix (Fin 4) (Fin 4) ℂ,
+      Tendsto (fun n => ∑ v, t n v A) atTop (𝓝 A.permanent) :=
+  not_tendsto_sum_four_isSplit t ht
+
+end Limit
 
 end PvsNP
