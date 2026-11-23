@@ -452,6 +452,109 @@ def check():
     print("ALL EXACT CHECKS PASSED")
 
 
+# ------------------------------------------------------------------ (d): squares plus pure extras
+def pure_setup():
+    """index tables of the GMF two-block sub-model: lam[i][s, t] = index (0..89) of the weight-(2,2,2)
+    monomial x_s(P_i) y_t(P_i^c), s, t permutations of the three columns."""
+    mons = [t for t in itertools.product(range(3), repeat=6) if all(t.count(c) == 2 for c in range(3))]
+    pos = {t: i for i, t in enumerate(mons)}
+    perms3 = list(itertools.permutations(range(3)))
+    lam = np.zeros((10, 6, 6), dtype=np.int64)
+    for i, P in enumerate(PAIRS):
+        Pc = [r for r in range(6) if r not in P]
+        for a, s in enumerate(perms3):
+            for b, t in enumerate(perms3):
+                tup = [0] * 6
+                for j, r in enumerate(P):
+                    tup[r] = s[j]
+                for j, r in enumerate(Pc):
+                    tup[r] = t[j]
+                lam[i, a, b] = pos[tuple(tup)]
+    return lam
+
+
+def pure_search(e1, e2, starts, seed=0, cap=25.0, iters=300, verbose=False):
+    """Squares on all ten pairings (constants c_P in block 1, d_P = 1 / c_P in block 2) plus pure
+    extra products: e1 = pairing indices of the block-1 extras, e2 = of the block-2 extras, all
+    factors generalised matrix functions (6 coefficients). Unknowns c, d, (u_e, h_e).
+    Equations: 90 (block 1) + 90 (block 2) + 10 (c_P d_P = 1). An exact solution is an exact
+    decomposition of perm_6 into 10 + len(e1) + len(e2) split products."""
+    lam = pure_setup()
+    ext = [(0, p) for p in e1] + [(1, p) for p in e2]
+    nu = 20 + 12 * len(ext)
+    rng = np.random.default_rng(seed)
+
+    def res_jac(x):
+        r = np.zeros(190)
+        J = np.zeros((190, nu))
+        for b in range(2):
+            for i in range(10):
+                idx = lam[i].ravel()
+                np.add.at(r, 90 * b + idx, x[10 * b + i])
+                J[90 * b + idx, 10 * b + i] += 1.0
+        for e, (b, p) in enumerate(ext):
+            o = 20 + 12 * e
+            u, h = x[o:o + 6], x[o + 6:o + 12]
+            idx = 90 * b + lam[p]
+            np.add.at(r, idx.ravel(), np.outer(u, h).ravel())
+            for a in range(6):
+                J[idx[a, :], o + a] += h
+                J[idx[:, a], o + 6 + a] += u
+        r[180:] = x[:10] * x[10:20] - 1.0
+        J[180 + np.arange(10), np.arange(10)] = x[10:20]
+        J[180 + np.arange(10), 10 + np.arange(10)] = x[:10]
+        return r, J
+    hits = 0
+    best = np.inf
+    sols = []
+    B2 = cap * nu
+    for s in range(starts):
+        x = rng.standard_normal(nu)
+        x[10:20] = 1.0 / x[:10]
+        lamd = 1e-2
+        r, J = res_jac(x)
+        loss = r @ r + 10 * max(0.0, x @ x / B2 - 1) ** 2
+        for it in range(iters):
+            H = J.T @ J
+            g = J.T @ r
+            p = max(0.0, x @ x / B2 - 1)
+            if p > 0:
+                gp = np.sqrt(10) * 2 * x / B2
+                H += np.outer(gp, gp)
+                g += gp * np.sqrt(10) * p
+            dg = np.maximum(np.diag(H), 1e-12)
+            ok = False
+            for _ in range(25):
+                try:
+                    step = scipy.linalg.solve(H + lamd * np.diag(dg), -g, assume_a='pos')
+                except Exception:
+                    lamd *= 10
+                    continue
+                x2 = x + step
+                r2, J2 = res_jac(x2)
+                l2 = r2 @ r2 + 10 * max(0.0, x2 @ x2 / B2 - 1) ** 2
+                if np.isfinite(l2) and l2 < loss:
+                    ok = True
+                    break
+                lamd *= 5
+            if not ok:
+                break
+            x, r, J, loss = x2, r2, J2, l2
+            lamd = max(lamd / 3, 1e-12)
+            if loss < 1e-26:
+                break
+        rr = float(r @ r)
+        best = min(best, rr)
+        if rr < 1e-20:
+            hits += 1
+            sols.append(x.copy())
+        if verbose:
+            print(f"    start {s}: residual {rr:.3e} max|x| {np.abs(x).max():.1f} min|c| {np.abs(x[:10]).min():.2e}")
+    print(f"SUMMARY pure extras block1 {list(e1)} block2 {list(e2)}: {10 + len(ext)} terms, exact {hits}/{starts}, "
+          f"best squared residual {best:.3e}", flush=True)
+    return hits, best, sols
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('mode')
@@ -464,12 +567,17 @@ if __name__ == '__main__':
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--scale', type=float, default=0.5)
     ap.add_argument('--verbose', action='store_true')
+    ap.add_argument('--e1', default='0,0,1,1,5')
+    ap.add_argument('--e2', default='0,0,1,1,5')
     ap.add_argument('--lo', type=int, default=1)
     ap.add_argument('--hi', type=int, default=None)
     a = ap.parse_args()
     if a.mode == 'run':
         search(parse_sets(a.sets), a.cls, a.starts, cap=a.cap, iters=a.iters, seed=a.seed, scale=a.scale,
                verbose=a.verbose, label=a.sets)
+    elif a.mode == 'pure':
+        pure_search([int(t) for t in a.e1.split(',') if t], [int(t) for t in a.e2.split(',') if t], a.starts,
+                    seed=a.seed, cap=a.cap, iters=a.iters, verbose=a.verbose)
     elif a.mode == 'check':
         check()
     elif a.mode == 'enum':
