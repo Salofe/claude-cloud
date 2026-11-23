@@ -157,10 +157,19 @@ class Model:
         return x
 
 
-def lm(M, x, iters=300, cap=4.0, lam=1e-2, rho=10.0, log=None, tol=1e-24, patience=60, ridge=None):
+def lm(M, x, iters=300, cap=4.0, lam=1e-2, rho=10.0, log=None, tol=1e-24, patience=60, ridge=None, gauge=None,
+       floor=None):
     """Levenberg-Marquardt on M with the size cap of fullw.lm. Returns (x, weighted loss).
     ridge: optional vector of weights; adds sum_i ridge_i |x_i|^2 to the loss (used to push
-    chosen terms to zero continuously: the term-deletion local search)."""
+    chosen terms to zero continuously: the term-deletion local search).
+    gauge: optional (sign vector, kappa); adds the square of kappa * sum_i sign_i |x_i|^2 / nu.
+    With sign = +1 on the components of top weight and -1 on those of bottom weight this pins
+    the position on each orbit of the scaling flow (two-sided, where the cap is one-sided), so
+    the lower components cannot be shrunk by scaling at all. It vanishes on one point of every
+    orbit, so it does not move the solutions.
+    floor: optional (list of index arrays, gamma); for every block b adds the square of
+    rho * max(0, 1 - |x_b|^2 / gamma). With the blocks = bottom-weight components of every
+    factor this forbids the PER-TERM scaling escape (see FLOOR in the module docstring)."""
     B2 = cap * M.nu
 
     def penalty(x):
@@ -170,7 +179,13 @@ def lm(M, x, iters=300, cap=4.0, lam=1e-2, rho=10.0, log=None, tol=1e-24, patien
         return np.vdot(r, r).real
 
     def rdg(x):
-        return 0.0 if ridge is None else float((ridge * np.abs(x) ** 2).sum())
+        out = 0.0 if ridge is None else float((ridge * np.abs(x) ** 2).sum())
+        if gauge is not None:
+            out += (gauge[1] * float((gauge[0] * np.abs(x) ** 2).sum()) / M.nu) ** 2
+        if floor is not None:
+            for b in floor[0]:
+                out += (rho * max(0.0, 1.0 - float((np.abs(x[b]) ** 2).sum()) / floor[1])) ** 2
+        return out
 
     r = M.residual(x)
     pen = penalty(x)
@@ -190,6 +205,19 @@ def lm(M, x, iters=300, cap=4.0, lam=1e-2, rho=10.0, log=None, tol=1e-24, patien
         if ridge is not None:
             H[np.diag_indices_from(H)] += ridge
             g = g + ridge * x
+        g = np.array(g)
+        if floor is not None:
+            for b in floor[0]:
+                pf = rho * (1.0 - float((np.abs(x[b]) ** 2).sum()) / floor[1])
+                if pf > 0:
+                    gf = -2 * rho * x[b] / floor[1]
+                    H[np.ix_(b, b)] += np.outer(gf, gf.conj())
+                    g[b] = g[b] + gf * pf
+        if gauge is not None:
+            pb = gauge[1] * float((gauge[0] * np.abs(x) ** 2).sum()) / M.nu
+            gb = 2 * gauge[1] * gauge[0] * x / M.nu
+            H += np.outer(gb, gb.conj())
+            g = g + gb * pb
         dg = np.maximum(np.diag(H).real, 1e-12 * np.trace(H).real / len(g))
         ok = False
         for _ in range(30):
@@ -276,7 +304,30 @@ def two_block_classes(k):
     return [frozenset(range(k)), frozenset(range(k, 2 * k))]
 
 
-def solve(M, x0, iters, cap, stages=(1.0,), log=None, ridge=None):
+def gauge_signs(M):
+    """+1 on the factor components that use only columns of maximal weight, -1 on those that
+    use only columns of minimal weight, 0 elsewhere."""
+    w = np.array(M.w)
+    sg = np.zeros(M.nu)
+    for v in range(M.n):
+        for (o, d), cod in ((M.offF[v], M.codesF[v]), (M.offG[v], M.codesG[v])):
+            ws = np.array([[w[c] for c in M.tuples[cc]] for cc in cod])
+            sg[o:o + d] = np.where((ws == w.max()).all(axis=1), 1.0, 0.0) - np.where((ws == w.min()).all(axis=1), 1.0, 0.0)
+    return sg
+
+
+def bottom_blocks(M):
+    """For every factor, the indices of its components that use only columns of minimal weight."""
+    w = np.array(M.w)
+    out = []
+    for v in range(M.n):
+        for (o, d), cod in ((M.offF[v], M.codesF[v]), (M.offG[v], M.codesG[v])):
+            ws = np.array([[w[c] for c in M.tuples[cc]] for cc in cod])
+            out.append(o + np.nonzero((ws == w.min()).all(axis=1))[0])
+    return out
+
+
+def solve(M, x0, iters, cap, stages=(1.0,), log=None, ridge=None, gauge=None, floor=None):
     """LM, optionally in stages with decreasing weight mu on the lower components.
     Returns x, relative residual (unweighted, all equations), rms entry."""
     x = x0
@@ -284,7 +335,7 @@ def solve(M, x0, iters, cap, stages=(1.0,), log=None, ridge=None):
         M.sw = np.where(M.low, np.sqrt(mu), 1.0)
         R = np.concatenate([np.concatenate([rw, rw]) for rw in M.rows])
         M._swR = M.sw[R]
-        x, _ = lm(M, x, iters=iters, cap=cap, log=log, ridge=ridge)
+        x, _ = lm(M, x, iters=iters, cap=cap, log=log, ridge=ridge, gauge=gauge, floor=floor)
     a, b = M.split_loss(x)
     return x, (a + b) / M.norm2, a / M.norm2, b / M.norm2, float(np.sqrt(np.vdot(x, x).real / M.nu))
 
