@@ -15,7 +15,8 @@ import numpy as np
 
 from permsearch import ABP, lm, sample
 
-ZERO = 1e-18
+ZERO = 1e-18    # a formula: residual at rounding level on fresh points
+ACCEPT = 1e-7   # close enough to keep pruning from; the final program is polished and re-judged against ZERO
 
 
 def penalised_lm(model, X, y, pen, iters, lam=1e-3, lam_min=1e-9):
@@ -122,7 +123,7 @@ def try_delete(model, k, X, y, Xv, yv, squeeze=True, iters=300):
     lm(cand, X, y, iters, 1e-26, giveup=(40, 1e-3))
     rv = cand.value(Xv) - yv
     fresh = np.vdot(rv, rv).real / np.vdot(yv, yv).real
-    return (cand if fresh < ZERO else None), fresh, float(sv[-1] / sv[0])
+    return (cand if fresh < ACCEPT else None), fresh, float(sv[-1] / sv[0])
 
 
 def main():
@@ -145,10 +146,10 @@ def main():
         S = args.samples or 3 * model.get().size
         X, y = sample(rng, m, S)
         Xv, yv = sample(rng, m, 3000)
-        lm(model, X, y, args.iters, 1e-26)
+        lm(model, X, y, 2 * args.iters, 1e-26)
         rv = model.value(Xv) - yv
         fresh = np.vdot(rv, rv).real / np.vdot(yv, yv).real
-        if fresh > ZERO:
+        if fresh > ACCEPT:
             print(json.dumps(dict(trial=trial, start=args.widths, status='wide fit failed', fresh=fresh)), flush=True)
             continue
         log = []
@@ -176,15 +177,19 @@ def main():
             if not progressed:
                 break
         floor = model.ws[1:-1]
-        floors.append(floor)
+        lm(model, X, y, 5 * args.iters, 1e-27)
+        rv = model.value(Xv) - yv
+        polished = np.vdot(rv, rv).real / np.vdot(yv, yv).real
+        floors.append((floor, polished))
         failed = [(e['layer'], e['refit']) for e in log if e['to'] is None]
         print(json.dumps(dict(trial=trial, start=args.widths, floor=floor, size=1 + sum(floor),
+                              polished_residual=float(f"{polished:.3e}"), exact=bool(polished < ZERO),
                               failed_deletions_at_floor=failed[-2 * (m - 1):], seconds=round(time.time() - t0, 1))), flush=True)
         if args.save:
             np.save(f"{args.save}_m{m}_{'-'.join(map(str, floor))}_trial{trial}.npy", model.get())
-    sizes = sorted(1 + sum(f) for f in floors)
-    print(f"SUMMARY m={m} start={args.widths}: floors reached {sorted(map(tuple, floors))}; "
-          f"smallest determinantal size {sizes[0] if sizes else None}", flush=True)
+    exact = sorted(1 + sum(f) for f, res in floors if res < ZERO)
+    print(f"SUMMARY m={m} start={args.widths}: floors reached {sorted((tuple(f), float(f'{res:.1e}')) for f, res in floors)}; "
+          f"smallest size with a residual at rounding level: {exact[0] if exact else None}", flush=True)
 
 
 if __name__ == '__main__':
