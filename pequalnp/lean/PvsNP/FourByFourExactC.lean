@@ -512,7 +512,7 @@ lemma pair_finish [CharZero K] {a b c d : Fin 4} (hd : D4 a b c d)
     apply hX23
     have h2 : (2 : K) ≠ 0 := two_ne_zero
     rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-    · have : (2 : K) * X 2 3 = 0 := by linear_combination x6 - h5
+    · have : (2 : K) * X 2 3 = 0 := by linear_combination h5 - x6
       exact (mul_eq_zero.mp this).resolve_left h2
     · have : (2 : K) * X 2 3 = 0 := by linear_combination h5 - x6
       exact (mul_eq_zero.mp this).resolve_left h2
