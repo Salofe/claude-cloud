@@ -10,3 +10,4 @@ import PvsNP.FifteenTerm
 import PvsNP.SixBySixForms
 import PvsNP.FifteenForms
 import PvsNP.FourByFourLower
+import PvsNP.SplitRank
