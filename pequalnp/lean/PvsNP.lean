@@ -12,3 +12,5 @@ import PvsNP.FifteenForms
 import PvsNP.FourByFourLower
 import PvsNP.SplitRank
 import PvsNP.FourByFourExact
+import PvsNP.SquaresBound
+import PvsNP.DetFour

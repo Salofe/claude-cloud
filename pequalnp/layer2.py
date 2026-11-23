@@ -38,9 +38,22 @@ import math
 import sys
 import time
 
+import warnings
+
 import numpy as np
 import scipy.linalg
 import scipy.sparse as sp
+
+warnings.filterwarnings('ignore', category=scipy.linalg.LinAlgWarning)
+
+
+def perm_sign(t):
+    s = 1
+    for i in range(len(t)):
+        for j in range(i + 1, len(t)):
+            if t[i] > t[j]:
+                s = -s
+    return s
 
 
 # ----------------------------------------------------------------------------- configurations
@@ -136,11 +149,13 @@ def flattening_ok(m, pairs_list):
 # ----------------------------------------------------------------------------- the model
 
 class Model:
-    def __init__(self, m, pairs, real=False, inj=False, weights=None):
+    def __init__(self, m, pairs, real=False, inj=False, weights=None, det=False):
         self.m, self.pairs, self.real, self.inj = m, list(pairs), real, inj
         self.n = len(self.pairs)
         idx = np.array(list(itertools.product(range(m), repeat=m)), dtype=np.int64)
         target = np.array([len(set(t)) == m for t in idx], dtype=float)
+        if det:      # the determinant tensor instead of the permanent (validation: det_5 = 6 terms on K_4)
+            target = np.array([perm_sign(t) if len(set(t)) == m else 0 for t in idx], dtype=float)
         keep = np.ones(len(idx), dtype=bool)
         if weights is not None:
             w = np.array(weights)
@@ -247,7 +262,8 @@ def lm(M, th, mu=0.0, iters=300, tol=1e-26, lam=1e-2, stall=40, tmax=None):
             A = H.copy()
             A[np.diag_indices_from(A)] += mu + lam * d
             try:
-                step = scipy.linalg.solve(A, -g, assume_a='pos', check_finite=False)
+                cf = scipy.linalg.cho_factor(A, lower=True, overwrite_a=True, check_finite=False)
+                step = scipy.linalg.cho_solve(cf, -g, check_finite=False)
             except (np.linalg.LinAlgError, scipy.linalg.LinAlgError):
                 lam *= 10
                 continue
@@ -336,7 +352,7 @@ def cmd_validate(args):
 
 
 def run_config(m, pairs, args, rng):
-    M = Model(m, pairs, real=args.real, inj=args.inj, weights=args.weights)
+    M = Model(m, pairs, real=args.real, inj=args.inj, weights=args.weights, det=args.det)
     t0 = time.time()
     res = fit(M, rng, restarts=args.restarts, iters=args.iters, border=args.border, verbose=args.verbose,
               tmax=args.tmax)
@@ -409,6 +425,7 @@ if __name__ == '__main__':
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--real', action='store_true')
     ap.add_argument('--inj', action='store_true')
+    ap.add_argument('--det', action='store_true', help='decompose det_m instead of perm_m')
     ap.add_argument('--border', action='store_true')
     ap.add_argument('--verbose', action='store_true')
     ap.add_argument('--weights', type=lambda s: [int(x) for x in s.split(',')], default=None)
