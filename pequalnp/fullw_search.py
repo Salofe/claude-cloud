@@ -2,24 +2,93 @@
 
 Same graded system as fullw.py (read its docstring first): columns carry integer weights w,
 the tensor Y = sum_v F_v(rows S_v) G_v(rows not in S_v) must have no component of weight
-< W = sum(w) and weight-W component equal to the permanent. What is new here:
+< W = sum(w) and its weight-W component must be the permanent. New here:
 
-  * a sparse builder in which every factor of every term can be restricted to a set of
-    "column classes" (the set of columns a monomial of the factor uses). With no restriction
-    this is the full model of fullw.py; with every factor restricted to the two classes
-    {first block}, {second block} it is the two-block model; in between are the sub-models
-    homogeneous for a subtorus of the column torus (see CLASSES below);
-  * weights on the equations (mu multiplies the squared residual of the components of weight
-    < W) and several start strategies, to fight the scaling escape described in fullw.lm;
-  * a term-deletion local search from a known solution.
+  * CLASSES. A sparse builder in which every factor can be restricted to a set of column
+    classes (the set of columns a monomial of the factor uses). Three choices (--classes):
+      all       every class: the full model of fullw.py (120 coefficients per factor at 6 x 6);
+      twoblock  the classes {first block}, {second block}: the two-block model (12 coefficients);
+      paired    one column out of every pair {j, j + k}: 6 * 8 = 48 coefficients per factor at
+                6 x 6. This sub-model contains the two-block model and the known 15 terms, is
+                closed under the row-wise unipotent symmetry below, and does NOT force a term
+                on every pairing of the rows (a term can cover permutations of 8 column sets).
+                It is about 20 times cheaper than the full model.
+  * complex unknowns (--complex), a per-term FLOOR (--floor), a term-deletion local search
+    (mode delete), the tangent space at the known solution (mode kernel), and a 4 x 4 table
+    of gradings and patterns (mode table4).
+
+WHY A PLAIN LEAST-SQUARES SEARCH IS NOT TRUSTWORTHY (pseudo-solutions). Scaling the weight-a
+component of both factors of ONE term by s^(a - W/2) keeps that term's weight-W part and
+multiplies its weight-d part by s^(d - W). So every term can shed its low-weight garbage by
+growing, one term at a time, and the solver only needs perm = sum_v [F_v G_v]_W (weight-W
+parts of products, each worth up to W + 1 products). A cap on the size of the unknowns turns
+this into a floor of the loss, typically 1e-5 .. 1e-10 relative, that says NOTHING about the
+existence of a decomposition: at 4 x 4 the provably impossible patterns (5,0,0) (flattening
+rank 6) and four terms (Lean: border rank 5) reach 3e-8 and 2e-10 (mode table4). Only
+residuals at rounding level with bounded unknowns count.
+FLOOR: a lower bound gamma on |bottom-weight component|^2 of every factor, together with the
+cap, blocks the per-term escape (the term cannot grow its top without shrinking its bottom).
+It restricts the search to solutions in which every factor has a bottom component.
+
+SYMMETRY (proved on paper, checked numerically). Let A_r be any linear map of the row space
+that strictly raises the column weight, one for every row r, and u = (1 + A_0) (x) .. (x)
+(1 + A_{m-1}). Then u Y = Y + (components of higher weight made from lower ones), so u maps
+solutions of the graded system to solutions with the same row sets and the same number of
+terms. For w = (0,0,0,1,1,1) this group has dimension 6 * 9 = 54; its orbit of the known
+two-block 15 terms consists of 15-term solutions with all mixed components nonzero. So the
+two-block form is not an invariant notion; "outside the two-block form" must mean outside
+this orbit.
+
+RESULTS (6 x 6, w = (0,0,0,1,1,1); S15 = the row sets of the known 15 terms; "solved" means
+relative residual < 1e-18; run on a heavily loaded machine, so the numbers of starts are small)
+  * recovery of a 15-term solution on S15 from random starts
+      two-block classes (360 unknowns): cap only 0 of 90 real, 0 of 30 complex;
+        complex + floor: gamma 0.3: 0/40, 1: 1/140 (three caps), 3: 2/40, 10: 4/40, 30: 2/40;
+      paired classes (1440 unknowns): cap only 0 of 6 real, 0 of 12 complex;
+        complex + floor 1, |x|^2 <= 6000: 1 of 8. That solution has all mixed coefficients
+        below 7e-4 (pure ones up to 5): it is a two-block solution.
+      From the known solution plus noise 0.5, 1.0, 1.5 per entry (paired, real): 3/3 each.
+    So the best strategy found recovers 15 terms at about one start in eight to ten; searches
+    below 15 with a handful of starts are weak evidence only.
+  * 14 terms, paired classes, complex + floor 1, |x|^2 <= 6000 (the strategy above): nothing
+    solved. Configuration: solved/starts, best relative residual
+      012x3;013x2;024x2;014;015;023;025;034;035;045  (10 pairings)  0/6  1.8e-3
+      012x3;013x3;024x2;014;015;023;025;034;035      (9 pairings)   0/4  1.4e-2
+      012x3;013x2;024x2;035x2;014;015;023;025;034    (9 pairings)   0/1  1.6e-2
+      012x2;013x2;014x2;023x2;025x2;034x2;045x2      (7 pairings)   0/3  1.0e-2
+      012x3;034x3;015x3;024x3;035x2                  (5 pairings)   0/2  9.1e-2
+      012x4;013x4;024x3;034x3                        (4 pairings)   0/4  9.2e-2
+    With a recovery rate near 1/8 at 15 terms this excludes nothing.
+  * exact model, paired classes: 20 terms (two on every pairing) solved from 4 of 4 random
+    starts; 19 terms (one pairing with a single term): 0 of 2, residuals 8e-2 and 1e-4 at
+    the cap (the second is a limit-type approximation, not an exact solution).
+  * mode delete (paired classes): removing any one of the 15 terms by continuation leaves
+    either 72 permutations uncovered (residual 0.1; the eight squares other than those on
+    013 and 024) or a pseudo-solution (9e-6 .. 4e-5; the other seven terms).
+  * mode kernel: the Jacobian at the known solution has kernel of dimension 31 (two-block),
+    67 (paired), 139 (full, injective). Of the 36 new directions in the paired model 18 are
+    the row-wise unipotent ones; a random combination of the other 18 does not integrate
+    (the solver moves back 88 percent of the perturbation, independently of its size).
+  * In the paired model a term on the pairing S | S^c reaches exactly the permutations whose
+    column pairs are each split by S, so the pairings used must split every perfect
+    matching of the rows: at least 4 pairings (15 minimal sets, e.g. 012, 013, 024, 034).
+  * mode table4 (4 x 4, complex, cap; 20 starts each): five terms are found for the patterns
+    (3,1,1) and (2,2,1) with w = (0,0,1,1) (17, 16), (0,1,1,1) (13, 3), (0,1,1,2) (2, 1),
+    (0,1,2,3) (9, 7), and (3,1,1) with (0,0,1,2) (1); never with w = (0,0,0,1); never for
+    (4,1,0), (3,2,0), (5,0,0) or four terms.
 
 A factor F on the rows S is stored as a vector indexed by the injective maps S -> columns
-(option inj=False: all maps). Its class components are F_alpha, alpha a k-set of columns.
+(--full: all maps).
 
-Usage (examples; every run prints one SUMMARY line):
-  python3 fullw_search.py recover --starts 6 --strategy near2b
-  python3 fullw_search.py run 0,0,0,1,1,1 "012;013;014;015;023;024;025;034;035;045;012x2;013x2;024" --starts 4
-  python3 fullw_search.py delete --starts 1
+Usage (every run prints a SUMMARY line):
+  python3 fullw_search.py table4 --starts 20
+  python3 fullw_search.py kernel
+  python3 fullw_search.py delete --classes paired
+  python3 fullw_search.py run 0,0,0,1,1,1 S15 --classes twoblock --complex --floor 3 --capabs 3000 --starts 40
+  python3 fullw_search.py run 0,0,0,1,1,1 S15 --classes paired --strategy known:0.3
+  python3 fullw_search.py run 0,0,0,1,1,1 "012x2;013x2;014x2;015x2;023x2;024x2;025x2;034x2;035x2;045x2" \
+          --classes paired --exact --complex --capabs 6000
+  python3 fullw_search.py run 0,0,1,1 "01x2;02x2;03" --k 2 --full --complex --starts 20
 """
 import argparse
 import itertools
@@ -340,64 +409,125 @@ def solve(M, x0, iters, cap, stages=(1.0,), log=None, ridge=None, gauge=None, fl
     return x, (a + b) / M.norm2, a / M.norm2, b / M.norm2, float(np.sqrt(np.vdot(x, x).real / M.nu))
 
 
+def paired_classes(k):
+    """Column classes that use exactly one column of every pair {j, j + k}."""
+    return [frozenset(j + k * b for j, b in zip(range(k), bits)) for bits in itertools.product((0, 1), repeat=k)]
+
+
+def class_set(name, k):
+    return {'all': None, 'paired': paired_classes(k), 'twoblock': two_block_classes(k)}[name]
+
+
+def random_start(M, rng, scale, cplx):
+    x0 = rng.standard_normal(M.nu) * scale
+    if cplx:
+        x0 = x0 + 1j * scale * rng.standard_normal(M.nu)
+    return x0
+
+
+def cmd_run(args):
+    k = args.k
+    w = [int(c) for c in args.weights.split(',')]
+    splits = SPLITS15 if args.splits in ('', 'S15') else parse_splits(args.splits, k)
+    cls = class_set(args.classes, k)
+    M = Model(k, w, [(S, cls, cls) for S in splits], exact=args.exact, inj=not args.full)
+    cap = args.capabs / M.nu if args.capabs else args.cap
+    floor = (bottom_blocks(M), args.floor) if args.floor > 0 else None
+    print(f"k={k} w={w} terms={M.n} classes={args.classes} equations={M.neq} unknowns={M.nu} "
+          f"{'exact' if args.exact else 'limit'} {'all maps' if args.full else 'injective'} "
+          f"{'complex' if args.complex else 'real'} floor={args.floor} cap(mean square)={cap:.2f} "
+          f"unreachable part of the permanent={M.const}", flush=True)
+    rng_seed = args.seed
+    hits, out = 0, []
+    for trial in range(args.starts):
+        t0 = time.time()
+        rng = np.random.default_rng(rng_seed + trial)
+        kind, _, eps = args.strategy.partition(':')
+        if kind == 'random':
+            x0 = random_start(M, rng, args.scale, args.complex)
+        elif kind == 'known':      # the known 15 terms plus noise (6 x 6, weights 0,0,0,1,1,1, SPLITS15 only)
+            x0 = known15(M) + float(eps or 0.1) * rng.standard_normal(M.nu)
+        else:
+            raise SystemExit('unknown strategy')
+        x, rel, relW, rellow, rms = solve(M, x0, args.iters, cap, [1.0], None, floor=floor)
+        hits += rel < 1e-18
+        out.append(rel)
+        print(f"  start {rng_seed + trial}: rel residual {rel:.3e} (weight W {relW:.1e}, lower {rellow:.1e}) |x|^2 "
+              f"{np.vdot(x, x).real:.0f} max|entry| {np.abs(x).max():.1f}  ({time.time() - t0:.0f} s)", flush=True)
+        if rel < 1e-18 and args.save:
+            np.save(f"{args.save}_{rng_seed + trial}.npy", x)
+    print(f"SUMMARY run w={w} classes={args.classes} splits={args.splits or 'S15'} terms={M.n} "
+          f"{'exact' if args.exact else 'limit'} {'complex' if args.complex else 'real'} floor={args.floor}: "
+          f"{hits}/{args.starts} solved, best rel residual {min(out):.3e}, median {np.median(out):.1e}", flush=True)
+
+
+def cmd_delete(args):
+    """Term-deletion local search from the known 15 terms: a ridge on one term is raised in
+    steps until the term is gone, re-optimising the others at every step."""
+    cls = class_set(args.classes, 3)
+    M = Model(3, [0, 0, 0, 1, 1, 1], [(S, cls, cls) for S in SPLITS15])
+    which = [int(c) for c in args.drop.split(',')] if args.drop else list(range(15))
+    for v in which:
+        t0 = time.time()
+        x = known15(M)
+        ridge = np.zeros(M.nu)
+        (oF, dF), (oG, dG) = M.offF[v], M.offG[v]
+        for nu in (1e-3, 1e-2, 1e-1, 1.0, 10.0, 1e3, 1e6, 1e12):
+            ridge[oF:oF + dF] = nu
+            ridge[oG:oG + dG] = nu
+            x, _ = lm(M, x, iters=args.iters, cap=args.cap, ridge=ridge, patience=30)
+        a, b = M.split_loss(x)
+        print(f"  delete term {v} (rows {M.terms[v][0]}): rel residual of the other 14 terms {(a + b) / M.norm2:.3e} "
+              f"(weight W {a / M.norm2:.1e}, lower {b / M.norm2:.1e})  ({time.time() - t0:.0f} s)", flush=True)
+
+
+def cmd_kernel(args):
+    """Tangent space of the solution set at the known 15 terms, in three models."""
+    for name in ('twoblock', 'paired', 'all'):
+        cls = class_set(name, 3)
+        M = Model(3, [0, 0, 0, 1, 1, 1], [(S, cls, cls) for S in SPLITS15])
+        x = known15(M)
+        J = M.jac(x)
+        ev = np.linalg.eigvalsh((J.T @ J).toarray())
+        a, b = M.split_loss(x)
+        print(f"  classes {name}: unknowns {M.nu}, equations {M.neq}, residual of the known solution {a + b:.1e}, "
+              f"kernel of the Jacobian has dimension {int((ev < 1e-9 * ev[-1]).sum())}", flush=True)
+
+
+def cmd_table4(args):
+    """4 x 4: which gradings and patterns have graded limit decompositions (the validated case)."""
+    pats = {'(3,1,1)': '01x3;02;03', '(2,2,1)': '01x2;02x2;03', '(4,1,0)': '01x4;02', '(3,2,0)': '01x3;02x2',
+            '(5,0,0)': '01x5', '4 terms (2,1,1)': '01x2;02;03'}
+    for w in ([0, 0, 1, 1], [0, 0, 0, 1], [0, 1, 1, 1], [0, 1, 1, 2], [0, 0, 1, 2], [0, 1, 2, 3]):
+        for name, sp in pats.items():
+            M = Model(2, w, [(S, None, None) for S in parse_splits(sp, 2)], inj=False)
+            out = []
+            for s in range(args.starts):
+                x0 = random_start(M, np.random.default_rng(s), 0.5, True)
+                out.append(solve(M, x0, 300, 4.0)[1])
+            print(f"SUMMARY 4x4 w={w} pattern {name}: {sum(r < 1e-18 for r in out)}/{args.starts} solved, "
+                  f"best rel {min(out):.1e}, median {np.median(out):.1e}", flush=True)
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('mode', choices=['run', 'recover', 'delete'])
+    ap.add_argument('mode', choices=['run', 'delete', 'kernel', 'table4'])
     ap.add_argument('weights', nargs='?', default='0,0,0,1,1,1')
-    ap.add_argument('splits', nargs='?', default='')
+    ap.add_argument('splits', nargs='?', default='', help='e.g. "012x3;013;024", or S15 for the 15 known terms')
     ap.add_argument('--k', type=int, default=3)
+    ap.add_argument('--classes', default='all', choices=['all', 'paired', 'twoblock'])
     ap.add_argument('--starts', type=int, default=4)
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--iters', type=int, default=300)
-    ap.add_argument('--cap', type=float, default=4.0)
+    ap.add_argument('--cap', type=float, default=4.0, help='bound on the mean square of the unknowns')
+    ap.add_argument('--capabs', type=float, default=0.0, help='bound on |x|^2 instead of --cap')
+    ap.add_argument('--floor', type=float, default=0.0, help='lower bound on |bottom component|^2 of every factor')
+    ap.add_argument('--complex', action='store_true')
     ap.add_argument('--full', action='store_true', help='all column maps in the factors (default: injective)')
     ap.add_argument('--exact', action='store_true')
     ap.add_argument('--scale', type=float, default=0.5, help='standard deviation of the random start')
-    ap.add_argument('--stages', default='1', help='comma separated weights mu on the lower components, in order')
-    ap.add_argument('--strategy', default='random',
-                    help='random | near2b:<eps> (random two-block point plus noise eps) | known:<eps>')
-    ap.add_argument('--drop', default='', help='delete mode: comma separated term indices to delete')
-    ap.add_argument('--verbose', action='store_true')
+    ap.add_argument('--strategy', default='random', help='random | known:<eps>')
+    ap.add_argument('--drop', default='', help='delete mode: comma separated term indices (default all 15)')
+    ap.add_argument('--save', default='', help='prefix for .npy files of solved starts')
     args = ap.parse_args()
-    k = args.k
-    w = [int(c) for c in args.weights.split(',')]
-    stages = [float(s) for s in args.stages.split(',')]
-    rng = np.random.default_rng(args.seed)
-    log = (lambda s: print(s, flush=True)) if args.verbose else None
-    if args.mode == 'run':
-        splits = parse_splits(args.splits, k)
-    else:
-        splits = list(SPLITS15)
-    if args.mode == 'delete':
-        drop = [int(c) for c in args.drop.split(',')] if args.drop else []
-    M = Model(k, w, [(S, None, None) for S in splits], exact=args.exact, inj=not args.full)
-    print(f"k={k} w={w} terms={M.n} equations={M.neq} unknowns={M.nu} {'exact' if args.exact else 'limit'} "
-          f"{'full' if args.full else 'injective'} factors, strategy {args.strategy}, stages {stages}, cap {args.cap}", flush=True)
-    kind, _, eps = args.strategy.partition(':')
-    eps = float(eps) if eps else 0.1
-    hits, best = 0, np.inf
-    for trial in range(args.starts):
-        t0 = time.time()
-        if kind == 'random':
-            x0 = rng.standard_normal(M.nu) * args.scale
-        elif kind == 'near2b':
-            # a random point of the two-block sub-model plus noise in all other components
-            M2 = Model(k, w, [(S, two_block_classes(k), two_block_classes(k)) for S in splits], inj=not args.full)
-            x0 = rng.standard_normal(M.nu) * eps
-            for v in range(M.n):
-                for (o, d), (o2, d2), cod, cod2 in ((M.offF[v], M2.offF[v], M.codesF[v], M2.codesF[v]),
-                                                    (M.offG[v], M2.offG[v], M.codesG[v], M2.codesG[v])):
-                    pos = {c: i for i, c in enumerate(cod)}
-                    sel = np.array([pos[c] for c in cod2])
-                    x0[o + sel] = rng.standard_normal(d2) * args.scale
-        elif kind == 'known':
-            x0 = known15(M) + eps * rng.standard_normal(M.nu)
-        else:
-            raise SystemExit('unknown strategy')
-        x, rel, relW, rellow, rms = solve(M, x0, args.iters, args.cap, stages, log)
-        best = min(best, rel)
-        hits += rel < 1e-18
-        print(f"  start {trial}: rel residual {rel:.3e} (weight W {relW:.1e}, lower {rellow:.1e}) rms entry {rms:.2f} "
-              f"max {np.abs(x).max():.1f}  ({time.time() - t0:.0f} s)", flush=True)
-    print(f"SUMMARY {args.mode} w={w} terms={M.n} splits={args.splits or 'SPLITS15'} strategy={args.strategy} stages={stages} "
-          f"cap={args.cap}: {hits}/{args.starts} solved, best rel residual {best:.3e}", flush=True)
+    {'run': cmd_run, 'delete': cmd_delete, 'kernel': cmd_kernel, 'table4': cmd_table4}[args.mode](args)
