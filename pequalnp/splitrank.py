@@ -173,6 +173,7 @@ if __name__ == '__main__':
         overall = min(overall, best)
         found += hits > 0
         print(json.dumps(dict(rows=["".join(str(i + 1) for i in s) for s in sets], distinct=len(set(sets)),
-                              best=float(f"{best:.3e}"), exact=f"{hits}/{args.restarts}")), flush=True)
+                              best=float(f"{best:.3e}"), exact=f"{hits}/{args.restarts}",
+                              median_param_norm=round(norm, 1))), flush=True)
     print(f"SUMMARY m={args.m} k={args.k} terms={args.terms}: {found} of {len(cfgs)} configurations of row sets "
           f"admit an exact decomposition; best residual over all {overall:.3e}", flush=True)
