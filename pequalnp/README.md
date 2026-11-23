@@ -71,7 +71,8 @@ only been checked by the agents of this project.
 | statement | status | where |
 |---|---|---|
 | `det_{2k}` is an exact sum of `N` products, one per pairing, for every `k ≥ 2` | paper; identity tested in exact arithmetic on random integer matrices for `k ≤ 5` | `checks/det_identities.py` |
-| `det_8` is an exact sum of 15 products (Laplace: 70); `det_12` of 92 | paper; same kind of test | `checks/det_pfaffian_cover.py`, `det_pfaffian_greedy.py` |
+| `det_8` is an exact sum of 15 products (Laplace: 70) | paper; same kind of test | `checks/det_pfaffian_cover.py` |
+| for every even `k`, `det_{2k}` is an exact sum of `C(3k/2, k/2)` products: 3, 15, 84, …, about `2.6^k` against `N ≈ 4^k` | paper (short argument in the docstring); partition checked exhaustively and identity tested for `k = 2, 4, 6` | `checks/det_canonical.py` |
 
 The mechanism is `det(R) = Pf(R W Rᵀ)` and a partition of the perfect matchings of the rows into
 products of matchings of the two sides of a cut (`notes/next_steps.md`, Section 3). The tests
