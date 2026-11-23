@@ -16,7 +16,8 @@ The (1,1) condition is block diagonal: only terms with row set R or R^c contribu
 components of the pairing {R, R^c}, so every pairing needs at least one term. The classical
 count (Laplace) is two terms per pairing, C(2k, k) in total.
 
-Usage: python3 twoblock.py <k> <counts> [restarts] [seed]
+Usage: python3 twoblock.py <k> <counts> [restarts] [seed] [--exact]
+  --exact: also require the weight-(0,2) part to cancel (an exact decomposition, not a limit).
   counts: number of terms per pairing, in the order printed by --list, e.g. 3,1,1 for k = 2.
 """
 import itertools
@@ -27,6 +28,10 @@ import jax
 import jax.numpy as jnp
 
 jax.config.update('jax_enable_x64', True)
+
+EXACT = '--exact' in sys.argv
+if EXACT:
+    sys.argv.remove('--exact')
 
 
 def pairings(k):
@@ -62,6 +67,12 @@ def build(k, counts):
             t = jnp.outer(F1[v], G1[v]).reshape((k,) * (2 * k))
             acc20 = acc20 + jnp.transpose(t, orders[pi])
         out.append(acc20.ravel())
+        if EXACT:  # also ask the weight-(0,2) part to cancel: an ordinary decomposition, no limit
+            acc02 = jnp.zeros((k,) * (2 * k))
+            for v, pi in enumerate(terms):
+                t = jnp.outer(F2[v], G2[v]).reshape((k,) * (2 * k))
+                acc02 = acc02 + jnp.transpose(t, orders[pi])
+            out.append(acc02.ravel())
         for pi in range(len(prs)):
             a = -target
             b = -target
@@ -119,7 +130,6 @@ if __name__ == '__main__':
     seed = int(sys.argv[4]) if len(sys.argv) > 4 else 0
     res, jac, n, nt = build(k, counts)
     rng = np.random.default_rng(seed)
-    scale = np.sqrt(float(np.math.factorial(k)) if hasattr(np, 'math') else 1.0)
     norm2 = 2 * len(counts) * float(len(list(itertools.permutations(range(k)))) ** 2)
     best, hits = np.inf, 0
     for trial in range(restarts):
@@ -129,5 +139,5 @@ if __name__ == '__main__':
         best = min(best, rel)
         hits += rel < 1e-22
         print(f"  trial {trial}: relative residual {rel:.3e} |x| {np.linalg.norm(x):.1f}", flush=True)
-    print(f"SUMMARY k={k} counts={counts} terms={nt} (classical {2 * len(counts)}): "
-          f"{hits}/{restarts} exact, best {best:.3e}", flush=True)
+    print(f"SUMMARY k={k} counts={counts} terms={nt} (classical {2 * len(counts)}) {'exact' if EXACT else 'limit'} model: "
+          f"{hits}/{restarts} solved, best residual {best:.3e}", flush=True)
