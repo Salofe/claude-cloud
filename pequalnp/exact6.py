@@ -237,6 +237,67 @@ def cfg(mult):
     return out
 
 
+def pairing_perms():
+    """the action of S_6 (row permutations) on the ten pairings, as index permutations (deduplicated)."""
+    idx = {P: i for i, P in enumerate(PAIRS)}
+    out = set()
+    for g in itertools.permutations(range(6)):
+        im = []
+        for P in PAIRS:
+            Q = tuple(sorted(g[r] for r in P))
+            if 0 not in Q:
+                Q = tuple(r for r in range(6) if r not in Q)
+            im.append(idx[Q])
+        out.add(tuple(im))
+    return sorted(out)
+
+
+def orbits(total, lo=1, hi=None):
+    """orbit representatives under S_6 of the vectors (n_P) with lo <= n_P <= hi and sum = total."""
+    hi = total if hi is None else hi
+    G = np.array(pairing_perms())
+    seen, reps = set(), []
+
+    def rec(pref, rest):
+        if len(pref) == 10:
+            if rest == 0:
+                yield tuple(pref)
+            return
+        left = 10 - len(pref) - 1
+        for c in range(lo, min(hi, rest - lo * left) + 1):
+            yield from rec(pref + [c], rest - c)
+    for v in rec([], total):
+        if v in seen:
+            continue
+        orb = {tuple(r) for r in np.array(v)[G]}
+        seen |= orb
+        reps.append(tuple(int(c) for c in max(orb)))
+    return reps
+
+
+def enum_search(total, cls, starts, cap, lo=1, hi=None, seed=0, iters=300, skip=0, limit=None):
+    reps = orbits(total, lo, hi)
+    print(f"{len(reps)} orbits of term vectors with sum {total}, {lo} <= n_P <= {hi}", flush=True)
+    tot_hits = 0
+    table = []
+    for i, v in enumerate(reps[skip:limit] if limit else reps[skip:]):
+        sets = cfg(dict(enumerate(v)))
+        M = Model(sets, cls)
+        rng = np.random.default_rng(seed + i)
+        rels = []
+        for s in range(starts):
+            x, rel, its = lm(M, rng.standard_normal(M.nu) * 0.5, iters=iters, cap=cap)
+            rels.append(rel)
+        h = sum(r < 1e-20 for r in rels)
+        tot_hits += h
+        table.append((v, h, min(rels)))
+        print(f"  n_P = {v}: exact {h}/{starts}, best rel {min(rels):.2e}, median {np.median(rels):.2e}", flush=True)
+    best = min(t[2] for t in table)
+    print(f"SUMMARY enum total={total} cls={cls} cap={cap}: {len(table)} configurations, {starts} starts each, "
+          f"configurations with an exact hit: {sum(t[1] > 0 for t in table)}, smallest residual {best:.2e}", flush=True)
+    return table
+
+
 S15 = cfg({0: 3, 1: 3, 2: 1, 3: 1, 4: 1, 5: 2, 6: 1, 7: 1, 8: 1, 9: 1})      # row sets of the 15-term limit identity
 
 SUITES = {
@@ -273,6 +334,124 @@ SUITES = {
 }
 
 
+# ------------------------------------------------------------------ exact checks for the note
+def matchings():
+    def rec(rows):
+        if not rows:
+            yield ()
+            return
+        a = rows[0]
+        for b in rows[1:]:
+            rest = [r for r in rows if r not in (a, b)]
+            for m in rec(rest):
+                yield ((a, b),) + m
+    return list(rec(list(range(6))))
+
+
+def separates(P, m):
+    return all((a in P) != (b in P) for a, b in m)
+
+
+def check():
+    """Exact (integer / rational) checks of the statements of notes/exact_6x6.md, Section 3."""
+    import sympy
+    ms = matchings()
+    assert len(ms) == 15
+    A = sympy.Matrix(15, 10, lambda i, j: int(separates(PAIRS[j], ms[i])))
+    print("1. matrix A (15 matchings x 10 pairings, A[m,P] = 1 iff P separates m): rank", A.rank(),
+          "(= 10: the ten tensors v_P = q(P) q(P^c) are linearly independent)")
+    assert A.rank() == 10
+    assert all(sum(A[i, j] for j in range(10)) == 4 for i in range(15)) and all(sum(A[i, j] for i in range(15)) == 6 for j in range(10))
+    # weight-(2,2,2) monomials of the block-1 tensor space (3^6): index tuples using each column twice
+    mons = [t for t in itertools.product(range(3), repeat=6) if all(t.count(c) == 2 for c in range(3))]
+    pos = {t: i for i, t in enumerate(mons)}
+    assert len(mons) == 90
+    perms3 = list(itertools.permutations(range(3)))
+
+    def vec(P, coefF, coefG):
+        """sum_{s,t} coefF[s] coefG[t] x_s(P) y_t(P^c) as a vector on the 90 monomials."""
+        Pc = [r for r in range(6) if r not in P]
+        v = [0] * 90
+        for s, cs in zip(perms3, coefF):
+            for t, ct in zip(perms3, coefG):
+                if cs * ct:
+                    tup = [0] * 6
+                    for i, r in enumerate(P):
+                        tup[r] = s[i]
+                    for i, r in enumerate(Pc):
+                        tup[r] = t[i]
+                    v[pos[tuple(tup)]] += cs * ct
+        return v
+    one = [1] * 6
+    unit = [[int(i == j) for j in range(6)] for i in range(6)]
+    V = [vec(P, one, one) for P in PAIRS]
+    tang = {i: [vec(P, one, u) for u in unit] + [vec(P, u, one) for u in unit] for i, P in enumerate(PAIRS)}
+    print("2. weight-(2,2,2) parts of the tangent spaces L_P + R_P = q(P) (x) V(P^c) + V(P) (x) q(P^c):")
+    dims = [sympy.Matrix(tang[i]).rank() for i in range(10)]
+    print("   dimensions", dims, "(6 + 6 - 1 each)")
+    allrank = sympy.Matrix([v for i in range(10) for v in tang[i]]).rank()
+    print("   dimension of the sum over all ten pairings:", allrank, "of 90")
+    ok = True
+    for i0 in range(10):
+        S = [v for i in range(10) if i != i0 for v in tang[i]]
+        r0 = sympy.Matrix(S).rank()
+        r1 = sympy.Matrix(S + [V[i0]]).rank()
+        ok &= (r1 == r0 + 1)
+    print("   v_P0 is NOT in the sum of the tangent spaces of the other nine pairings, for every P0:", ok)
+    assert ok
+    # symmetrisation: the S_3-average of q(P) (x) H is mean(H) * v_P
+    def sym(v):
+        out = [sympy.Rational(0)] * 90
+        for g in perms3:
+            for t, c in zip(mons, v):
+                if c:
+                    out[pos[tuple(g[x] for x in t)]] += sympy.Rational(c, 6)
+        return out
+    ok = True
+    for i, P in enumerate(PAIRS[:3]):
+        for u in unit:
+            ok &= sym(vec(P, one, u)) == [sympy.Rational(x, 6) for x in V[i]]
+            ok &= sym(vec(P, u, one)) == [sympy.Rational(x, 6) for x in V[i]]
+    print("   S_3-average of q(P) (x) e_t and of e_s (x) q(P^c) equals v_P / 6:", ok)
+    assert ok
+    # 3. the rank statements of Lemma 2 / Lemma 3 on random integer instances
+    rng = np.random.default_rng(1)
+    d = 6
+    x, w, y, z = [sympy.Matrix(d, 1, [1] * d) for _ in range(4)]
+
+    def Mmat(G1, G2):
+        return sympy.Matrix(sympy.BlockMatrix([[G1, x * y.T], [z * w.T, G2]]))
+
+    def rv():
+        return sympy.Matrix(d, 1, [int(t) for t in rng.integers(-5, 6, d)])
+    c = sympy.Rational(3, 7)
+    r = {}
+    r['square'] = Mmat(c * x * w.T, x * y.T / c).rank()
+    r['A'] = Mmat(x * rv().T, z * rv().T).rank()
+    r["A'"] = Mmat(rv() * w.T, rv() * y.T).rank()
+    r['B'] = Mmat(c * x * w.T + rv() * rv().T, z * y.T / c).rank()
+    r["B'"] = Mmat(c * x * w.T, z * y.T / c + rv() * rv().T).rank()
+    r['C'] = Mmat(sympy.zeros(d, d), z * rv().T + rv() * y.T).rank()
+    r["C'"] = Mmat(x * rv().T + rv() * w.T, sympy.zeros(d, d)).rank()
+    r['square, wrong constant'] = Mmat(c * x * w.T, 2 * z * y.T / c).rank()
+    r['tangent in both blocks, two-sided'] = Mmat(x * rv().T + rv() * w.T, z * rv().T + rv() * y.T).rank()
+    print("3. rank of M_P = [[Gamma1, x y^T], [z w^T, Gamma2]] for the types of Lemma 3:", r)
+    assert r['square'] == 1 and all(r[t] == 2 for t in ['A', "A'", 'B', "B'", 'C', "C'"])
+    assert r['square, wrong constant'] == 2 and r['tangent in both blocks, two-sided'] > 2
+    worst = 10
+    for _ in range(200):
+        a, b = int(rng.integers(0, 5)), int(rng.integers(0, 5))
+        G1 = sum((rv() * rv().T for _ in range(a)), sympy.zeros(d, d))
+        G2 = sum((rv() * rv().T for _ in range(b)), sympy.zeros(d, d))
+        if rng.random() < 0.5 and a and b:      # force the equality case: x in col, w in row, alpha * beta = 1
+            G1 = G1 - G1 + x * w.T * c + sum((rv() * rv().T for _ in range(a - 1)), sympy.zeros(d, d))
+            G2 = z * y.T / c + sum((rv() * rv().T for _ in range(b - 1)), sympy.zeros(d, d))
+        worst = min(worst, Mmat(G1, G2).rank() - (G1.rank() + G2.rank() - 1))
+    print("   min over 200 random instances of rank M_P - (rank Gamma1 + rank Gamma2 - 1):", worst, "(Lemma 2: >= 0)")
+    assert worst == 0
+    print("ALL EXACT CHECKS PASSED")
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('mode')
@@ -285,10 +464,16 @@ if __name__ == '__main__':
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--scale', type=float, default=0.5)
     ap.add_argument('--verbose', action='store_true')
+    ap.add_argument('--lo', type=int, default=1)
+    ap.add_argument('--hi', type=int, default=None)
     a = ap.parse_args()
     if a.mode == 'run':
         search(parse_sets(a.sets), a.cls, a.starts, cap=a.cap, iters=a.iters, seed=a.seed, scale=a.scale,
                verbose=a.verbose, label=a.sets)
+    elif a.mode == 'check':
+        check()
+    elif a.mode == 'enum':
+        enum_search(int(a.name), a.cls, a.starts, a.cap, lo=a.lo, hi=a.hi, seed=a.seed, iters=a.iters)
     elif a.mode == 'suite':
         for label, sets in SUITES[a.name]:
             print(f"== {label}  ({len(sets)} terms)", flush=True)

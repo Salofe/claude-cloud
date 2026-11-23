@@ -52,7 +52,7 @@ example where this rank drops in the limit. For comparison the 4 × 4 determinan
 |---|---|---|---|
 | 4 × 4 | 6 | 6, optimal (Lean) | 5 .. 5 (Lean) |
 | 6 × 6 | 20 | 20 | 8 (paper + certificates) .. 15 (Lean) |
-| 8 × 8 | 70 | 47 (paper + exact check); 73 in Lean | 9 (paper + certificates) .. 41 (paper + exact check); 53 in Lean |
+| 8 × 8 | 70 | 47 (Lean) | 9 (paper + certificates) .. 41 (Lean) |
 | 10 × 10 | 252 | 186 (paper); 228 in Lean | 10 (paper) .. 156 (paper); 176 in Lean |
 
 ### General size
@@ -64,7 +64,8 @@ Upper bounds:
 | `2k × 2k`, every `k ≥ 1`, any field: limit of sums of `N + T_k` terms (`T_k` the central trinomial coefficient 1, 3, 7, 19, 51, …), and of `N + T_k − 1` when `2^(k−1) ≠ 1` in the field: 5, 16, 53, 176 for `k = 2..5`, about half of Laplace | Lean | `SquaresBound.lean`, `borderMixedSplit_perm_fin`, `borderMixedSplit_perm_fin_sub_one` |
 | `2k × 2k`: exact sum of `N + 2T_k` terms; at 10 × 10 this is 228 < 252, so Laplace is not optimal for exact sums | Lean | `mixedSplit_perm_fin`, `exists_mixedSplit_perm_ten_lt_laplace` |
 | 6 × 6: limit of sums of 15 (Laplace: 20) | Lean | `FifteenTerm.lean`, `borderMixedSplit_perm_six` |
-| `2k × 2k`, `k` even: limit of sums of `N + C(k, k/2)` terms and exact sum of `N + 2C(k, k/2)`; at 8 × 8 this is 41 and 47 (Laplace: 70). For odd `k` the extra count is `(k+1)/2 · C(k, (k−1)/2)` | paper; exact check on the full tensors for `k ≤ 4` | `notes/extra_terms.md`, `python3 garbage_general.py verify 4` |
+| `2k × 2k`, `k` even, any field: limit of sums of `N + C(k, k/2)` terms and exact sum of `N + 2C(k, k/2)`; at 8 × 8 this is 41 and 47 (Laplace: 70), so Laplace is not optimal for exact sums from 8 × 8 on | Lean | `SignedSquares.lean`, `borderMixedSplit_perm_signed_fin`, `mixedSplit_perm_signed_fin`, `mixedSplit_perm_eight_signed` |
+| `k` odd: the same construction with `(k+1)/2 · C(k, (k−1)/2)` extra terms (156 in the limit and 186 exactly at 10 × 10) | paper; checked at the level of matchings for `k = 5` | `notes/extra_terms.md` |
 
 Lower bounds:
 

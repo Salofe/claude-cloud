@@ -14,3 +14,4 @@ import PvsNP.SplitRank
 import PvsNP.FourByFourExact
 import PvsNP.SquaresBound
 import PvsNP.DetFour
+import PvsNP.SignedSquares
