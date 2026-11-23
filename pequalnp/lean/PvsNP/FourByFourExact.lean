@@ -37,7 +37,7 @@ open Matrix
 
 variable {K : Type*} [Field K]
 
-/-- No pattern with five terms admits a decomposition of the permanent. -/
+/-- No pattern with five terms has a decomposition of the permanent. -/
 theorem not_hasDec_of_sum_five [CharZero K] {n0 n1 n2 : ℕ} (h : n0 + n1 + n2 = 5) :
     ¬ HasDec K n0 n1 n2 := by
   intro hD

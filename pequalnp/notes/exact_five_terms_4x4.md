@@ -1,5 +1,14 @@
 # Is the 4 x 4 permanent an exact sum of five split products? No.
 
+**Update (same day): the final statement is now proved in Lean.** `not_mixedSplit_perm_four_five`
+and `mixedSplit_perm_four_iff` in `lean/PvsNP/FourByFourExact.lean` (with the files
+`FourByFourExactBase`, `A`, `Pencil`, `B`, `C`; no `sorry`, standard axioms only) state that over any
+field of characteristic zero the 4 x 4 permanent is a sum of n split products if and only if
+n >= 6. The Lean proof follows this note for the patterns (5,0,0), (4,1,0), (3,1,1) and (2,2,1),
+with several lemmas replaced by weaker statements that suffice, and uses a different argument
+for (3,2,0). Sentences below saying that nothing is checked in Lean describe the state of the
+note when it was written.
+
 **Status.** No. The pattern (2,2,1), which was open, is impossible: `perm_4` is not an exact sum
 of two split products of the pairing 01|23, two of 02|13 and one of 03|12 (Theorem 1 below: a
 complete paper proof, every computational ingredient checked in exact arithmetic by
