@@ -6,3 +6,4 @@ import PvsNP.SixBySix
 import PvsNP.Squares
 import PvsNP.FirstLayer
 import PvsNP.SplitBridge
+import PvsNP.FifteenTerm
