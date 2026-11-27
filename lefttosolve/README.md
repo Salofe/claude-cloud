@@ -51,8 +51,11 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `SumOfThreeCubes.isSumOfThreeCubes_iff_mod_9.R1.H1.lean` | step | PR #2284 |
 | `Mills.lower_bound_of_RH.R1.H2.lean` | step | solved by someone else first |
 | `Erdos1100.erdos_1100.variants.erdos_tenenbaum_g.lean` | **complete problem** | solved by someone else first (a different proof) |
-| `Erdos1100.erdos_1100.variants.erdos_simonovits.lean` | **complete problem** | branch pushed to the fork; PR to be opened |
+| `Erdos1100.erdos_1100.variants.erdos_simonovits.lean` | **complete problem** | **merged and credited to Salofe** ([PR #3267](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3267), 18 points) |
 | `Erdos999.erdos_999.variants.easy_direction.lean` | **complete problem** (warm-up) | closed by someone else first, through a two-step reduction |
+| `Erdos792.erdos_792.variants.bourgain.lean` | **complete problem** (proved by Fable 5.2) | [PR #4072](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4072) |
+| `Erdos1088.f_isLeast.lean` | **complete problem** (warm-up, proved by Fable 5.2) | solved by someone else first |
+| `Sendov.sendov_conjecture.variants.le_eight.lean` | **complete problem** (Sendov's conjecture, degree ≤ 8) | solved by someone else first |
 | `OeisA24356.conjecture.R1.H1.lean` | step | [PR #3573](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3573) (opened automatically) |
 | `OeisA135508.conjecture.R1.H1.lean` | step | [PR #3570](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3570) (opened automatically) |
 | `OeisA108129.conjecture.R1.H1.lean` | step | [PR #3571](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3571) (opened automatically) |
@@ -96,3 +99,10 @@ Together these give `τ⊥(n) ≤ 3·(3y/2)^k`.
 - The set of `x` in `[0,1]` within `f(q)/q` of a reduced fraction `p/q` is covered by `3φ(q)` intervals.
 - Its measure is therefore at most `6·φ(q)f(q)/q`.
 - By Borel–Cantelli, almost no `x` is approximable, which contradicts the hypothesis.
+
+**Erdős 792, Bourgain's sum-free bound** (proved by Fable 5.2): every set of `n ≥ 3` positive integers
+has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-type sets
+`{a : ⌊a t / M⌋ ≡ 1 (mod 3)}`, which are always sum-free:
+- **Lifting:** shifting `t` by `M` or `2M` leaves the multiples of 3 alone and selects every other element exactly once.
+- **Induction:** divide the multiples of 3 by 3 and apply the statement to them.
+- **Hard case:** two multiples of 3 of the form `{3v, 6v}`. A carefully chosen pair of nearby ratios makes the split uneven.
