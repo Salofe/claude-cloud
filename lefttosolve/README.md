@@ -236,6 +236,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `OeisA69191.conjecture_2.R1.H2.lean` | step (hard step, rated 5/10) | [PR #7584](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7584) (opened automatically) |
 | `AgohGiuga.agoh_giuga.R1.H1.lean` | step (hard step, rated 5/10, Kellner equivalence) | [PR #7585](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7585) (opened automatically) |
 | `Erdos52.erdos_52.R2.H1.lean` | step (divisor bound, already proved in the reduction) | [PR #7638](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7638) (opened automatically) |
+| `OeisA78729.conjecture.R1.H1.lean` | step (a(4) = 0: the product plus one is the square (k^2+5k+5)^2) | [PR #7661](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7661) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
