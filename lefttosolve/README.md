@@ -294,6 +294,13 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a273384.lean` | **OEIS conjecture, first Lean statement** (statement PR for review; our full Lean proof, already accepted locally, follows once it is merged) | [PR #10499](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10499) |
 | `oeis-a000166.R1.H1.lean` | step | [PR #10500](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10500) (opened automatically) |
 | `oeis-a273766.lean` | **OEIS conjecture, first Lean statement** (statement PR for review; our full Lean proof follows once it is merged) | [PR #10521](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10521) (opened automatically) |
+| `oeis-a273408.lean` | **OEIS conjecture, first Lean statement** (statement PR for review; our full Lean proof follows once it is merged) | [PR #10524](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10524) (opened automatically) |
+| `Arxiv.1601.03081.crystals_components_unique.R1.H2.R1.H2.R1.H1.R1.H2.R1.H2.R1.H1.lean` | step | [PR #10531](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10531) (opened automatically) |
+| `oeis-a180486.lean` | **OEIS conjecture, first Lean statement** (statement PR for review; our full Lean proof follows once it is merged) | [PR #10542](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10542) (opened automatically) |
+| `oeis-a273789.lean` | **OEIS conjecture, first Lean statement** (statement PR for review; our full Lean proof follows once it is merged) | [PR #10544](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10544) (opened automatically) |
+| `Arxiv.1601.03081.crystals_components_unique.R1.H2.R1.H2.R1.H1.R1.H2.R1.H2.R1.H2.lean` | step | [PR #10553](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10553) (opened automatically) |
+| `oeis-a119652.lean` | **OEIS conjecture, first Lean statement** (statement PR for review; our full Lean proof follows once it is merged) | [PR #10557](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10557) (opened automatically) |
+| `oeis-a208139.lean` | **OEIS conjecture, first Lean statement** (statement PR for review; our full Lean proof follows once it is merged) | [PR #10570](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10570) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
