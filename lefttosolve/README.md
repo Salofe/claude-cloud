@@ -40,4 +40,30 @@ Note: another contributor's proof of the main problem was merged into
 GuillaumeBAUD-coder/open-math-agents while this one was being written. Its machine definitions were
 read before writing this file, and the machine here follows the same layout (copy, restore, run,
 inspect, clear). The lemmas and proofs here were written separately and do not reuse its code.
-Nothing has been submitted to the site.
+
+## Other proofs in this folder
+
+All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound).
+
+| File | Kind | Status upstream |
+|---|---|---|
+| `SternPrime.isSternPrime_iff.R1.H2.lean` | step | PR #2279 |
+| `SumOfThreeCubes.isSumOfThreeCubes_iff_mod_9.R1.H1.lean` | step | PR #2284 |
+| `Mills.lower_bound_of_RH.R1.H2.lean` | step | solved by someone else first |
+| `Erdos1100.erdos_1100.variants.erdos_tenenbaum_g.lean` | **complete problem** | branch pushed to the fork; PR to be opened |
+| `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
+
+**Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
+`ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
+`a = ω(d)`, `b = ω(d')` satisfies `1 ≤ y^k/2^a + y^k/2^b + 2^(a+b)/y^(2k)`, because one of
+`3a ≤ k`, `3b ≤ k` or `3(a+b) ≥ 2k` holds. Summing over the pairs, the maps `d`, `d'` and `dd'` are
+injective into the divisors of `n`. Over divisors of a squarefree `n`, `Σ x^ω(d) ≤ (1+x)^k`.
+Together these give `τ⊥(n) ≤ 3·(3y/2)^k`.
+
+**Erdős 593 variant: obligatory 3-uniform hypergraphs are 2-colorable.**
+- Host: triples `{a, b, d}`, where `a → b` is an arc of a shift graph built as iterated line
+  digraphs of a transitive tournament on a well-ordered set that is too large to be countable.
+- The host has uncountable chromatic number. A countable coloring of a line digraph descends to
+  one of the digraph by subsets of colors, so Cantor's theorem rules it out.
+- Every `r` vertices of the shift graph induce a 2-colorable subgraph.
+- So any `F` that appears in the host gets a 2-coloring by pulling back the local coloring.
