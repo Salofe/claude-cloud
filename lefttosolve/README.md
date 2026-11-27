@@ -260,6 +260,10 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos560.erdos_560.variants.conlon_fox_wigderson.R1.H1.lean` | step | [PR #8105](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8105) (opened automatically) |
 | `Erdos457.erdos_457.variants.one_sub.R1.H1.lean` | step | [PR #8203](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8203) (opened automatically) |
 | `Erdos86.erdos_86.R1.H1.lean` | step | [PR #8213](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8213) (opened automatically) |
+| `oeis-a000188.lean` | **open problem** (site statement) | [PR #8207](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8207) (opened automatically) |
+| `oeis-a092506.lean` | **open problem** (site statement) | [PR #8227](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8227) (opened automatically) |
+| `oeis-a000126.lean` | **open problem** (site statement) | [PR #8268](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8268) (opened automatically) |
+| `oeis-a068598.lean` | **open problem** (site statement) | [PR #8275](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8275) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
