@@ -219,6 +219,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `ABC.abc.variants.quality.R1.H1.lean` | step | [PR #6833](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6833) (opened automatically) |
 | `Erdos687.erdos_687.variants.iwaniec.R1.H2.lean` | step | [PR #6941](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6941) (opened automatically) |
 | `OeisA237720.conjecture_2.R1.H1.lean` | step | [PR #7041](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7041) (opened automatically) |
+| `Erdos848.erdos_848.R1.H2.R1.H2.R1.H2.lean` | step | [PR #7073](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7073) (opened automatically) |
+| `Erdos913.erdos_913.variants.infinite_many_8p_sq_add_one_primes.R1.H1.lean` | step | [PR #6912](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6912) (opened automatically) |
+| `Erdos733.erdos_733.variants.limit_exists.R1.H1.lean` | step | [PR #6988](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6988) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
