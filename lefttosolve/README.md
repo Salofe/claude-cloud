@@ -172,6 +172,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `OeisA51903.conjecture1.R1.H1.lean` | step | [PR #5906](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5906) (opened automatically) |
 | `OeisA69004.conjecture2.variants.without_upper_bound.R1.H3.lean` | step | [PR #5890](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5890) (opened automatically) |
 | `Erdos542.erdos_542.variants.only_two.R1.H1.lean` | step | [PR #5918](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5918) (opened automatically) |
+| `OeisA1146.conjecture.R1.H2.R1.H1.lean` | step | [PR #5952](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5952) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
