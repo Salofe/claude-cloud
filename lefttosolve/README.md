@@ -53,6 +53,12 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos1100.erdos_1100.variants.erdos_tenenbaum_g.lean` | **complete problem** | solved by someone else first (a different proof) |
 | `Erdos1100.erdos_1100.variants.erdos_simonovits.lean` | **complete problem** | branch pushed to the fork; PR to be opened |
 | `Erdos999.erdos_999.variants.easy_direction.lean` | **complete problem** (warm-up) | closed by someone else first, through a two-step reduction |
+| `OeisA24356.conjecture.R1.H1.lean` | step | [PR #3573](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3573) (opened automatically) |
+| `OeisA135508.conjecture.R1.H1.lean` | step | [PR #3570](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3570) (opened automatically) |
+| `OeisA108129.conjecture.R1.H1.lean` | step | [PR #3571](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3571) (opened automatically) |
+| `Erdos647.erdos_647.R1.H1.lean` | step | [PR #3572](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3572) (opened automatically) |
+| `OeisA237578.conjecture_2.R1.H1.lean` | step | [PR #3575](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3575) (opened automatically) |
+| `OeisA249609.conjecture.R1.H1.lean` | step | [PR #3576](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3576) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
