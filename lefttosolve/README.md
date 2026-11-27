@@ -264,6 +264,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a092506.lean` | **open problem** (site statement) | [PR #8227](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8227) (opened automatically) |
 | `oeis-a000126.lean` | **open problem** (site statement) | [PR #8268](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8268) (opened automatically) |
 | `oeis-a068598.lean` | **open problem** (site statement) | [PR #8275](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8275) (opened automatically) |
+| `Erdos695.erdos_695.variants.upperBound.R1.H1.lean` | step | [PR #8200](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8200) (opened automatically) |
+| `Erdos388.erdos_388.variants.general.R1.H1.lean` | step | [PR #8145](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8145) (opened automatically) |
+| `Green92.green_92.variants.chase_lower.R1.H1.R1.H2.R1.H1.lean` | step | [PR #8349](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8349) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
