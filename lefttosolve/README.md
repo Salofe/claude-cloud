@@ -180,6 +180,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `OeisA238585.conjecture_2.R1.H1.lean` | step | [PR #6170](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6170) (opened automatically) |
 | `Green75.green_75.variants.pinchasi.R1.H1.lean` | step | [PR #6183](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6183) (opened automatically) |
 | `Erdos20.erdos_20.R1.H2.R2.H2.lean` | step | [PR #6198](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6198) (opened automatically) |
+| `RiemannHypothesis.lagarias_criterion.R1.H2.R1.H1.R1.H2.lean` | step | [PR #6292](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6292) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
