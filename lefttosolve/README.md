@@ -50,7 +50,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `SternPrime.isSternPrime_iff.R1.H2.lean` | step | PR #2279 |
 | `SumOfThreeCubes.isSumOfThreeCubes_iff_mod_9.R1.H1.lean` | step | PR #2284 |
 | `Mills.lower_bound_of_RH.R1.H2.lean` | step | solved by someone else first |
-| `Erdos1100.erdos_1100.variants.erdos_tenenbaum_g.lean` | **complete problem** | branch pushed to the fork; PR to be opened |
+| `Erdos1100.erdos_1100.variants.erdos_tenenbaum_g.lean` | **complete problem** | solved by someone else first (a different proof) |
+| `Erdos1100.erdos_1100.variants.erdos_simonovits.lean` | **complete problem** | branch pushed to the fork; PR to be opened |
+| `Erdos999.erdos_999.variants.easy_direction.lean` | **complete problem** (warm-up) | closed by someone else first, through a two-step reduction |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
@@ -67,3 +69,16 @@ Together these give `τ⊥(n) ≤ 3·(3y/2)^k`.
   one of the digraph by subsets of colors, so Cantor's theorem rules it out.
 - Every `r` vertices of the shift graph induce a 2-colorable subgraph.
 - So any `F` that appears in the host gets a 2-coloring by pulling back the local coloring.
+
+**Erdős 1100, Erdős–Simonovits bounds** `(√2+o(1))^k < g(k) < (2−c)^k`.
+- Upper bound, with `c = 1/20`: it comes from the Erdős–Tenenbaum estimate above, because `3/2^(2/3) < 1.95`.
+- Lower bound, by construction. Take primes `N < p < q` with `(q−p)·N < p`. The divisors of `N·p·q`
+  interleave as `p·a < q·a < p·a' < q·a' < …`, which gives `τ⊥(Npq) ≥ 2·τ⊥(N) + 2`.
+- Iterating gives a squarefree number with `k` prime factors and `τ⊥ ≥ 2^(⌊k/2⌋+1) − 2 > r^k`.
+- Such close pairs of primes exist above any `N`. Otherwise the primes would grow geometrically,
+  contradicting Mathlib's lower bound on sums of prime reciprocals.
+
+**Erdős 999, easy direction of Duffin–Schaeffer.** Suppose `Σ φ(q)f(q)/q` converges.
+- The set of `x` in `[0,1]` within `f(q)/q` of a reduced fraction `p/q` is covered by `3φ(q)` intervals.
+- Its measure is therefore at most `6·φ(q)f(q)/q`.
+- By Borel–Cantelli, almost no `x` is approximable, which contradicts the hypothesis.
