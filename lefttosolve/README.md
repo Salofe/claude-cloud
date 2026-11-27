@@ -196,6 +196,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Green91.green_91.R1.H2.lean` | step | [PR #6485](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6485) (opened automatically) |
 | `Mills.exists-prime.R1.H2.lean` | step | [PR #6459](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6459) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
+| `Erdos930.erdos_930.variants.consecutive_integers.R1.H4.R1.H2.R1.H1.R1.H3.R1.H4.lean` | step | [PR #6875](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6875) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
