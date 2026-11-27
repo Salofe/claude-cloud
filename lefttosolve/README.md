@@ -98,6 +98,14 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos835.johnson_chromaticNumber.R1.H1.lean` | step | [PR #3704](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3704) (opened automatically) |
 | `OeisA5258.conjecture.R1.H1.lean` | step | [PR #3703](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3703) (opened automatically) |
 | `LennonPittel.lennon_pittel_conjecture.R1.H1.lean` | step | [PR #3711](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3711) (opened automatically) |
+| `AgohGiuga.agoh_giuga.variants.giuga.R1.H2.lean` | step | [PR #4751](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4751) (opened automatically) |
+| `Green37.green_37_lower_bound.R1.H3.lean` | step | [PR #4774](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4774) (opened automatically) |
+| `IrvingLeather.irving_leather_growth_rate.R1.H1.lean` | step | [PR #4759](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4759) (opened automatically) |
+| `OeisA105751.conjecture.variants.moll_p_mod_4_eq_1.R1.H1.lean` | step | [PR #4783](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4783) (opened automatically) |
+| `FeitThompsonPrimeConjecture.feit_thompson_primes.R1.H1.lean` | step | [PR #4779](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4779) (opened automatically) |
+| `FeitThompsonPrimeConjecture.feit_thompson_primes.R1.H2.lean` | step | [PR #4785](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4785) (opened automatically) |
+| `Erdos535.erdos_535.R1.H3.lean` | step | [PR #4792](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4792) (opened automatically) |
+| `Erdos94.erdos_94.variants.regular_ngon.R1.H1.lean` | step | [PR #4796](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4796) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
