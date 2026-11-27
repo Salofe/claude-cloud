@@ -58,6 +58,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos321.erdos_321.variants.upper.lean` | **complete problem** (Bleicher–Erdős upper bound for R(N), proved by Fable 5.2) | **merged, credited to Salofe** ([PR #4869](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4869), 19 points) |
 | `Arxiv.2606.03696.bondy_conjecture.variants.three.lean` | **complete problem** (Bondy's longest-cycle conjecture for k = 3, proved by Fable 5.2) | [PR #6031](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6031) |
 | `Erdos976.erdos_976.variants.nagell_ricci.lean` | **complete problem** (Nagell–Ricci, proved by Fable 5.2) | [PR #6147](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6147) |
+| `Erdos258.erdos_258.variants.monotone.lean` | **complete problem** (monotone variant, proved by Fable 5.2) | [PR #6499](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6499) |
 | `Erdos377.erdos_377.variants.ae.lean` | **complete problem** (proved by Fable 5.2) | solved by someone else first |
 | `Erdos1088.f_isLeast.lean` | **complete problem** (warm-up, proved by Fable 5.2) | solved by someone else first |
 | `Sendov.sendov_conjecture.variants.le_eight.lean` | **complete problem** (Sendov's conjecture, degree ≤ 8) | solved by someone else first |
@@ -192,6 +193,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos1013.erdos_1013.variants.lower.R1.H2.lean` | step | [PR #6236](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6236) (opened automatically) |
 | `Erdos1013.erdos_1013.variants.lower.R1.H3.lean` | step | [PR #6207](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6207) (opened automatically) |
 | `Erdos1013.erdos_1013.variants.lower.R1.H4.lean` | step | [PR #6267](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6267) (opened automatically) |
+| `Green91.green_91.R1.H2.lean` | step | [PR #6485](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6485) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with

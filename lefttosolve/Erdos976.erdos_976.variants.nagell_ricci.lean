@@ -360,9 +360,8 @@ lemma cnt_pow_le (f : ℤ[X]) (hf : Irreducible f) (hd : 2 ≤ f.natDegree) :
       calc (cnt f n (p ^ k) : ℝ) ≤ (p : ℝ) ^ k * ((n : ℝ) / (p : ℝ) ^ k) := by rw [← h3]; exact h1
         _ ≤ (R.natAbs : ℝ) ^ 3 * ((n : ℝ) / (p : ℝ) ^ k) :=
             mul_le_mul_of_nonneg_right h4 hfrac
-        _ ≤ (R.natAbs : ℝ) ^ 3 * ((n : ℝ) / (p : ℝ) ^ k + 1) := by
-            apply mul_le_mul_of_nonneg_left _ (by positivity)
-            linarith
+        _ ≤ (R.natAbs : ℝ) ^ 3 * ((n : ℝ) / (p : ℝ) ^ k + 1) :=
+            mul_le_mul_of_nonneg_left (by linarith) (pow_nonneg (Nat.cast_nonneg _) 3)
     · have hke' : e + 1 ≤ k := by omega
       have h1 : cnt f n (p ^ k) ≤ p ^ (e + 1) * (n / p ^ (k - e) + 1) := by
         unfold cnt
@@ -391,10 +390,9 @@ lemma cnt_pow_le (f : ℤ[X]) (hf : Irreducible f) (hd : 2 ≤ f.natDegree) :
           exact_mod_cast h1
         refine h3.trans ?_
         push_cast
-        apply mul_le_mul_of_nonneg_left _ (by positivity)
         have h4 : ((n / p ^ (k - e) : ℕ) : ℝ) ≤ (n : ℝ) / ((p ^ (k - e) : ℕ) : ℝ) := Nat.cast_div_le
         push_cast at h4
-        linarith
+        exact mul_le_mul_of_nonneg_left (by linarith) (pow_nonneg hp0.le _)
       have h5 : (p : ℝ) ^ (k - e) * (p : ℝ) ^ e = (p : ℝ) ^ k := by
         rw [← pow_add]; congr 1; omega
       have h6 : (n : ℝ) / (p : ℝ) ^ (k - e) = (p : ℝ) ^ e * ((n : ℝ) / (p : ℝ) ^ k) := by
@@ -853,9 +851,9 @@ lemma saving (f : ℤ[X]) (hf : Irreducible f) (hd : 2 ≤ f.natDegree) :
         ≤ 2 * (N : ℝ) ^ 4 * f.natDegree * C₂ :=
       mul_le_mul_of_nonneg_left hsq (by positivity)
     have h12 : 2 * (N : ℝ) ^ 2 * f.natDegree * ∑ p ∈ Nat.primesLE n, Real.log (p : ℝ)
-        ≤ 2 * (N : ℝ) ^ 2 * f.natDegree * (Real.log 4 * (N : ℝ) ^ 2) := by
-      apply mul_le_mul_of_nonneg_left _ (by positivity)
-      exact htheta.trans (mul_le_mul_of_nonneg_left hnNr hlog4)
+        ≤ 2 * (N : ℝ) ^ 2 * f.natDegree * (Real.log 4 * (N : ℝ) ^ 2) :=
+      mul_le_mul_of_nonneg_left (htheta.trans (mul_le_mul_of_nonneg_left hnNr hlog4))
+        (by positivity)
     nlinarith [hb, ha, hd', h11, h12]
   have h13 : ∑ p ∈ Nat.primesLE n, (rho f p : ℝ) * (Real.log p / p)
       ≤ Real.log M + 2 * f.natDegree * C₂ + 2 * f.natDegree * Real.log 4 :=
@@ -1250,15 +1248,24 @@ lemma small_part (f : ℤ[X]) (hf : Irreducible f) (hd : 2 ≤ f.natDegree) :
 lemma le_maxPrimeFac_of_dvd {n p : ℕ} (hn : n ≠ 0) (hp : p.Prime) (h : p ∣ n) :
     p ≤ Nat.maxPrimeFac n := by
   have hmem : p ∈ n.primeFactorsList := (Nat.mem_primeFactorsList hn).2 ⟨hp, h⟩
-  have hne : n.primeFactorsList ≠ [] := List.ne_nil_of_mem hmem
   have h1 : n ≠ 1 := by
     rintro rfl
     simp at hmem
-  have h2 : p ≤ n.primeFactorsList.getLast hne :=
-    (Nat.primeFactorsList_sorted n).pairwise.rel_getLast hmem
-  unfold Nat.maxPrimeFac
-  rw [if_neg h1, List.getLastI_eq_getLast?_getD, List.getLast?_eq_getLast_of_ne_nil hne]
-  exact h2
+  have hsort : n.primeFactorsList.Pairwise (fun a b => a ≤ b) :=
+    (Nat.primeFactorsList_sorted n).pairwise
+  -- split off the last entry of the sorted list of prime factors
+  rcases List.eq_nil_or_concat n.primeFactorsList with h0 | ⟨l, a, hl⟩
+  · rw [h0] at hmem
+    simp at hmem
+  · rw [List.concat_eq_append] at hl
+    have hval : Nat.maxPrimeFac n = a := by
+      unfold Nat.maxPrimeFac
+      rw [if_neg h1, hl, List.getLastI_eq_getLast?_getD, List.getLast?_concat, Option.getD_some]
+    rw [hval]
+    rw [hl] at hmem hsort
+    rcases List.mem_append.1 hmem with hx | hx
+    · exact (List.pairwise_append.1 hsort).2.2 p hx a (List.mem_singleton.2 rfl)
+    · exact le_of_eq (List.mem_singleton.1 hx)
 
 lemma key_bound (f : ℤ[X]) (hf : Irreducible f) (hd : 2 ≤ f.natDegree) :
     ∃ C : ℝ, ∀ n : ℕ, 2 ≤ n → Lf f ≤ n →
@@ -1284,12 +1291,10 @@ lemma key_bound (f : ℤ[X]) (hf : Irreducible f) (hd : 2 ≤ f.natDegree) :
   have h1 : ∑ p ∈ Z.primeFactors.filter (fun p => p ≤ n),
       (Z.factorization p : ℝ) * Real.log p
       ≤ ∑ p ∈ Nat.primesLE n, (Z.factorization p : ℝ) * Real.log p := by
-    apply Finset.sum_le_sum_of_subset_of_nonneg
-    · intro p hp
-      have hp' := Finset.mem_filter.1 hp
-      exact Nat.mem_primesLE.2 ⟨hp'.2, (Nat.mem_primeFactors.1 hp'.1).1⟩
-    · intro p _ _
-      exact mul_nonneg (Nat.cast_nonneg _) (Real.log_natCast_nonneg _)
+    refine Finset.sum_le_sum_of_subset_of_nonneg (fun p hp => ?_)
+      (fun p _ _ => mul_nonneg (Nat.cast_nonneg _) (Real.log_natCast_nonneg p))
+    have hp' := Finset.mem_filter.1 hp
+    exact Nat.mem_primesLE.2 ⟨hp'.2, (Nat.mem_primeFactors.1 hp'.1).1⟩
   have h2 : ∑ p ∈ Z.primeFactors.filter (fun p => ¬ p ≤ n),
       (Z.factorization p : ℝ) * Real.log p
       ≤ (f.natDegree : ℝ) ^ 2 * Real.log 4 * (Z.maxPrimeFac : ℝ) := by
@@ -1312,14 +1317,11 @@ lemma key_bound (f : ℤ[X]) (hf : Irreducible f) (hd : 2 ≤ f.natDegree) :
             * ∑ p ∈ Z.primeFactors.filter (fun p => ¬ p ≤ n), Real.log (p : ℝ) := by
           rw [Finset.mul_sum]
       _ ≤ (f.natDegree : ℝ) ^ 2 * ∑ p ∈ Nat.primesLE Z.maxPrimeFac, Real.log (p : ℝ) := by
-          apply mul_le_mul_of_nonneg_left _ (by positivity)
-          apply Finset.sum_le_sum_of_subset_of_nonneg
-          · intro p hp
-            have hp' := Finset.mem_filter.1 hp
-            have hpf := Nat.mem_primeFactors.1 hp'.1
-            exact Nat.mem_primesLE.2 ⟨le_maxPrimeFac_of_dvd hZ0 hpf.1 hpf.2.1, hpf.1⟩
-          · intro p _ _
-            exact Real.log_natCast_nonneg _
+          refine mul_le_mul_of_nonneg_left
+            (Finset.sum_le_sum_of_subset_of_nonneg (fun p hp => ?_)
+              (fun p _ _ => Real.log_natCast_nonneg p)) (sq_nonneg _)
+          have hpf := Nat.mem_primeFactors.1 (Finset.mem_filter.1 hp).1
+          exact Nat.mem_primesLE.2 ⟨le_maxPrimeFac_of_dvd hZ0 hpf.1 hpf.2.1, hpf.1⟩
       _ = (f.natDegree : ℝ) ^ 2 * Chebyshev.theta (Z.maxPrimeFac : ℝ) := by
           rw [Chebyshev.theta_eq_sum_primesLE_log]
       _ ≤ (f.natDegree : ℝ) ^ 2 * (Real.log 4 * Z.maxPrimeFac) := by
