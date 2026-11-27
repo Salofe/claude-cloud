@@ -107,6 +107,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `FeitThompsonPrimeConjecture.feit_thompson_primes.R1.H2.lean` | step | [PR #4785](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4785) (opened automatically) |
 | `Erdos535.erdos_535.R1.H3.lean` | step | [PR #4792](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4792) (opened automatically) |
 | `Erdos94.erdos_94.variants.regular_ngon.R1.H1.lean` | step | [PR #4796](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4796) (opened automatically) |
+| `Erdos535.erdos_535.R1.H2.lean` | step | [PR #4841](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4841) (opened automatically) |
+| `Erdos78.erdos_78.variants.strongly_explicit.R1.H3.lean` | step | [PR #4891](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4891) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
