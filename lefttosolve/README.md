@@ -222,6 +222,13 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos848.erdos_848.R1.H2.R1.H2.R1.H2.lean` | step | [PR #7073](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7073) (opened automatically) |
 | `Erdos913.erdos_913.variants.infinite_many_8p_sq_add_one_primes.R1.H1.lean` | step | [PR #6912](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6912) (opened automatically) |
 | `Erdos733.erdos_733.variants.limit_exists.R1.H1.lean` | step | [PR #6988](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6988) (opened automatically) |
+| `Erdos456.erdos_456.variants.linniks_theorem.R1.H2.lean` | step | [PR #7098](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7098) (opened automatically) |
+| `OeisA262781.conjecture_2.R1.H1.lean` | step | [PR #7172](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7172) (opened automatically) |
+| `Erdos436.erdos_436.variants.ge_four.R2.H2.lean` | step | [PR #7286](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7286) (opened automatically) |
+| `Erdos500.erdos_500.variants.turan_conjecture.R1.H1.lean` | step | [PR #7287](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7287) (opened automatically) |
+| `Erdos151.erdos_151.variants.cliqueFree_four.R3.H1.lean` | step | [PR #7350](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7350) (opened automatically) |
+| `PoincareConjecture.poincare_conjecture.R1.H3.R1.H2.R1.H3.lean` | step | [PR #7488](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7488) (opened automatically) |
+| `Erdos69.erdos_69.R2.H2.lean` | step | [PR #7521](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7521) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
