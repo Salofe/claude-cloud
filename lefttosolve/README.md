@@ -312,6 +312,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos955.erdos_955.variants.pollack_pomerance_thompson_bound.R1.H1.R1.H2.lean` | step | [PR #11395](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/11395) (opened automatically) |
 | `Erdos423.erdos_423.variants.upper_bound.R1.H2.lean` | step | [PR #11885](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/11885) (opened automatically) |
 | `PoincareConjecture.poincare_conjecture.R1.H2.R1.H1.R1.H2.R1.H1.R1.H2.lean` | step | [PR #12113](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/12113) (opened automatically) |
+| `erdos-550.lean` | **open problem** (site statement); disproof of the statement as formalized (it bounds only the smallest class, the source needs n large relative to all classes), so reviewers may flag it | [PR #12411](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/12411) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
