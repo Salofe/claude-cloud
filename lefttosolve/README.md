@@ -66,6 +66,11 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos687.erdos_687.parts.iii.R1.H2.R1.H2.R1.H1.lean` | step | [PR #4163](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4163) (opened automatically) |
 | `Erdos828.erdos_828.R1.H1.lean` | step | [PR #4165](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4165) (opened automatically) |
 | `Erdos78.erdos_78.variants.strongly_explicit.R1.H1.R1.H1.R1.H2.lean` | step | [PR #4179](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4179) (opened automatically) |
+| `Erdos686.erdos_686.R1.H1.lean` | step | [PR #4356](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4356) (opened automatically) |
+| `Erdos687.erdos_687.variants.maier_pomerance.R1.H2.lean` | step | [PR #4354](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4354) (opened automatically) |
+| `Erdos700.erdos_700.parts.ii.R1.H1.lean` | step | [PR #4373](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4373) (opened automatically) |
+| `MonochromaticQuantumGraph.eqSystem6_no_solution_ge3.R1.H1.lean` | step | [PR #4363](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4363) (opened automatically) |
+| `OeisA224.conjecture.R1.H1.lean` | step | [PR #4372](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4372) (opened automatically) |
 | `Erdos1129.erdos_1129.lean` | **complete problem** (Kilgore / de Boor–Pinkus, proved by Fable 5.2, 2460 lines) | solved by someone else first |
 | `Erdos944.erdos_944.variants.dirac_conjecture.lean` | **complete problem** (Dirac's conjecture for all k ≥ 4, proved by Fable 5.2) | solved by someone else first |
 | `OeisA24356.conjecture.R1.H1.lean` | step | [PR #3573](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3573) (opened automatically) |
