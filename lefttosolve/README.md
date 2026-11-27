@@ -139,6 +139,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Mersenne.squarefree_mersenne_of_prime.R1.H1.lean` | step | [PR #5325](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5325) (opened automatically) |
 | `Erdos366.erdos_366.variants.weaker.R2.H2.lean` | step | [PR #5314](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5314) (opened automatically) |
 | `Erdos408.erdos_408.parts.ii.R1.H1.lean` | step | [PR #5343](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5343) (opened automatically) |
+| `Erdos161.erdos_161.parts.ii.R1.H2.R1.H1.lean` | step | [PR #5377](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5377) (opened automatically) |
+| `Erdos40.erdos_40.variants.weaker.R1.H2.R1.H1.lean` | step | [PR #5471](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5471) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
