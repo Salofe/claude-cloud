@@ -245,6 +245,10 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `EllipticCurveRank.RatEllipticCurve.goldfeld_conjecture.variants.two_le.R1.H1.R1.H2.lean` | step | [PR #7751](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7751) (opened automatically) |
 | `Erdos604.erdos_604.variants.katz_tardos.R1.H2.lean` | step | [PR #7861](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7861) (opened automatically) |
 | `Erdos398.erdos_398.R1.H2.lean` | step | [PR #7907](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7907) (opened automatically) |
+| `Arxiv.2610.08796.exists_isPolyTime_bayesNash.R1.H1.lean` | step (hard step, rated 4/10: polynomial-time Turing machine composition) | [PR #7934](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7934) (opened automatically) |
+| `Erdos713.erdos_713.parts.ii.R1.H1.lean` | step (hard step, rated 4/10) | [PR #7935](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7935) (opened automatically) |
+| `Green47.green_47.variants.finite_exceptions.R1.H1.lean` | step | [PR #7853](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7853) (opened automatically) |
+| `Erdos789.erdos_789.variants.sq.R1.H1.lean` | step | [PR #7929](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7929) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
