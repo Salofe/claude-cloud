@@ -59,6 +59,14 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos647.erdos_647.R1.H1.lean` | step | [PR #3572](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3572) (opened automatically) |
 | `OeisA237578.conjecture_2.R1.H1.lean` | step | [PR #3575](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3575) (opened automatically) |
 | `OeisA249609.conjecture.R1.H1.lean` | step | [PR #3576](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3576) (opened automatically) |
+| `OeisA234246.conjecture_2.R1.H1.lean` | step | [PR #3685](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3685) (opened automatically) |
+| `ErdosMoser.erdos_moser_conjecture.R1.H1.lean` | step | [PR #3693](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3693) (opened automatically) |
+| `Erdos406.erdos_406.variants.one_two.R1.H1.lean` | step | [PR #3692](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3692) (opened automatically) |
+| `OeisA7406.conjecture.R1.H1.lean` | step | [PR #3697](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3697) (opened automatically) |
+| `OeisA2426.conjecture.R1.H1.lean` | step | [PR #3698](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3698) (opened automatically) |
+| `Erdos835.johnson_chromaticNumber.R1.H1.lean` | step | [PR #3704](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3704) (opened automatically) |
+| `OeisA5258.conjecture.R1.H1.lean` | step | [PR #3703](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3703) (opened automatically) |
+| `LennonPittel.lennon_pittel_conjecture.R1.H1.lean` | step | [PR #3711](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3711) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
