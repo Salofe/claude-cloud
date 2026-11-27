@@ -169,6 +169,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos173.erdos_173.R1.H2.R1.H2.R1.H1.R1.H2.lean` | step | [PR #5889](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5889) (opened automatically) |
 | `Arxiv.1601.03081.crystals_components_unique.R1.H2.R1.H1.lean` | step | [PR #5893](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5893) (opened automatically) |
 | `Erdos242.erdos_242.variants.schinzel_generalization.R1.H2.lean` | step | [PR #5908](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5908) (opened automatically) |
+| `OeisA51903.conjecture1.R1.H1.lean` | step | [PR #5906](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5906) (opened automatically) |
+| `OeisA69004.conjecture2.variants.without_upper_bound.R1.H3.lean` | step | [PR #5890](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5890) (opened automatically) |
+| `Erdos542.erdos_542.variants.only_two.R1.H1.lean` | step | [PR #5918](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5918) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
