@@ -280,7 +280,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a001595.lean` | **open problem** (site statement) | [PR #8440](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8440) (opened automatically) |
 | `oeis-a000262.lean` | **open problem** (site statement) | **merged** ([PR #8480](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8480)); counts as an open problem solved once the site confirms the statement |
 | `oeis-a000579.lean` | **open problem** (site statement) | [PR #8522](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8522) (opened automatically) |
-| `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (site statement) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) (opened automatically) |
+| `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
