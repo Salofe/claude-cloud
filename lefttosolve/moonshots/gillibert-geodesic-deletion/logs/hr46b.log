@@ -1,0 +1,82 @@
+MEMBER alltrans46_k=19.gz
+depthhist: 0:2325466
+total 2325466 connected 2325466 capped 0 counterexamples 0 nodes 46509320 maxnodes 20
+MEMBER alltrans46_k=20.gz
+depthhist: 0:2766046 1:4
+total 2766051 connected 2766050 capped 0 counterexamples 0 nodes 58087430 maxnodes 173
+MEMBER alltrans46_k=21.gz
+depthhist: 0:3098260
+total 3098260 connected 3098260 capped 0 counterexamples 0 nodes 68161720 maxnodes 22
+MEMBER alltrans46_k=22.gz
+depthhist: 0:3281398
+total 3281399 connected 3281398 capped 0 counterexamples 0 nodes 75472154 maxnodes 23
+MEMBER alltrans46_k=23.gz
+depthhist: 0:3281398 1:1
+total 3281399 connected 3281399 capped 0 counterexamples 0 nodes 78754082 maxnodes 530
+MEMBER alltrans46_k=24.gz
+depthhist: 0:3098260
+total 3098260 connected 3098260 capped 0 counterexamples 0 nodes 77456500 maxnodes 25
+MEMBER alltrans46_k=25.gz
+depthhist: 0:2766051
+total 2766051 connected 2766051 capped 0 counterexamples 0 nodes 71917326 maxnodes 26
+MEMBER alltrans46_k=26.gz
+depthhist: 0:2325466
+total 2325466 connected 2325466 capped 0 counterexamples 0 nodes 62787582 maxnodes 27
+MEMBER alltrans46_k=27.gz
+depthhist: 0:1849563
+total 1849563 connected 1849563 capped 0 counterexamples 0 nodes 51787764 maxnodes 28
+MEMBER alltrans46_k=28.gz
+depthhist: 0:1379318
+total 1379318 connected 1379318 capped 0 counterexamples 0 nodes 40000222 maxnodes 29
+MEMBER alltrans46_k=29.gz
+depthhist: 0:973011
+total 973011 connected 973011 capped 0 counterexamples 0 nodes 29190330 maxnodes 30
+MEMBER alltrans46_k=30.gz
+depthhist: 0:639272
+total 639272 connected 639272 capped 0 counterexamples 0 nodes 19817432 maxnodes 31
+MEMBER alltrans46_k=31.gz
+depthhist: 0:397166
+total 397166 connected 397166 capped 0 counterexamples 0 nodes 12709312 maxnodes 32
+MEMBER alltrans46_k=32.gz
+depthhist: 0:227396
+total 227396 connected 227396 capped 0 counterexamples 0 nodes 7504068 maxnodes 33
+MEMBER alltrans46_k=33.gz
+depthhist: 0:123175
+total 123175 connected 123175 capped 0 counterexamples 0 nodes 4187950 maxnodes 34
+MEMBER alltrans46_k=34.gz
+depthhist: 0:60431
+total 60431 connected 60431 capped 0 counterexamples 0 nodes 2115085 maxnodes 35
+MEMBER alltrans46_k=35.gz
+depthhist: 0:28163
+total 28163 connected 28163 capped 0 counterexamples 0 nodes 1013868 maxnodes 36
+MEMBER alltrans46_k=36.gz
+depthhist: 0:11527
+total 11527 connected 11527 capped 0 counterexamples 0 nodes 426499 maxnodes 37
+MEMBER alltrans46_k=37.gz
+depthhist: 0:4556
+total 4556 connected 4556 capped 0 counterexamples 0 nodes 173128 maxnodes 38
+MEMBER alltrans46_k=38.gz
+depthhist: 0:1486
+total 1486 connected 1486 capped 0 counterexamples 0 nodes 57954 maxnodes 39
+MEMBER alltrans46_k=39.gz
+depthhist: 0:497
+total 497 connected 497 capped 0 counterexamples 0 nodes 19880 maxnodes 40
+MEMBER alltrans46_k=40.gz
+depthhist: 0:118
+total 118 connected 118 capped 0 counterexamples 0 nodes 4838 maxnodes 41
+MEMBER alltrans46_k=41.gz
+depthhist: 0:36
+total 36 connected 36 capped 0 counterexamples 0 nodes 1512 maxnodes 42
+MEMBER alltrans46_k=42.gz
+depthhist: 0:5
+total 5 connected 5 capped 0 counterexamples 0 nodes 215 maxnodes 43
+MEMBER alltrans46_k=43.gz
+depthhist: 0:2
+total 2 connected 2 capped 0 counterexamples 0 nodes 88 maxnodes 44
+MEMBER alltrans46_k=44.gz
+depthhist: 0:1
+total 1 connected 1 capped 0 counterexamples 0 nodes 45 maxnodes 45
+MEMBER alltrans46_k=45.gz
+depthhist: 0:1
+total 1 connected 1 capped 0 counterexamples 0 nodes 46 maxnodes 46
+ALLDONE 46

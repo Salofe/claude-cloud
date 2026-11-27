@@ -1,0 +1,70 @@
+MEMBER alltrans42_k=00.gz
+depthhist:
+total 1 connected 0 capped 0 counterexamples 0 nodes 0 maxnodes 0 () nonregular_or_asymmetric 0
+MEMBER alltrans42_k=01.gz
+depthhist:
+total 1 connected 0 capped 0 counterexamples 0 nodes 0 maxnodes 0 () nonregular_or_asymmetric 0
+MEMBER alltrans42_k=02.gz
+depthhist: 0:1
+total 6 connected 1 capped 0 counterexamples 0 nodes 3 maxnodes 3 (#5) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=03.gz
+depthhist: 0:9 1:1
+total 15 connected 10 capped 0 counterexamples 0 nodes 42 maxnodes 6 (#7) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=04.gz
+depthhist: 0:59 1:5
+total 81 connected 64 capped 0 counterexamples 0 nodes 356 maxnodes 17 (#38) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=05.gz
+depthhist: 0:215 1:6
+total 228 connected 221 capped 0 counterexamples 0 nodes 1406 maxnodes 26 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=06.gz
+depthhist: 0:737 1:34
+total 808 connected 771 capped 0 counterexamples 0 nodes 5772 maxnodes 37 (#306) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=07.gz
+depthhist: 0:2037 1:32
+total 2078 connected 2069 capped 0 counterexamples 0 nodes 16936 maxnodes 44 (#66) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=08.gz
+depthhist: 0:5535 1:32
+total 5621 connected 5567 capped 0 counterexamples 0 nodes 50901 maxnodes 65 (#1148) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=09.gz
+depthhist: 0:12464 1:14
+total 12484 connected 12478 capped 0 counterexamples 0 nodes 125203 maxnodes 82 (#1253) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=10.gz
+depthhist: 0:27344 1:5
+total 27408 connected 27349 capped 0 counterexamples 0 nodes 301109 maxnodes 92 (#18) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=11.gz
+depthhist: 0:52419 1:5
+total 52426 connected 52424 capped 0 counterexamples 0 nodes 629468 maxnodes 102 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=12.gz
+depthhist: 0:96588 1:19
+total 96656 connected 96607 capped 0 counterexamples 0 nodes 1257508 maxnodes 145 (#234) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=13.gz
+depthhist: 0:160360 1:1
+total 160362 connected 160361 capped 0 counterexamples 0 nodes 2245138 maxnodes 98 (#899) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=14.gz
+depthhist: 0:253637 1:1
+total 253667 connected 253638 capped 0 counterexamples 0 nodes 3804752 maxnodes 197 (#526) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=15.gz
+depthhist: 0:367921 1:5
+total 367926 connected 367926 capped 0 counterexamples 0 nodes 5887362 maxnodes 226 (#232) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=16.gz
+depthhist: 0:506317 1:10
+total 506338 connected 506327 capped 0 counterexamples 0 nodes 8608459 maxnodes 197 (#105) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=17.gz
+depthhist: 0:646368
+total 646368 connected 646368 capped 0 counterexamples 0 nodes 11634624 maxnodes 18 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=18.gz
+depthhist: 0:780409 1:4
+total 780416 connected 780413 capped 0 counterexamples 0 nodes 14828408 maxnodes 325 (#10) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=19.gz
+depthhist: 0:880795
+total 880795 connected 880795 capped 0 counterexamples 0 nodes 17615900 maxnodes 20 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=20.gz
+depthhist: 0:937426 1:1
+total 937428 connected 937427 capped 0 counterexamples 0 nodes 19686043 maxnodes 97 (#3) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=21.gz
+depthhist: 0:937423 1:5
+total 937428 connected 937428 capped 0 counterexamples 0 nodes 20624156 maxnodes 442 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=22.gz
+depthhist: 0:880795
+total 880795 connected 880795 capped 0 counterexamples 0 nodes 20258285 maxnodes 23 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans42_k=23.gz
