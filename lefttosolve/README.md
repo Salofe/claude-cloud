@@ -238,6 +238,13 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos52.erdos_52.R2.H1.lean` | step (divisor bound, already proved in the reduction) | [PR #7638](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7638) (opened automatically) |
 | `OeisA78729.conjecture.R1.H1.lean` | step (a(4) = 0: the product plus one is the square (k^2+5k+5)^2) | [PR #7661](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7661) (opened automatically) |
 | `Arxiv.1601.03081.crystals_components_unique.R2.H1.lean` | step (crystal uniqueness when n+1 = 2^A p^B: one of a+1, b+1 is a power of two, then a size argument) | [PR #7858](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7858) (opened automatically) |
+| `PoincareConjecture.poincare_conjecture.R1.H3.R1.H2.R1.H1.lean` | step | [PR #7914](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7914) (opened automatically) |
+| `Erdos338.erdos_338.variants.triangular.R1.H1.R1.H1.R1.H1.R1.H1.R1.H2.R1.H3.lean` | step | [PR #7636](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7636) (opened automatically) |
+| `Erdos386.erdos_386.variants.two.R1.H1.lean` | step | [PR #7639](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7639) (opened automatically) |
+| `Arxiv.2501.03234.conjecture_1_1.R1.H2.R1.H1.lean` | step | [PR #7681](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7681) (opened automatically) |
+| `EllipticCurveRank.RatEllipticCurve.goldfeld_conjecture.variants.two_le.R1.H1.R1.H2.lean` | step | [PR #7751](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7751) (opened automatically) |
+| `Erdos604.erdos_604.variants.katz_tardos.R1.H2.lean` | step | [PR #7861](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7861) (opened automatically) |
+| `Erdos398.erdos_398.R1.H2.lean` | step | [PR #7907](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7907) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
