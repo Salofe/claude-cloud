@@ -232,6 +232,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos768.erdos_768.R1.H1.R1.H2.lean` | step (hard step, rated 5/10) | [PR #7561](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7561) (opened automatically) |
 | `OeisA245212.conjecture.R1.H1.R1.H1.lean` | step (hard step, rated 5/10) | [PR #7563](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7563) (opened automatically) |
 | `LennonPittel.lennon_pittel_conjecture.R3.H2.R1.H1.lean` | step (hard step, rated 5/10) | [PR #7564](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7564) (opened automatically) |
+| `Erdos687.erdos_687.parts.iii.R1.H2.R1.H2.R1.H2.R1.H1.lean` | step (hard step, rated 5/10) | [PR #7570](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7570) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
