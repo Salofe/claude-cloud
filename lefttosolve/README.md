@@ -215,6 +215,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `InscribedSquare.exists_inscribed_rectangle.R1.H2.R1.H1.lean` | step | [PR #6784](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6784) (opened automatically) |
 | `Erdos552.erdos_552.parts.ii.R1.H1.lean` | step | [PR #6825](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6825) (opened automatically) |
 | `OeisA262446.conjecture_2.R1.H1.lean` | step | [PR #6827](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6827) (opened automatically) |
+| `Erdos1042.erdos_1042.variants.universal.R1.H1.R1.H1.lean` | step | [PR #6982](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6982) (opened automatically) |
+| `ABC.abc.variants.quality.R1.H1.lean` | step | [PR #6833](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6833) (opened automatically) |
+| `Erdos687.erdos_687.variants.iwaniec.R1.H2.lean` | step | [PR #6941](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6941) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
