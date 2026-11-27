@@ -54,6 +54,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos1100.erdos_1100.variants.erdos_simonovits.lean` | **complete problem** | **merged and credited to Salofe** ([PR #3267](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3267), 18 points) |
 | `Erdos999.erdos_999.variants.easy_direction.lean` | **complete problem** (warm-up) | closed by someone else first, through a two-step reduction |
 | `Erdos792.erdos_792.variants.bourgain.lean` | **complete problem** (proved by Fable 5.2) | [PR #4072](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4072) |
+| `Erdos174.erdos_174.variants.trapezoid.lean` | **complete problem** (Kříž: isosceles trapezoids are Ramsey, proved by Fable 5.2) | [PR #4258](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4258) |
 | `Erdos1088.f_isLeast.lean` | **complete problem** (warm-up, proved by Fable 5.2) | solved by someone else first |
 | `Sendov.sendov_conjecture.variants.le_eight.lean` | **complete problem** (Sendov's conjecture, degree ≤ 8) | solved by someone else first |
 | `OeisA182126.conjecture3.R1.H2.lean` | step | [PR #4113](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4113) (opened automatically) |
