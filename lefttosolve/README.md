@@ -123,6 +123,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos317.erdos_317.variants.claim2.R1.H1.lean` | step | [PR #4889](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4889) (opened automatically) |
 | `Erdos470.erdos_470.parts.ii.R3.H1.lean` | step | [PR #4896](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4896) (opened automatically) |
 | `OpenQuantumProblem23.hasSICPOVM_68.R1.H2.lean` | step | [PR #4965](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4965) (opened automatically) |
+| `ReconstructionConjecture.edge_reconstruction_conjecture.R1.H2.lean` | step | [PR #5208](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5208) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
