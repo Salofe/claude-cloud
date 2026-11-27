@@ -125,6 +125,16 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `OpenQuantumProblem23.hasSICPOVM_68.R1.H2.lean` | step | [PR #4965](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4965) (opened automatically) |
 | `ReconstructionConjecture.edge_reconstruction_conjecture.R1.H2.lean` | step | [PR #5208](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5208) (opened automatically) |
 | `LennonPittel.lennon_pittel_conjecture.R2.H1.lean` | step | [PR #5260](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5260) (opened automatically) |
+| `Erdos104.erdos_104.R1.H2.lean` | step | [PR #5277](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5277) (opened automatically) |
+| `Erdos142.erdos_142.variants.lower.R2.H2.lean` | step | [PR #5265](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5265) (opened automatically) |
+| `Erdos535.erdos_535.R2.H2.lean` | step | [PR #5264](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5264) (opened automatically) |
+| `Erdos142.erdos_142.variants.lower.R1.H2.R2.H2.lean` | step | [PR #5279](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5279) (opened automatically) |
+| `Erdos151.erdos_151.variants.cliqueFree_four.R1.H2.lean` | step | [PR #5331](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5331) (opened automatically) |
+| `Erdos173.erdos_173.R1.H1.lean` | step | [PR #5304](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5304) (opened automatically) |
+| `OeisA108569.conjecture.R1.H2.lean` | step | [PR #5297](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5297) (opened automatically) |
+| `Mersenne.squarefree_mersenne_of_prime.R1.H1.lean` | step | [PR #5325](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5325) (opened automatically) |
+| `Erdos366.erdos_366.variants.weaker.R2.H2.lean` | step | [PR #5314](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5314) (opened automatically) |
+| `Erdos408.erdos_408.parts.ii.R1.H1.lean` | step | [PR #5343](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5343) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
