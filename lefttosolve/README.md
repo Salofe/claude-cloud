@@ -305,6 +305,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Arxiv.1601.03081.crystals_components_unique.R1.H2.R1.H2.R1.H1.R1.H2.R1.H1.R1.H1.lean` | step | [PR #10777](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10777) (opened automatically) |
 | `Arxiv.1601.03081.crystals_components_unique.R1.H2.R1.H2.R1.H1.R1.H2.R1.H1.R1.H2.lean` | step | [PR #10824](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10824) (opened automatically) |
 | `Erdos604.erdos_604.variants.average.R2.H2.R1.H1.R1.H2.lean` | step | [PR #10819](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10819) (opened automatically) |
+| `erdos-634.R1.H3.R1.H4.R1.H2.lean` | step | [PR #10952](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10952) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
