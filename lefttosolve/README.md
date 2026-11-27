@@ -249,6 +249,12 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos713.erdos_713.parts.ii.R1.H1.lean` | step (hard step, rated 4/10) | [PR #7935](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7935) (opened automatically) |
 | `Green47.green_47.variants.finite_exceptions.R1.H1.lean` | step | [PR #7853](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7853) (opened automatically) |
 | `Erdos789.erdos_789.variants.sq.R1.H1.lean` | step | [PR #7929](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7929) (opened automatically) |
+| `Erdos398.erdos_398.R1.H1.lean` | step | [PR #7738](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7738) (opened automatically) |
+| `Erdos375.erdos_375.variants.bounded_gap.R1.H1.R1.H2.R1.H2.lean` | step | [PR #7868](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7868) (opened automatically) |
+| `Erdos458.erdos_458.R1.H1.lean` | step | [PR #7910](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7910) (opened automatically) |
+| `Erdos375.erdos_375.variants.bounded_gap.R1.H1.R1.H2.R1.H3.lean` | step | [PR #7941](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7941) (opened automatically) |
+| `Erdos1210.erdos_1210.variants.er80_correction.R1.H1.lean` | step | [PR #7975](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7975) (opened automatically) |
+| `Erdos81.erdos_81.R1.H1.lean` | step | [PR #7986](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7986) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
