@@ -69,6 +69,15 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos686.erdos_686.R1.H1.lean` | step | [PR #4356](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4356) (opened automatically) |
 | `Erdos687.erdos_687.variants.maier_pomerance.R1.H2.lean` | step | [PR #4354](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4354) (opened automatically) |
 | `Erdos700.erdos_700.parts.ii.R1.H1.lean` | step | [PR #4373](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4373) (opened automatically) |
+| `MeynielConjecture.meyniel_conjecture.R1.H1.lean` | step | [PR #4353](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4353) (opened automatically) |
+| `MeynielConjecture.meyniel_conjecture.variants.soft.R1.H1.lean` | step | [PR #4348](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4348) (opened automatically) |
+| `FeitThompsonPrimeConjecture.feit_thompson_primes.R1.H3.R1.H1.lean` | step | [PR #4349](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4349) (opened automatically) |
+| `FlintCooksonHills.flint_hills_series_converges.R1.H2.lean` | step | [PR #4357](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4357) (opened automatically) |
+| `FlintCooksonHills.cookson_hills_series_converges.R1.H2.lean` | step | [PR #4367](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4367) (opened automatically) |
+| `ScholzConjecture.scholz_conjecture.R1.H1.lean` | step | [PR #4360](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4360) (opened automatically) |
+| `WrittenOnTheWallII.GraphConjecture84.conjecture84.R1.H2.lean` | step | [PR #4362](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4362) (opened automatically) |
+| `Erdos1160.erdos_1160.variants.sum.R3.H2.R1.H1.lean` | step | [PR #4376](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4376) (opened automatically) |
+| `Erdos470.erdos_470.parts.ii.R1.H1.lean` | step | [PR #4383](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4383) (opened automatically) |
 | `MonochromaticQuantumGraph.eqSystem6_no_solution_ge3.R1.H1.lean` | step | [PR #4363](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4363) (opened automatically) |
 | `OeisA224.conjecture.R1.H1.lean` | step | [PR #4372](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4372) (opened automatically) |
 | `Erdos1129.erdos_1129.lean` | **complete problem** (Kilgore / de Boor–Pinkus, proved by Fable 5.2, 2460 lines) | solved by someone else first |
