@@ -85,6 +85,10 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `OeisA224.conjecture.R1.H1.lean` | step | [PR #4372](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4372) (opened automatically) |
 | `Erdos1129.erdos_1129.lean` | **complete problem** (Kilgore / de Boor–Pinkus, proved by Fable 5.2, 2460 lines) | solved by someone else first |
 | `Erdos944.erdos_944.variants.dirac_conjecture.lean` | **complete problem** (Dirac's conjecture for all k ≥ 4, proved by Fable 5.2) | solved by someone else first |
+| `Arxiv.0805.3777.isMaxRank_of_le_min.lean` | **complete problem** (maximal tensor rank, proved by Fable 5.2) | solved by someone else first |
+| `Erdos1111.erdos_1111.variants.nguyen_scott_seymour.lean` | **complete problem** (proved by Fable 5.2) | solved by someone else first (by about 15 minutes) |
+| `ReconstructionConjecture.reconstruction_conjecture.variants.tree.lean` | **complete problem** (Kelly: trees are reconstructible, proved by Fable 5.2) | solved by someone else first |
+| `Arxiv.2605.02731.dean_conjecture.variants.three.lean` | **complete problem** (Chen–Saito: min degree ≥ 3 gives a cycle of length ≡ 0 mod 3, proved by Fable 5.2) | solved by someone else first |
 | `OeisA24356.conjecture.R1.H1.lean` | step | [PR #3573](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3573) (opened automatically) |
 | `OeisA135508.conjecture.R1.H1.lean` | step | [PR #3570](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3570) (opened automatically) |
 | `OeisA108129.conjecture.R1.H1.lean` | step | [PR #3571](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3571) (opened automatically) |
