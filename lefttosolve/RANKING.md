@@ -49,3 +49,21 @@ abandoned:
 Problems in the easiest tier that are untouched are untouched for a reason: they need research-level
 arguments, such as Ramsey and regularity methods, SDP certificates, or searches over all graphs on
 up to 25 vertices.
+
+## Follow-up: going for the best target
+
+- **Erdős 399, step R1.H2 (Breusch).** Not feasible yet. The step needs a prime q ≡ 3 (mod 4) in
+  (n/2, n] for every n > 100. Every elementary route I worked through needs prime counts in this
+  residue class to be accurate within about ±5%. Mathlib has nothing close (it has
+  θ(x) ≤ x·log 4), and even Chebyshev's classical constants, 0.92 and 1.106, are not sharp enough.
+  So the analytic machinery would have to be built first.
+- **Sylvester–Schur (Erdős 683 variant and Erdős 961).** I found a workable route on top of
+  Mathlib's Bertrand and Chebyshev tools. Both problems were solved by another contributor during
+  the analysis, about an hour later.
+- **Best target still achievable: `Mills.lower_bound_of_RH.R1.H2`**, the unconditional bound
+  ψ(x) − θ(x) ≤ √x·log²x/8 for x ≥ 599. The proof combines Mathlib's Costa Pereira inequality,
+  ψ(x) − θ(x) ≤ ψ(x^½) + ψ(x^⅓) + ψ(x^⅕), with `Chebyshev.psi_le` and explicit comparisons of
+  x^¼, x^⅓ and x^⅙ with √x. It reduces to 2.343 + 0.36282·L ≤ L²/8 with L = log x ≥ 9·log 2.
+  **ACCEPTED** locally by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound). It is
+  one step: closing Mills' problem also needs step R1.H1, Schoenfeld's bound under RH, which is
+  research-scale.
