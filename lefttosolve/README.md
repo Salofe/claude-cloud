@@ -56,6 +56,16 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos792.erdos_792.variants.bourgain.lean` | **complete problem** (proved by Fable 5.2) | [PR #4072](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4072) |
 | `Erdos1088.f_isLeast.lean` | **complete problem** (warm-up, proved by Fable 5.2) | solved by someone else first |
 | `Sendov.sendov_conjecture.variants.le_eight.lean` | **complete problem** (Sendov's conjecture, degree ≤ 8) | solved by someone else first |
+| `OeisA182126.conjecture3.R1.H2.lean` | step | [PR #4113](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4113) (opened automatically) |
+| `OeisA67599.conjecture.R1.H2.lean` | step | [PR #4127](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4127) (opened automatically) |
+| `OeisA217785.conjecture_3.R1.H1.lean` | step | [PR #4140](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4140) (opened automatically) |
+| `Erdos700.erdos_700.parts.ii.R1.H2.lean` | step | [PR #4156](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4156) (opened automatically) |
+| `Erdos420.erdos_420.parts.i.R1.H2.lean` | step | [PR #4143](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4143) (opened automatically) |
+| `Erdos479.erdos_479.R1.H1.lean` | step | [PR #4151](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4151) (opened automatically) |
+| `Erdos687.erdos_687.parts.iii.R1.H2.R1.H2.R1.H1.lean` | step | [PR #4163](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4163) (opened automatically) |
+| `Erdos828.erdos_828.R1.H1.lean` | step | [PR #4165](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4165) (opened automatically) |
+| `Erdos78.erdos_78.variants.strongly_explicit.R1.H1.R1.H1.R1.H2.lean` | step | [PR #4179](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4179) (opened automatically) |
+| `Erdos1129.erdos_1129.lean` | **complete problem** (Kilgore / de Boor–Pinkus, proved by Fable 5.2, 2460 lines) | solved by someone else first |
 | `OeisA24356.conjecture.R1.H1.lean` | step | [PR #3573](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3573) (opened automatically) |
 | `OeisA135508.conjecture.R1.H1.lean` | step | [PR #3570](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3570) (opened automatically) |
 | `OeisA108129.conjecture.R1.H1.lean` | step | [PR #3571](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3571) (opened automatically) |
