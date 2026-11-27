@@ -272,6 +272,15 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a189202.lean` | **open problem** (site statement) | [PR #8436](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8436) (opened automatically) |
 | `oeis-a256171.lean` | **open problem** (site statement) | [PR #8784](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8784) (opened automatically) |
 | `oeis-a261387.lean` | **open problem** (site statement) | [PR #8794](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8794) (opened automatically) |
+| `oeis-a000392.lean` | **open problem** (site statement) | [PR #8267](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8267) (opened automatically) |
+| `oeis-a000364.lean` | **open problem** (site statement) | [PR #8323](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8323) (opened automatically) |
+| `oeis-a000350.lean` | **open problem** (site statement) | **merged** ([PR #8383](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8383)); counts as an open problem solved once the site confirms the statement |
+| `oeis-a001045.lean` | **open problem** (site statement) | **merged** ([PR #8389](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8389)); counts as an open problem solved once the site confirms the statement |
+| `oeis-a204988.lean` | **open problem** (site statement) | **merged** ([PR #8431](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8431)); counts as an open problem solved once the site confirms the statement |
+| `oeis-a001595.lean` | **open problem** (site statement) | [PR #8440](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8440) (opened automatically) |
+| `oeis-a000262.lean` | **open problem** (site statement) | **merged** ([PR #8480](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8480)); counts as an open problem solved once the site confirms the statement |
+| `oeis-a000579.lean` | **open problem** (site statement) | [PR #8522](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8522) (opened automatically) |
+| `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (site statement) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
