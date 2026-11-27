@@ -197,6 +197,24 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Mills.exists-prime.R1.H2.lean` | step | [PR #6459](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6459) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 | `Erdos930.erdos_930.variants.consecutive_integers.R1.H4.R1.H2.R1.H1.R1.H3.R1.H4.lean` | step | [PR #6875](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6875) (opened automatically) |
+| `Erdos1109.erdos_1109.variants.konyagin_upper.R1.H1.R1.H1.lean` | step | [PR #6335](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6335) (opened automatically) |
+| `Erdos313.erdos_313.variants.primary_pseudoperfect_are_infinite.R1.H1.lean` | step | [PR #6336](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6336) (opened automatically) |
+| `Erdos821.erdos_821.variants.lichtman.R1.H2.lean` | step | [PR #6362](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6362) (opened automatically) |
+| `Green68.green_68.variants.voloch.R1.H2.lean` | step | [PR #6386](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6386) (opened automatically) |
+| `LatinSquare.growthRateZn.R1.H2.lean` | step | [PR #6405](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6405) (opened automatically) |
+| `Green54.green_54_known_case.R1.H2.lean` | step | [PR #6455](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6455) (opened automatically) |
+| `Erdos561.erdos_561.R1.H1.lean` | step | [PR #6457](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6457) (opened automatically) |
+| `Erdos647.erdos_647.variants.infinite.R1.H2.lean` | step | [PR #6473](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6473) (opened automatically) |
+| `Green72.no_k_in_line_big.R1.H2.lean` | step | [PR #6475](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6475) (opened automatically) |
+| `Erdos422.erdos_422.variants.well_defined.R1.H1.lean` | step | [PR #6543](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6543) (opened automatically) |
+| `OeisA218585.conjecture_4.R1.H2.R1.H1.R1.H1.R1.H2.lean` | step | [PR #6573](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6573) (opened automatically) |
+| `OeisA262813.conjecture_2.R1.H1.lean` | step | [PR #6669](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6669) (opened automatically) |
+| `AlspachConjecture.alspach_conjecture.variants.long_cycles.R1.H1.lean` | step | [PR #6728](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6728) (opened automatically) |
+| `Erdos552.erdos_552.parts.ii.R1.H2.lean` | step | [PR #6745](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6745) (opened automatically) |
+| `Erdos208.erdos_208.variants.log_bound.R1.H1.lean` | step | [PR #6756](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6756) (opened automatically) |
+| `InscribedSquare.exists_inscribed_rectangle.R1.H2.R1.H1.lean` | step | [PR #6784](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6784) (opened automatically) |
+| `Erdos552.erdos_552.parts.ii.R1.H1.lean` | step | [PR #6825](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6825) (opened automatically) |
+| `OeisA262446.conjecture_2.R1.H1.lean` | step | [PR #6827](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6827) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
