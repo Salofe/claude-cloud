@@ -285,6 +285,14 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Arxiv.1601.03081.crystals_components_unique.R1.H2.R1.H2.R1.H1.R1.H2.R1.H1.lean` | step | [PR #9217](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9217) (opened automatically) |
 | `Erdos332.erdos_332.lean` | **complete problem** | [PR #10136](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10136) (opened automatically) |
 | `Erdos357.erdos_357.variants.monotone.parts.ii.littleO_version_symm.lean` | **complete problem** | [PR #10206](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10206) (opened automatically) |
+| `Erdos535.erdos_535.R2.H1.R1.H2.lean` | step | [PR #10237](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10237) (opened automatically) |
+| `arxiv-2606.27961.R1.H1.lean` | step | [PR #10340](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10340) (opened automatically) |
+| `oeis-a267872.lean` | **complete problem** | [PR #10411](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10411) (opened automatically) |
+| `oeis-a188148.lean` | **complete problem** | [PR #10451](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10451) (opened automatically) |
+| `oeis-a273743.lean` | **complete problem** | [PR #10472](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10472) (opened automatically) |
+| `SierpinskiNumber.prime_sierpinski_problem.R1.H1.R1.H1.lean` | step | [PR #10490](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10490) (opened automatically) |
+| `oeis-a273384.lean` | **complete problem** | [PR #10499](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10499) (opened automatically) |
+| `oeis-a000166.R1.H1.lean` | step | [PR #10500](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10500) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
