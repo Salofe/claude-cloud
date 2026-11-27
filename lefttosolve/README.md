@@ -78,6 +78,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `WrittenOnTheWallII.GraphConjecture84.conjecture84.R1.H2.lean` | step | [PR #4362](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4362) (opened automatically) |
 | `Erdos1160.erdos_1160.variants.sum.R3.H2.R1.H1.lean` | step | [PR #4376](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4376) (opened automatically) |
 | `Erdos470.erdos_470.parts.ii.R1.H1.lean` | step | [PR #4383](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4383) (opened automatically) |
+| `Erdos20.erdos_20.R1.H1.lean` | step | [PR #4414](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4414) (opened automatically) |
+| `Erdos770.erdos_770.parts.iii.R1.H2.lean` | step | [PR #4506](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4506) (opened automatically) |
 | `MonochromaticQuantumGraph.eqSystem6_no_solution_ge3.R1.H1.lean` | step | [PR #4363](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4363) (opened automatically) |
 | `OeisA224.conjecture.R1.H1.lean` | step | [PR #4372](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4372) (opened automatically) |
 | `Erdos1129.erdos_1129.lean` | **complete problem** (Kilgore / de Boor–Pinkus, proved by Fable 5.2, 2460 lines) | solved by someone else first |
