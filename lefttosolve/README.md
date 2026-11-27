@@ -283,6 +283,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `erdos-684.lean` | **open problem** (site statement) | [PR #9213](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9213) (opened automatically) |
 | `Erdos1191.erdos_1191.parts.ii.R2.H2.lean` | step | [PR #9215](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9215) (opened automatically) |
 | `Arxiv.1601.03081.crystals_components_unique.R1.H2.R1.H2.R1.H1.R1.H2.R1.H1.lean` | step | [PR #9217](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9217) (opened automatically) |
+| `Erdos332.erdos_332.lean` | **complete problem** | [PR #10136](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10136) (opened automatically) |
+| `Erdos357.erdos_357.variants.monotone.parts.ii.littleO_version_symm.lean` | **complete problem** | [PR #10206](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/10206) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
