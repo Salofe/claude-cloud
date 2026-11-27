@@ -229,6 +229,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos151.erdos_151.variants.cliqueFree_four.R3.H1.lean` | step | [PR #7350](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7350) (opened automatically) |
 | `PoincareConjecture.poincare_conjecture.R1.H3.R1.H2.R1.H3.lean` | step | [PR #7488](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7488) (opened automatically) |
 | `Erdos69.erdos_69.R2.H2.lean` | step | [PR #7521](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7521) (opened automatically) |
+| `Erdos768.erdos_768.R1.H1.R1.H2.lean` | step (hard step, rated 5/10) | [PR #7561](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7561) (opened automatically) |
+| `OeisA245212.conjecture.R1.H1.R1.H1.lean` | step (hard step, rated 5/10) | [PR #7563](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7563) (opened automatically) |
+| `LennonPittel.lennon_pittel_conjecture.R3.H2.R1.H1.lean` | step (hard step, rated 5/10) | [PR #7564](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/7564) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
