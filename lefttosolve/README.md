@@ -194,6 +194,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos1013.erdos_1013.variants.lower.R1.H3.lean` | step | [PR #6207](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6207) (opened automatically) |
 | `Erdos1013.erdos_1013.variants.lower.R1.H4.lean` | step | [PR #6267](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6267) (opened automatically) |
 | `Green91.green_91.R1.H2.lean` | step | [PR #6485](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6485) (opened automatically) |
+| `Mills.exists-prime.R1.H2.lean` | step | [PR #6459](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/6459) (opened automatically) |
 | `Erdos593.erdos_593.variants.obligatory_implies_two_colorable.lean` | **complete problem** | solved by someone else first |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
