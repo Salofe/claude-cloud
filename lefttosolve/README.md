@@ -258,6 +258,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos36.minimum_overlap.variants.lower.white_2022.R1.H3.lean` | step | [PR #8055](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8055) (opened automatically) |
 | `Erdos292.erdos_292.variants.martin.R1.H2.lean` | step | [PR #8065](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8065) (opened automatically) |
 | `Erdos560.erdos_560.variants.conlon_fox_wigderson.R1.H1.lean` | step | [PR #8105](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8105) (opened automatically) |
+| `Erdos457.erdos_457.variants.one_sub.R1.H1.lean` | step | [PR #8203](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8203) (opened automatically) |
+| `Erdos86.erdos_86.R1.H1.lean` | step | [PR #8213](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/8213) (opened automatically) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
