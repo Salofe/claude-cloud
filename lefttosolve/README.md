@@ -53,9 +53,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos1100.erdos_1100.variants.erdos_tenenbaum_g.lean` | **complete problem** | solved by someone else first (a different proof) |
 | `Erdos1100.erdos_1100.variants.erdos_simonovits.lean` | **complete problem** | **merged and credited to Salofe** ([PR #3267](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/3267), 18 points) |
 | `Erdos999.erdos_999.variants.easy_direction.lean` | **complete problem** (warm-up) | closed by someone else first, through a two-step reduction |
-| `Erdos792.erdos_792.variants.bourgain.lean` | **complete problem** (proved by Fable 5.2) | [PR #4072](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4072) |
-| `Erdos174.erdos_174.variants.trapezoid.lean` | **complete problem** (Kříž: isosceles trapezoids are Ramsey, proved by Fable 5.2) | [PR #4258](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4258) |
-| `Erdos321.erdos_321.variants.upper.lean` | **complete problem** (Bleicher–Erdős upper bound for R(N), proved by Fable 5.2) | [PR #4869](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4869) |
+| `Erdos792.erdos_792.variants.bourgain.lean` | **complete problem** (proved by Fable 5.2) | **merged, credited to Salofe** ([PR #4072](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4072), 17 points) |
+| `Erdos174.erdos_174.variants.trapezoid.lean` | **complete problem** (Kříž: isosceles trapezoids are Ramsey, proved by Fable 5.2) | **merged, credited to Salofe** ([PR #4258](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4258), site credit pending) |
+| `Erdos321.erdos_321.variants.upper.lean` | **complete problem** (Bleicher–Erdős upper bound for R(N), proved by Fable 5.2) | **merged, credited to Salofe** ([PR #4869](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4869), 19 points) |
 | `Erdos1088.f_isLeast.lean` | **complete problem** (warm-up, proved by Fable 5.2) | solved by someone else first |
 | `Sendov.sendov_conjecture.variants.le_eight.lean` | **complete problem** (Sendov's conjecture, degree ≤ 8) | solved by someone else first |
 | `OeisA182126.conjecture3.R1.H2.lean` | step | [PR #4113](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4113) (opened automatically) |
@@ -127,7 +127,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `Erdos317.erdos_317.variants.claim2.R1.H1.lean` | step | [PR #4889](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4889) (opened automatically) |
 | `Erdos470.erdos_470.parts.ii.R3.H1.lean` | step | [PR #4896](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4896) (opened automatically) |
 | `OpenQuantumProblem23.hasSICPOVM_68.R1.H2.lean` | step | [PR #4965](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4965) (opened automatically) |
-| `ReconstructionConjecture.edge_reconstruction_conjecture.R1.H2.lean` | step | [PR #5208](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5208) (opened automatically) |
+| `ReconstructionConjecture.edge_reconstruction_conjecture.R1.H2.lean` | step | **merged** ([PR #5208](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5208)) |
 | `LennonPittel.lennon_pittel_conjecture.R2.H1.lean` | step | [PR #5260](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5260) (opened automatically) |
 | `Erdos104.erdos_104.R1.H2.lean` | step | [PR #5277](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5277) (opened automatically) |
 | `Erdos142.erdos_142.variants.lower.R2.H2.lean` | step | [PR #5265](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/5265) (opened automatically) |
