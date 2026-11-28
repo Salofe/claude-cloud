@@ -643,7 +643,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a249963.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28100](https://github.com/lefttosolve2/open-math-agents/pull/28100) |
 | `oeis-a250061.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28101](https://github.com/lefttosolve2/open-math-agents/pull/28101) |
 | `oeis-a106391.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28102](https://github.com/lefttosolve2/open-math-agents/pull/28102) |
-| `oeis-a183980.lean` | proof of another account's pending site statement | [PR #28121](https://github.com/lefttosolve2/open-math-agents/pull/28121) |
+| `oeis-a183980.lean` | proof of Volkopat's pending statement #24761 (2 X 2 block sums, width 4; transfer recursion per block sum, order-4 recurrence) | [PR #28121](https://github.com/lefttosolve2/open-math-agents/pull/28121) |
+| `oeis-a183981.lean` | proof of Volkopat's pending statement #24772 (same method, width 5) | [PR #28215](https://github.com/lefttosolve2/open-math-agents/pull/28215) |
 | `oeis-a391629.lean` | proof of esracummings31-blip's pending statement #24830 | [PR #27951](https://github.com/lefttosolve2/open-math-agents/pull/27951) |
 | `opg-decomposition-of-completions-of-reloids.lean` | disproof of pmaster's pending statement #24813 (clause 1 of Porton's conjecture fails for f = full relation, g = cofinite-rows reloid) | [PR #28173](https://github.com/lefttosolve2/open-math-agents/pull/28173) |
 
