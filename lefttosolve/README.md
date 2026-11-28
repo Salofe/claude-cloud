@@ -315,7 +315,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `erdos-550.lean` | **open problem** (site statement); disproof of the statement as formalized (it bounds only the smallest class, the source needs n large relative to all classes), so reviewers may flag it | [PR #12411](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/12411) (opened automatically) |
 | `oeis-a390815.lean` | **open problem** (site statement) | [PR #13074](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/13074) (opened automatically) |
 | `oeis-a072872.lean` | **open problem** (site statement): **counterexample** to the OEIS conjecture a(n) < prime(n) for n > 47: a(6298) = 77742 > prime(6298) = 62753 (6298 = 2·47·67) | [PR #13111](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/13111) (opened automatically) |
-| `oeis-a184540.lean` | **complete problem** | [PR #16635](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16635) (opened automatically) |
+| `oeis-a184540.lean` | **OEIS conjecture, first Lean statement** (statement PR; our proof follows right after) | [PR #16635](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16635) (opened automatically) |
 | `oeis-a188572.lean` | proof queued | branch `oma/oeis-a188572` pushed; PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a226839.lean` | proof queued | branch `oma/oeis-a226839` pushed; PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a084199.lean` | proof queued | branch `oma/oeis-a084199` pushed; PR waits until GitHub Actions is re-enabled on the fork |
