@@ -591,6 +591,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a201695.lean` | proof re-filed after our statement #21305 merged (first proof #21319 ran CI too early) | [PR #26682](https://github.com/lefttosolve2/open-math-agents/pull/26682) |
 | `oeis-a200887.lean` | proof re-filed after our statement #21340 merged (first proof #21358 ran CI too early) | [PR #26711](https://github.com/lefttosolve2/open-math-agents/pull/26711) |
 | `oeis-a375439.lean` | proof of Volkopat's pending statement #24951 | [PR #25149](https://github.com/lefttosolve2/open-math-agents/pull/25149) |
+| `oeis-a267068.lean` | proof of rtflynn's pending statement #24853 | [PR #26994](https://github.com/lefttosolve2/open-math-agents/pull/26994) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
