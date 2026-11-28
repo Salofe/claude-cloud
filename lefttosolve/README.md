@@ -320,8 +320,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a084199.lean` | proof queued | branch `oma/oeis-a084199` pushed; PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a176612.lean` | proof queued | branch `oma/oeis-a176612` pushed; PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a082382.lean` | proof queued | branch `oma/oeis-a082382` pushed; PR waits until GitHub Actions is re-enabled on the fork |
-| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.R1.H1.lean` | proof accepted locally | not submitted (another account filed first, or pending decision) |
-| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.lean` | proof accepted locally | not submitted (another account filed first, or pending decision) |
+| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.R1.H1.lean` | warm-up proof from the first session | no PR from this account |
+| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.lean` | warm-up proof from the first session | no PR from this account |
 | `oeis-a089001.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a154145.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a290192.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
