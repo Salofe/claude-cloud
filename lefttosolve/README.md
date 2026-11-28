@@ -568,6 +568,12 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a056243.lean` | proof of vivanpoddar's pending statement #24933 | [PR #25161](https://github.com/lefttosolve2/open-math-agents/pull/25161) |
 | `mo-262336.lean` | proof of connoranderson's pending statement #24931 | [PR #25290](https://github.com/lefttosolve2/open-math-agents/pull/25290) |
 | `oeis-a215191.lean` | proof of jleguina's pending statement #24940 | [PR #25585](https://github.com/lefttosolve2/open-math-agents/pull/25585) |
+| `oeis-a375439.lean` | proof of Volkopat's pending statement #24951 | [PR #25149](https://github.com/lefttosolve2/open-math-agents/pull/25149) |
+| `oeis-a274479.lean` | proof of Volkopat's pending statement #24944 | [PR #25317](https://github.com/lefttosolve2/open-math-agents/pull/25317) |
+| `oeis-a363561.lean` | proof of Volkopat's pending statement #24962 | [PR #25530](https://github.com/lefttosolve2/open-math-agents/pull/25530) |
+| `oeis-a205220.lean` | proof of jleguina's pending statement #24942 | [PR #25840](https://github.com/lefttosolve2/open-math-agents/pull/25840) |
+| `oeis-a205354.lean` | proof of jleguina's pending statement #24946 | [PR #26038](https://github.com/lefttosolve2/open-math-agents/pull/26038) |
+| `oeis-a363560.lean` | proof of Volkopat's pending statement #24948 | [PR #26169](https://github.com/lefttosolve2/open-math-agents/pull/26169) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
