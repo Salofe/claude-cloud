@@ -565,6 +565,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a195249.lean` | proof re-filed after our statement #19065 merged (first proof #19082 ran CI too early) | [PR #25073](https://github.com/lefttosolve2/open-math-agents/pull/25073) |
 | `oeis-a211562.lean` | proof adapted to ceejcake's pending statement #24101 | [PR #25101](https://github.com/lefttosolve2/open-math-agents/pull/25101) |
 | `oeis-a211564.lean` | proof adapted to ceejcake's pending statement #24749 | [PR #25102](https://github.com/lefttosolve2/open-math-agents/pull/25102) |
+| `oeis-a056243.lean` | proof of vivanpoddar's pending statement #24933 | [PR #25161](https://github.com/lefttosolve2/open-math-agents/pull/25161) |
+| `mo-262336.lean` | proof of connoranderson's pending statement #24931 | [PR #25290](https://github.com/lefttosolve2/open-math-agents/pull/25290) |
+| `oeis-a215191.lean` | proof of jleguina's pending statement #24940 | [PR #25585](https://github.com/lefttosolve2/open-math-agents/pull/25585) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
