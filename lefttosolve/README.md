@@ -424,6 +424,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a023811.lean` | proof (statement pending in #15454 by Dugongue) | [PR #19745](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19745) |
 | `oeis-a072944.lean` | proof (statement pending in #15455 by Dugongue) | [PR #19905](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19905) |
 | `oeis-a273405.lean` | proof (statement pending in #15435 by jleguina) | [PR #19956](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19956) |
+| `oeis-a207390.lean` | proof (statement pending in #15624 by clementtrecourt; transfer on row pairs over the 31 allowed rows, each of the 961 pair counts is a degree-7 polynomial in the binomial basis, checked by the kernel in 31 chunks; closed form, recurrence and g.f.) | [PR #20104](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20104) |
+| `oeis-a154143.lean` | proof (statement pending in #15628 by jleguina; Pell-type descent for (2k+1)^2 + 79 = 8m^2: solutions (3,4), (5,5) and (k, m) -> (3k+4m+1, 2k+3m+1), Nat.nth identification, recurrence and both g.f.s) | [PR #20186](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20186) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
