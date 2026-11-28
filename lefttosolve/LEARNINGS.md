@@ -171,6 +171,16 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   these comments after the repo move, so detect merges from upstream main, not from comment counts. Tooling:
   prize_kit/mon/watch_statements.sh (Monitor, 150 s poll) + prize_kit/mon/refile.sh. *Confidence:* high.
 
+- **P14** Snipes need the same re-file. With CI fast again (~3,100 verdicts/h, queue ~60 at 11:14 UTC 28 Nov), a proof
+  of another account's PENDING statement is rejected within minutes: lint "<id> has no Lean statement yet". The
+  site's per-handle API lists the last 40 submissions with state and reason:
+  https://lefttosolve.com/api/pending?handle=Salofe . Audit at 11:20 UTC: of our open proof PRs, 38 were rejected only
+  for the missing statement and their statements had since merged with no proof on main; 52 more (06:30-08:20 UTC)
+  never got a verdict (systemic: 612 of 691 open PRs from 07:15-08:20 had no comment). Of these 90, 45 already had a
+  rival proof PR filed after the merge (statement authors re-file fast: jleguina, caa1982, ivillar, justusklocke-cloud,
+  Genbox), so we skipped them; 45 were re-filed on oma/<id>-p2. Lesson: register every snipe id with the statement
+  watcher and re-file the moment the statement merges. *Confidence:* high.
+
 ## 3. Lean / checker rules
 
 - **L1** Catalog proof format: the first non-comment line is `import <module>` with guillemets, followed by Mathlib

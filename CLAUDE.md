@@ -42,6 +42,11 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
   the merger's pending list and rivals' competitor checks key on the title; `<id>-statement`/`<id>-p2` titles are
   invisible to them. Fix the Action's title input before filing more statements/re-files.
 - Our own statement + proof: file the proof PR within a minute of the statement PR. Never hold the proof back.
+- SNIPES TOO: since 28 Nov ~09:00 CI runs within minutes, so any proof of a statement not yet on main is rejected
+  in seconds ("has no Lean statement yet"). A snipe scores only if re-filed (oma/<id>-p2) right after the rival
+  statement merges; statement authors and other snipers race for it (45 of 90 stale ids already had rival re-files).
+  The watcher covers own, adapted and sniped ids (rebuild prize_kit/mon/rebuild_waits.sh every re-arm); bulk
+  re-file with prize_kit/mon/refile_batch.sh. Verdict reasons: https://lefttosolve.com/api/pending?handle=Salofe.
 - That immediate proof PR always fails CI while merges lag (12/12 on 28 Nov); it only deters rivals. The proof that
   scores is the re-file on oma/<id>-p2 the moment the statement merges: run the statement-merge Monitor
   (prize_kit/mon/watch_statements.sh, 150 s poll, re-arm every 30 min) and prize_kit/mon/refile.sh <id>.

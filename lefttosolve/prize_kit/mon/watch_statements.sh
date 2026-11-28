@@ -5,7 +5,7 @@ PRR=$SP/open/prrepo; SEEN=$SP/open/mon/seen.txt; touch $SEEN
 while true; do
   if git -C $PRR fetch -q --filter=blob:none --depth 1 origin +HEAD:refs/mon/head 2>/dev/null; then
     files=$(git -C $PRR ls-tree --name-only refs/mon/head statements/ proofs/ 2>/dev/null)
-    for id in $(cat $SP/open/own_statement_ids.txt) $(awk '{print $1}' $SP/open/rival_statement_waits.txt); do
+    for id in $(cat $SP/open/own_statement_ids.txt) $(awk '{print $1}' $SP/open/rival_statement_waits.txt $SP/open/mon/snipe_waits.txt 2>/dev/null | sort -u); do
       grep -qx "$id" $SEEN && continue
       if grep -qx "statements/$id.lean" <<<"$files"; then
         p=no; grep -qx "proofs/$id.lean" <<<"$files" && p=yes
