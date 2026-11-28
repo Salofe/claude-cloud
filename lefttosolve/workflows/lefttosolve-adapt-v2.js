@@ -1,0 +1,19 @@
+export const meta = {
+  name: 'lefttosolve-adapt-to-rival-statement-v2',
+  description: 'For OEIS problems where another account filed a competing (older) statement PR, adapt our existing accepted proof to their statement and file the proof PR early',
+  phases: [ { title: 'Adapt', detail: 'rewrite our proof against the rival statement, official check, PR' } ],
+}
+const SP = '/tmp/claude-0/-home-user-claude-cloud/bd3d433e-a40c-5862-83a1-d99ab03e0074/scratchpad'
+const FC = '/home/user/google-deepmind/formal-conjectures'
+const PRR = SP + '/open/prrepo'
+const items = args.items
+const SUB = { type: 'object', properties: { id: { type: 'string' }, status: { type: 'string', enum: ['submitted', 'queued', 'accepted_not_submitted', 'failed'] }, pr_url: { type: 'string' }, notes: { type: 'string' } }, required: ['id', 'status', 'pr_url', 'notes'] }
+const res = await parallel(items.map(it => () => agent(`
+TASK: another account (${it.user}) filed a statement PR #${it.pr} for ${it.id}, older than ours, so their statement will most likely be the one merged. We already have an ACCEPTED proof of OUR statement of the same OEIS conjecture: our statement ${SP}/open/formalize/statements/${it.id}.lean and our proof ${SP}/open/formalize/proofs/${it.id}.lean (our own work). Adapt our proof to THEIR statement and file it.
+1. Get their statement: git -C ${PRR} fetch -q --filter=blob:none --depth 1 origin pull/${it.pr}/head && git -C ${PRR} show FETCH_HEAD:statements/${it.id}.lean > ${SP}/open/adapt/${it.id}/statement.lean (mkdir -p first). Do NOT open any proofs/ file of other PRs.
+2. Copy their statement to ${SP}/oma-check/statements/${it.id}.lean (overwriting ours there), then write ${SP}/oma-check/proofs/${it.id}.lean proving type_of% @OMA.S_${it.id.replace(/[^A-Za-z0-9]/g, '_')}.main for THEIR statement (same proof file format as ours: first line import OMAStatements.S_${it.id.replace(/[^A-Za-z0-9]/g, '_')}, theorem OMA.solution, helpers in namespace OMA.Helpers). Reuse our mathematics and lemmas; bridge their definitions to ours. If their statement is false or differs materially, say so (a disproof is fine if it is false).
+3. Official check: cd ${SP}/oma-check && export PATH="$HOME/.elan/bin:$PATH" OMA_FC=${FC} && python3 -I tools/lint.py proofs/${it.id}.lean data/catalog.json && bash tools/check.sh proofs/${it.id}.lean ${SP}/open/adapt/${it.id}/verdict.json ; must be accepted. Lint rules: no double quotes, no sorry/axiom/native_decide etc., axioms within propext, Classical.choice, Quot.sound.
+4. Competitor check: gh api -X GET search/issues -f q='repo:lefttosolve2/open-math-agents is:pr is:open in:title ${it.id}' --jq '.items[] | \"\\(.number) \\(.user.login) \\(.title)\"' : if any open PR other than #${it.pr} and Salofe's statement PRs exists for this id (a proof by someone else), do not submit.
+5. Submit: our branch name oma/${it.id} may already exist on the fork from earlier work; use branch oma/${it.id}-p2 instead. Follow ${SP}/SUBMIT_PROCEDURE.md (private worktree from origin/oma-base, add proofs/${it.id}.lean only, commit, push, trigger the fork Action open-upstream-pr.yml with inputs branch and body; read the PR URL from the job log). Body: Lease: none (statement pending in #${it.pr}) / Agent: claude-code / Model: unknown / blank / Problem: https://lefttosolve.com/p/${it.id} / Proves the statement in #${it.pr} (by ${it.user}), which must be merged first. / Checked locally with tools/check.sh against that statement: ACCEPTED (axioms within propext, Classical.choice, Quot.sound). / footer from SUBMIT_PROCEDURE.md. You are authorized to use git in /home/user/open-math-agents for this.
+6. Finally restore OUR statement into ${SP}/oma-check/statements/${it.id}.lean (copy from ${SP}/open/formalize/statements/) and save the adapted proof as ${SP}/open/adapt/${it.id}/proof_for_rival.lean.`, { label: `adapt:${it.id}`, phase: 'Adapt', schema: SUB, effort: 'high' })))
+return { results: res }

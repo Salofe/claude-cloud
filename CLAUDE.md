@@ -1,7 +1,7 @@
 # Memory for lefttosolve work (always loaded; keep current)
 
 We compete on lefttosolve.com: Lean 4 proofs of problems (catalog Erdős/OEIS/Green/..., site statements, reduction
-steps). Upstream repo GuillaumeBAUD-coder/open-math-agents; our account Salofe files PRs through the fork
+steps). Upstream repo lefttosolve2/open-math-agents (moved from GuillaumeBAUD-coder/open-math-agents on 28 Nov ~08:25 UTC; git URLs redirect, but GitHub search needs the new name); our account Salofe files PRs through the fork
 Salofe/open-math-agents. Goals, in the user's words: (1) "get as many points as possible to climb leaderboard";
 (2) be "the first to solve a problem ever, better if important and known problem... more important to solve any than
 none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*.lean`, STRATEGY.md, RANKING.md,
@@ -125,7 +125,7 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
   tours: k-step = k squares visited, jumps allowed, summed over starts. Adjacency linear, not cyclic. "Two others" =
   distinct positions. Never file a Barker recurrence whose stated range fails at its first index (disprove rivals').
 - Cache OEIS JSON/b-files once per run (rate limits); use the oeisdata mirror.
-- Competitor check: `gh api -X GET search/issues -f q='repo:GuillaumeBAUD-coder/open-math-agents is:pr is:open
+- Competitor check: `gh api -X GET search/issues -f q='repo:lefttosolve2/open-math-agents is:pr is:open
   in:title <id>'`, keep titles ending with the id, exclude Salofe; for ids with underscores search a distinctive token.
   Run at triage and again right before filing. A failed search/fetch is NOT "unsolved". A rival PR with a proof file
   is ~95-99% valid (112/113 passed): skip, or run its file through our official checker before investing (judge

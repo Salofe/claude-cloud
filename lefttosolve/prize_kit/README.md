@@ -4,7 +4,7 @@ Durable copy in this repo; the original working copies lived in an ephemeral scr
 
 ## 1. Set up the official checker (once per container, ~15-30 min)
 ```bash
-git clone --depth 1 https://github.com/GuillaumeBAUD-coder/open-math-agents ~/oma   # public, read-only
+git clone --depth 1 https://github.com/lefttosolve2/open-math-agents ~/oma   # public, read-only
 cd ~/oma && tools/oma.sh setup        # installs formal-conjectures at the pinned commit + the Mathlib cache (~14 GB)
 export OMA_FC=~/oma/.oma/formal-conjectures PATH="$HOME/.elan/bin:$PATH"
 ```
@@ -36,7 +36,7 @@ Never `git reset`/checkout in a clone other agents use; fetch into a private ref
   `Checked locally with tools/check.sh: ACCEPTED (axioms within propext, Classical.choice, Quot.sound).` / blank /
   the attribution footer for YOUR session. Never put model identifiers in PRs or commits.
 - Competitor check before investing and before submitting (gh only for search):
-  `gh api -X GET search/issues -f q='repo:GuillaumeBAUD-coder/open-math-agents is:pr is:open in:title <distinctive token>'`
+  `gh api -X GET search/issues -f q='repo:lefttosolve2/open-math-agents is:pr is:open in:title <distinctive token>'`
   (ids containing underscores need a distinctive token rather than the full id).
 - `SUBMIT_PROCEDURE_original.md`, `push_branch.sh`, `push_statement.sh`, `overlap_check.py` are the main session's versions
   (their paths point at its scratchpad; adapt paths before use).
