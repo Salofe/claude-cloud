@@ -351,6 +351,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a081669.lean` | proof (statement pending in #15485 by Dugongue) | [PR #18371](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18371) (opened automatically) |
 | `oeis-a154150.lean` | proof (statement pending in #15487 by jleguina) | [PR #18486](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18486) (opened automatically) |
 | `oeis-a284540.lean` | proof (statement pending in #15491 by clementtrecourt) | [PR #18773](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18773) (opened automatically) |
+| `oeis-a195233.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #19012](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19012); proof [PR #19020](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19020) |
+| `oeis-a195249.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #19065](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19065); proof [PR #19082](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19082) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 | `oeis-a074882.lean` | proof (statement pending in #15570 by jleguina) | [PR #16625](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16625) |
 | `oeis-a267539.lean` | proof (statement pending in #15747 by alkrssve) | [PR #16663](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16663) |
