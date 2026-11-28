@@ -411,6 +411,19 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a208065.lean` | proof (statement pending in #15638 by clementtrecourt; the vertical rule says row i+2 is bitwise below row i, so transfer on row pairs factors as G m u v = D((m+1)/2, u) D(m/2, v) with D counting chains of allowed rows; 2D is quadratic, a(m+2) = S((m+1)/2) S(m/2) with S(k) = 2k^2+12k+10; both closed forms and the g.f.) | [PR #19440](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19440) |
 | `oeis-a154148.lean` | proof (statement pending in #15646 by jleguina; Pell-type descent for x^2 + 167 = 8y^2: solutions (11,6), (15,7) and (x, y) -> (3x+8y, x+3y), Nat.nth identification via eq_nth_of_strictMonoOn_of_mapsTo_of_surjOn, recurrence, g.f. and partial fractions) | [PR #19531](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19531) |
 | `oeis-a154144.lean` | proof (statement pending in #15637 by jleguina; Pell-type descent for (2k+1)^2 + 103 = 8m^2: solutions (2,4), (8,7) and (k, m) -> (3k+4m+1, 2k+3m+1), Nat.nth identification, recurrence and both g.f.s) | [PR #19652](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19652) |
+| `oeis-a088500.lean` | proof (statement pending in #15705 by Dugongue) | [PR #18385](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18385) |
+| `oeis-a207389.lean` | proof (statement pending in #15672 by clementtrecourt) | [PR #19037](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19037) |
+| `oeis-a077625.lean` | proof (statement pending in #15463 by Dugongue) | [PR #19091](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19091) |
+| `oeis-a127710.lean` | proof (statement pending in #15466 by jleguina) | [PR #19212](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19212) |
+| `oeis-a077624.lean` | proof (statement pending in #15456 by Dugongue) | [PR #19300](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19300) |
+| `oeis-a079665.lean` | proof (statement pending in #15449 by Dugongue) | [PR #19405](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19405) |
+| `oeis-a273406.lean` | proof (statement pending in #15446 by jleguina) | [PR #19445](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19445) |
+| `oeis-a279053.lean` | proof (statement pending in #15451 by clementtrecourt) | [PR #19482](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19482) |
+| `oeis-a076821.lean` | proof (statement pending in #15434 by Dugongue) | [PR #19577](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19577) |
+| `oeis-a072780.lean` | proof (statement pending in #15438 by Dugongue) | [PR #19704](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19704) |
+| `oeis-a023811.lean` | proof (statement pending in #15454 by Dugongue) | [PR #19745](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19745) |
+| `oeis-a072944.lean` | proof (statement pending in #15455 by Dugongue) | [PR #19905](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19905) |
+| `oeis-a273405.lean` | proof (statement pending in #15435 by jleguina) | [PR #19956](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19956) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
