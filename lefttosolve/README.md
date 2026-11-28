@@ -644,6 +644,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a250061.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28101](https://github.com/lefttosolve2/open-math-agents/pull/28101) |
 | `oeis-a106391.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28102](https://github.com/lefttosolve2/open-math-agents/pull/28102) |
 | `oeis-a183980.lean` | proof of another account's pending site statement | [PR #28121](https://github.com/lefttosolve2/open-math-agents/pull/28121) |
+| `oeis-a391629.lean` | proof of esracummings31-blip's pending statement #24830 | [PR #27951](https://github.com/lefttosolve2/open-math-agents/pull/27951) |
+| `opg-decomposition-of-completions-of-reloids.lean` | disproof of pmaster's pending statement #24813 (clause 1 of Porton's conjecture fails for f = full relation, g = cofinite-rows reloid) | [PR #28173](https://github.com/lefttosolve2/open-math-agents/pull/28173) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
