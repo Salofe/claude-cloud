@@ -49,7 +49,8 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
   re-file with prize_kit/mon/refile_batch.sh. Verdict reasons: https://lefttosolve.com/api/pending?handle=Salofe.
 - That immediate proof PR always fails CI while merges lag (12/12 on 28 Nov); it only deters rivals. The proof that
   scores is the re-file on oma/<id>-p2 the moment the statement merges: run the statement-merge Monitor
-  (prize_kit/mon/watch_statements.sh, 150 s poll, re-arm every 30 min) and prize_kit/mon/refile.sh <id>.
+  (prize_kit/mon/watch_statements.sh: 60 s poll, pushes the -p2 branch itself and prints READY lines; then only the
+  fork Action is left; rivals re-file within ~5 min of a merge) and prize_kit/mon/refile.sh <id>.
 - Subagents may be denied triggering the fork Action (classifier: Unsanctioned Communication). Do not use fallbacks;
   file from the main session.
 - After any batch/flush or Actions outage, reconcile every pushed oma/* branch, every pr_queue.jsonl line and every
