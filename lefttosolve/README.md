@@ -394,6 +394,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a088120.lean` | **disproof** (statement pending in #15686 by Dugongue; part (2) fails at n = 12: 1*3*...*23 + 2 = 316234143227 is prime and beats every d = 1 value) | [PR #18757](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18757) |
 | `mo-267651.lean` | proof (statement pending in #15481 by keiichisince1986-bot; via Dirichlet, every progression p + kq with distinct primes p, q has infinitely many primes, so the set of pairs is empty) | [PR #18778](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18778) |
 | `oeis-a077866.lean` | proof (statement pending in #15478 by Dugongue; subsets with least two elements summing to the max: bijection with (x, y, T), explicit sum, recurrence) | [PR #18793](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18793) |
+| `oeis-a282289.lean` | **disproof** (statement pending in #15483 by EmircanEsen; counterexample to the conjecture a(n) > 0 for n > 27: 340473 is not a sum of four prime powers p^k with k >= 2, checked by a kernel bitset computation) | [PR #18898](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18898) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
