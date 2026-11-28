@@ -533,6 +533,38 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a202785.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22518](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22518); proof [PR #22532](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22532) |
 | `oeis-a202933.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22520](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22520); proof [PR #22533](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22533) |
 | `oeis-a202330.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22513](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22513); proof [PR #22536](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22536) |
+| `oeis-a116191.lean` | proof of another account's pending site statement | [PR #22559](https://github.com/lefttosolve2/open-math-agents/pull/22559) |
+| `oeis-a377824.lean` | proof of another account's pending site statement | [PR #22565](https://github.com/lefttosolve2/open-math-agents/pull/22565) |
+| `oeis-a285052.lean` | proof of another account's pending site statement | [PR #22601](https://github.com/lefttosolve2/open-math-agents/pull/22601) |
+| `oeis-a231897.lean` | proof of another account's pending site statement | [PR #22673](https://github.com/lefttosolve2/open-math-agents/pull/22673) |
+| `oeis-a111779.lean` | proof of another account's pending site statement | [PR #22700](https://github.com/lefttosolve2/open-math-agents/pull/22700) |
+| `oeis-a090049.lean` | proof of another account's pending site statement | [PR #22728](https://github.com/lefttosolve2/open-math-agents/pull/22728) |
+| `oeis-a229423.lean` | proof of another account's pending site statement | [PR #22755](https://github.com/lefttosolve2/open-math-agents/pull/22755) |
+| `oeis-a249963.lean` | proof of another account's pending site statement | [PR #22779](https://github.com/lefttosolve2/open-math-agents/pull/22779) |
+| `oeis-a041042.lean` | proof of another account's pending site statement | [PR #22794](https://github.com/lefttosolve2/open-math-agents/pull/22794) |
+| `oeis-a250061.lean` | proof of another account's pending site statement | [PR #22853](https://github.com/lefttosolve2/open-math-agents/pull/22853) |
+| `oeis-a205345.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22856](https://github.com/lefttosolve2/open-math-agents/pull/22856); proof [PR #22865](https://github.com/lefttosolve2/open-math-agents/pull/22865) |
+| `oeis-a100833.lean` | proof of another account's pending site statement | [PR #22915](https://github.com/lefttosolve2/open-math-agents/pull/22915) |
+| `oeis-a271256.lean` | proof of another account's pending site statement | [PR #23099](https://github.com/lefttosolve2/open-math-agents/pull/23099) |
+| `oeis-a282655.lean` | proof of another account's pending site statement | [PR #23112](https://github.com/lefttosolve2/open-math-agents/pull/23112) |
+| `oeis-a289004.lean` | proof of another account's pending site statement | [PR #23119](https://github.com/lefttosolve2/open-math-agents/pull/23119) |
+| `oeis-a129695.lean` | proof of another account's pending site statement | [PR #23214](https://github.com/lefttosolve2/open-math-agents/pull/23214) |
+| `oeis-a248586.lean` | proof of another account's pending site statement | [PR #23239](https://github.com/lefttosolve2/open-math-agents/pull/23239) |
+| `oeis-a321644.lean` | proof of another account's pending site statement | [PR #23255](https://github.com/lefttosolve2/open-math-agents/pull/23255) |
+| `oeis-a250064.lean` | proof of another account's pending site statement | [PR #23285](https://github.com/lefttosolve2/open-math-agents/pull/23285) |
+| `mo-254840.lean` | proof of another account's pending site statement | [PR #23312](https://github.com/lefttosolve2/open-math-agents/pull/23312) |
+| `oeis-a116408.lean` | proof of another account's pending site statement | [PR #23364](https://github.com/lefttosolve2/open-math-agents/pull/23364) |
+| `oeis-a316316.lean` | proof of another account's pending site statement | [PR #23380](https://github.com/lefttosolve2/open-math-agents/pull/23380) |
+| `oeis-a106391.lean` | proof of another account's pending site statement | [PR #23381](https://github.com/lefttosolve2/open-math-agents/pull/23381) |
+| `oeis-a316357.lean` | proof of another account's pending site statement | [PR #23382](https://github.com/lefttosolve2/open-math-agents/pull/23382) |
+| `oeis-a308726.lean` | proof of another account's pending site statement | [PR #23543](https://github.com/lefttosolve2/open-math-agents/pull/23543) |
+| `oeis-a084091.lean` | proof of another account's pending site statement | [PR #23569](https://github.com/lefttosolve2/open-math-agents/pull/23569) |
+| `oeis-a191150.lean` | proof of another account's pending site statement | [PR #23579](https://github.com/lefttosolve2/open-math-agents/pull/23579) |
+| `oeis-a196079.lean` | proof of another account's pending site statement | [PR #23583](https://github.com/lefttosolve2/open-math-agents/pull/23583) |
+| `oeis-a195233.lean` | proof re-filed after our statement #19012 merged (first proof #19020 ran CI too early) | [PR #25072](https://github.com/lefttosolve2/open-math-agents/pull/25072) |
+| `oeis-a195249.lean` | proof re-filed after our statement #19065 merged (first proof #19082 ran CI too early) | [PR #25073](https://github.com/lefttosolve2/open-math-agents/pull/25073) |
+| `oeis-a211562.lean` | proof adapted to ceejcake's pending statement #24101 | [PR #25101](https://github.com/lefttosolve2/open-math-agents/pull/25101) |
+| `oeis-a211564.lean` | proof adapted to ceejcake's pending statement #24749 | [PR #25102](https://github.com/lefttosolve2/open-math-agents/pull/25102) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
