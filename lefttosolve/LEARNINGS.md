@@ -22,7 +22,7 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
 
 | Quantity | Value | Source |
 |---|---|---|
-| Points formula | max(1, round(d^1.5/10)), x1.5 if open; d20=9, d30=16, d40=25/38, d45=30/45, d52=37/56, d60=46/70, d90=85/128 | lib/points.ts |
+| Points formula | base = max(1, round(d^1.5/10)); open = round(1.5*base); unformalized/statements 0; d20=9, d30=16, d40=25/38, d45=30/45, d52=37/56, d60=46/69, d90=85/128 | lib/points.ts |
 | Step value | max(1, floor(parent/n)), n=2-4; Erdős 713 R3.H2 = 33 of 99 | ledgercore.ts; PR #18340 |
 | Reduction author payout | max(1, floor(sum of step points/10)) when parent closes; max 3 reductions per target | ledgercore.ts |
 | Site points day 1 (18:00-00:10) | new-statement proofs ~12,100 (299 proofs, ~40 each); steps ~2,700; catalog open ~1,900; MathOverflow ~1,800 | STRATEGY.md |
@@ -58,16 +58,19 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
 
 ## 1. Scoring and merger facts
 
-- **S1** Points per first merged proof: max(1, round(d^1.5/10)), times 1.5 for kind open. Rank targets by expected
-  points per effort, not by difficulty alone. *Evidence:* upstream lib/points.ts. *Confidence:* high.
-- **S2** Only the earliest merged proof of an id scores. Later proofs, statements and shorter proofs score 0. A shorter
+- **S1** Points per first merged proof: base = max(1, round(d^1.5/10)); kind open gets round(1.5*base) (the base is
+  rounded first, so d60 open = 69, not 70). Rank targets by expected points per effort, not by difficulty alone.
+  *Evidence:* upstream lib/points.ts pointsFor. *Confidence:* high.
+- **S2** Only the earliest merged proof of an id scores. Later proofs and shorter proofs score 0, and statements score
+  0 always (pointsFor returns 0 for unformalized; ledger: 'statements ... no points'). A shorter
   proof must be at least 5% and at least 20 characters shorter, not counting comments or whitespace. Never spend effort
   on an id already on main. *Evidence:* ledgercore.ts lines 103-110 and 201-204; check-proof.yml 'Already on main?'
   step; tools/prooflen.py. *Confidence:* high.
 - **S3** A merged site statement turns an unformalized problem into kind open, so its proof earns about 40 points with
   the 1.5x bonus. Proofs of new site statements were the largest pool on day 1. *Evidence:* ledgercore.ts line 141
   (kindOf); STRATEGY.md. *Confidence:* high.
-- **S4** Step value is max(1, floor(parent/n)) and halves or worse at each nesting level. A reduction PR itself scores
+- **S4** Step value is max(1, floor(parent/n)) (the site database's figure wins when it has the step) and halves or
+  worse at each nesting level. A reduction PR itself scores
   0. Closing a parent pays the reduction author max(1, floor(step sum/10)). Prefer shallow steps of high-difficulty
   roots (Erdős 713 R3.H2 = 33 points). Treat a reduction only as a vehicle for steps we can also prove.
   *Evidence:* ledgercore.ts lines 108-110, 176-182, 212-228; PR #18340. *Confidence:* high.
@@ -84,7 +87,9 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   *Evidence:* tools/merger_loop.sh header 'v4', queue step 5. *Confidence:* high.
 - **S8** CI compiles GitHub's merge commit against current main, with a sparse checkout of statements/. A proof of a
   site statement that is not yet on main is rejected in seconds ('<id> has no Lean statement yet'). Re-file it after
-  the statement merges. *Evidence:* check-proof.yml lines 29-48; lint.py lines 109-146. *Confidence:* high.
+  the statement merges. (verdict_one.sh re-lints ACCEPTED runs against the latest main, but that does not rescue a
+  CI run that already failed.) *Evidence:* check-proof.yml lines 29-48; lint.py lines 109-146; verdict_one.sh lines
+  59-61. *Confidence:* high.
 - **S9** The merger scans only runs from the last 3 hours. Lost runs get a verdict only if listed in
   tools/requeue.tsv (948 lines, up to #9998). Our 10 statement PRs #10411-#10570 waited about 5 hours with no verdict,
   rivals filed competing statements for 3 of them, and our resubmissions #15266-#15283 lost filing order. If a PR has
@@ -134,8 +139,9 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   *Confidence:* high.
 - **P6** After any flush or batch submit, reconcile every pushed oma/* branch and every 'queued' claim against our
   actual PRs. The 01:10 flush silently skipped 10 items (recovered at 05:46 as #21104-#21110, and at 06:03), and two
-  others (A089001, A085928) went to rivals in the meantime. *Evidence:* SP/open/pr_queue_flushed_0110.jsonl;
-  commit 4e3d67c. *Confidence:* high.
+  others (A089001, A085928) went to rivals in the meantime. The same applies after an Actions outage: every line of
+  SP/open/pr_queue.jsonl must map to a real PR URL before it is reported as filed. *Evidence:*
+  SP/open/pr_queue_flushed_0110.jsonl; commit 4e3d67c. *Confidence:* high.
 - **P7** Upstream's rejection comment says 'Push a fixed file to this pull request'. A real fix pushed to the same PR
   keeps its older number in the queue, but the user forbade empty commits and close/reopen, so ask first.
   *Evidence:* verdict_one.sh line 141; check-proof.yml concurrency group. *Confidence:* medium.
@@ -147,6 +153,14 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
 - **P10** Before filing, re-run lint and check.sh on the exact file at proofs/<id>.lean, and make sure the local
   reduction's H text matches the merged one. A verdict from an older copy or a differently named file does not count.
   *Evidence:* verify reports; the Erdos173 note about a newer reduction file. *Confidence:* medium.
+
+- **P11** File accepted results from the main session the moment they pass. Do not leave them for a queued submit
+  agent: with ~2 workflow agents, the 713 submit waited ~70 min behind an attack, and hand-filing rescued #18340 and
+  the A188556/A188785 pairs. Every minute counts because filing order decides the first solve (S7). *Evidence:* O1;
+  check-ins at 02:57 and 03:38 on 28 Nov. *Confidence:* high.
+- **P12** A proof must check in under 30 minutes (check.sh `timeout 1800`, 'timeout: over 30 minutes' = rejected).
+  Anything estimated beyond ~1e9 kernel steps needs chunking or a reduction tree (Erdős 1 a(9): ~10 h of kernel time,
+  so ~40 leaf files). *Evidence:* tools/check.sh line 59-61; erdos1-least_N_9-notes.md. *Confidence:* high.
 
 ## 3. Lean / checker rules
 
@@ -411,8 +425,9 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   return nothing, so search a distinctive token. A failed fetch must not read as 'not solved' (a locked clone printed
   NOT_SOLVED for the Reconstruction tree). *Evidence:* user message 16:10 on day 1; wf_52cad99f-105;
   wf_5bdb62dc-e59; wf_d5e223e5-2c3. *Confidence:* high.
-- **T25** Rival proofs are almost always valid (see calibration), so skip. A rival PR with no proofs file does not
-  block: 21 such PRs freed A000009, A000166, A000215, A000330, A007053 and A060199. *Evidence:*
+- **T25** Rival proofs are almost always valid (see calibration), so skip. If a target matters, run the rival's file
+  through our official checker (lint + check.sh) BEFORE investing; this judges validity only and is what the user
+  asked for (U2): never read it for ideas or copy it. A rival PR with no proofs file does not block: 21 such PRs freed A000009, A000166, A000215, A000330, A007053 and A060199. *Evidence:*
   SP/open/contested_results.jsonl, held_compcheck.jsonl. *Confidence:* high.
 - **T26** Step snipers: ivillar (PRs 1-5 min apart), marcusbuffett, TheWaler, Genbox. Fresh-merge snipers: Genbox,
   Jakeybakeypants, Mapika, romechenko, KoaOkano, Ciphore. *Evidence:* journal 'Taken by PR' notes. *Confidence:* high.
@@ -572,7 +587,8 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
 - **U5** PRs are opened autonomously ('Can you submit the prs without me having to click the link'). The PAT lives
   only in the fork secret UPSTREAM_PR_TOKEN: never ask for it or print it. *Evidence:* user 03:08 on day 1.
   *Confidence:* high.
-- **U6** Attribution: PR bodies say Model: unknown and carry the session footer; commits carry the session trailers.
+- **U6** Attribution: PR bodies say Model: unknown and carry the session footer, with no model identifier in title
+  or body; commits carry the session's standard trailers.
   Push only to claude/charming-wright-zjra4p in the record repo and only oma/* branches on the fork. A stop hook
   requires untracked files to be committed. Credit stays with Salofe. *Evidence:* SUBMIT_PROCEDURE; standing
   constraints. *Confidence:* high.
@@ -583,7 +599,8 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   - a subagent's PR trigger was denied (Unsanctioned Communication);
   - git reset --hard on the shared clone was blocked;
   - push add_repo, fork_repository and create_pull_request on upstream were denied, hence the fork Action plus PAT;
-  - compiling third-party (OpenAI) Lean was blocked (Undermining Oversight);
+  - compiling a PORT of third-party (OpenAI) Lean was blocked (Undermining Oversight); checking rival PR files with
+    the checker for validity (T25) was not;
   - rewording a file to pass the overlap check was blocked.
   *Evidence:* journals; transcript summaries. *Confidence:* high.
 - **U9** The user is usually on a phone, on UTC-6 ('10am tomorrow' meant 16:00 UTC). Keep messages phone-readable and
@@ -594,3 +611,5 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
 ## Change log
 - 2026-11-28: first full synthesis from four mining passes (replaces the interim CLAUDE.md). Contradictions resolved:
   import timeout (upstream 1200 s), Nat.sqrt (avoid), rival-validity denominators.
+- 2026-11-28 review: d60 open corrected to 69 (base rounded first); statements always 0; step DB override; commits
+  may carry the session trailers (only PRs must be model-free); added P11-P12, T25 checker note, outage-queue check.

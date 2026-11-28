@@ -9,24 +9,25 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
 (every learning below with evidence and confidence, plus calibration numbers). Read LEARNINGS.md before big decisions.
 
 ## Scoring and merger facts
-- Points per FIRST merged proof = max(1, round(d^1.5/10)), x1.5 if kind open. d20=9, d30=16, d40=25 (open 38),
-  d60=46 (open 70), d90=85 (open 128). Disproofs score like proofs.
-- Only the earliest merged proof of an id scores. Later proofs, statements, reductions and shorter proofs score 0.
-  Never work on an id whose proof is on main or has a valid pending rival proof PR.
+- Points per FIRST merged proof: base = max(1, round(d^1.5/10)); kind open = round(1.5*base). d20=9, d30=16,
+  d40=25 (open 38), d60=46 (open 69), d90=85 (open 128). Disproofs score like proofs.
+- Only the earliest merged proof of an id scores. Later proofs, reductions and shorter proofs score 0; statements
+  ALWAYS score 0. Never work on an id whose proof is on main or has a valid pending rival proof PR.
 - A merged site statement makes an unformalized problem kind open, so its proof gets x1.5 (~40 pts per OEIS statement).
-  Statements themselves score 0: file one only as the gate for our own proof.
-- Step value = max(1, floor(parent/n)), n = 2-4 hypotheses; halves (or worse) per nesting level. Closing all steps pays
-  the reduction author max(1, floor(step sum/10)). Max 3 reductions per target. Prefer shallow steps of rich roots.
+  File a statement only as the gate for our own proof.
+- Step value = max(1, floor(parent/n)) (the site DB figure overrides), n = 2-4 hypotheses; halves (or worse) per
+  nesting level. Closing all steps pays the reduction author max(1, floor(step sum/10)). Max 3 reductions per
+  target. Prefer shallow steps of rich roots.
 - A valid proof of a step's parent (merged OR pending) makes all its sub-steps worthless: check every ancestor's PRs.
 - Merger v4: verdicts go oldest PR number first among COMPLETED CI runs (batches of 40). Filing order decides who is
   first, so open the PR the second a proof passes the checker; keep files fast so CI completes early.
-- CI compiles GitHub's merge commit with current main: a proof of a site statement not yet on main fails in seconds
-  ("has no Lean statement yet"). Re-file (new branch) once the statement merges.
+- CI compiles GitHub's merge commit with main as of the run: a proof of a site statement not yet on main fails in
+  seconds ("has no Lean statement yet"). Re-file (new branch) once the statement merges; a watcher does this.
 - Statement PRs auto-merge as soon as they compile; faithfulness is reviewed later. One statement per id; first verdict
   wins; a resubmission gets a new, higher number and loses to anything filed in between.
 - The merger scans only the last 3 h of runs; runs lost across merger versions need tools/requeue.tsv (we cannot edit
   it; the user must ask the maintainer). If a PR has no verdict 1-2 h after later PRs merged, act at once.
-- Expect long verdict delays: on 28 Nov the queue lagged ~5,000 PRs, then stalled (~10k-11k PRs open). Plan for hours.
+- Expect verdict delays of hours (on 28 Nov the queue lagged ~5,000 PRs, then stalled).
 - The site pays points, not money. Erdős prize money needs a full solution accepted by mathematicians.
 
 ## Submission procedure (details: lefttosolve/prize_kit/README.md)
@@ -43,9 +44,11 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
 - Our own statement + proof: file the proof PR within a minute of the statement PR. Never hold the proof back.
 - Subagents may be denied triggering the fork Action (classifier: Unsanctioned Communication). Do not use fallbacks;
   file from the main session.
-- After any batch/flush, reconcile every pushed oma/* branch and every "queued" claim against our real PRs
-  (gh search author:Salofe). A flush once silently skipped 10 proofs.
+- After any batch/flush or Actions outage, reconcile every pushed oma/* branch, every pr_queue.jsonl line and every
+  "queued" claim against our real PRs (gh search author:Salofe). A flush once silently skipped 10 proofs; never report
+  "filed" without a PR URL.
 - Before filing: re-run competitor search (<2 min old), lint + check.sh on the exact file, overlap check.
+- File accepted results yourself the moment they pass; never leave them waiting for a queued submit agent.
 - Desk lease API is optional and often unavailable; `Lease: none (<reason>)` is fine.
 - Pushing a real fix to the SAME rejected PR keeps its older number; ask the user before doing this.
 
@@ -60,16 +63,19 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
 - Value problems (data/placeholders.json): `def OMA.answer := <explicit value>` and
   `OMA.solution : <placeholder> = OMA.answer → type_of% @decl`. No sInf/sSup/choice/Nat.find/own defs in the answer.
 - Lint: no double-quote chars in code; no `/-` or `-/` inside comment prose. Prefix-banned identifiers: macro*,
-  syntax*, elab* (incl. @[elab_as_elim]), notation*. Also banned: meta, IO, partial, opaque, axiom, attribute,
-  unsafe, `decide := true`, native_decide, bv_decide, LRAT. Only `@[simp]`/`@[local simp]` attributes.
+  syntax*, elab* (incl. @[elab_as_elim]), notation*. Also banned: sorry, meta, IO, partial, opaque, axiom,
+  attribute, unsafe, extern, prefix/postfix/infix, initialize, `import Lean`, Lean.Meta/Elab, `decide := true`,
+  native_decide, and every `#command` (#eval, #print, #check...; the regex also hits Finset-card `#simp..`/`#test..`
+  names, so write Finset.card). bv_decide/LRAT add Lean.ofReduceBool and fail the axiom check: use `decide +kernel`.
+  Only `@[simp]`/`@[local simp]` attributes.
 - `set_option` only `maxHeartbeats|maxRecDepth|synthInstance.* <n> in` per declaration. File limit 512 KiB raw.
 - Axioms allowed: propext, Classical.choice, Quot.sound. Any upstream def built on sorry poisons the statement:
   skip such ids. Use only upstream DEFINITIONS + Mathlib + own lemmas (upstream theorems may be sorry).
 - Run lint from the checker root with the file physically there:
   `cd <oma> && python3 -I tools/lint.py proofs/<id>.lean data/catalog.json && bash tools/check.sh proofs/<id>.lean v.json`.
   Linting a path outside proofs/ fails (266 transcripts hit this). Steps/statements need their module locally.
-- check.sh: 1800 s proof limit; upstream gives imports 1200 s (refresh stale local copies). CI job limit 60 min.
-  Median accepted check 26 s (p90 60 s); first build of a new module adds 25-70 s.
+- check.sh: the proof must compile in 30 min (1800 s; over = rejected); upstream gives imports 1200 s (refresh
+  stale local copies). Median accepted check 26 s (p90 60 s); first build of a new module adds 25-70 s.
 - Iterate with `cd <FC> && lake env lean scratch.lean`; FC must be at the catalog's pinned commit.
 - Adaptation runs swap statements in FC: restore ours and byte-compare reductions before trusting other verdicts.
 
@@ -97,7 +103,8 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
 - Grep Mathlib for every lemma name; never guess. Qualify helper names (Mathlib has top-level `toZ`).
 - Statements: counts as `noncomputable def a n := by classical; exact Fintype.card {w // P w}`; g.f. in product form
   over ℚ; recurrences in ℤ with `k < n →` guards; keep the OEIS offset.
-- Rival statement for our id: copy our defs into OMA.Helpers, prove bridge lemmas, file against their file (7/7 ok).
+- Rival statement for our id filed or merged before ours: do not wait on ours; adapt our proof to THEIR statement
+  (fetch only their statements file, copy our defs into OMA.Helpers, prove bridge lemmas; 7/7 accepted, ~7 min each).
 
 ## Problem selection and triage
 - Ranking by points per agent-hour: (1) prove other accounts' pending, unmerged statement PRs (snipe, ~11 agent-min per
@@ -120,14 +127,15 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
 - Cache OEIS JSON/b-files once per run (rate limits); use the oeisdata mirror.
 - Competitor check: `gh api -X GET search/issues -f q='repo:GuillaumeBAUD-coder/open-math-agents is:pr is:open
   in:title <id>'`, keep titles ending with the id, exclude Salofe; for ids with underscores search a distinctive token.
-  Run at triage and again right before filing. A rival PR with a proof file is ~95-99% valid: skip. One with no
-  proof file (statement only) does not block.
+  Run at triage and again right before filing. A failed search/fetch is NOT "unsolved". A rival PR with a proof file
+  is ~95-99% valid (112/113 passed): skip, or run its file through our official checker before investing (judge
+  validity only, never read it for ideas). One with no proof file (statement only) does not block.
 - Triage feasibility >=7 almost always yields an accepted proof: the risk is the race, not the math. Let triage agents
   that already hold an accepted proof submit at once. State the 0-10 scale in schemas (agents returned 0-100).
 
 ## Research / moonshot method
 - Prefer self-contained provable steps inside open prize trees over open cores (only research win: Erdős 713 (i)
-  R3.H2, 28 min, PR #18340). Selector odds of 1-8% for cores are honest: expect partial results only.
+  R3.H2, 28 min, PR #18340). Selector odds of 1-10% for cores are honest (8 attacks, 1 lemma-level win).
 - Cap selection at 30-45 min, reuse scouting files, timebox attacks ~2 h with a checkpoint (certificate or closing
   lemma in sight?). Stop early if a proof would imply a famous conjecture or needs missing Mathlib theory.
 - Firsts come from the long tail: obscure/recent OEIS comments, Open Problem Garden, quick numeric checks past the b-file
@@ -147,34 +155,36 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
 - Machine: 4 shared CPUs, 15 GB (cgroup ~13.4 GB). Mathlib import maps 6-7 GB RSS (judge by anonymous memory).
   One Lean process per agent; concurrent Lean jobs get OOM-killed ("does not compile", exit 137): re-run when free.
   Research jobs: <=2 cores, <=4 GB, nice -n 15, stream big data, delete downloads.
-- Workflow tool runs ~2 agents at once (min(16, CPUs-2)): submit steps queue for hours behind attacks. File accepted
-  results from the main session immediately; give each long attack its own workflow. No barriers between batches;
-  scripted overlap check instead of verify agents; batches of ~6-8.
+- Workflow tool runs ~2 agents at once (min(16, CPUs-2)): submit steps queued ~70 min behind attacks. Submit from
+  the main session; give each long attack its own workflow. No barriers between batches; scripted overlap check
+  instead of verify agents; batches of ~6-8.
 - Fewer simultaneous race jobs = each finishes sooner (load 10+ made Lean checks crawl).
 - Bash background jobs stop at 30 min default (max 2 h): pass timeouts, checkpoint, make runs resumable.
 - Watchers beat check-ins: own-statement watcher (3 min) to re-file proofs when statements merge; upstream watcher
   (4 min) waking only for new unclaimed statements. While Actions is down, park work instead of waking.
 - Before race hunts, confirm a cheap fork Action run works. If "Actions has been disabled", give the user the exact
   settings URL at once and stop starting new races.
-- Shared upstream clone: fetch only into private refs (`+HEAD:refs/watch/head`), read with `git show ref:path`, never
-  reset/checkout; gc.auto 0. GitHub search caps at 1,000 results: query in 30-min created: windows, sleep 2-2.5 s.
-  Read rival PR files via `git fetch pull/N/head` into a blob-less clone.
+- Shared upstream clone (/home/user/guillaumebaud-coder/open-math-agents): fetch only into private refs
+  (`+HEAD:refs/<name>/head`), read with `git show ref:path`, NEVER reset/checkout/switch there; gc.auto 0; avoid
+  concurrent fetches (shallow.lock races, proxy 429). Read rival PR files via `git fetch pull/N/head` into a
+  blob-less clone. GitHub search caps at 1,000 results: query in 30-min `created:` windows, sleep 2-2.5 s.
 - Every check-in: list new PRs; file stuck accepted results; re-file proofs whose statement merged; confirm queued items
   became PRs; reconcile journals with lefttosolve/README.md (merged/lost/waiting); read and update this file; commit+push.
 - Record repo: push only to branch claude/charming-wright-zjra4p; fork: only oma/* branches. Commit untracked work
-  (a stop hook requires it). Commits carry the session's Co-Authored-By and Claude-Session trailers.
+  (a stop hook requires it). Commits carry the session's standard trailers.
 - Scratchpad (/tmp/claude-0/.../scratchpad: oma-check checker, open/ watchers and pools) is EPHEMERAL. Durable copies:
   prize_kit/ (setup, push scripts, overlap_check.py), moonshots/, proofs in lefttosolve/. Copy new tools there.
 
 ## User preferences and hard constraints
-- Never ask for, paste or print tokens. PR bodies say `Model: unknown`; never model identifiers in PRs or commits.
+- Never ask for, paste or print tokens. PR bodies say `Model: unknown`; never model identifiers in PR titles/bodies.
 - Credit stays with Salofe (user offered Claude credit; declined).
 - No duplicate submissions: skip ids with a valid rival proof PR; prefer ids nobody filed.
-- Never port, copy or consult third-party Lean proofs; run prize_kit/overlap_check.py before every submit (flags >=10%
-  identical substantive lines); rename generic helpers problem-specifically.
+- Never port, copy or take ideas from third-party Lean proofs (checking a rival file's validity with the checker is
+  fine); run prize_kit/overlap_check.py before every submit (flags >=10% identical substantive lines); rename generic
+  helpers problem-specifically.
 - Never work around permission or classifier denials (no git reset on shared clones, no rewording to dodge checks).
 - No empty commits or close/reopen to kick CI. Leave lost PRs open. Ask before trivial placeholder answers or
-  formalization-gap disproofs (open asks: close #10206, #12411; maintainer requeue of #10411-#10570).
+  formalization-gap disproofs (pending asks: LEARNINGS.md U4).
 - PRs are opened autonomously (user does not want to click links). "Burn my limits" when asked.
 - Target choice: not the stalled easiest; rank what AI is good at; overnight, harder problems that won't fall hourly.
 - User is usually on a phone, clock UTC-6: convert times, keep messages short, give exact URLs for settings.
