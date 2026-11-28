@@ -15,11 +15,11 @@ while true; do
       if grep -qx "proofs/$id.lean" <<<"$files"; then echo "SKIP $id: proof already on main"; continue; fi
       if grep -qx "$id" $SP/open/own_statement_ids.txt; then
         out=$($M/refile.sh $id 2>&1); orig=$(grep -oE "^#[0-9]+ Salofe open $id " <<<"$out" | head -1 | grep -oE '[0-9]+' | head -1)
-        br=$(grep -oE "PUSHED oma/$id-p[0-9]" <<<"$out" | cut -d' ' -f2)
+        br=$(grep -oE "PUSHED oma/$id-p[0-9]+" <<<"$out" | cut -d' ' -f2)
         [ -n "$br" ] && echo "READY own $id $br ${orig:-?}" || echo "FAIL own $id: $(tail -1 <<<"$out")"
       elif grep -q "^$id " $SP/open/rival_statement_waits.txt; then
         ours=$(grep "^$id " $SP/open/rival_statement_waits.txt | awk '{print $3}')
-        out=$($M/refile.sh $id $SP/open/adapt/$id/proof_for_rival.lean 2>&1); br=$(grep -oE "PUSHED oma/$id-p[0-9]" <<<"$out" | cut -d' ' -f2)
+        out=$($M/refile.sh $id $SP/open/adapt/$id/proof_for_rival.lean 2>&1); br=$(grep -oE "PUSHED oma/$id-p[0-9]+" <<<"$out" | cut -d' ' -f2)
         [ -n "$br" ] && echo "READY adapted $id $br $ours" || echo "FAIL adapted $id: $(tail -1 <<<"$out")"
       else
         grep "^$id " $M/snipe_waits.txt | head -1 > $M/ev_$id.txt

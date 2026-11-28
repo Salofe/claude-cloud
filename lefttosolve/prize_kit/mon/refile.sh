@@ -10,9 +10,11 @@ if [ -z "$2" ]; then
 fi
 gh api -X GET search/issues -f q="repo:lefttosolve2/open-math-agents is:pr in:title $id" --jq '.items[] | "#\(.number) \(.user.login) \(.state) \(.title) c=\(.comments)"'
 git -C $F fetch -q origin oma-base
-W=$SP/submit/$id-p2; rm -rf $W; git -C $F worktree prune
-git -C $F worktree add -q -f -B oma/$id-p2 $W origin/oma-base && cp $src $W/proofs/$id.lean && git -C $W add proofs/$id.lean && \
+# never reuse a branch that already exists on the fork (it may be the head of an open PR)
+br=oma/$id-p2; for k in 3 4 5 6 7 8 9; do git -C $F ls-remote --exit-code origin refs/heads/$br >/dev/null 2>&1 || break; br=oma/$id-p$k; done
+W=$SP/submit/$id-re; rm -rf $W; git -C $F worktree prune
+git -C $F worktree add -q -f -B $br $W origin/oma-base && cp $src $W/proofs/$id.lean && git -C $W add proofs/$id.lean && \
 git -C $W commit -q -m "$id" -m "Re-filed now that the statement is on main." -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01AHP11gRZhPCs6WLUp21YKZ" && \
-for t in 1 2 3 4; do git -C $W push -q -f -u origin oma/$id-p2 2>/dev/null && break; sleep $((t*3)); done
-git -C $F worktree remove --force $W; echo "PUSHED oma/$id-p2 $(git -C $F rev-parse --short origin/oma-base)"
+for t in 1 2 3 4; do git -C $W push -q -u origin $br 2>/dev/null && break; sleep $((t*3)); done
+git -C $F worktree remove --force $W; echo "PUSHED $br $(git -C $F rev-parse --short origin/oma-base)"

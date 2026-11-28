@@ -665,3 +665,7 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   that needs it instead of letting agents burn usage on failing steps; probe hourly with git ls-remote + search.
 - 2026-11-28 ~10:40 UTC: a README table edit with awk (first input /dev/null, so NR==FNR held for README too) wrote an
   empty README; restored with git checkout. Lesson: insert table rows with a small Python script and check the row count.
+- 2026-11-28 12:27 UTC: refile.sh force-pushed oma/oeis-a267872-p2, which was the head of our open PR #16803 (an adapted
+  proof for Mapika's statement), replacing its content for about 2 minutes. That is the kind of push to an existing PR
+  the user wants to approve first. Restored the original commit 68f9206 and filed the new proof on oma/oeis-a267872-p3.
+  Fix: refile.sh never reuses a branch that exists on the fork and no longer force-pushes.
