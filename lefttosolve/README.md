@@ -646,6 +646,10 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a183980.lean` | proof of Volkopat's pending statement #24761 (2 X 2 block sums, width 4; transfer recursion per block sum, order-4 recurrence) | [PR #28121](https://github.com/lefttosolve2/open-math-agents/pull/28121) |
 | `oeis-a183981.lean` | proof of Volkopat's pending statement #24772 (same method, width 5) | [PR #28215](https://github.com/lefttosolve2/open-math-agents/pull/28215) |
 | `oeis-a391629.lean` | proof of esracummings31-blip's pending statement #24830 | [PR #27951](https://github.com/lefttosolve2/open-math-agents/pull/27951) |
+| `oeis-a357958.lean` | disproof of ShoQo's pending statement #24705 (product congruence fails at p = 3, r = 2: v_3(u(9) - u(3)) = 8 < 9) | [PR #28387](https://github.com/lefttosolve2/open-math-agents/pull/28387) |
+| `oeis-a391620.lean` | proof of esracummings31-blip's pending statement #24736 (first sums of compositions with parts > 1 = partitions with all parts >= 4) | [PR #28464](https://github.com/lefttosolve2/open-math-agents/pull/28464) |
+| `oeis-a378578.lean` | proof of Volkopat's pending statement #24745 (parity of A378578 = parity of C(3n,n)/(2n+1); Lucas + Frobenius over ZMod 2) | [PR #28655](https://github.com/lefttosolve2/open-math-agents/pull/28655) |
+| `oeis-a201975.lean` | proof of jleguina's pending statement #24718 (n X 2 lex arrays over 0..3; transfer recursion, cubic closed form, g.f. and recurrence) | [PR #28879](https://github.com/lefttosolve2/open-math-agents/pull/28879) |
 | `opg-decomposition-of-completions-of-reloids.lean` | disproof of pmaster's pending statement #24813 (clause 1 of Porton's conjecture fails for f = full relation, g = cofinite-rows reloid) | [PR #28173](https://github.com/lefttosolve2/open-math-agents/pull/28173) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
