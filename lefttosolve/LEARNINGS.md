@@ -635,3 +635,12 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   import timeout (upstream 1200 s), Nat.sqrt (avoid), rival-validity denominators.
 - 2026-11-28 review: d60 open corrected to 69 (base rounded first); statements always 0; step DB override; commits
   may carry the session trailers (only PRs must be model-free); added P11-P12, T25 checker note, outage-queue check.
+
+
+## Incident log
+- 2026-11-28 ~08:20-08:25 UTC: upstream GuillaumeBAUD-coder/open-math-agents stopped being publicly visible (anonymous git
+  fetch asks for credentials; search API 422 "cannot be searched"; repository search finds nothing), minutes after our
+  fork Action had opened PR #23583 there. All pipelines depend on it (competitor checks, statement fetches, PR opening),
+  so the formalize and pending-statement workflows were paused (resumable by run id) and finished pairs were parked in
+  scratchpad/open/pending_pairs_after_outage.txt (A211562, A211564). Lesson: when upstream disappears, pause everything
+  that needs it instead of letting agents burn usage on failing steps; probe hourly with git ls-remote + search.
