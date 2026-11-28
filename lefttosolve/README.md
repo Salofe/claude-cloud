@@ -334,6 +334,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `mo-81816.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a094076.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a267604.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
+| `oeis-a290835.lean` | proof (statement pending in #15553 by jleguina) | branch `oma/oeis-a290835` pushed; PR queued |
+| `oeis-a330910.lean` | proof (statement pending in #15556 by jleguina) | [PR #16719](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16719) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
