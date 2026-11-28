@@ -594,6 +594,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a267068.lean` | proof of rtflynn's pending statement #24853 | [PR #26994](https://github.com/lefttosolve2/open-math-agents/pull/26994) |
 | `oeis-a384350.lean` | proof of esracummings31-blip's pending statement #24884 | [PR #26523](https://github.com/lefttosolve2/open-math-agents/pull/26523) |
 | `oeis-a251269.lean` | proof of jleguina's pending statement #24904 | [PR #27106](https://github.com/lefttosolve2/open-math-agents/pull/27106) |
+| `oeis-a251130.lean` | proof of Dariusthedoggie's pending statement #24838 | [PR #27251](https://github.com/lefttosolve2/open-math-agents/pull/27251) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
@@ -629,4 +630,3 @@ has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-t
 - **Lifting:** shifting `t` by `M` or `2M` leaves the multiples of 3 alone and selects every other element exactly once.
 - **Induction:** divide the multiples of 3 by 3 and apply the statement to them.
 - **Hard case:** two multiples of 3 of the form `{3v, 6v}`. A carefully chosen pair of nearby ratios makes the split uneven.
-| `oeis-a251130.lean` | proof of another account's pending site statement | [PR #27251](https://github.com/lefttosolve2/open-math-agents/pull/27251) |
