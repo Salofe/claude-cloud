@@ -9,6 +9,12 @@ that carries a real prize, as formalized on lefttosolve. Nothing here is a submi
 | Erdős 647 (n > 24 with max_{m<n}(m + tau(m)) <= n + 2) | £25 | Rejected after analysis: almost surely no such n; non-existence unprovable. |
 | Erdős 711 (i) (max_m f(n,m) <= n^{1+o(1)}) | ₹1000 | Attempted, stopped: reduces to an arithmetic-Kakeya-type statement. |
 | Erdős 13 general, 552 (ii), 470 (ii) | $100 / $100 / $10 | Rejected at audit (reasons below). |
+| Erdős 32, 50, 128, 120, 661 | $50-$250 | Examined in some depth, rejected (reasons below). |
+| Erdős 595, 601, 633, 710 | $25-$500 | Rejected: set-theoretic independence or answer too large to state. |
+
+Outcome: no full prize problem was solved and nothing was submitted. Every remaining open prize id on the site
+(84 catalog entries without a merged proof on 28 Nov) is a genuine research core; the reasons are recorded here so
+the audit need not be repeated.
 
 ## Erdős 647: do not search
 - Forced structure (my derivation, agrees with the forum): for n > 24 the conditions tau(n-k) <= k+2 for
@@ -51,3 +57,30 @@ Verdict: a full proof would be a major result in incidence geometry. Stopped.
   infinitely many s; needs non-existence of near-projective-plane structures.
 - Erdős 470 (ii): every known family (2^k p q, more primes) needs a prime in an interval of length about sqrt(x)
   at a prescribed place (the Melfi condition); binary problem at level of distribution 1/2.
+
+## Further candidates examined (second pass)
+- Erdős 32 (every large n = p + a with |A ∩ [1,N]| = o((log N)^2)): open as stated. Each a covers a 1/log N
+  fraction of a dyadic block, so covering ALL n needs about (log N)^2 trials by any union-bound or greedy argument;
+  sieve weights do not help because the average over residue classes is fixed. Kolountzakis and Ruzsa improve the
+  bound only for almost all n.
+- Erdős 50 (no point where the distribution function of phi(n)/n has a positive finite derivative): my reduction:
+  the mass just left of y = phi(m)/m is at least c / (phi(m) log(1/delta)), so the derivative at x is infinite
+  along a sequence whenever x is approximable by phi(m)/m within o(1/(phi(m) log phi(m))). Greedy prime-by-prime
+  approximation misses this by a factor log; points that are badly approximable need a separate argument, and the
+  local cascade (new primes shift mass left at rate ln 2 / log(1/eta) per halving of scale) is consistent with a
+  flat profile, so no contradiction appears. Open in both directions.
+- Erdős 128: as formalized it is the sparse-halves conjecture. Trivial for e <= 2n^2/25, known for e >= n^2/5
+  (rival step proved); the middle range is the open problem (Razborov has 27/1024 instead of 1/50).
+- Erdős 120 (similarity problem) and 661 (cross distances o(n/sqrt(log n))): classical open problems; lattice
+  constructions for 661 give C n / sqrt(log n) for every fixed lattice and worse when the lattice varies with n.
+- Erdős 595: existence of a K4-free graph that is not a countable union of triangle-free graphs is only known to
+  be consistent (database state: not disprovable). Erdős 601: state not provable; value problem.
+- Erdős 633: solved in the literature (Beeson-Laczkovich-Zhang, arXiv:2604.03609) but the answer is a long
+  classification that the upstream file itself calls too involved to encode. Erdős 710: value problem whose true
+  asymptotic is unknown.
+
+## Tools worth reusing
+- Status of all Erdős problems (state, Lean status, forum proof claims): one fetch of
+  raw.githubusercontent.com/teorth/erdosproblems/main/data/problems.yaml.
+- data/catalog.json in the upstream repo has prize and erdosState per id; a file proofs/<id>.lean means a merged
+  proof. Their difference is the list of unsolved prize ids.

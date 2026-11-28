@@ -508,6 +508,23 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   *Confidence:* medium.
 - **R25** Literature access is patchy: erdosproblems.com and some PDFs returned 403, while arXiv works. Keep novelty
   claims tentative. *Evidence:* wf_175492cd-815. *Confidence:* medium.
+- **R26** Second prize-core audit (Fable-led prize session, 28 Nov): no full prize problem is within reach, and the
+  reasons are structural, so do not re-audit these. Erdős 711 (i) contains an arithmetic-Kakeya statement (N
+  progressions with distinct prime differences and free residues must have union >= N; Tao's forum comment says the
+  problem morally implies Kakeya in all dimensions; best bound n^{4/3+o(1)}). Erdős 647: searched to 1e22, and about
+  log n of the conditions tau(n-k) <= k+2 fail in expectation, so no witness is expected (rival step R2.H3 is almost
+  surely false). 32: (log N)^2 is the union-bound barrier and the Kolountzakis/Ruzsa gains hold only for almost all
+  n. 50: reduces to approximating every x by phi(m)/m within o(1/(phi(m) log phi(m))), which greedy constructions
+  miss by a log factor. 128 is the sparse-halves conjecture (open for 2/25 < e/n^2 < 1/5). 552 (ii) needs
+  non-existence of near-polarity C4-free graphs. 470 (ii) needs a prime in a sqrt-length interval. 595 and 601 are
+  set-theoretic (not disprovable / not provable in ZFC). 633's answer is a long classification (arXiv:2604.03609).
+  *Evidence:* lefttosolve/prize_lead/REPORT.md. *Confidence:* high for 711/647/128/595, medium for the rest.
+- **R27** One fetch gives the status of every Erdős problem: raw.githubusercontent.com/teorth/erdosproblems/main/
+  data/problems.yaml (state, Lean status, forum proof-claim counts). Cross it with data/catalog.json (fields prize,
+  erdosState) and the files in proofs/ to see what is still unsolved on the site. On 28 Nov the open prize ids
+  without a merged proof were exactly the hard cores; the ones rivals had merged (erdos_40, erdos_500, erdos_593,
+  erdos_18a/b/c, 161 parts.ii, 143 parts.ii) were value-placeholder or freshly solved problems. *Evidence:* REPORT.md.
+  *Confidence:* high.
 - **R26** Fable writes long accepted proofs of known theorems in 30-130 min: Erdős 1129 (2,460 lines), Bondy k=3,
   Nagell-Ricci, Erdős 321, Dirac/944. For known results the bottleneck is racing, so pair every proof run with
   immediate filing. Of 14 known complete problems proved on day 1, only 3 were credited (792 #4072, 174 #4258, 321

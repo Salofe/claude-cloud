@@ -148,6 +148,8 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
 - After proving a step, scan siblings for reuse of the same core (check rivals first).
 - Write notes.md during every attack (with an "if someone resumes" section) and copy it to lefttosolve/moonshots/.
 - Resumable: Erdős 470 R2.H2 search tree (if rivals fail); Erdős 1 a(9) needs ~40 leaf files, not one file.
+- Prize cores audited twice (LEARNINGS R26, prize_lead/REPORT.md): none reachable; 711 (i) is arithmetic-Kakeya-hard,
+  647 has no expected witness (searched to 1e22). Do not re-audit; status of all Erdős problems in one fetch: R27.
 - Fable: deep mathematics only, short audits, more attempts; its weekly quota runs out (hit twice). Use the default
   model for computation, Lean engineering, literature and reviews; tell the user when Fable is exhausted.
 
