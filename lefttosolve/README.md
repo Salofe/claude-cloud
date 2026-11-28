@@ -386,6 +386,8 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a188861.lean` | **OEIS conjecture, proof** adapted to the competing statement filed first (statement pending in #17997 by cj-55m; our own statement was not filed) | [PR #18422](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18422) |
 | `oeis-a266841.lean` | proof (statement pending in #15689 by jleguina; Rule 69 automaton: explicit rows, closed forms, recurrence and g.f.) | [PR #18435](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18435) |
 | `oeis-a078130.lean` | proof (statement pending in #15477 by Dugongue; numbers with exactly one partition into cubes > 1 are finite: two {8,27}-partitions for n >= 405) | [PR #18470](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18470) |
+| `oeis-a067567.lean` | proof (statement pending in #15685 by Dugongue; Bala's partition-convolution divisibility and parity: pair k with n - k, k^(2m+1) + (n-k)^(2m+1) is divisible by n) | [PR #18558](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18558) |
+| `oeis-a088120.lean` | **disproof** (statement pending in #15686 by Dugongue; part (2) fails at n = 12: 1*3*...*23 + 2 = 316234143227 is prime and beats every d = 1 value) | [PR #18757](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18757) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
