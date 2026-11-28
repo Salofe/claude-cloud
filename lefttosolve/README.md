@@ -490,6 +490,49 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a398692.lean` | proof (statement pending in #19867 by etaubman) | [PR #21331](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21331) |
 | `oeis-a071306.lean` | proof (statement pending in #15399 by Dugongue) | [PR #21344](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21344) |
 | `oeis-a200887.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #21340](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21340); proof [PR #21358](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21358) |
+| `oeis-a082382.lean` | proof (statement pending in #15566 by Dugongue) | [PR #21381](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21381) |
+| `oeis-a084199.lean` | **disproof** (statement pending in #15571 by Dugongue) | [PR #21382](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21382) |
+| `oeis-a267210.lean` | proof (statement pending in #15573 by jleguina) | [PR #21384](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21384) |
+| `oeis-a290192.lean` | proof (statement pending in #15564 by jleguina) | [PR #21385](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21385) |
+| `oeis-a290835.lean` | proof (statement pending in #15553 by jleguina) | [PR #21386](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21386) |
+| `oeis-a105794.lean` | proof (statement pending in #19862 by caa1982) | [PR #21439](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21439) |
+| `oeis-a208138.lean` | proof (statement pending in #19626 by blakestone-x) | [PR #21469](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21469) |
+| `oeis-a386830.lean` | proof (statement pending in #19892 by vivanpoddar) | [PR #21501](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21501) |
+| `oeis-a209648.lean` | proof (statement pending in #19629 by blakestone-x) | [PR #21507](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21507) |
+| `oeis-a207452.lean` | proof (statement pending in #19616 by blakestone-x) | [PR #21510](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21510) |
+| `oeis-a207598.lean` | proof (statement pending in #19622 by blakestone-x) | [PR #21517](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21517) |
+| `mo-138934.lean` | proof (statement pending in #19851 by connoranderson) | [PR #21524](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21524) |
+| `mo-250663.lean` | proof (statement pending in #19853 by caa1982) | [PR #21588](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21588) |
+| `oeis-a061100.lean` | proof (statement pending in #19624 by SudharsanAnimations) | [PR #21615](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21615) |
+| `oeis-a061101.lean` | proof (statement pending in #19623 by SudharsanAnimations) | [PR #21620](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21620) |
+| `oeis-a324017.lean` | proof (statement pending in #19607 by blakestone-x) | [PR #21624](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21624) |
+| `oeis-a083452.lean` | proof (statement pending in #19856 by bnb9001) | [PR #21630](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21630) |
+| `mo-436948.lean` | proof (statement pending in #19608 by ivillar) | [PR #21679](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21679) |
+| `oeis-a193679.lean` | proof (statement pending in #19858 by esracummings31-blip) | [PR #21689](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21689) |
+| `oeis-a329395.lean` | proof (statement pending in #19599 by etaubman) | [PR #21724](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21724) |
+| `oeis-a386837.lean` | proof (statement pending in #19894 by vivanpoddar) | [PR #21747](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21747) |
+| `oeis-a207449.lean` | proof (statement pending in #19610 by clementtrecourt) | [PR #21751](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21751) |
+| `oeis-a207303.lean` | proof (statement pending in #19600 by clementtrecourt) | [PR #21800](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21800) |
+| `oeis-a207399.lean` | proof (statement pending in #19604 by clementtrecourt) | [PR #21805](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21805) |
+| `oeis-a207257.lean` | proof (statement pending in #19592 by clementtrecourt) | [PR #21880](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21880) |
+| `oeis-a236407.lean` | proof (statement pending in #19838 by vivanpoddar) | [PR #21881](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21881) |
+| `oeis-a270530.lean` | proof (statement pending in #19841 by vivanpoddar) | [PR #21996](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21996) |
+| `oeis-a207167.lean` | proof (statement pending in #19589 by clementtrecourt) | [PR #22000](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22000) |
+| `oeis-a288523.lean` | proof (statement pending in #19579 by blakestone-x) | [PR #22013](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22013) |
+| `oeis-a207109.lean` | proof (statement pending in #19584 by clementtrecourt) | [PR #22036](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22036) |
+| `oeis-a288668.lean` | proof (statement pending in #19583 by blakestone-x) | [PR #22113](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22113) |
+| `oeis-a207065.lean` | proof (statement pending in #19567 by clementtrecourt) | [PR #22156](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22156) |
+| `oeis-a270490.lean` | proof (statement pending in #19840 by vivanpoddar) | [PR #22193](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22193) |
+| `oeis-a289131.lean` | proof (statement pending in #19587 by blakestone-x) | [PR #22218](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22218) |
+| `oeis-a254702.lean` | proof (statement pending in #19887 by clementtrecourt) | [PR #22221](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22221) |
+| `oeis-a105801.lean` | proof (statement pending in #19565 by blakestone-x) | [PR #22335](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22335) |
+| `oeis-a129366.lean` | **disproof** (statement pending in #19585 by caa1982) | [PR #22341](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22341) |
+| `oeis-a278618.lean` | proof (statement pending in #19842 by vivanpoddar) | [PR #22376](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22376) |
+| `oeis-a250084.lean` | proof (statement pending in #19837 by clementtrecourt) | [PR #22457](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22457) |
+| `oeis-a202331.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22516](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22516); proof [PR #22530](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22530) |
+| `oeis-a202785.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22518](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22518); proof [PR #22532](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22532) |
+| `oeis-a202933.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22520](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22520); proof [PR #22533](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22533) |
+| `oeis-a202330.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #22513](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22513); proof [PR #22536](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/22536) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
