@@ -63,12 +63,18 @@ Verdict: a full proof would be a major result in incidence geometry. Stopped.
   fraction of a dyadic block, so covering ALL n needs about (log N)^2 trials by any union-bound or greedy argument;
   sieve weights do not help because the average over residue classes is fixed. Kolountzakis and Ruzsa improve the
   bound only for almost all n.
-- Erdős 50 (no point where the distribution function of phi(n)/n has a positive finite derivative): my reduction:
-  the mass just left of y = phi(m)/m is at least c / (phi(m) log(1/delta)), so the derivative at x is infinite
-  along a sequence whenever x is approximable by phi(m)/m within o(1/(phi(m) log phi(m))). Greedy prime-by-prime
-  approximation misses this by a factor log; points that are badly approximable need a separate argument, and the
-  local cascade (new primes shift mass left at rate ln 2 / log(1/eta) per halving of scale) is consistent with a
-  flat profile, so no contradiction appears. Open in both directions.
+- Erdős 50 (no point where the distribution function F of phi(n)/n has a positive finite derivative): real attempt.
+  - Lemma (sound, elementary): for squarefree k and y = phi(k)/k, the mass of (y - delta, y] is at least
+    c / (phi(k) log(1/delta)) (take n whose primes below W are exactly those of k, W about 1/(delta log(1/delta))).
+  - Consequence: if F'(x) exists and is finite, then t_k phi(k) log(1/t_k) -> infinity along every sequence of
+    squarefree k with t_k = |x - phi(k)/k| -> 0 (compare two intervals containing x whose difference is
+    (y_k - tau t_k, y_k]). So a finite derivative forces x to be very badly approximable by totient ratios.
+  - Why this does not finish: the number of squarefree k with phi(k) near 2^j within C/(2^j j) of a typical point
+    is about 1/j, a divergent but borderline series, so a nested-interval construction produces points x that ARE
+    this badly approximable. At such points the mass at scale eta is carried by many kernels with
+    phi(k) > omega/(eta log(1/eta)), and the scale-to-scale dynamics (new primes move mass left at rate
+    ln 2 / log(1/eta) per halving) is consistent with a flat profile. Deciding the derivative there needs new ideas.
+    Greedy prime-by-prime approximation also misses the needed quality by a factor log. Open in both directions.
 - Erdős 128: as formalized it is the sparse-halves conjecture. Trivial for e <= 2n^2/25, known for e >= n^2/5
   (rival step proved); the middle range is the open problem (Razborov has 27/1024 instead of 1/50).
 - Erdős 120 (similarity problem) and 661 (cross distances o(n/sqrt(log n))): classical open problems; lattice
