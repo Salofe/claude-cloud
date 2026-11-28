@@ -395,6 +395,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `mo-267651.lean` | proof (statement pending in #15481 by keiichisince1986-bot; via Dirichlet, every progression p + kq with distinct primes p, q has infinitely many primes, so the set of pairs is empty) | [PR #18778](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18778) |
 | `oeis-a077866.lean` | proof (statement pending in #15478 by Dugongue; subsets with least two elements summing to the max: bijection with (x, y, T), explicit sum, recurrence) | [PR #18793](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18793) |
 | `oeis-a282289.lean` | **disproof** (statement pending in #15483 by EmircanEsen; counterexample to the conjecture a(n) > 0 for n > 27: 340473 is not a sum of four prime powers p^k with k >= 2, checked by a kernel bitset computation) | [PR #18898](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18898) |
+| `oeis-a154141.lean` | proof (statement pending in #15480 by jleguina; Pell-type descent for (2k+1)^2 + 63 = 8m^2: two orbits under (k, m) -> (3k+4m+1, 2k+3m+1), Nat.nth identification, recurrence and both g.f.s) | [PR #19016](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19016) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
