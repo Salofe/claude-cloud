@@ -315,6 +315,11 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `erdos-550.lean` | **open problem** (site statement); disproof of the statement as formalized (it bounds only the smallest class, the source needs n large relative to all classes), so reviewers may flag it | [PR #12411](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/12411) (opened automatically) |
 | `oeis-a390815.lean` | **open problem** (site statement) | [PR #13074](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/13074) (opened automatically) |
 | `oeis-a072872.lean` | **open problem** (site statement): **counterexample** to the OEIS conjecture a(n) < prime(n) for n > 47: a(6298) = 77742 > prime(6298) = 62753 (6298 = 2·47·67) | [PR #13111](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/13111) (opened automatically) |
+| `oeis-a188572.lean` | proof queued | branch `oma/oeis-a188572` pushed; PR waits until GitHub Actions is re-enabled on the fork |
+| `oeis-a226839.lean` | proof queued | branch `oma/oeis-a226839` pushed; PR waits until GitHub Actions is re-enabled on the fork |
+| `oeis-a084199.lean` | proof queued | branch `oma/oeis-a084199` pushed; PR waits until GitHub Actions is re-enabled on the fork |
+| `oeis-a176612.lean` | proof queued | branch `oma/oeis-a176612` pushed; PR waits until GitHub Actions is re-enabled on the fork |
+| `oeis-a082382.lean` | proof queued | branch `oma/oeis-a082382` pushed; PR waits until GitHub Actions is re-enabled on the fork |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
