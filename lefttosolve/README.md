@@ -426,6 +426,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a273405.lean` | proof (statement pending in #15435 by jleguina) | [PR #19956](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/19956) |
 | `oeis-a207390.lean` | proof (statement pending in #15624 by clementtrecourt; transfer on row pairs over the 31 allowed rows, each of the 961 pair counts is a degree-7 polynomial in the binomial basis, checked by the kernel in 31 chunks; closed form, recurrence and g.f.) | [PR #20104](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20104) |
 | `oeis-a154143.lean` | proof (statement pending in #15628 by jleguina; Pell-type descent for (2k+1)^2 + 79 = 8m^2: solutions (3,4), (5,5) and (k, m) -> (3k+4m+1, 2k+3m+1), Nat.nth identification, recurrence and both g.f.s) | [PR #20186](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20186) |
+| `oeis-a309291.lean` | proof (statement pending in #15405 by xor2k; for k > 4 a composite p = k! - q in [k, k^2] has a prime factor at most k, which divides k! and hence the prime q > k) | [PR #20377](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20377) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
@@ -461,4 +462,3 @@ has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-t
 - **Lifting:** shifting `t` by `M` or `2M` leaves the multiples of 3 alone and selects every other element exactly once.
 - **Induction:** divide the multiples of 3 by 3 and apply the statement to them.
 - **Hard case:** two multiples of 3 of the form `{3v, 6v}`. A carefully chosen pair of nearby ratios makes the split uneven.
-| `oeis-a309291.lean` | proof (statement pending in #15405 by xor2k; for k > 4 a composite p = k! - q in [k, k^2] has a prime factor at most k, which divides k! and hence the prime q > k) | [PR #20377](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20377) |
