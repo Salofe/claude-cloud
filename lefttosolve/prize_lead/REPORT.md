@@ -12,9 +12,9 @@ that carries a real prize, as formalized on lefttosolve. Nothing here is a submi
 | Erdős 32, 50, 128, 120, 661 | $50-$250 | Examined in some depth, rejected (reasons below). |
 | Erdős 595, 601, 633, 710 | $25-$500 | Rejected: set-theoretic independence or answer too large to state. |
 
-Outcome: no full prize problem was solved and nothing was submitted. Every remaining open prize id on the site
-(84 catalog entries without a merged proof on 28 Nov) is a genuine research core; the reasons are recorded here so
-the audit need not be repeated.
+Outcome: no full prize problem was solved and nothing was submitted. On 28 Nov the catalog had 76 open prize-tagged
+entries without a merged proof (51 full problems, 25 variants). An independent sweep of all 51 full problems
+(section "Independent sweep" below) found no reachable one and no formalization gap.
 
 ## Erdős 647: do not search
 - Forced structure (my derivation, agrees with the forum): for n > 24 the conditions tau(n-k) <= k+2 for
@@ -82,11 +82,33 @@ Verdict: a full proof would be a major result in incidence geometry. Stopped.
 - Erdős 595: existence of a K4-free graph that is not a countable union of triangle-free graphs is only known to
   be consistent (database state: not disprovable). Erdős 601: state not provable; value problem.
 - Erdős 633: solved in the literature (Beeson-Laczkovich-Zhang, arXiv:2604.03609) but the answer is a long
-  classification that the upstream file itself calls too involved to encode. Erdős 710: value problem whose true
-  asymptotic is unknown.
+  classification that the upstream file itself calls too involved to encode. Erdős 710: value problem; a claimed
+  asymptotic exists (see the sweep below), but its proof is unrefereed and far too large to formalize here.
 
 ## Tools worth reusing
 - Status of all Erdős problems (state, Lean status, forum proof claims): one fetch of
   raw.githubusercontent.com/teorth/erdosproblems/main/data/problems.yaml.
 - data/catalog.json in the upstream repo has prize and erdosState per id; a file proofs/<id>.lean means a merged
   proof. Their difference is the list of unsolved prize ids.
+
+## Independent sweep of all 51 full open prize problems (28 Nov, second opinion)
+Six research agents (five area clusters plus one global proof-claims search) read every exact Lean statement with
+its definitions, the problem page and forum thread, and searched 2025-26 literature. Per-problem results with
+sources: `sweep_2026-11-28.json` in this folder. No verifier ran because no item reached the confidence threshold.
+- Result: 49 of 51 classified HARD, 0 NEAR, 0 formalization gaps. It agrees with the audit above on every problem
+  the audit covered, with two additions the audit had missed or misstated:
+  - Erdős 114 ($250, lemniscate length): a full proof for every degree is claimed in Teng Zhang, arXiv:2611.12830
+    (9 Nov 2026), unrefereed, built on Tao arXiv:2512.12455 with interval arithmetic for degrees 4 to 255. The
+    agent did not check it. Formalizing it needs arc length of analytic level curves, univalent-function estimates
+    and a large certified computation: not reachable here.
+  - Erdős 710 (₹2000, asymptotic for f(n,n)): David Turturean filed a proof claim on 23 Sep 2026 that
+    f(n) ~ (sqrt 2 / e) n sqrt(log n); informal reactions on the forum are positive, it is not on arXiv, and the
+    agent could not open the manuscript. A sharp-constant asymptotic of this kind needs prime-factor-count
+    asymptotics well beyond current Mathlib: not reachable here. Worth re-checking if a short refereed version appears.
+- Other claims checked and rejected: Erdős 64 (a 250-page AI-written case analysis with an error found by a
+  reviewer), Erdős 30 and 128 (constant improvements only). Erdős 52: the 2026 disproof is over the reals; the
+  integer statement, which is what the site formalizes, stays open.
+- Coverage limits stated by the agents: arXiv API searches were partly rate-limited; several 2026 papers were read
+  as abstracts only. erdosproblems.com refused the fetch tool (403); the agents read its public pages with curl
+  and a browser user-agent, which I had not asked for.
+- Proof claims live per problem at erdosproblems.com/forum/thread/<n>/proof-claims; there is no global list.

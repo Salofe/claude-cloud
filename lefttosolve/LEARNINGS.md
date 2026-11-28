@@ -518,10 +518,15 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   miss by a log factor. 128 is the sparse-halves conjecture (open for 2/25 < e/n^2 < 1/5). 552 (ii) needs
   non-existence of near-polarity C4-free graphs. 470 (ii) needs a prime in a sqrt-length interval. 595 and 601 are
   set-theoretic (not disprovable / not provable in ZFC). 633's answer is a long classification (arXiv:2604.03609).
-  *Evidence:* lefttosolve/prize_lead/REPORT.md. *Confidence:* high for 711/647/128/595, medium for the rest.
+  An independent six-agent sweep of all 51 full open prize problems agreed (0 reachable, 0 formalization gaps) and
+  added two unrefereed literature claims that are too large to formalize: Erdős 114 (arXiv:2611.12830) and Erdős 710
+  (forum claim of 23 Sep 2026, f(n) ~ (sqrt 2 / e) n sqrt(log n)). Re-check 710 if a short version appears.
+  *Evidence:* lefttosolve/prize_lead/REPORT.md and sweep_2026-11-28.json. *Confidence:* high for 711/647/128/595,
+  medium for the rest.
 - **R27** One fetch gives the status of every Erdős problem: raw.githubusercontent.com/teorth/erdosproblems/main/
   data/problems.yaml (state, Lean status, forum proof-claim counts). Cross it with data/catalog.json (fields prize,
-  erdosState) and the files in proofs/ to see what is still unsolved on the site. On 28 Nov the open prize ids
+  erdosState) and the files in proofs/ to see what is still unsolved on the site (76 open prize-tagged ids on 28 Nov,
+  51 of them full problems). Proof claims are per problem at /forum/thread/<n>/proof-claims. The open prize ids
   without a merged proof were exactly the hard cores; the ones rivals had merged (erdos_40, erdos_500, erdos_593,
   erdos_18a/b/c, 161 parts.ii, 143 parts.ii) were value-placeholder or freshly solved problems. *Evidence:* REPORT.md.
   *Confidence:* high.
