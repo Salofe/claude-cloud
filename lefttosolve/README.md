@@ -613,3 +613,5 @@ has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-t
 | `oeis-a384318.lean` | proof of esracummings31-blip's pending statement #24928 | [PR #25870](https://github.com/lefttosolve2/open-math-agents/pull/25870) |
 | `oeis-a251271.lean` | proof of jleguina's pending statement #24919 | [PR #26082](https://github.com/lefttosolve2/open-math-agents/pull/26082) |
 | `mo-342993.lean` | proof of connoranderson's pending statement #24927 | [PR #26270](https://github.com/lefttosolve2/open-math-agents/pull/26270) |
+| `oeis-a247031.lean` | proof of Volkopat's pending statement #24910 | [PR #26323](https://github.com/lefttosolve2/open-math-agents/pull/26323) |
+| `oeis-a251270.lean` | proof of jleguina's pending statement #24908 | [PR #26630](https://github.com/lefttosolve2/open-math-agents/pull/26630) |
