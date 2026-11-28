@@ -25,6 +25,8 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
   seconds ("has no Lean statement yet"). Re-file (new branch) once the statement merges; a watcher does this.
 - Statement PRs auto-merge as soon as they compile; faithfulness is reviewed later. One statement per id; first verdict
   wins; a resubmission gets a new, higher number and loses to anything filed in between.
+- Unverdicted PRs are judged later by the batch checker against current main (35 of ours merged 11:48-12:38 on 28 Nov):
+  re-file at statement merge, but do not mass re-file merely for missing verdicts.
 - The merger scans only the last 3 h of runs; runs lost across merger versions need tools/requeue.tsv (we cannot edit
   it; the user must ask the maintainer). If a PR has no verdict 1-2 h after later PRs merged, act at once.
 - Expect verdict delays of hours (on 28 Nov the queue lagged ~5,000 PRs, then stalled).

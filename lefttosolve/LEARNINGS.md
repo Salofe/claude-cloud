@@ -181,6 +181,13 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   Genbox), so we skipped them; 45 were re-filed on oma/<id>-p2. Lesson: register every snipe id with the statement
   watcher and re-file the moment the statement merges. *Confidence:* high.
 
+- **P15** Unverdicted PRs do get judged later: between 11:48 and 12:38 UTC 28 Nov the site's batch checker cleared the
+  07:15-08:20 window and older lost runs (35 of our PRs merged in 50 min: lost-window snipes such as #22113, #22013,
+  #23380; old own statements #10411, #10472, #10499, #10557, #10570; steps #10340, #10500, #10531; and #10206 Erdos357,
+  the placeholder answer the user had not decided on). The batch checker judges against CURRENT main, so an old proof PR
+  can pass once its statement merged. Re-files of such ids become harmless duplicates. Keep re-filing at statement
+  merge (rivals race), but do not mass re-file merely for missing verdicts. *Confidence:* high.
+
 ## 3. Lean / checker rules
 
 - **L1** Catalog proof format: the first non-comment line is `import <module>` with guillemets, followed by Mathlib
