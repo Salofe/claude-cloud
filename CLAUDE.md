@@ -42,6 +42,9 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
   the merger's pending list and rivals' competitor checks key on the title; `<id>-statement`/`<id>-p2` titles are
   invisible to them. Fix the Action's title input before filing more statements/re-files.
 - Our own statement + proof: file the proof PR within a minute of the statement PR. Never hold the proof back.
+- That immediate proof PR always fails CI while merges lag (12/12 on 28 Nov); it only deters rivals. The proof that
+  scores is the re-file on oma/<id>-p2 the moment the statement merges: run the statement-merge Monitor
+  (prize_kit/mon/watch_statements.sh, 150 s poll, re-arm every 30 min) and prize_kit/mon/refile.sh <id>.
 - Subagents may be denied triggering the fork Action (classifier: Unsanctioned Communication). Do not use fallbacks;
   file from the main session.
 - After any batch/flush or Actions outage, reconcile every pushed oma/* branch, every pr_queue.jsonl line and every
@@ -163,7 +166,7 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
   instead of verify agents; batches of ~6-8.
 - Fewer simultaneous race jobs = each finishes sooner (load 10+ made Lean checks crawl).
 - Bash background jobs stop at 30 min default (max 2 h): pass timeouts, checkpoint, make runs resumable.
-- Watchers beat check-ins: own-statement watcher (3 min) to re-file proofs when statements merge; upstream watcher
+- Watchers beat check-ins (use the Monitor tool, not 2-h background bash): own-statement watcher (3 min) to re-file proofs when statements merge; upstream watcher
   (4 min) waking only for new unclaimed statements. While Actions is down, park work instead of waking.
 - Before race hunts, confirm a cheap fork Action run works. If "Actions has been disabled", give the user the exact
   settings URL at once and stop starting new races.

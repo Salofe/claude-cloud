@@ -162,6 +162,15 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   Anything estimated beyond ~1e9 kernel steps needs chunking or a reduction tree (Erdős 1 a(9): ~10 h of kernel time,
   so ~40 leaf files). *Evidence:* tools/check.sh line 59-61; erdos1-least_N_9-notes.md. *Confidence:* high.
 
+- **P13** Own statement+proof pairs: the proof PR filed a minute after the statement always fails CI ("has no Lean
+  statement yet"), because statements merge hours later (lag 3-5 h on 28 Nov). It scores nothing; it only signals a claim.
+  The scoring proof is a re-file (new branch oma/<id>-p2) the moment the statement merges, before rivals race the
+  freshly merged statement (5-20 min). *Evidence:* 28 Nov 09:39-10:45 UTC: 12 merged statements (A195233, A195249,
+  A199531, A199899, A200786, A200840, A200839, A200888, A201044, A201812, A201695, A200887); every first proof PR was
+  still open with one verdict comment; all re-filed (#25072-#26600 range). GitHub search's comments:>0 filter missed
+  these comments after the repo move, so detect merges from upstream main, not from comment counts. Tooling:
+  prize_kit/mon/watch_statements.sh (Monitor, 150 s poll) + prize_kit/mon/refile.sh. *Confidence:* high.
+
 ## 3. Lean / checker rules
 
 - **L1** Catalog proof format: the first non-comment line is `import <module>` with guillemets, followed by Mathlib
@@ -644,3 +653,5 @@ Contradictions were resolved in favour of more recent, high-confidence evidence.
   so the formalize and pending-statement workflows were paused (resumable by run id) and finished pairs were parked in
   scratchpad/open/pending_pairs_after_outage.txt (A211562, A211564). Lesson: when upstream disappears, pause everything
   that needs it instead of letting agents burn usage on failing steps; probe hourly with git ls-remote + search.
+- 2026-11-28 ~10:40 UTC: a README table edit with awk (first input /dev/null, so NR==FNR held for README too) wrote an
+  empty README; restored with git checkout. Lesson: insert table rows with a small Python script and check the row count.
