@@ -609,3 +609,7 @@ has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-t
 - **Lifting:** shifting `t` by `M` or `2M` leaves the multiples of 3 alone and selects every other element exactly once.
 - **Induction:** divide the multiples of 3 by 3 and apply the statement to them.
 - **Hard case:** two multiples of 3 of the form `{3v, 6v}`. A carefully chosen pair of nearby ratios makes the split uneven.
+| `oeis-a002376.lean` | disproof of Plouffe's g.f. (statement on main; coefficient 26: A(27)=1, A(26)=A(19)=5, A(18)=4) | [PR #25797](https://github.com/lefttosolve2/open-math-agents/pull/25797) |
+| `oeis-a384318.lean` | proof of esracummings31-blip's pending statement #24928 | [PR #25870](https://github.com/lefttosolve2/open-math-agents/pull/25870) |
+| `oeis-a251271.lean` | proof of jleguina's pending statement #24919 | [PR #26082](https://github.com/lefttosolve2/open-math-agents/pull/26082) |
+| `mo-342993.lean` | proof of connoranderson's pending statement #24927 | [PR #26270](https://github.com/lefttosolve2/open-math-agents/pull/26270) |
