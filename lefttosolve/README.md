@@ -326,8 +326,6 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a085928.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a222139.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a267210.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
-| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.R1.H1.lean` | proof accepted locally | not submitted yet |
-| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.lean` | proof accepted locally | not submitted yet |
 | `mo-81816.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a094076.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a267604.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
