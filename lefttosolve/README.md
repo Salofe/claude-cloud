@@ -597,6 +597,53 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a251130.lean` | proof of Dariusthedoggie's pending statement #24838 | [PR #27251](https://github.com/lefttosolve2/open-math-agents/pull/27251) |
 | `oeis-a183982.lean` | proof of Volkopat's pending statement #24783 (transfer recursion over 64 row codes per block sum s; the recurrence defect vanishes at m = 1 and propagates linearly, giving the closed forms, g.f.) | [PR #27694](https://github.com/lefttosolve2/open-math-agents/pull/27694) |
 | `oeis-a183983.lean` | proof of Volkopat's pending statement #24810 | [PR #27703](https://github.com/lefttosolve2/open-math-agents/pull/27703) |
+| `oeis-a391629.lean` | proof of another account's pending site statement | [PR #27951](https://github.com/lefttosolve2/open-math-agents/pull/27951) |
+| `oeis-a261702.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27955](https://github.com/lefttosolve2/open-math-agents/pull/27955) |
+| `oeis-a282653.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27956](https://github.com/lefttosolve2/open-math-agents/pull/27956) |
+| `oeis-a398692.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27958](https://github.com/lefttosolve2/open-math-agents/pull/27958) |
+| `mo-138934.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27961](https://github.com/lefttosolve2/open-math-agents/pull/27961) |
+| `oeis-a324017.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27963](https://github.com/lefttosolve2/open-math-agents/pull/27963) |
+| `oeis-a207452.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27964](https://github.com/lefttosolve2/open-math-agents/pull/27964) |
+| `oeis-a083452.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27966](https://github.com/lefttosolve2/open-math-agents/pull/27966) |
+| `oeis-a207399.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27968](https://github.com/lefttosolve2/open-math-agents/pull/27968) |
+| `oeis-a389540.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27970](https://github.com/lefttosolve2/open-math-agents/pull/27970) |
+| `oeis-a289004.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27972](https://github.com/lefttosolve2/open-math-agents/pull/27972) |
+| `oeis-a250064.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27975](https://github.com/lefttosolve2/open-math-agents/pull/27975) |
+| `oeis-a329395.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27996](https://github.com/lefttosolve2/open-math-agents/pull/27996) |
+| `oeis-a386837.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #27999](https://github.com/lefttosolve2/open-math-agents/pull/27999) |
+| `oeis-a207449.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28000](https://github.com/lefttosolve2/open-math-agents/pull/28000) |
+| `oeis-a207303.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28001](https://github.com/lefttosolve2/open-math-agents/pull/28001) |
+| `oeis-a207257.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28002](https://github.com/lefttosolve2/open-math-agents/pull/28002) |
+| `oeis-a236407.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28005](https://github.com/lefttosolve2/open-math-agents/pull/28005) |
+| `oeis-a270530.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28006](https://github.com/lefttosolve2/open-math-agents/pull/28006) |
+| `oeis-a207167.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28010](https://github.com/lefttosolve2/open-math-agents/pull/28010) |
+| `oeis-a288523.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28011](https://github.com/lefttosolve2/open-math-agents/pull/28011) |
+| `oeis-a207109.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28012](https://github.com/lefttosolve2/open-math-agents/pull/28012) |
+| `oeis-a288668.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28014](https://github.com/lefttosolve2/open-math-agents/pull/28014) |
+| `oeis-a211562.lean` | proof adapted to ceejcake's statement #24101, re-filed after it merged | [PR #28045](https://github.com/lefttosolve2/open-math-agents/pull/28045) |
+| `oeis-a207065.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28050](https://github.com/lefttosolve2/open-math-agents/pull/28050) |
+| `oeis-a270490.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28052](https://github.com/lefttosolve2/open-math-agents/pull/28052) |
+| `oeis-a289131.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28053](https://github.com/lefttosolve2/open-math-agents/pull/28053) |
+| `oeis-a254702.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28056](https://github.com/lefttosolve2/open-math-agents/pull/28056) |
+| `oeis-a105801.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28057](https://github.com/lefttosolve2/open-math-agents/pull/28057) |
+| `oeis-a278618.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28059](https://github.com/lefttosolve2/open-math-agents/pull/28059) |
+| `oeis-a250084.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28060](https://github.com/lefttosolve2/open-math-agents/pull/28060) |
+| `oeis-a116191.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28062](https://github.com/lefttosolve2/open-math-agents/pull/28062) |
+| `oeis-a285052.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28063](https://github.com/lefttosolve2/open-math-agents/pull/28063) |
+| `oeis-a377824.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28066](https://github.com/lefttosolve2/open-math-agents/pull/28066) |
+| `oeis-a090049.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28084](https://github.com/lefttosolve2/open-math-agents/pull/28084) |
+| `oeis-a100833.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28086](https://github.com/lefttosolve2/open-math-agents/pull/28086) |
+| `oeis-a129695.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28088](https://github.com/lefttosolve2/open-math-agents/pull/28088) |
+| `oeis-a248586.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28090](https://github.com/lefttosolve2/open-math-agents/pull/28090) |
+| `oeis-a282655.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28092](https://github.com/lefttosolve2/open-math-agents/pull/28092) |
+| `oeis-a041042.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28094](https://github.com/lefttosolve2/open-math-agents/pull/28094) |
+| `oeis-a316316.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28095](https://github.com/lefttosolve2/open-math-agents/pull/28095) |
+| `oeis-a116408.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28096](https://github.com/lefttosolve2/open-math-agents/pull/28096) |
+| `oeis-a196079.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28097](https://github.com/lefttosolve2/open-math-agents/pull/28097) |
+| `oeis-a249963.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28100](https://github.com/lefttosolve2/open-math-agents/pull/28100) |
+| `oeis-a250061.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28101](https://github.com/lefttosolve2/open-math-agents/pull/28101) |
+| `oeis-a106391.lean` | proof re-filed once the statement was on main (first PR rejected for the missing statement or never judged) | [PR #28102](https://github.com/lefttosolve2/open-math-agents/pull/28102) |
+| `oeis-a183980.lean` | proof of another account's pending site statement | [PR #28121](https://github.com/lefttosolve2/open-math-agents/pull/28121) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
