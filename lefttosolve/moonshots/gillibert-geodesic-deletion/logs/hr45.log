@@ -1,0 +1,48 @@
+-rw-r--r-- 1 root root 46864384 Nov 27 20:43 /tmp/claude-0/-home-user-claude-cloud/bd3d433e-a40c-5862-83a1-d99ab03e0074/scratchpad/open/moonshot/gillibert-geodesic-deletion/dl/hr/alltrans45.tar
+MEMBER alltrans45_k=00.gz
+total 1 connected 0 capped 0 counterexamples 0 nodes 0 maxnodes 0 () nonregular_or_asymmetric 0
+MEMBER alltrans45_k=02.gz
+total 5 connected 1 capped 0 counterexamples 0 nodes 3 maxnodes 3 (#4) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=04.gz
+total 33 connected 22 capped 0 counterexamples 0 nodes 110 maxnodes 5 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=06.gz
+total 171 connected 157 capped 0 counterexamples 0 nodes 1129 maxnodes 37 (#59) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=08.gz
+total 756 connected 743 capped 0 counterexamples 0 nodes 6687 maxnodes 9 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=10.gz
+total 2600 connected 2592 capped 0 counterexamples 0 nodes 28602 maxnodes 101 (#63) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=12.gz
+total 7231 connected 7228 capped 0 counterexamples 0 nodes 94492 maxnodes 145 (#12) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=14.gz
+total 16334 connected 16333 capped 0 counterexamples 0 nodes 244995 maxnodes 15 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=16.gz
+total 30492 connected 30492 capped 0 counterexamples 0 nodes 518364 maxnodes 17 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=18.gz
+total 47263 connected 47263 capped 0 counterexamples 0 nodes 898711 maxnodes 325 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=20.gz
+total 61378 connected 61378 capped 0 counterexamples 0 nodes 1289128 maxnodes 211 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=22.gz
+total 66892 connected 66892 capped 0 counterexamples 0 nodes 1538516 maxnodes 23 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=24.gz
+total 61378 connected 61378 capped 0 counterexamples 0 nodes 1534450 maxnodes 25 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=26.gz
+total 47263 connected 47263 capped 0 counterexamples 0 nodes 1276101 maxnodes 27 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=28.gz
+total 30492 connected 30492 capped 0 counterexamples 0 nodes 884268 maxnodes 29 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=30.gz
+total 16334 connected 16334 capped 0 counterexamples 0 nodes 506354 maxnodes 31 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=32.gz
+total 7231 connected 7231 capped 0 counterexamples 0 nodes 238623 maxnodes 33 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=34.gz
+total 2600 connected 2600 capped 0 counterexamples 0 nodes 91000 maxnodes 35 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=36.gz
+total 756 connected 756 capped 0 counterexamples 0 nodes 27972 maxnodes 37 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=38.gz
+total 171 connected 171 capped 0 counterexamples 0 nodes 6669 maxnodes 39 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=40.gz
+total 33 connected 33 capped 0 counterexamples 0 nodes 1353 maxnodes 41 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=42.gz
+total 5 connected 5 capped 0 counterexamples 0 nodes 215 maxnodes 43 (#1) nonregular_or_asymmetric 0
+MEMBER alltrans45_k=44.gz
+total 1 connected 1 capped 0 counterexamples 0 nodes 45 maxnodes 45 (#1) nonregular_or_asymmetric 0
+ALLDONE 45

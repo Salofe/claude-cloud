@@ -1,0 +1,10 @@
+[171s] graphs 200000 connected 200000 capped 0 counterexamples 0 nodes 803140 maxnodes 10 (#2) last=#200000
+[396s] graphs 400000 connected 400000 capped 0 counterexamples 0 nodes 1604306 maxnodes 10 (#2) last=#400000
+[683s] graphs 600000 connected 600000 capped 0 counterexamples 0 nodes 2405326 maxnodes 10 (#2) last=#600000
+[1211s] graphs 800000 connected 800000 capped 0 counterexamples 0 nodes 3206014 maxnodes 10 (#2) last=#800000
+[1785s] graphs 1000000 connected 1000000 capped 0 counterexamples 0 nodes 4006770 maxnodes 10 (#2) last=#1000000
+[2563s] graphs 1200000 connected 1200000 capped 0 counterexamples 0 nodes 4807404 maxnodes 10 (#2) last=#1200000
+[3645s] graphs 1400000 connected 1400000 capped 0 counterexamples 0 nodes 5607738 maxnodes 10 (#2) last=#1400000
+[4481s] graphs 1600000 connected 1600000 capped 0 counterexamples 0 nodes 6408412 maxnodes 10 (#2) last=#1600000
+[5259s] graphs 1791851 connected 1791850 capped 0 counterexamples 0 nodes 7176154 maxnodes 10 (#2) last=#1791851
+STREAMDONE

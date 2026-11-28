@@ -1,0 +1,1152 @@
+[
+ [
+  "Erdos20.erdos_20.R1.H2.R1.H1.R1.H1",
+  8.75,
+  "\u2203 (J : Type) (_ : Fintype J) (_ : DecidableEq J) (\u03a6 : (\u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102) \u2192 \u211d), ((\u2200 X, 0 \u2264 \u03a6 X) \u2227 \u03a6 \u27e8fun _ => 1, fun _ => 1\u27e9 = 1 \u2227 (\u2200 X : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, (\u2200 z, X.2 z = 0) \u2192 \u03a6 X = 0) \u2227 (\u2200 X Y : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, (\u2203 A : \u2200 j, Matrix (Fin (Y.1 j)) (Fin (X.1 j)) \u2102, \u2200 y, Y.2 y = \u2211 z, (\u220f j, A j (y j) (z j)) * X.2 z) \u2192 \u03a6 Y \u2264 \u03a6 X) \u2227 (\u2200 X Y : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, \u03a6 \u27e8fun j => X.1 j * Y.1 j, fun z => X.2 (fun j => (finProdFinEquiv.symm (z j)).1) * Y.2 (fun j => (finProdFinEquiv.symm (z j)).2)\u27e9 = \u03a6 X * \u03a6 Y) \u2227 (\u2200 X Y : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, \u03a6 \u27e8fun j => X.1 j + Y.1 j, fun z => if h : \u2200 j, (z j : \u2115) < X.1 j then X.2 (fun j => \u27e8z j, h j\u27e9) else if h' : \u2200 j, X.1 j \u2264 z j then Y.2 (fun j => \u27e8z j - X.1 j, by have h2 : (z j : \u2115) < X.1 j + Y.1 j := (z j).2; have := h' j; omega\u27e9) else 0\u27e9 = \u03a6 X + \u03a6 Y)) \u2227 \u2203 a b c e : J, let w := fun s t : J => Real.logb 2 (\u03a6 \u27e8fun j => if j = s \u2228 j = t then 2 else 1, fun y => if (y s : \u2115) = y t then 1 else 0\u27e9); max (w a c + w b e) (w a e + w b c) < w a b + w c e"
+ ],
+ [
+  "Erdos20.erdos_20.R1.H2.R1.H1.R1.H2",
+  8.75,
+  "let P : \u2200 (J : Type) [Fintype J] [DecidableEq J], ((\u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102) \u2192 \u211d) \u2192 Prop := fun J _ _ \u03a6 => (\u2200 X, 0 \u2264 \u03a6 X) \u2227 \u03a6 \u27e8fun _ => 1, fun _ => 1\u27e9 = 1 \u2227 (\u2200 X : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, (\u2200 z, X.2 z = 0) \u2192 \u03a6 X = 0) \u2227 (\u2200 X Y : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, (\u2203 A : \u2200 j, Matrix (Fin (Y.1 j)) (Fin (X.1 j)) \u2102, \u2200 y, Y.2 y = \u2211 z, (\u220f j, A j (y j) (z j)) * X.2 z) \u2192 \u03a6 Y \u2264 \u03a6 X) \u2227 (\u2200 X Y : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, \u03a6 \u27e8fun j => X.1 j * Y.1 j, fun z => X.2 (fun j => (finProdFinEquiv.symm (z j)).1) * Y.2 (fun j => (finProdFinEquiv.symm (z j)).2)\u27e9 = \u03a6 X * \u03a6 Y) \u2227 (\u2200 X Y : \u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102, \u03a6 \u27e8fun j => X.1 j + Y.1 j, fun z => if h : \u2200 j, (z j : \u2115) < X.1 j then X.2 (fun j => \u27e8z j, h j\u27e9) else if h' : \u2200 j, X.1 j \u2264 z j then Y.2 (fun j => \u27e8z j - X.1 j, by have h2 : (z j : \u2115) < X.1 j + Y.1 j := (z j).2; have := h' j; omega\u27e9) else 0\u27e9 = \u03a6 X + \u03a6 Y) \u2200 (J : Type) [Fintype J] [DecidableEq J] (\u03a6 : (\u03a3 d : J \u2192 \u2115, (\u2200 j, Fin (d j)) \u2192 \u2102) \u2192 \u211d) (a b c e : J), P J \u03a6 \u2192 (let w := fun s t : J => Real.logb 2 (\u03a6 \u27e8fun j => if j = s \u2228 j = t then 2 else 1, fun y => if (y s : \u2115) = y t then 1 else 0\u27e9); max (w a c + w b e) (w a e + w b c) < w a b + w c e) \u2192 \u2203 \u03b4 : Finset (EuclideanSpace \u211d (Fin 2)) \u2192 \u211d, Monotone \u03b4 \u2227 (\u2200 A B : Finset (EuclideanSpace \u211d (Fin 2)), (A \u2229 B).Nonempty \u2192 \u03b4 (A \u222a B) + \u03b4 (A \u2229 B) \u2264 \u03b4 A + \u03b4 B) \u2227 (\u2200 Q : Finset (EuclideanSpace \u211d (Fin 2) \u00d7 EuclideanSpace \u211d (Fin 2)), \u2200 s t : \u211d, 0 \u2264 s \u2192 0 \u2264 t \u2192 s + t = 1 \u2192 \u03b4 (Q.image fun q => s \u2022 q.1 + t \u2022 q.2) \u2264 s * \u03b4 (Q.image Prod.fst) + t * \u03b4 (Q.image Prod.snd)) \u2227 (\u2200 p q, \u03b4 {p, q} = dist p q) \u2227 (\u2200 p q r, \u03b4 {p, q, r} \u2264 (dist p q + dist q r + dist r p) / 2) \u2227 \u2200 (I : Type) [Fintype I] [DecidableEq I] [Nontrivial I] (x : I \u21aa EuclideanSpace \u211d (Fin 2)), \u2203 \u03a8, P I \u03a8 \u2227 \u2200 (S : Finset I) (hS : S.Nonempty), Real.logb 2 (\u03a8 \u27e8fun i => if i \u2208 S then 2 else 1, fun z => if \u2200 i \u2208 S, \u2200 j \u2208 S, (z i : \u2115) = z j then 1 else 0\u27e9) = \u03b4 (S.image x) / \u03b4 (Finset.univ.image x)"
+ ],
+ [
+  "Erdos20.erdos_20.R1.H2.R2.H1",
+  26.25,
+  "\u2200 r : \u2115, 3 \u2264 r \u2192 \u2203 D : \u2115, 1 \u2264 D \u2227 \u2200 L : \u2115, \u2203 N : \u2115, L \u2264 N \u2227 \u2200 V : Finset (Fin N \u2192 Fin N), (\u2200 w : Fin r \u2192 Fin N \u2192 Fin N, (\u2200 i, w i \u2208 V) \u2192 (\u2200 j, (\u2200 a b, w a j = w b j) \u2228 Function.Injective (fun i => w i j)) \u2192 \u2200 a b, w a = w b) \u2192 V.card \u2264 D ^ N"
+ ],
+ [
+  "Erdos30.erdos_30.R1.H1",
+  52.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2200\u1da0 n : \u2115 in Filter.atTop, \u2203 q : \u2115, IsPrimePow q \u2227 (n : \u211d) - (n : \u211d) ^ \u03b5 \u2264 (q : \u211d) \u2227 q \u2264 n"
+ ],
+ [
+  "Erdos30.erdos_30.R1.H2",
+  52.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 K : \u2115, \u2200 A : Finset \u2115, IsSidon (A : Set \u2115) \u2192 K \u2264 A.card \u2192 \u2203 a \u2208 A, \u2203 b \u2208 A, (A.card : \u211d) ^ 2 - (A.card : \u211d) ^ (1 + \u03b5) \u2264 (b : \u211d) - (a : \u211d)"
+ ],
+ [
+  "Erdos30.erdos_30.R2.H1",
+  52.0,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 K : \u2115, \u2200 a b : \u2115, K \u2264 a \u2192 a \u2264 b \u2192 b \u2264 2 * a \u2192 (Erdos30.h (a ^ 2) : \u211d) + Erdos30.h (b ^ 2) \u2264 Erdos30.h ((a + b) ^ 2) + (a : \u211d) ^ \u03b4"
+ ],
+ [
+  "Erdos30.erdos_30.R2.H2",
+  52.0,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 K : \u2115, \u2200 a b : \u2115, K \u2264 a \u2192 a \u2264 b \u2192 b \u2264 2 * a \u2192 (Erdos30.h ((a + b) ^ 2) : \u211d) \u2264 Erdos30.h (a ^ 2) + (Erdos30.h (b ^ 2) : \u211d) + (a : \u211d) ^ \u03b4"
+ ],
+ [
+  "Erdos30.erdos_30.R3.H1",
+  52.0,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 K : \u2115, \u2200 m : \u2115, K \u2264 m \u2192 2 * (Erdos30.h (m ^ 2) : \u211d) \u2264 Erdos30.h ((2 * m) ^ 2) + (m : \u211d) ^ \u03b4"
+ ],
+ [
+  "Erdos30.erdos_30.R3.H2",
+  52.0,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 K : \u2115, \u2200 m : \u2115, K \u2264 m \u2192 (Erdos30.h ((2 * m) ^ 2) : \u211d) \u2264 2 * Erdos30.h (m ^ 2) + (m : \u211d) ^ \u03b4"
+ ],
+ [
+  "Erdos1191.erdos_1191.parts.i.R1.H2",
+  51.0,
+  "\u2200 L R\u2080 : \u2115, 16 \u2264 R\u2080 \u2192 1 \u2264 L \u2192 \u2203 K : \u2115, 2 * R\u2080 + L \u2264 K \u2227 \u2200 S : Finset \u2115, (\u2191S : Set \u2115) \u2286 Set.Icc 1 (2 ^ K) \u2192 IsSidon (\u2191S : Set \u2115) \u2192 (\u2203 R \u2208 Set.Icc R\u2080 (K - L), (S.filter (\u00b7 \u2264 2 ^ R)).card ^ 2 * R \u2264 512 * 2 ^ R) \u2192 \u2203 R \u2208 Set.Icc R\u2080 (K - L), (S.filter (\u00b7 \u2264 2 ^ R)).card ^ 2 * R \u2264 512 * 2 ^ R \u2227 2 ^ L * (S.filter (fun a => 2 ^ R < a \u2227 a \u2264 2 ^ (R + L))).card ^ 2 * (R + L) \u2264 2 ^ (R + L)"
+ ],
+ [
+  "Erdos1191.erdos_1191.parts.i.R2.H1",
+  51.0,
+  "\u2200 d C J : \u2115, 0 < d \u2192 \u2203 K \u2265 J, \u2200 S : Finset \u2115, (S : Set \u2115) \u2286 Set.Icc 1 (2 ^ K) \u2192 IsSidon (S : Set \u2115) \u2192 (\u2200 j \u2208 Finset.Icc J K, (S.filter (\u00b7 \u2264 2 ^ j)).card ^ 2 * j \u2264 C * 2 ^ j) \u2192 \u2203 j \u2208 Finset.Icc J K, d * (S.filter (\u00b7 \u2264 2 ^ j)).card ^ 2 * j \u2264 2 ^ j"
+ ],
+ [
+  "Erdos1191.erdos_1191.parts.i.R2.H2",
+  51.0,
+  "\u2200 d : \u2115, 0 < d \u2192 \u2203 C : \u2115, \u2200 J K : \u2115, J \u2264 K \u2192 \u2203 K' \u2265 K, \u2200 S : Finset \u2115, (S : Set \u2115) \u2286 Set.Icc 1 (2 ^ K') \u2192 IsSidon (S : Set \u2115) \u2192 (\u2203 j \u2208 Finset.Icc J K, C * 2 ^ j < (S.filter (\u00b7 \u2264 2 ^ j)).card ^ 2 * j) \u2192 \u2203 j \u2208 Finset.Icc J K', d * (S.filter (\u00b7 \u2264 2 ^ j)).card ^ 2 * j \u2264 2 ^ j"
+ ],
+ [
+  "Erdos1191.erdos_1191.parts.ii.R1.H1",
+  51.0,
+  "\u2203 d K : \u2115, \u2200 N : \u2115, \u2203 S \u2208 (Finset.Icc 1 N).powerset, (\u2200 k \u2208 Finset.Icc K N, k \u2264 (S.filter (\u00b7 \u2264 k)).card ^ 2 * (1 + Nat.log 2 k) ^ d) \u2227 \u2200 a \u2208 S, \u2200 b \u2208 S, \u2200 u \u2208 S, \u2200 v \u2208 S, b < a \u2192 v < u \u2192 Nat.log 2 a = Nat.log 2 b \u2192 Nat.log 2 u = Nat.log 2 v \u2192 a - b = u - v \u2192 a = u \u2227 b = v"
+ ],
+ [
+  "Erdos1191.erdos_1191.parts.ii.R2.H1",
+  51.0,
+  "\u2203 d J : \u2115, \u2200 N : \u2115, \u2203 B : \u2115 \u2192 Finset \u2115, (\u2200 j, B j \u2286 Finset.Ico (2 ^ j) (2 ^ (j + 1))) \u2227 (\u2200 j, \u2200 a \u2208 B j, \u2200 b \u2208 B j, \u2200 u \u2208 B j, \u2200 v \u2208 B j, a + b = u + v \u2192 (a = u \u2227 b = v) \u2228 (a = v \u2227 b = u)) \u2227 (\u2200 j, J \u2264 j \u2192 j \u2264 N \u2192 2 ^ j \u2264 (B j).card ^ 2 * (j + 1) ^ (2 * (d + 1))) \u2227 \u2200 i j, j / 3 < i \u2192 i < j \u2192 \u2200 a \u2208 B i, \u2200 b \u2208 B i, \u2200 u \u2208 B j, \u2200 v \u2208 B j, b < a \u2192 v < u \u2192 a - b \u2260 u - v"
+ ],
+ [
+  "Erdos52.erdos_52.R1.H2",
+  51.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < 1 \u2192 \u2203 C : \u211d, 0 < C \u2227 \u2200 (S : Finset \u2124) (M : \u2115), (S+S).card \u2264 M \u2192 (S*S).card \u2264 M \u2192 (S.card : \u211d)^(2+\u03b5) < (min (addEnergy S S) (mulEnergy S S) : \u211d) \u2192 (\u2200 x \u2208 S, S.card \u2264 8 * (S.filter (fun y => S.card^2 \u2264 8*M*((S \u00d7\u02e2 S).filter (fun p => p.1+p.2 = x+y)).card \u2227 S.card^2 \u2264 8*M*((S \u00d7\u02e2 S).filter (fun p => p.1*p.2 = x*y)).card)).card) \u2192 C * (S.card : \u211d)^(2-\u03b5) \u2264 M"
+ ],
+ [
+  "Erdos52.erdos_52.R2.H2",
+  51.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < 1 \u2192 \u2203 K : \u2115, \u2203 c : \u211d, 0 < c \u2227 \u2200 A : Finset \u2124, 2 \u2264 A.card \u2192 (max (A + A).card (A * A).card : \u211d) < c * (A.card : \u211d) ^ (2 - \u03b5) \u2192 \u2203 (I : Finset \u2124) (a d : \u2124), d \u2260 0 \u2227 (\u2200 i \u2208 I, 0 \u2264 i \u2227 i \u2264 (A.card ^ K : \u2115) \u2227 a + d * i \u2208 A \u2227 a + d * i \u2260 0) \u2227 (A.card : \u211d) ^ (2 - \u03b5 / 2) \u2264 (I.card : \u211d) ^ 2"
+ ],
+ [
+  "Erdos52.erdos_52.R3.H1",
+  51.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < 1 \u2192 \u2203 C : \u211d, 0 < C \u2227 \u2200 A : Finset \u2124, (\u2200 a \u2208 A, 0 < a) \u2192 (max (A + A).card (A * A).card : \u211d) \u2265 C * (A.card : \u211d) ^ (2 - \u03b5)"
+ ],
+ [
+  "Erdos52.erdos_52.R3.H2",
+  51.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < 1 \u2192 \u2203 C : \u211d, 0 < C \u2227 \u2200 A : Finset \u2124, (\u2200 a \u2208 A, a < 0) \u2192 (max (A + A).card (A * A).card : \u211d) \u2265 C * (A.card : \u211d) ^ (2 - \u03b5)"
+ ],
+ [
+  "Erdos687.erdos_687.parts.iii.R1.H2.R1.H2.R1.H2.R1.H2.R1.H2",
+  3.1875,
+  "\u2203 \u03b8 : \u211d, 0 < \u03b8 \u2227 \u03b8 < 1 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < 1 \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2200\u1da0 x : \u2115 in Filter.atTop, let L := \u2308(x : \u211d) ^ (1 + \u03b5)\u2309\u208a / 2 let D := L / (Nat.log 2 L + 1) let Q := \u220f p \u2208 (Finset.range (x + 1)).filter Nat.Prime, p; (Q : \u211d) ^ \u03b7 \u2264 (((Finset.range Q).filter fun M => \u2211 d \u2208 Q.divisors.filter (fun d => D < d), ((ArithmeticFunction.moebius d : \u211d) / (Nat.totient d : \u211d)) * \u2211 r \u2208 (Finset.range d).filter (fun r => Nat.Coprime r d), Real.cos (2 * Real.pi * (r : \u211d) * ((M + L : \u2115) : \u211d) / (d : \u211d)) * (\u2016\u2211 u \u2208 Finset.range L, Complex.exp (((2 * Real.pi * (r : \u211d) * (u : \u211d) / (d : \u211d) : \u211d) : \u2102) * Complex.I)\u2016 ^ 2 / (L : \u211d)) < -((3 * \u03b8 / 4) * (L : \u211d))).card : \u211d) \u2192 (Q : \u211d) / Real.sqrt (L : \u211d) \u2264 (((Finset.range Q).filter fun M => \u2211 d \u2208 Q.divisors.filter (fun d => D < d), ((ArithmeticFunction.moebius d : \u211d) / (Nat.totient d : \u211d)) * \u2211 r \u2208 (Finset.range d).filter (fun r => Nat.Coprime r d), Real.cos (2 * Real.pi * (r : \u211d) * ((M + L : \u2115) : \u211d) / (d : \u211d)) * (\u2016\u2211 u \u2208 Finset.range L, Complex.exp (((2 * Real.pi * (r : \u211d) * (u : \u211d) / (d : \u211d) : \u211d) : \u2102) * Complex.I)\u2016 ^ 2 / (L : \u211d)) < -((\u03b8 / 2) * (L : \u211d))).card : \u211d)"
+ ],
+ [
+  "Erdos687.erdos_687.parts.iii.R2.H1",
+  51.0,
+  "\u2200 J : \u2115, \u2203 j \u2265 J, \u00ac Green46.IsCoveredByResidues (2 * 2 ^ (4 * j)) (2 ^ (6 * j))"
+ ],
+ [
+  "Erdos687.erdos_687.parts.iii.R2.H2",
+  51.0,
+  "\u2200 \u03b5 > (0 : \u211d), \u2203 J : \u2115, \u2200 j \u2265 J, \u2200 x : \u2115, (x : \u211d) ^ (1 + \u03b5) \u2264 (2 : \u211d) ^ (12 * j) \u2192 \u2200 a : \u2115 \u2192 \u2115, (\u2200 m \u2208 Finset.Icc 1 (2 ^ (12 * j)), \u2203 p \u2264 x, p.Prime \u2227 m \u2261 a p [MOD p]) \u2192 let K : \u2115 := 2 ^ (6 * j) let z : \u2115 := 2 ^ (4 * j) \u2203 b : \u2115, b + K \u2264 2 ^ (12 * j) \u2227 ((Finset.Icc 1 K).filter fun m \u21a6 \u00ac \u2203 p \u2264 z, p.Prime \u2227 (b + m) \u2261 a p [MOD p]).card \u2264 ((Finset.Ioc z (2 * z)).filter Nat.Prime).card"
+ ],
+ [
+  "Erdos687.erdos_687.parts.iii.R3.H1",
+  51.0,
+  "\u2200\u1da0 n : \u2115 in atTop, \u2203 p : \u2115, p.Prime \u2227 n < p \u2227 (p - n) ^ 3 \u2264 n ^ 2"
+ ],
+ [
+  "Erdos687.erdos_687.parts.iii.R3.H2",
+  51.0,
+  "\u2200 \u03b5 > (0 : \u211d), \u2200\u1da0 x : \u2115 in atTop, \u2200 b : \u2115, \u2308(x : \u211d) ^ (1 + \u03b5)\u2309\u208a ^ 3 < b ^ 2 \u2192 2 * b + \u2308(x : \u211d) ^ (1 + \u03b5)\u2309\u208a < primorial x \u2192 \u2203 m \u2208 Finset.Icc 1 \u2308(x : \u211d) ^ (1 + \u03b5)\u2309\u208a, (b + m).Coprime (primorial x)"
+ ],
+ [
+  "Erdos1135.erdos_1135.R1.H1",
+  49.5,
+  "\u2200 n : \u2115, 1 < n \u2192 n % 27 \u2208 ([1, 4, 7, 10, 16, 19, 25] : List \u2115) \u2192 n % 256 \u2208 ([27, 31, 47, 63, 71, 91, 103, 111, 127, 155, 159, 167, 191, 207, 223, 231, 239, 251, 255] : List \u2115) \u2192 \u2203 k : \u2115, collatzStep^[k] n < n"
+ ],
+ [
+  "Erdos1135.erdos_1135.R1.H2.R1.H1",
+  24.75,
+  "let T := fun v : \u2115 => if v % 2 = 0 then v / 2 else (3 * v + 1) / 2 \u2200 n : \u2115, 860179 < n \u2192 n % 9 = 5 \u2192 n % 256 \u2208 ([27, 31, 47, 63, 71, 91, 103, 111, 127, 155, 159, 167, 191, 207, 223, 231, 239, 251, 255] : List \u2115) \u2192 (\u2200 B : \u2115, \u2203 i : \u2115, B < T^[i] n) \u2192 \u2203 k : \u2115, 3 ^ ((range k).filter fun i => T^[i] n % 2 = 1).card < 2 ^ k"
+ ],
+ [
+  "Erdos1135.erdos_1135.R1.H2.R1.H2",
+  24.75,
+  "let T := fun v : \u2115 => if v % 2 = 0 then v / 2 else (3 * v + 1) / 2 \u2200 n k : \u2115, 860179 < n \u2192 n % 9 = 5 \u2192 n % 256 \u2208 ([27, 31, 47, 63, 71, 91, 103, 111, 127, 155, 159, 167, 191, 207, 223, 231, 239, 251, 255] : List \u2115) \u2192 let s := fun j : \u2115 => ((range j).filter fun i => T^[i] n % 2 = 1).card 4096 < k \u2192 3 ^ s k < 2 ^ k \u2192 (\u2200 i < k, 2 ^ i \u2264 3 ^ s i) \u2192 n \u2264 T^[k] n \u2192 3 * (2 ^ k - 3 ^ s k) * n \u2264 s k * 3 ^ s k \u2192 3 * (T^[k] n - n) < s k \u2192 \u2203 j : \u2115, T^[j] (T^[k] n) < n"
+ ],
+ [
+  "Erdos1135.erdos_1135.R2.H1",
+  49.5,
+  "let T := fun n : \u2115 => if n % 2 = 0 then n / 2 else (3 * n + 1) / 2 \u2200 n : \u2115, 2048 < n \u2192 n % 4 = 3 \u2192 \u2203 k : \u2115, let s := ((range k).filter fun i => T^[i] n % 2 = 1).card (n - 2 + 2 * s) * (3 ^ s) ^ 6 < (n - 2) * (2 ^ k) ^ 6"
+ ],
+ [
+  "Erdos1135.erdos_1135.R2.H2",
+  49.5,
+  "\u2200 (k n : \u2115) (S : Finset \u2115), 2048 < n \u2192 S \u2286 range k \u2192 94 \u2264 S.card \u2192 3 ^ S.card < 2 ^ k \u2192 2 ^ k * 2048 ^ S.card \u2264 6145 ^ S.card \u2192 2 ^ k * n \u2260 3 ^ S.card * n + \u2211 i \u2208 S, 2 ^ i * 3 ^ (S.filter fun j => i < j).card"
+ ],
+ [
+  "Erdos28.erdos_28.R1.H1.R1.H2",
+  24.75,
+  "let boundedLength := fun g : \u2115 => \u2203 K : \u2115, \u2200 (d : \u2115) (T : Finset \u2115), d \u2208 T \u2192 T \u2286 Finset.Iic d \u2192 (\u2200 n \u2264 d, \u2203 a \u2208 T, \u2203 b \u2208 T, a+b=n) \u2192 (\u2200 n, sumRep (T : Set \u2115) n \u2264 g) \u2192 T.card \u2264 K \u2200 r : \u2115, 2 \u2264 r \u2192 boundedLength (2*r+1) \u2192 boundedLength (2*(r+1)+1)"
+ ],
+ [
+  "Erdos28.erdos_28.R1.H1.R2.H2",
+  24.75,
+  "\u2200 g K : \u2115, \u2203 L\u2265K, \u2200 S : Finset \u2115, S \u2286 Iic L \u2192 (\u2200 n\u2264L, \u2203 a\u2208S, \u2203 b\u2208S, a+b=n) \u2192 (\u2200 N, K\u2264N \u2192 N\u2264L \u2192 N \u2264 1024*(g+3)^4* ((range N).filter (fun n => 6 \u2264 sumRep (S : Set \u2115) n)).card) \u2192 \u2203 n\u2264L, g<sumRep (S : Set \u2115) n"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R1.H1.R1.H2",
+  24.75,
+  "\u2200 (r : \u2115) (J : SimpleGraph (Fin r)), J.IsBipartite \u2192 J.Connected \u2192 (\u2200 v, 2 \u2264 J.degree v) \u2192 \u00ac Nonempty (J \u2243g (completeBipartiteGraph (Fin 2) (Fin 2))) \u2192 Tendsto (fun n : \u2115 => (extremalNumber n J : \u211d)/n) atTop atTop \u2192 \u2203 \u03b1 c : \u211d, \u03b1 \u2208 Set.Ioo 1 2 \u2227 0<c \u2227 IsEquivalent atTop (fun n : \u2115 => (extremalNumber n J : \u211d)) (fun n => c*(n:\u211d)^\u03b1)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R1.H2.R1.H1",
+  16.5,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.IsBipartite \u2192 G.IsAcyclic \u2192 2 \u2264 G.edgeFinset.card \u2192 (\u2200 v, \u00ac G.IsIsolated v) \u2192 \u00ac G.Connected \u2192 (\u2203 v, 2 \u2264 G.degree v) \u2192 (\u2200 v, G.degree v \u2264 2) \u2192 \u2200 a b : \u211a, a < b \u2192 (\u2200 N, \u2203 n \u2265 N, b*n < (extremalNumber n G : \u211a)) \u2192 \u2203 M, \u2200 m \u2265 M, a*m \u2264 (extremalNumber m G : \u211a)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R1.H2.R1.H3",
+  16.5,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.IsBipartite \u2192 G.IsAcyclic \u2192 2 \u2264 G.edgeFinset.card \u2192 (\u2200 v, \u00ac G.IsIsolated v) \u2192 \u00ac G.Connected \u2192 (\u2203 v, 2 \u2264 G.degree v) \u2192 (\u2203 v, 3 \u2264 G.degree v) \u2192 (\u2203 v w, G.Adj v w \u2227 2 \u2264 G.degree v \u2227 2 \u2264 G.degree w) \u2192 \u2200 a b : \u211a, a < b \u2192 (\u2200 N, \u2203 n \u2265 N, b*n < (extremalNumber n G : \u211a)) \u2192 \u2203 M, \u2200 m \u2265 M, a*m \u2264 (extremalNumber m G : \u211a)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R2.H1",
+  49.5,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.IsBipartite \u2192 2 \u2264 G.edgeFinset.card \u2192 (\u2200 v, \u00ac G.IsIsolated v) \u2192 G.Connected \u2192 \u00ac G.IsAcyclic \u2192 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / n) atTop atTop \u2192 \u2203 \u03b1 c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / (n : \u211d) ^ \u03b1) atTop (\ud835\udcdd c)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R2.H2",
+  49.5,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.IsBipartite \u2192 2 \u2264 G.edgeFinset.card \u2192 (\u2200 v, \u00ac G.IsIsolated v) \u2192 \u00ac G.Connected \u2192 (\u00ac \u2203 c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / n) atTop (\ud835\udcdd c)) \u2192 \u2203 \u03b1 c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / (n : \u211d) ^ \u03b1) atTop (\ud835\udcdd c)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R3.H1",
+  33.0,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.IsBipartite \u2192 2 \u2264 G.edgeFinset.card \u2192 (\u2200 v, \u00ac G.IsIsolated v) \u2192 G.Connected \u2192 \u00ac G.IsAcyclic \u2192 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / n) atTop atTop \u2192 \u2203 \u03b1 c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / (n : \u211d) ^ \u03b1) atTop (\ud835\udcdd c)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R3.H2",
+  33.0,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.IsBipartite \u2192 2 \u2264 G.edgeFinset.card \u2192 (\u2200 v, \u00ac G.IsIsolated v) \u2192 \u00ac G.Connected \u2192 G.IsAcyclic \u2192 (\u2200 n : \u2115, extremalNumber n G \u2264 q * n) \u2192 \u2203 c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / n) atTop (\ud835\udcdd c)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R3.H3",
+  33.0,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.IsBipartite \u2192 2 \u2264 G.edgeFinset.card \u2192 (\u2200 v, \u00ac G.IsIsolated v) \u2192 \u00ac G.Connected \u2192 \u00ac G.IsAcyclic \u2192 (\u00ac \u2203 c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / n) atTop (\ud835\udcdd c)) \u2192 \u2203 \u03b1 c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n G : \u211d) / (n : \u211d) ^ \u03b1) atTop (\ud835\udcdd c)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.i.R4.H2",
+  49.5,
+  "\u2200 {V : Type} [Fintype V] (J : SimpleGraph V), J.IsBipartite \u2192 J.Connected \u2192 \u00ac J.IsAcyclic \u2192 (\u2200 v, 2 \u2264 J.degree v) \u2192 \u2203 a c : \u211d, 0 < c \u2227 Tendsto (fun n : \u2115 => (extremalNumber n J : \u211d) / (n : \u211d) ^ a) atTop (\ud835\udcdd c)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.ii.R1.H2.R1.H2.R1.H1",
+  12.375,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.Connected \u2192 G.IsBipartite \u2192 (\u2200 v, 2 \u2264 G.degree v) \u2192 (completeBipartiteGraph (Fin 2) (Fin 2)).Free G \u2192 \u2200 \u03b1 : \u211d, \u03b1 \u2208 Set.Ioo 1 (3/2:\u211d) \u2192 (fun n : \u2115 => (extremalNumber n G : \u211d)) =O[atTop] (fun n : \u2115 => (n : \u211d)^\u03b1) \u2192 \u00ac (fun n : \u2115 => (extremalNumber n G : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d)^\u03b1) \u2192 \u03b1 \u2208 Set.range ((\u2191) : \u211a \u2192 \u211d)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.ii.R1.H2.R1.H2.R1.H2",
+  12.375,
+  "\u2200 (q : \u2115) (G : SimpleGraph (Fin q)), G.Connected \u2192 G.IsBipartite \u2192 (\u2200 v, 2 \u2264 G.degree v) \u2192 (\u2200 R : Finset (Fin q), (\u2200 u v, G.Adj u v \u2192 (u \u2208 R \u2194 v \u2209 R)) \u2192 \u2203 v \u2209 R, 3 \u2264 G.degree v) \u2192 \u2200 \u03b1 : \u211d, \u03b1 \u2208 Set.Ioo (3/2:\u211d) 2 \u2192 (fun n : \u2115 => (extremalNumber n G : \u211d)) =O[atTop] (fun n : \u2115 => (n : \u211d)^\u03b1) \u2192 \u00ac (fun n : \u2115 => (extremalNumber n G : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d)^\u03b1) \u2192 \u03b1 \u2208 Set.range ((\u2191) : \u211a \u2192 \u211d)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.ii.R2.H2",
+  49.5,
+  "\u2200 (r : \u2115) (F : SimpleGraph (Fin r)), F.IsBipartite \u2192 (\u2200 v, 2 \u2264 F.degree v) \u2192 \u2200 \u03b1 : \u211d, \u03b1 \u2208 Set.Ioo 1 2 \u2192 (fun n : \u2115 => (extremalNumber n F : \u211d)) =O[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1) \u2192 \u00ac (fun n : \u2115 => (extremalNumber n F : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1) \u2192 (\u2200 (s : \u2115) (J : SimpleGraph (Fin s)), J \u2291 F \u2192 s + J.edgeFinset.card < r + F.edgeFinset.card \u2192 (fun n : \u2115 => (extremalNumber n J : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1)) \u2192 (\u2200 (s : \u2115) (J : SimpleGraph (Fin s)), J \u2291 F \u2192 2 \u2264 J.edgeFinset.card \u2192 (2 : \u211d) - ((s - 2 : \u2115) : \u211d) / ((J.edgeFinset.card - 1 : \u2115) : \u211d) < \u03b1) \u2192 \u03b1 \u2208 Set.range ((\u2191) : \u211a \u2192 \u211d)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.ii.R3.H1",
+  49.5,
+  "\u2200 (r : \u2115) (F : SimpleGraph (Fin r)), F.IsBipartite \u2192 \u00ac completeBipartiteGraph (Fin 2) (Fin 2) \u2291 F \u2192 \u2200 \u03b1 : \u211d, 1 < \u03b1 \u2192 \u03b1 < 3 / 2 \u2192 (fun n : \u2115 => (extremalNumber n F : \u211d)) =O[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1) \u2192 \u00ac (fun n : \u2115 => (extremalNumber n F : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1) \u2192 (\u2200 (s : \u2115) (J : SimpleGraph (Fin s)), J \u2291 F \u2192 s + J.edgeFinset.card < r + F.edgeFinset.card \u2192 (fun n : \u2115 => (extremalNumber n J : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1)) \u2192 (\u2200 (s : \u2115) (J : SimpleGraph (Fin s)), J \u2291 F \u2192 2 \u2264 J.edgeFinset.card \u2192 (2 : \u211d) - ((s - 2 : \u2115) : \u211d) / ((J.edgeFinset.card - 1 : \u2115) : \u211d) < \u03b1) \u2192 (\u2200 (R : Finset (Fin r)) (t : \u2115), 0 < t \u2192 (\u2200 \u2983u v\u2984, F.Adj u v \u2192 (u \u2208 R \u2194 v \u2209 R)) \u2192 \u2200 E : Finset {v : Fin r // v \u2209 R}, E.card \u2264 t \u2192 (\u2200 v \u2209 E, F.degree v.val \u2264 t) \u2192 \u03b1 < 2 - 1 / (t : \u211d)) \u2192 \u03b1 \u2208 Set.range ((\u2191) : \u211a \u2192 \u211d)"
+ ],
+ [
+  "Erdos713.erdos_713.parts.ii.R3.H2",
+  49.5,
+  "\u2200 (r : \u2115) (F : SimpleGraph (Fin r)), F.IsBipartite \u2192 \u2200 \u03b1 : \u211d, 3 / 2 < \u03b1 \u2192 \u03b1 < 2 \u2192 (fun n : \u2115 => (extremalNumber n F : \u211d)) =O[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1) \u2192 \u00ac (fun n : \u2115 => (extremalNumber n F : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1) \u2192 (\u2200 (s : \u2115) (J : SimpleGraph (Fin s)), J \u2291 F \u2192 s + J.edgeFinset.card < r + F.edgeFinset.card \u2192 (fun n : \u2115 => (extremalNumber n J : \u211d)) =o[atTop] (fun n : \u2115 => (n : \u211d) ^ \u03b1)) \u2192 (\u2200 (s : \u2115) (J : SimpleGraph (Fin s)), J \u2291 F \u2192 2 \u2264 J.edgeFinset.card \u2192 (2 : \u211d) - ((s - 2 : \u2115) : \u211d) / ((J.edgeFinset.card - 1 : \u2115) : \u211d) < \u03b1) \u2192 (\u2200 (R : Finset (Fin r)) (t : \u2115), 0 < t \u2192 (\u2200 \u2983u v\u2984, F.Adj u v \u2192 (u \u2208 R \u2194 v \u2209 R)) \u2192 \u2200 E : Finset {v : Fin r // v \u2209 R}, E.card \u2264 t \u2192 (\u2200 v \u2209 E, F.degree v.val \u2264 t) \u2192 \u03b1 < 2 - 1 / (t : \u211d)) \u2192 \u03b1 \u2208 Set.range ((\u2191) : \u211a \u2192 \u211d)"
+ ],
+ [
+  "Erdos39.erdos_39.R1.H1",
+  49.0,
+  "\u2203 f : \u2115 \u2192 \u2115, (\u2200 k, \u2203 n, k \u2264 f n) \u2227 (\u2200 \u03b5 > (0 : \u211d), (\u00b7 ^ (1 / 2 - \u03b5) : \u2115 \u2192 \u211d) =O[atTop] fun n => (f n : \u211d)) \u2227 \u2200 K : \u2115, \u2203 B : Finset \u2115, IsSidon (B : Set \u2115) \u2227 \u2200 n \u2264 K, f n \u2264 ((Set.Icc 1 n) \u2229 (B : Set \u2115)).ncard"
+ ],
+ [
+  "Erdos41.erdos_41.R1.H2",
+  49.0,
+  "\u2200 (f : \u2115 \u2192 \u2115), StrictMono f \u2192 (\u2203 K : \u2115, \u2200\u1da0 n in atTop, f n \u2264 K * (n + 1)^3) \u2192 (\u00ac (fun i : \u2115 => ((f (i+1)-f i : \u2115) : \u211d)) =o[atTop] (fun i : \u2115 => (i : \u211d)^2 * Real.log (i+2))) \u2192 (\u2200 p : \u211d, 1 < p \u2192 \u2200 C : \u211d, \u2203\u1da0 n : \u2115 in atTop, C < (\u2211 i \u2208 Finset.range n, ((f (i+1)-f i : \u2115) : \u211d)^p) / ((n : \u211d)+1)^(2*p+1)) \u2192 \u00ac Erdos41.NtupleCondition (Set.range f) 3"
+ ],
+ [
+  "Erdos41.erdos_41.R2.H1",
+  49.0,
+  "\u2200 f : \u2115 \u2192 \u2115, StrictMono f \u2192 Erdos41.NtupleCondition (Set.range f) 3 \u2192 (\u2203 d : \u2115, 0 < d \u2227 \u2200\u1da0 n : \u2115 in atTop, f n \u2264 (d * (n + 1)) ^ 3) \u2192 (\u2203 C : \u2115, \u2200\u1da0 k : \u2115 in atTop, \u2200 D : Finset (\u2115 \u00d7 \u2115), (\u2200 p \u2208 D, p.1 \u2208 Set.range f \u2227 p.2 \u2208 Set.range f \u2227 p.1 \u2260 p.2 \u2227 p.1 \u2264 p.2 + k ^ 3 \u2227 p.2 \u2264 p.1 + k ^ 3) \u2192 D.card \u2264 C * k ^ 2) \u2192 (\u2203 L : \u211d, Tendsto (fun n : \u2115 => (f n : \u211d) / ((n : \u211d) + 1) ^ 3) atTop (nhds L)) \u2192 False"
+ ],
+ [
+  "Erdos41.erdos_41.R2.H2",
+  49.0,
+  "\u2200 f : \u2115 \u2192 \u2115, StrictMono f \u2192 Erdos41.NtupleCondition (Set.range f) 3 \u2192 (\u2203 d : \u2115, 0 < d \u2227 \u2200\u1da0 n : \u2115 in atTop, f n \u2264 (d * (n + 1)) ^ 3) \u2192 (\u2203 C : \u2115, \u2200\u1da0 k : \u2115 in atTop, \u2200 D : Finset (\u2115 \u00d7 \u2115), (\u2200 p \u2208 D, p.1 \u2208 Set.range f \u2227 p.2 \u2208 Set.range f \u2227 p.1 \u2260 p.2 \u2227 p.1 \u2264 p.2 + k ^ 3 \u2227 p.2 \u2264 p.1 + k ^ 3) \u2192 D.card \u2264 C * k ^ 2) \u2192 (\u00ac \u2203 L : \u211d, Tendsto (fun n : \u2115 => (f n : \u211d) / ((n : \u211d) + 1) ^ 3) atTop (nhds L)) \u2192 False"
+ ],
+ [
+  "Erdos564.erdos_564.R1.H1",
+  49.0,
+  "\u2203 a : \u211d, 0 < a \u2227 \u2200\u1da0 k : \u2115 in atTop, \u2200 m : \u2115, (\u2200 f : Finset (Fin m) \u2192 Fin 3, \u2203 S : Finset (Fin m), S.card = k \u2227 \u2203 b : Fin 3, \u2200 e : Finset (Fin m), e \u2286 S \u2192 e.card = 3 \u2192 f e = b) \u2192 (2 : \u211d) ^ (2 : \u211d) ^ (a * k) \u2264 m"
+ ],
+ [
+  "Erdos564.erdos_564.R1.H2",
+  49.0,
+  "\u2203 d : \u211d, 0 < d \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2203 k : \u2115, d * n \u2264 k \u2227 \u2200 f : Finset (Fin (hypergraphRamsey 3 n)) \u2192 Fin 3, \u2203 S : Finset (Fin (hypergraphRamsey 3 n)), S.card = k \u2227 \u2203 b : Fin 3, \u2200 e : Finset (Fin (hypergraphRamsey 3 n)), e \u2286 S \u2192 e.card = 3 \u2192 f e = b"
+ ],
+ [
+  "Erdos564.erdos_564.R2.H2",
+  49.0,
+  "\u2203 d : \u211d, 0 < d \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2203 k : \u2115, d * n \u2264 k \u2227 \u2200 f : Finset (Fin (hypergraphRamsey 3 n)) \u2192 Fin 4, \u2203 S : Finset (Fin (hypergraphRamsey 3 n)), S.card = k \u2227 \u2203 b : Fin 4, \u2200 e : Finset (Fin (hypergraphRamsey 3 n)), e \u2286 S \u2192 e.card = 3 \u2192 f e = b"
+ ],
+ [
+  "Erdos66.erdos_66.R1.H2",
+  49.0,
+  "\u2203 a : \u211d, 0 < a \u2227 let p : \u2115 \u2192 \u211d := fun i \u21a6 a * Real.sqrt ((1 + Real.log ((i : \u211d) + 1)) / ((i : \u211d) + 1)) \u2203 D : \u211d, 0 \u2264 D \u2227 \u2203 e : \u2115 \u2192 \u211d, Tendsto e atTop (\ud835\udcdd 0) \u2227 \u2200 N : \u2115, \u2203 S : Finset \u2115, S \u2286 range (N + 1) \u2227 let d : \u2115 \u2192 \u211d := fun i \u21a6 (if i \u2208 S then 1 else 0) - p i \u2200 n \u2264 N, |\u2211 i \u2208 range (n + 1), d i| \u2264 D \u2227 |sumConv d d n / Real.log n| \u2264 e n"
+ ],
+ [
+  "Erdos89.erdos_89.R1.H2",
+  49.0,
+  "(fun n : \u2115 => n / (n : \u211d).log.sqrt) =O[atTop] (fun n => (minimalDistinctDistances {p : \u211d\u00b2 // \u2200 i : Fin 2, IsIntegral \u2124 (p i)} n : \u211d))"
+ ],
+ [
+  "Erdos50.erdos_50.R1.H1",
+  46.5,
+  "\u2200 f : \u211d \u2192 \u211d, (\u2200 c \u2208 Set.Icc (0 : \u211d) 1, {n : \u2115 | (Nat.totient n : \u211d) < c * n}.HasDensity (f c)) \u2192 \u2200 x \u2208 Set.Ioo (0 : \u211d) 1, (\u00ac\u2203 d : \u2115, 0 < d \u2227 x = (d.totient : \u211d) / d) \u2192 Irrational x \u2192 \u00ac\u2203 y > 0, HasDerivWithinAt f y (Set.Icc 0 1) x"
+ ],
+ [
+  "Erdos50.erdos_50.R1.H2",
+  46.5,
+  "\u2200 f : \u211d \u2192 \u211d, (\u2200 c \u2208 Set.Icc (0 : \u211d) 1, {n : \u2115 | (Nat.totient n : \u211d) < c * n}.HasDensity (f c)) \u2192 \u2200 x \u2208 Set.Ioo (0 : \u211d) 1, (\u00ac\u2203 d : \u2115, 0 < d \u2227 x = (d.totient : \u211d) / d) \u2192 \u00ac Irrational x \u2192 \u00ac\u2203 y > 0, HasDerivWithinAt f y (Set.Icc 0 1) x"
+ ],
+ [
+  "Erdos595.erdos_595.R1.H2",
+  46.5,
+  "\u2203 (V : Type) (_ : Infinite V) (X : SimpleGraph V), (\u2200 c : X.EdgeLabeling \u2115, \u2203 n, \u00ac (c.labelGraph n).CliqueFree 3) \u2227 \u2203 F : \u2115 \u2192 SimpleGraph V, (\u2200 n a b, (F n).Adj a b \u2192 Nonempty ({w : V | (F n).Adj a w \u2227 (F n).Adj b w} \u21aa (\u2115 \u2192 Bool))) \u2227 \u2200 s : Finset V, X.IsNClique 4 s \u2192 \u2203 n, \u2203 a \u2208 s, \u2203 b \u2208 s, (F n).Adj a b"
+ ],
+ [
+  "Erdos86.erdos_86.R1.H2",
+  46.0,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 m : \u2115, \u2200 L R : SimpleGraph (Fin m \u2192 Bool), L \u2264 hypercube m \u2192 R \u2264 hypercube m \u2192 \u00accycleGraph 4 \u2291 L \u2192 \u00accycleGraph 4 \u2291 R \u2192 (\u2200 J : SimpleGraph (Fin m \u2192 Bool), L \u2264 J \u2192 J \u2264 hypercube m \u2192 \u00accycleGraph 4 \u2291 J \u2192 J = L) \u2192 (\u2200 J : SimpleGraph (Fin m \u2192 Bool), R \u2264 J \u2192 J \u2264 hypercube m \u2192 \u00accycleGraph 4 \u2291 J \u2192 J = R) \u2192 \u2203 (t : \u2115) (u v : Fin t \u2192 (Fin m \u2192 Bool)), Function.Injective (fun p : Bool \u00d7 Fin t => if p.1 then u p.2 else v p.2) \u2227 (\u2200 j, L.Adj (u j) (v j) \u2227 R.Adj (u j) (v j)) \u2227 (L.edgeSet.ncard : \u211d) + R.edgeSet.ncard + 2^m \u2264 (1/2+\u03b4) * ((m:\u211d)+1) * 2^m + t"
+ ],
+ [
+  "Erdos99.erdos_99.R1.H2",
+  46.0,
+  "\u2200\u1da0 n : \u2115 in Filter.atTop, \u2200 A : Finset (EuclideanSpace \u211d (Fin 2)), A.card = n \u2192 (\u2200 p \u2208 A, \u2200 q \u2208 A, p \u2260 q \u2192 1 \u2264 dist p q) \u2192 (\u2203 p \u2208 A, \u2203 q \u2208 A, dist p q = 1) \u2192 Metric.diam (A : Set (EuclideanSpace \u211d (Fin 2))) \u2264 2 * Real.sqrt n \u2192 (\u2200 v : EuclideanSpace \u211d (Fin 2) \u2192 EuclideanSpace \u211d (Fin 2), (\u2200 p \u2208 A, \u2200 q \u2208 A, dist p q = 1 \u2192 0 \u2264 \u27eap - q, v p - v q\u27eb_\u211d) \u2192 \u2203 p \u2208 A, \u2203 q \u2208 A, dist p q = Metric.diam (A : Set (EuclideanSpace \u211d (Fin 2))) \u2227 0 \u2264 \u27eap - q, v p - v q\u27eb_\u211d) \u2192 (\u00ac \u2203 p \u2208 A, \u2203 q \u2208 A, \u2203 r \u2208 A, dist p q = 1 \u2227 dist q r = 1 \u2227 dist p r = 1) \u2192 \u2203 B : Finset (EuclideanSpace \u211d (Fin 2)), B.card = n \u2227 (\u2200 p \u2208 B, \u2200 q \u2208 B, p \u2260 q \u2192 1 \u2264 dist p q) \u2227 Metric.diam (B : Set (EuclideanSpace \u211d (Fin 2))) < Metric.diam (A : Set (EuclideanSpace \u211d (Fin 2)))"
+ ],
+ [
+  "Erdos101.erdos_101.R1.H1.R1.H1",
+  22.5,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 d : \u2115, \u2203 c : \u211d, 0 < c \u2227 \u2203 N : \u2115, \u2200 S U : Finset \u211d\u00b2, N \u2264 S.card \u2192 U \u2286 S \u2192 NonCollinearFor 5 (S : Set \u211d\u00b2) \u2192 \u2200 A : Finset (AffineSubspace \u211d \u211d\u00b2), \u03b4*(S.card : \u211d)^2 \u2264 A.card \u2192 (\u2200 L \u2208 A, L \u2208 linesWithPointsFor 4 (S : Set \u211d\u00b2) \u2227 3 \u2264 (U.filter (fun p => p \u2208 L)).card) \u2192 \u2203 F : MvPolynomial (Fin 2) \u211d, F \u2260 0 \u2227 F.totalDegree \u2264 d \u2227 c*S.card \u2264 (U.filter (fun p => eval (fun i => p i) F = 0)).card"
+ ],
+ [
+  "Erdos101.erdos_101.R1.H1.R1.H2",
+  22.5,
+  "\u2200 d : \u2115, \u2200 \u03c4 : \u211d, 0 < \u03c4 \u2192 \u2203 e : \u2115, \u2203 c : \u211d, 0 < c \u2227 \u2203 N : \u2115, \u2200 S T : Finset \u211d\u00b2, N \u2264 S.card \u2192 T \u2286 S \u2192 NonCollinearFor 5 (S : Set \u211d\u00b2) \u2192 \u2200 F : MvPolynomial (Fin 2) \u211d, F \u2260 0 \u2192 F.totalDegree \u2264 d \u2192 (\u2200 p \u2208 T, eval (fun i => p i) F \u2260 0) \u2192 \u03c4*S.card \u2264 T.card \u2192 (\u2200 p \u2208 T, \u2203 A : Finset (AffineSubspace \u211d \u211d\u00b2), \u03c4*S.card \u2264 A.card \u2227 \u2200 L \u2208 A, p \u2208 L \u2227 L \u2208 linesWithPointsFor 4 (S : Set \u211d\u00b2) \u2227 2 \u2264 (S.filter (fun x => x \u2208 L \u2227 eval (fun i => x i) F = 0)).card) \u2192 \u2203 G : MvPolynomial (Fin 2) \u211d, G \u2260 0 \u2227 G.totalDegree \u2264 e \u2227 c*S.card \u2264 (T.filter (fun p => eval (fun i => p i) G = 0)).card"
+ ],
+ [
+  "Erdos101.erdos_101.R1.H2",
+  45.0,
+  "\u2200 d : \u2115, \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N : \u2115, \u2200 n : \u2115, N \u2264 n \u2192 \u2200 S : Finset \u211d\u00b2, S.card \u2264 n \u2192 NonCollinearFor 5 (S : Set \u211d\u00b2) \u2192 \u2200 F : MvPolynomial (Fin 2) \u211d, F \u2260 0 \u2192 4 \u2264 F.totalDegree \u2192 F.totalDegree \u2264 d \u2192 (\u2200 p \u2208 S, eval (fun i => p i) F = 0) \u2192 ((linesWithPointsFor 4 (S : Set \u211d\u00b2)).ncard : \u211d) \u2264 \u03b5 * (n : \u211d)^2"
+ ],
+ [
+  "Erdos101.erdos_101.R2.H1",
+  45.0,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 k : \u2115, \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2203 N : \u2115, \u2200 S : Finset \u211d\u00b2, N \u2264 S.card \u2192 NonCollinearFor 5 (S : Set \u211d\u00b2) \u2192 \u03b4*(S.card : \u211d)^2 \u2264 (linesWithPointsFor 4 (S : Set \u211d\u00b2)).ncard \u2192 \u2203 T : Finset (S \u00d7 S \u00d7 S), ExplicitDisjoint T \u2227 \u03b7*(S.card : \u211d)^2 \u2264 T.card \u2227 (T : Set (S \u00d7 S \u00d7 S)).InjOn (fun e => line[\u211d,(e.1 : \u211d\u00b2),(e.2.1 : \u211d\u00b2)]) \u2227 (\u2200 e \u2208 T, e.1 \u2260 e.2.1 \u2227 e.1 \u2260 e.2.2 \u2227 e.2.1 \u2260 e.2.2 \u2227 line[\u211d,(e.1 : \u211d\u00b2),(e.2.1 : \u211d\u00b2)] \u2208 linesWithPointsFor 4 (S : Set \u211d\u00b2)) \u2227 \u2203 a b d : S \u2192 S \u2192 \u211d\u02e3, (\u2200 e \u2208 T, (a e.1 e.2.2 : \u211d) + (b e.2.1 e.2.2 : \u211d) = 1 \u2227 (a e.1 e.2.2 : \u211d) \u2022 (e.1 : \u211d\u00b2) + (b e.2.1 e.2.2 : \u211d) \u2022 (e.2.1 : \u211d\u00b2) = (e.2.2 : \u211d\u00b2) \u2227 d e.1 e.2.1 = b e.2.1 e.2.2 / a e.1 e.2.2) \u2227 \u2203 K : Finset \u211d\u02e3, K.card \u2264 k \u2227 \u2200 x y z, (\u2203 w, (x,y,w) \u2208 T) \u2192 (\u2203 w, (x,w,z) \u2208 T) \u2192 (\u2203 w, (w,y,z) \u2208 T) \u2192 a x z * d x y / b y z \u2208 K"
+ ],
+ [
+  "Erdos101.erdos_101.R2.H2",
+  45.0,
+  "\u2200 k : \u2115, \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 N : \u2115, \u2200 S : Finset \u211d\u00b2, N \u2264 S.card \u2192 NonCollinearFor 5 (S : Set \u211d\u00b2) \u2192 \u2200 T : Finset (S \u00d7 S \u00d7 S), ExplicitDisjoint T \u2192 \u2200 a b d : S \u2192 S \u2192 \u211d\u02e3, (\u2200 e \u2208 T, (a e.1 e.2.2 : \u211d) + (b e.2.1 e.2.2 : \u211d) = 1 \u2227 (a e.1 e.2.2 : \u211d) \u2022 (e.1 : \u211d\u00b2) + (b e.2.1 e.2.2 : \u211d) \u2022 (e.2.1 : \u211d\u00b2) = (e.2.2 : \u211d\u00b2) \u2227 d e.1 e.2.1 = b e.2.1 e.2.2 / a e.1 e.2.2) \u2192 \u2200 K : Finset \u211d\u02e3, K.card \u2264 k \u2192 (\u2200 x y z, (\u2203 w, (x,y,w) \u2208 T) \u2192 (\u2203 w, (x,w,z) \u2208 T) \u2192 (\u2203 w, (w,y,z) \u2208 T) \u2192 a x z * d x y / b y z \u2208 K) \u2192 (T.card : \u211d) < \u03b4*(S.card : \u211d)^2"
+ ],
+ [
+  "Erdos1029.erdos_1029.R1.H1",
+  45.0,
+  "\u2200 a : \u2115, \u2203 N : \u2115, \u2200 s : \u2115, N \u2264 s \u2192 \u2203 G : SimpleGraph (Fin (a * (2 * (2 * s) * 2 ^ (2 * s)))), G.CliqueFree (2 * (2 * s)) \u2227 G\u1d9c.CliqueFree (2 * (2 * s))"
+ ],
+ [
+  "Erdos1029.erdos_1029.R1.H2",
+  45.0,
+  "\u2200 a : \u2115, \u2203 N : \u2115, \u2200 s : \u2115, N \u2264 s \u2192 \u2203 G : SimpleGraph (Fin (a * (2 * (2 * s + 1) * 2 ^ (2 * s + 1)))), G.CliqueFree (2 * (2 * s + 1)) \u2227 G\u1d9c.CliqueFree (2 * (2 * s + 1))"
+ ],
+ [
+  "Erdos104.erdos_104.R1.H1",
+  45.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N : \u2115, \u2200 n : \u2115, N \u2264 n \u2192 \u2200 P : Finset \u211d\u00b2, P.card \u2264 n \u2192 (({s : Sphere \u211d\u00b2 | s.radius = 1 \u2227 {p \u2208 (P : Set \u211d\u00b2) | p \u2208 s}.ncard = 3} \\ {s : Sphere \u211d\u00b2 | s.radius = 1 \u2227 \u2203 a \u2208 P, \u2203 b \u2208 P, a \u2260 b \u2227 dist a b = 2 \u2227 a \u2208 s \u2227 b \u2208 s}).ncard : \u211d) \u2264 \u03b5 * (n : \u211d) ^ 2"
+ ],
+ [
+  "Erdos142.erdos_142.variants.lower.R1.H2.R1.H1",
+  22.5,
+  "\u2200 k : \u2115, 4 \u2264 k \u2192 \u2203 (\u03b2 C T R\u2080 : \u211d), 0 < \u03b2 \u2227 \u03b2 < 1 \u2227 0 < C \u2227 \u2200 R : \u211d, R\u2080 \u2264 R \u2192 \u2200 (N : \u2115) (S : Finset \u2115), 2 \u2264 N \u2192 S \u2286 Finset.Icc 1 N \u2192 0 < S.card \u2192 (\u00ac \u2203 a d : \u2115, 0 < d \u2227 \u2200 i < k, a + i * d \u2208 S) \u2192 let p := max 2 (Real.log (2 * (N : \u211d) / (S.card : \u211d))) T < p \u2192 C * p ^ \u03b2 + R \u2264 Real.log (Real.log (N : \u211d)) \u2192 \u2203 (a q M : \u2115), 0 < q \u2227 2 \u2264 M \u2227 (\u2200 i \u2208 Finset.Icc 1 M, a + (i - 1) * q \u2208 Finset.Icc 1 N) \u2227 let U := (Finset.Icc 1 M).filter (fun i \u21a6 a + (i - 1) * q \u2208 S) let p' := max 2 (Real.log (2 * (M : \u211d) / (U.card : \u211d))) 0 < U.card \u2227 p' + 1 \u2264 p \u2227 C * p' ^ \u03b2 + R \u2264 Real.log (Real.log (M : \u211d))"
+ ],
+ [
+  "Erdos142.erdos_142.variants.lower.R1.H2.R2.H1",
+  22.5,
+  "\u2200 k : \u2115, 4 \u2264 k \u2192 \u2200\u1da0 N : \u2115 in atTop, \u2200 c : \u2115 \u2192 Fin ((\u2308Real.log (N : \u211d)\u2309\u208a + 1) ^ 4), \u2203 a d : \u2115, 0 < d \u2227 \u2200 i < k, a + i * d \u2208 Finset.Icc 1 N \u2227 c (a + i * d) = c a"
+ ],
+ [
+  "Erdos142.erdos_142.variants.lower.R2.H1",
+  45.0,
+  "\u2200 A : Set \u2115, (\u2200 x \u2208 A, \u2203 j : \u2115, 4 * 4 ^ j < x \u2227 x \u2264 5 * 4 ^ j) \u2192 \u00ac Summable (A.indicator (fun n : \u2115 \u21a6 (n : \u211d)\u207b\u00b9)) \u2192 \u2200 k : \u2115, 3 \u2264 k \u2192 \u2203 a d : \u2115, 0 < d \u2227 \u2200 i < k, a + i * d \u2208 A"
+ ],
+ [
+  "Erdos142.erdos_142.variants.lower.R3.H2",
+  45.0,
+  "\u2200 k : \u2115, 4 \u2264 k \u2192 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2200\u1da0 n : \u2115 in atTop, \u2200 S : Finset \u2115, (\u2200 x \u2208 S, \u2203 j \u2208 Finset.Ico n (2 * n), 4 * 4 ^ j < x \u2227 x \u2264 5 * 4 ^ j) \u2192 (\u00ac \u2203 a d : \u2115, 0 < d \u2227 \u2200 i < k, a + i * d \u2208 S) \u2192 (\u2211 x \u2208 S, (x : \u211d)\u207b\u00b9) \u2264 \u03b5"
+ ],
+ [
+  "Erdos159.erdos_159.R1.H1",
+  45.0,
+  "\u2203 \u03b5 A : \u211d, 0 < \u03b5 \u2227 \u03b5 \u2264 1 \u2227 1 \u2264 A \u2227 \u2200 (n m : \u2115) (G : SimpleGraph (Fin m)) (S : Finset (Fin m)), 1 \u2264 n \u2192 \u00ac (cycleGraph 4).IsContained G \u2192 \u00ac (completeGraph (Fin n)).IsContained G\u1d9c \u2192 (\u2200 x \u2208 S, S.card \u2264 16*n*((S.filter (G.Adj x)).card+1) \u2227 (S.filter (G.Adj x)).card \u2264 2*(n-1)) \u2192 (\u2200 B \u2286 S, \u00ac G.IsNClique 3 B) \u2192 (S.card : \u211d) \u2264 A*(n:\u211d)^(2-\u03b5)"
+ ],
+ [
+  "Erdos159.erdos_159.R1.H2",
+  45.0,
+  "\u2203 \u03b5 A : \u211d, 0 < \u03b5 \u2227 \u03b5 \u2264 1 \u2227 1 \u2264 A \u2227 \u2200 (n m : \u2115) (G : SimpleGraph (Fin m)) (S : Finset (Fin m)), 1 \u2264 n \u2192 \u00ac (cycleGraph 4).IsContained G \u2192 \u00ac (completeGraph (Fin n)).IsContained G\u1d9c \u2192 (\u2200 x \u2208 S, S.card \u2264 16*n*((S.filter (G.Adj x)).card+1) \u2227 (S.filter (G.Adj x)).card \u2264 2*(n-1)) \u2192 (\u2203 F : Finset (Finset (Fin m)), S.card \u2264 2*(F.biUnion id).card \u2227 (\u2200 B \u2208 F, B \u2286 S \u2227 G.IsNClique 3 B) \u2227 (\u2200 U \u2208 F, \u2200 W \u2208 F, U \u2260 W \u2192 Disjoint U W \u2227 \u2200 a \u2208 U, \u2200 c \u2208 U, \u2200 b \u2208 W, \u2200 d \u2208 W, G.Adj a b \u2192 G.Adj c d \u2192 a = c \u2227 b = d)) \u2192 (S.card : \u211d) \u2264 A*(n:\u211d)^(2-\u03b5)"
+ ],
+ [
+  "Erdos159.erdos_159.R2.H1",
+  45.0,
+  "\u2203 \u03b5 A : \u211d, 0 < \u03b5 \u2227 1 \u2264 A \u2227 \u2200 (n m : \u2115) (G : SimpleGraph (Fin m)), 1 \u2264 n \u2192 \u00ac (cycleGraph 4).IsContained G \u2192 G.CliqueFree 3 \u2192 \u00ac (completeGraph (Fin n)).IsContained G\u1d9c \u2192 (\u2200 v : Fin m, 2 * (Finset.univ.filter (G.Adj v)).card \u2264 n) \u2192 (m : \u211d) \u2264 A * (n : \u211d) ^ (2 - \u03b5)"
+ ],
+ [
+  "Erdos159.erdos_159.R2.H2",
+  45.0,
+  "\u2203 \u03b5 A : \u211d, 0 < \u03b5 \u2227 1 \u2264 A \u2227 \u2200 (n m : \u2115) (G : SimpleGraph (Fin m)), 1 \u2264 n \u2192 \u00ac (cycleGraph 4).IsContained G \u2192 G.CliqueFree 3 \u2192 \u00ac (completeGraph (Fin n)).IsContained G\u1d9c \u2192 (\u2203 v : Fin m, n < 2 * (Finset.univ.filter (G.Adj v)).card) \u2192 (m : \u211d) \u2264 A * (n : \u211d) ^ (2 - \u03b5)"
+ ],
+ [
+  "Erdos241.erdos_241.R1.H2",
+  45.0,
+  "\u2203 \u03b5 : \u2115 \u2192 \u211d, \u03b5 =o[atTop] (fun _ \u21a6 (1 : \u211d)) \u2227 \u2200\u1da0 N in atTop, (Erdos241.f N 3 : \u211d) \u2264 (1 + \u03b5 N) * (N : \u211d) ^ ((1 : \u211d) / 3)"
+ ],
+ [
+  "Erdos552.erdos_552.parts.ii.R1.H3",
+  30.0,
+  "let f := fun n : \u2115 => graphRamsey (cycleGraph 4) (completeBipartiteGraph (Fin 1) (Fin n)) \u2200 K B : \u2115, \u2203 n p : \u2115, B < n \u2227 p.Prime \u2227 n \u2264 p^2 \u2227 (\u2200 r : \u2115, r.Prime \u2192 n \u2264 r^2 \u2192 p \u2264 r) \u2227 ((Ico n (p^2)).filter (fun i => f (i+1) = f i)).card + p + K + 1 \u2264 ((Ico n (p^2)).filter (fun i => f (i+1) = f i+2)).card + Nat.sqrt n"
+ ],
+ [
+  "Erdos552.erdos_552.parts.ii.R2.H2",
+  45.0,
+  "\u2200 k : \u2115, \u2203 n d : \u2115, (d+k)^2 \u2264 n \u2227 \u2200 (G : SimpleGraph (Fin (n+d))) [DecidableRel G.Adj], \u00ac(cycleGraph 4).IsContained G \u2192 \u2203 v, G.degree v < d"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H1.R1.H1",
+  3.5,
+  "\u2200 (V : Type) (G : SimpleGraph V) [Fintype V] [DecidableRel G.Adj], G.Connected \u2192 (\u2200 x, G.degree x = 3) \u2192 (\u2200 \u2983a b\u2984, G.Adj a b \u2192 \u00ac G.IsBridge s(a,b)) \u2192 \u00ac G.IsBipartite \u2192 (\u00ac \u2203 color : V \u2192 Fin 4, (\u2200 \u2983x y\u2984, G.Adj x y \u2192 color x \u2260 color y) \u2227 \u2200 x j, j \u2260 color x \u2192 \u2203! y, G.Adj x y \u2227 color y = j) \u2192 \u2203 (k : \u2115) (v : V) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 c.length = 2 ^ k"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H1.R1.H2",
+  3.5,
+  "\u2200 (X : Type) [Fintype X] [Nonempty X] (p q r : Equiv.Perm X), \u00ac (Fintype.card X).Prime \u2192 \u00ac ((\u2203 s : \u2115, Fintype.card X = 2^s) \u2227 Group.IsSolvable (Subgroup.closure ({p,q,r} : Set (Equiv.Perm X)))) \u2192 (\u00ac \u2203 (A : Type) (_ : AddCommGroup A) (f : A \u21aa X) (s t u : Bool) (a b c : A), \u2200 x, p (f x) = f ((if s then -x else x)+a) \u2227 q (f x) = f ((if t then -x else x)+b) \u2227 r (f x) = f ((if u then -x else x)+c)) \u2192 \u00ac (\u2203 (A S : Type) (_ : AddCommGroup A) (_ : Group S) (_ : DistribMulAction S A) (f : A \u21aa X) (P Q R : S) (a b c : A), (\u2200 g : S, g \u2260 1 \u2192 Function.Bijective (fun x : A => x - g \u2022 x)) \u2227 \u2200 x, p (f x) = f (P \u2022 x+a) \u2227 q (f x) = f (Q \u2022 x+b) \u2227 r (f x) = f (R \u2022 x+c)) \u2192 let K := SimpleGraph.fromRel (fun u v : Fin 4 \u00d7 X => (u.1 = 0 \u2227 v.1 \u2260 0 \u2227 v.2 = u.2) \u2228 (u.1 = 1 \u2227 v.1 = 2 \u2227 v.2 = p u.2) \u2228 (u.1 = 2 \u2227 v.1 = 3 \u2227 v.2 = q u.2) \u2228 (u.1 = 3 \u2227 v.1 = 1 \u2227 v.2 = r u.2)) K.Connected \u2192 \u00ac K.IsBipartite \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 K"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H1.R1.H3",
+  3.5,
+  "\u2200 (X : Type) [Fintype X] [Nonempty X] (p q r : Equiv.Perm X), (Fintype.card X).Prime \u2192 \u00ac Group.IsSolvable (Subgroup.closure ({p,q,r} : Set (Equiv.Perm X))) \u2192 let K := SimpleGraph.fromRel (fun u v : Fin 4 \u00d7 X => (u.1 = 0 \u2227 v.1 \u2260 0 \u2227 v.2 = u.2) \u2228 (u.1 = 1 \u2227 v.1 = 2 \u2227 v.2 = p u.2) \u2228 (u.1 = 2 \u2227 v.1 = 3 \u2227 v.2 = q u.2) \u2228 (u.1 = 3 \u2227 v.1 = 1 \u2227 v.2 = r u.2)) K.Connected \u2192 \u00ac K.IsBipartite \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 K"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R1.H1.R1.H1",
+  2.625,
+  "\u2200 (A : Type) [Group A] [Fintype A] (a b : A), Subgroup.closure ({a,b}:Set A)=\u22a4 \u2192 a\u22601 \u2192 b\u22601 \u2192 a\u2260b \u2192 \u00ac(Commute a \u2045a,b\u2046 \u2227 Commute b \u2045a,b\u2046) \u2192 \u00ac IsPGroup 2 ((\u22a4 : Subgroup A).lowerCentralSeries 3) \u2192 Odd (Nat.card A) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 A => u.1=false \u2227 v.1=true \u2227 (v.2=u.2 \u2228 v.2=a*u.2 \u2228 v.2=b*u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R1.H1.R1.H2.R1.H2",
+  1.3125,
+  "\u2200 (A : Type) [Group A] [Fintype A] (P : Sylow 2 A) (a b : A), Subgroup.closure ({a,b}:Set A)=\u22a4 \u2192 Odd P.index \u2192 7 \u2264 P.index \u2192 P.index < Nat.card A \u2192 (\u2200 x : A \u29f8 (P : Subgroup A), a \u2022 x \u2260 x \u2227 b \u2022 x \u2260 x \u2227 a \u2022 x \u2260 b \u2022 x) \u2192 (\u2203 z : A, z \u2260 1 \u2227 z^2=1 \u2227 3 \u2264 {x : A \u29f8 (P : Subgroup A) | z \u2022 x = x}.ncard) \u2192 P.index \u2264 3 * {x : A \u29f8 (P : Subgroup A) | a \u2022 b \u2022 x \u2260 b \u2022 a \u2022 x}.ncard \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 (A \u29f8 (P : Subgroup A)) => u.1=false \u2227 v.1=true \u2227 (v.2=u.2 \u2228 v.2=a \u2022 u.2 \u2228 v.2=b \u2022 u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R1.H2.R1.H1",
+  2.625,
+  "\u2200 (X : Type) [Fintype X] [Nonempty X] (p q : Equiv.Perm X), (\u2200 x, p x \u2260 x \u2227 q x \u2260 x \u2227 p x \u2260 q x) \u2192 Fintype.card X \u2264 3 * {x : X | p (q x) \u2260 q (p x)}.ncard \u2192 \u00ac (Commute p \u2045p,q\u2046 \u2227 Commute q \u2045p,q\u2046) \u2192 (\u2203 g \u2208 Subgroup.closure ({p,q} : Set (Equiv.Perm X)), g \u2260 1 \u2227 \u2203 x : X, g x=x) \u2192 (\u2200 N : Subgroup (Subgroup.closure ({p,q} : Set (Equiv.Perm X))), N.Normal \u2192 IsMulCommutative N \u2192 N.index \u2260 11) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 X => u.1 = false \u2227 v.1 = true \u2227 (v.2 = u.2 \u2228 v.2 = p u.2 \u2228 v.2 = q u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R1.H2.R1.H2",
+  2.625,
+  "\u2200 (X : Type) [Fintype X] [Nonempty X] (p q : Equiv.Perm X), (\u2200 x, p x \u2260 x \u2227 q x \u2260 x \u2227 p x \u2260 q x) \u2192 Fintype.card X \u2264 3 * {x : X | p (q x) \u2260 q (p x)}.ncard \u2192 \u00ac (Commute p \u2045p,q\u2046 \u2227 Commute q \u2045p,q\u2046) \u2192 (\u2203 g \u2208 Subgroup.closure ({p,q} : Set (Equiv.Perm X)), g \u2260 1 \u2227 \u2203 x : X, g x=x) \u2192 \u2200 N : Subgroup (Subgroup.closure ({p,q} : Set (Equiv.Perm X))), N.Normal \u2192 IsMulCommutative N \u2192 N.index = 11 \u2192 (\u2200 x : X, \u2203 g : Subgroup.closure ({p,q} : Set (Equiv.Perm X)), g \u2022 x=x \u2227 g \u2209 N) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 X => u.1 = false \u2227 v.1 = true \u2227 (v.2 = u.2 \u2228 v.2 = p u.2 \u2228 v.2 = q u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R2.H1.R1.H1",
+  2.625,
+  "\u2200 (X : Type) [Fintype X] [Nonempty X] (p q : Equiv.Perm X), (\u2200 x, p x \u2260 x \u2227 q x \u2260 x \u2227 p x \u2260 q x) \u2192 Fintype.card X \u2264 3 * {x : X | p (q x) \u2260 q (p x)}.ncard \u2192 Odd (Nat.card (Subgroup.closure ({p,q} : Set (Equiv.Perm X)))) \u2192 (\u2200 x : X, \u2203 g \u2208 Subgroup.closure ({p,q} : Set (Equiv.Perm X)), g \u2260 1 \u2227 g x=x) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 X => u.1=false \u2227 v.1=true \u2227 (v.2=u.2 \u2228 v.2=p u.2 \u2228 v.2=q u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R2.H1.R1.H2.R1.H2",
+  1.3125,
+  "\u2200 (A : Type) [Group A] [Fintype A] (a b : A), Subgroup.closure ({a,b} : Set A) = \u22a4 \u2192 a \u2260 1 \u2192 b \u2260 1 \u2192 a \u2260 b \u2192 Odd (Nat.card A) \u2192 (\u2200 N : Subgroup A, N.Normal \u2192 IsMulCommutative N \u2192 N.index \u2260 11) \u2192 (\u2203 x y : commutator A, x * y \u2260 y * x) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 A => u.1=false \u2227 v.1=true \u2227 (v.2=u.2 \u2228 v.2=a*u.2 \u2228 v.2=b*u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R2.H2.R1.H1",
+  2.625,
+  "\u2200 (X : Type) [Fintype X] [Nonempty X] (p q : Equiv.Perm X), (\u2200 x, p x \u2260 x \u2227 q x \u2260 x \u2227 p x \u2260 q x) \u2192 Fintype.card X \u2264 3 * {x : X | p (q x) \u2260 q (p x)}.ncard \u2192 Even (Nat.card (Subgroup.closure ({p,q} : Set (Equiv.Perm X)))) \u2192 (\u2200 K : Subgroup (Subgroup.closure ({p,q} : Set (Equiv.Perm X))), K.Normal \u2192 IsPGroup 2 K \u2192 K = \u22a5) \u2192 let K := Subgroup.closure ({p,q} : Set (Equiv.Perm X)) let s : Fin 3 \u2192 K := ![1,\u27e8p,Subgroup.subset_closure (by simp)\u27e9, \u27e8q,Subgroup.subset_closure (by simp)\u27e9] (\u2200 (B : Type) [AddCommGroup B] (f : K \u2192* Multiplicative B), Function.Surjective f \u2192 (\u2200 i j : f.ker, i*j=j*i) \u2192 \u2200 \u03c3 : Equiv.Perm (Fin 3), let h := (f (s (\u03c3 1))).toAdd - (f (s (\u03c3 0))).toAdd let d := (f (s (\u03c3 2))).toAdd - (f (s (\u03c3 0))).toAdd h+h=0 \u2192 \u00ac Function.Injective (fun z : Fin 3 \u00d7 Fin 2 => z.1.val \u2022 d + z.2.val \u2022 h)) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 X => u.1 = false \u2227 v.1 = true \u2227 (v.2=u.2 \u2228 v.2=p u.2 \u2228 v.2=q u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R2.H2.R1.H2",
+  2.625,
+  "\u2200 (X : Type) [Fintype X] [Nonempty X] (p q : Equiv.Perm X), (\u2200 x, p x \u2260 x \u2227 q x \u2260 x \u2227 p x \u2260 q x) \u2192 Fintype.card X \u2264 3 * {x : X | p (q x) \u2260 q (p x)}.ncard \u2192 Even (Nat.card (Subgroup.closure ({p,q} : Set (Equiv.Perm X)))) \u2192 (\u2200 K : Subgroup (Subgroup.closure ({p,q} : Set (Equiv.Perm X))), K.Normal \u2192 IsPGroup 2 K \u2192 K = \u22a5) \u2192 let K := Subgroup.closure ({p,q} : Set (Equiv.Perm X)) let s : Fin 3 \u2192 K := ![1,\u27e8p,Subgroup.subset_closure (by simp)\u27e9, \u27e8q,Subgroup.subset_closure (by simp)\u27e9] \u2200 (B : Type) [AddCommGroup B] (f : K \u2192* Multiplicative B), Function.Surjective f \u2192 (\u2200 i j : f.ker, i*j=j*i) \u2192 \u2200 \u03c3 : Equiv.Perm (Fin 3), let h := (f (s (\u03c3 1))).toAdd - (f (s (\u03c3 0))).toAdd let d := (f (s (\u03c3 2))).toAdd - (f (s (\u03c3 0))).toAdd h+h=0 \u2192 Function.Injective (fun z : Fin 3 \u00d7 Fin 2 => z.1.val \u2022 d + z.2.val \u2022 h) \u2192 (\u2200 x : X, \u2203 g : K, g \u2022 x=x \u2227 f g\u22601) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 SimpleGraph.fromRel (fun u v : Bool \u00d7 X => u.1 = false \u2227 v.1 = true \u2227 (v.2=u.2 \u2228 v.2=p u.2 \u2228 v.2=q u.2))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R3.H1",
+  5.25,
+  "\u2200 (V : Type) [Fintype V] [Nonempty V] (G : SimpleGraph V) (s : V \u2192 Bool), (\u2200 {a b}, G.Adj a b \u2192 s a \u2260 s b) \u2192 (\u2200 x, (G.neighborSet x).ncard = 3) \u2192 (\u00ac cycleGraph 4 \u2291 G) \u2192 (\u00ac cycleGraph 6 \u2291 G) \u2192 (\u00ac cycleGraph 8 \u2291 G) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 G"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H1.R1.H2.R3.H2",
+  5.25,
+  "\u2200 (W : Type) [Fintype W] (H : SimpleGraph W) (s : W \u2192 Bool) (t : Fin 6 \u21aa W), (\u2200 {a b}, H.Adj a b \u2192 s a \u2260 s b) \u2192 (\u2200 x, (H.neighborSet x).ncard + (if x \u2208 Set.range t then 1 else 0) = 3) \u2192 (\u2200 i, s (t i) \u2260 s (t (i+1))) \u2192 (\u2200 i j, H.Adj (t i) (t j) \u2192 j=i+3) \u2192 (\u2200 i, \u00ac (H.Adj (t i) (t (i+3)) \u2227 H.Adj (t (i+1)) (t (i+4)))) \u2192 (\u2200 k : \u2115, 2 \u2264 k \u2192 \u00ac cycleGraph (2^k) \u2291 H) \u2192 (\u2200 (i j : Fin 6), i \u2260 j \u2192 \u2200 (P : H.Walk (t j) (t i)) (A : (cycleGraph 6).Walk i j), P.IsPath \u2192 A.IsPath \u2192 \u2200 k : \u2115, 2 \u2264 k \u2192 P.length+A.length+2 \u2260 2^k) \u2192 (\u2200 \u03c3 : Fin 6 \u2192 Fin 6, Function.Involutive \u03c3 \u2192 (\u2200 i, s (t i) \u2260 s (t (\u03c3 i))) \u2192 (\u2200 i, \u00ac H.Adj (t i) (t (\u03c3 i))) \u2192 \u2203 k : \u2115, 2 \u2264 k \u2227 cycleGraph (2^k) \u2291 fromRel (fun a b => H.Adj a b \u2228 \u2203 i, a=t i \u2227 b=t (\u03c3 i))) \u2192 \u2203 (k : \u2115) (_ : 2 \u2264 k) (S : Finset (Fin (2^k))) (a : {i // i \u2209 S} \u21aa W) (b : {i // i \u2208 S} \u21aa Fin 6), (\u2200 i j, (cycleGraph (2^k)).Adj i.val j.val \u2192 H.Adj (a i) (a j)) \u2227 (\u2200 i j, (cycleGraph (2^k)).Adj i.val j.val \u2192 (cycleGraph 6).Adj (b i) (b j)) \u2227 (\u2200 i j, (cycleGraph (2^k)).Adj i.val j.val \u2192 a j=t (b i))"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H1.R1.H2",
+  21.0,
+  "\u2200 (V : Type) (G : SimpleGraph V) [Fintype V] [DecidableRel G.Adj], G.Connected \u2192 \u2200 root : V, G.degree root = 2 \u2192 (\u2200 v, v \u2260 root \u2192 G.degree v = 3) \u2192 (\u2200 \u2983a b\u2984, G.Adj a b \u2192 \u00ac G.IsBridge s(a, b)) \u2192 \u2203 (k : \u2115) (v : V) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 c.length = 2 ^ k"
+ ],
+ [
+  "Erdos64.erdos_64.R1.H2",
+  42.0,
+  "\u2200 (V : Type) (G : SimpleGraph V) [Fintype V] [DecidableRel G.Adj], 3 \u2264 G.minDegree \u2192 (\u2203 v, 3 < G.degree v) \u2192 (\u2200 \u2983a b\u2984, G.Adj a b \u2192 G.degree a = 3 \u2228 G.degree b = 3) \u2192 (\u2200 a, \u2203 b, G.Adj a b \u2227 G.degree b = 3) \u2192 \u2203 (k : \u2115) (v : V) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 c.length = 2 ^ k"
+ ],
+ [
+  "Erdos64.erdos_64.R2.H1",
+  42.0,
+  "\u2200 (n : \u2115) (G : SimpleGraph (Fin n)) [DecidableRel G.Adj], 3 \u2264 G.minDegree \u2192 (\u2200 \u2983a b\u2984, G.Adj a b \u2192 G.degree a = 3 \u2228 G.degree b = 3) \u2192 (\u2200 a, \u2203 b, G.Adj a b \u2227 G.degree b = 3) \u2192 (\u2200 a b, a \u2260 b \u2192 ((G.neighborFinset a) \u2229 G.neighborFinset b).card \u2264 1) \u2192 (\u2200 C : Finset (Fin n), C.Nonempty \u2192 (\u2203 x, x \u2209 C) \u2192 (\u2200 \u2983a b\u2984, a \u2208 C \u2192 G.Adj a b \u2192 G.degree b = 3 \u2192 b \u2208 C) \u2192 \u2203 v \u2209 C, 4 \u2264 G.degree v \u2227 G.degree v - 2 \u2264 ((G.neighborFinset v) \u2229 C).card) \u2192 (\u2200 a b c, G.Adj a b \u2192 G.Adj b c \u2192 \u00ac G.Adj c a) \u2192 (\u2200 C : (G.induce {x : Fin n | G.degree x = 3}).ConnectedComponent, 4 \u2264 C.supp.ncard) \u2192 8*n \u2264 11*(univ.filter (fun x => G.degree x = 3)).card \u2192 \u2203 (k : \u2115) (v : Fin n) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 c.length = 2^k"
+ ],
+ [
+  "Erdos64.erdos_64.R2.H2",
+  42.0,
+  "\u2200 (n : \u2115) (G : SimpleGraph (Fin n)) [DecidableRel G.Adj], 3 \u2264 G.minDegree \u2192 (\u2200 \u2983a b\u2984, G.Adj a b \u2192 G.degree a = 3 \u2228 G.degree b = 3) \u2192 (\u2200 a, \u2203 b, G.Adj a b \u2227 G.degree b = 3) \u2192 (\u2200 a b, a \u2260 b \u2192 ((G.neighborFinset a) \u2229 G.neighborFinset b).card \u2264 1) \u2192 (\u2200 C : Finset (Fin n), C.Nonempty \u2192 (\u2203 x, x \u2209 C) \u2192 (\u2200 \u2983a b\u2984, a \u2208 C \u2192 G.Adj a b \u2192 G.degree b = 3 \u2192 b \u2208 C) \u2192 \u2203 v \u2209 C, 4 \u2264 G.degree v \u2227 G.degree v - 2 \u2264 ((G.neighborFinset v) \u2229 C).card) \u2192 (\u2203 a b c, G.Adj a b \u2227 G.Adj b c \u2227 G.Adj c a) \u2192 (\u2200 (m : \u2115) [NeZero m], 3 \u2264 m \u2192 \u2200 e : Fin (2*m) \u21aa Fin n, (\u2200 i, G.Adj (e i) (e (i+1))) \u2192 \u00ac (\u2200 i : Fin m, G.Adj (e \u27e82*i.val,by omega\u27e9) (e \u27e82*(i+1).val,by have := (i+1).isLt; omega\u27e9))) \u2192 2*n \u2264 3*(univ.filter (fun x => G.degree x = 3)).card \u2192 \u2203 (k : \u2115) (v : Fin n) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 c.length = 2^k"
+ ],
+ [
+  "Erdos64.erdos_64.R3.H1",
+  42.0,
+  "\u2200 (V : Type) (G : SimpleGraph V) [Fintype V] [DecidableRel G.Adj], 3 \u2264 G.minDegree \u2192 (\u2200 (a : V) (S : Set V), a \u2208 S \u2192 (\u2203 x \u2208 S, x \u2260 a) \u2192 (\u2203 y : V, y \u2209 S) \u2192 \u2203 x \u2208 S, x \u2260 a \u2227 \u2203 y \u2209 S, G.Adj x y) \u2192 \u2203 (k : \u2115) (v : V) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 c.length = 2 ^ k"
+ ],
+ [
+  "Erdos64.erdos_64.R3.H2.R1.H1",
+  21.0,
+  "\u2200 (V : Type) (K : SimpleGraph V) [Fintype V] [DecidableRel K.Adj] (a b : V), K.Adj b a \u2192 3 \u2264 K.minDegree \u2192 (\u2200 (z : V) (S : Set V), z \u2208 S \u2192 (\u2203 x \u2208 S, x \u2260 z) \u2192 (\u2203 y, y \u2209 S) \u2192 \u2203 x \u2208 S, x \u2260 z \u2227 \u2203 y \u2209 S, (K).Adj x y) \u2192 \u2203 (k : \u2115) (v : V) (c : K.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 ((c.length = 2^k \u2227 s(b,a) \u2209 c.edges) \u2228 (c.length + 1 = 2^k \u2227 s(b,a) \u2208 c.edges))"
+ ],
+ [
+  "Erdos64.erdos_64.R3.H2.R1.H2.R1.H1",
+  10.5,
+  "\u2200 (V : Type) (G : SimpleGraph V) [Fintype V] [DecidableRel G.Adj] (a b : V), G.Adj b a \u2192 (\u2200 x, 2 \u2264 G.degree x) \u2192 (\u2200 x, x \u2260 a \u2192 x \u2260 b \u2192 3 \u2264 G.degree x) \u2192 (\u2200 (z : V) (S : Set V), z \u2208 S \u2192 (\u2203 x \u2208 S, x \u2260 z) \u2192 (\u2203 y, y \u2209 S) \u2192 \u2203 x \u2208 S, x \u2260 z \u2227 \u2203 y \u2209 S, (G).Adj x y) \u2192 (\u2200 S : Finset V, S.Nonempty \u2192 \u2203 x \u2208 S, (S.filter (fun y => (G).Adj x y)).card \u2264 2) \u2192 \u2203 (k : \u2115) (v : V) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 (c.length = 2^k \u2228 (c.length + 1 = 2^k \u2227 s(b,a) \u2208 c.edges))"
+ ],
+ [
+  "Erdos64.erdos_64.R3.H2.R1.H2.R1.H2",
+  10.5,
+  "\u2200 (V : Type) (G : SimpleGraph V) [Fintype V] [DecidableRel G.Adj] (a b : V), G.Adj b a \u2192 (\u2200 x, 2 \u2264 G.degree x) \u2192 (\u2200 x, x \u2260 a \u2192 x \u2260 b \u2192 3 \u2264 G.degree x) \u2192 (\u2200 (z : V) (S : Set V), z \u2208 S \u2192 (\u2203 x \u2208 S, x \u2260 z) \u2192 (\u2203 y, y \u2209 S) \u2192 \u2203 x \u2208 S, x \u2260 z \u2227 \u2203 y \u2209 S, (G).Adj x y) \u2192 (\u2200 S : Finset V, S.Nonempty \u2192 \u2203 x \u2208 S, (S.filter (fun y => (G).Adj x y)).card \u2264 3) \u2192 (\u2203 S : Finset V, S.Nonempty \u2227 \u2200 x \u2208 S, 3 \u2264 (S.filter (G.Adj x)).card) \u2192 \u2203 (k : \u2115) (v : V) (c : G.Walk v v), 2 \u2264 k \u2227 c.IsCycle \u2227 (c.length = 2^k \u2228 (c.length + 1 = 2^k \u2227 s(b,a) \u2208 c.edges))"
+ ],
+ [
+  "Erdos19.erdos_19.R1.H1.R1.H1",
+  13.5,
+  "\u2200 (n : \u2115) (L : Finset (Finset (Fin n))), (\u2200 a \u2208 L, 2 \u2264 a.card) \u2192 (\u2200 a \u2208 L, \u2200 b \u2208 L, a \u2260 b \u2192 (a \u2229 b).card \u2264 1) \u2192 (\u2200 i j : Fin n, i \u2260 j \u2192 \u2203 e \u2208 L, i \u2208 e \u2227 j \u2208 e) \u2192 (\u2203 S \u2286 L, (\u2200 a \u2208 L, 3 \u2264 a.card \u2192 a \u2208 S) \u2227 \u2200 a \u2208 S, n \u2264 ((S.erase a).filter fun b => (a \u2229 b).Nonempty).card) \u2192 (n \u2264 12 \u2228 (n = 13 \u2227 (L.card \u2264 32 \u2228 55 \u2264 L.card \u2228 ((L.filter fun b => 3 \u2264 b.card).biUnion id).card \u2264 11 \u2228 (\u2203 b \u2208 L, 7 \u2264 b.card) \u2228 20 \u2264 (L.filter fun b => 3 \u2264 b.card).card))) \u2192 \u2203 c : L \u2192 Fin n, \u2200 A B : L, A \u2260 B \u2192 (A.val \u2229 B.val).Nonempty \u2192 c A \u2260 c B"
+ ],
+ [
+  "Erdos19.erdos_19.R1.H1.R1.H2",
+  13.5,
+  "\u2200 (n : \u2115) (L : Finset (Finset (Fin n))), (\u2200 a \u2208 L, 2 \u2264 a.card) \u2192 (\u2200 a \u2208 L, \u2200 b \u2208 L, a \u2260 b \u2192 (a \u2229 b).card \u2264 1) \u2192 (\u2200 i j : Fin n, i \u2260 j \u2192 \u2203 e \u2208 L, i \u2208 e \u2227 j \u2208 e) \u2192 (\u2203 S \u2286 L, (\u2200 a \u2208 L, 3 \u2264 a.card \u2192 a \u2208 S) \u2227 \u2200 a \u2208 S, n \u2264 ((S.erase a).filter fun b => (a \u2229 b).Nonempty).card) \u2192 (\u2203 b \u2208 L, n \u2264 b.card + 6) \u2192 \u2203 c : L \u2192 Fin n, \u2200 A B : L, A \u2260 B \u2192 (A.val \u2229 B.val).Nonempty \u2192 c A \u2260 c B"
+ ],
+ [
+  "Erdos19.erdos_19.R1.H1.R1.H3",
+  13.5,
+  "\u2200 (n : \u2115) (L : Finset (Finset (Fin n))), (\u2200 a \u2208 L, 2 \u2264 a.card) \u2192 (\u2200 a \u2208 L, \u2200 b \u2208 L, a \u2260 b \u2192 (a \u2229 b).card \u2264 1) \u2192 (\u2200 i j : Fin n, i \u2260 j \u2192 \u2203 e \u2208 L, i \u2208 e \u2227 j \u2208 e) \u2192 (\u2203 S \u2286 L, (\u2200 a \u2208 L, 3 \u2264 a.card \u2192 a \u2208 S) \u2227 \u2200 a \u2208 S, n \u2264 ((S.erase a).filter fun b => (a \u2229 b).Nonempty).card) \u2192 \u00ac (n \u2264 12 \u2228 (n = 13 \u2227 (L.card \u2264 32 \u2228 55 \u2264 L.card \u2228 ((L.filter fun b => 3 \u2264 b.card).biUnion id).card \u2264 11 \u2228 (\u2203 b \u2208 L, 7 \u2264 b.card) \u2228 20 \u2264 (L.filter fun b => 3 \u2264 b.card).card))) \u2192 (\u00ac \u2203 b \u2208 L, n \u2264 b.card + 6) \u2192 \u2203 c : L \u2192 Fin n, \u2200 A B : L, A \u2260 B \u2192 (A.val \u2229 B.val).Nonempty \u2192 c A \u2260 c B"
+ ],
+ [
+  "Erdos19.erdos_19.R1.H2.R1.H1",
+  20.25,
+  "\u2200 (n r : \u2115) (K : Finset (Finset (Fin n))), 3 \u2264 r \u2192 r*r+r-1 \u2264 n \u2192 n \u2264 r*((n-r)/(r-1)) \u2192 (\u2203 T \u2208 K, T.card = r) \u2192 (\u2200 A \u2208 K, r \u2264 A.card) \u2192 (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 T \u2208 K, n \u2264 ((K.erase T).filter fun A => (T \u2229 A).Nonempty).card) \u2192 3 \u2264 (K.filter fun A => 3 \u2264 A.card).card \u2192 (\u00ac \u2203 e : Fin n \u2243 Fin n, \u2200 A \u2208 K.image (Finset.map e.toEmbedding), 3 \u2264 A.card \u2192 \u2203 l r : Fin n, A = Finset.Icc l r) \u2192 (\u00ac \u2203 L R : Finset (Finset (Fin n)), L \u222a R = K \u2227 Disjoint L R \u2227 (\u2200 A \u2208 L, \u2200 B \u2208 L, A \u2260 B \u2192 (A \u2229 B).Nonempty) \u2227 (\u2200 A \u2208 R, \u2200 B \u2208 R, A \u2260 B \u2192 (A \u2229 B).Nonempty)) \u2192 (\u2203 T \u2286 K, T.card = 3 \u2227 \u2200 A \u2208 T, \u2200 B \u2208 T, A \u2260 B \u2192 Disjoint A B) \u2192 n+2 < K.card \u2192 \u2203 c : K \u2192 Fin n, \u2200 A B : K, A \u2260 B \u2192 (A.val \u2229 B.val).Nonempty \u2192 c A \u2260 c B"
+ ],
+ [
+  "Erdos19.erdos_19.R1.H2.R1.H2.R1.H1.R1.H1",
+  5.0625,
+  "\u2200 (n r : \u2115) (K : Finset (Finset (Fin n))), 3 \u2264 r \u2192 r*r+r-1 \u2264 n \u2192 n \u2264 r*((n-r)/(r-1)) \u2192 (\u2203 T \u2208 K, T.card = r) \u2192 (\u2200 A \u2208 K, r \u2264 A.card) \u2192 (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 T \u2208 K, n \u2264 ((K.erase T).filter fun A => (T \u2229 A).Nonempty).card) \u2192 3 \u2264 (K.filter fun A => 3 \u2264 A.card).card \u2192 (\u00ac \u2203 e : Fin n \u2243 Fin n, \u2200 A \u2208 K.image (Finset.map e.toEmbedding), 3 \u2264 A.card \u2192 \u2203 l r : Fin n, A = Finset.Icc l r) \u2192 (\u00ac \u2203 L R : Finset (Finset (Fin n)), L \u222a R = K \u2227 Disjoint L R \u2227 (\u2200 A \u2208 L, \u2200 B \u2208 L, A \u2260 B \u2192 (A \u2229 B).Nonempty) \u2227 (\u2200 A \u2208 R, \u2200 B \u2208 R, A \u2260 B \u2192 (A \u2229 B).Nonempty)) \u2192 (\u00ac \u2203 T \u2286 K, T.card = 3 \u2227 \u2200 A \u2208 T, \u2200 B \u2208 T, A \u2260 B \u2192 Disjoint A B) \u2192 \u2200 (m : \u2115) (L R : Fin m \u2192 Finset (Fin n)) (U : Finset (Finset (Fin n))), (\u2200 i, L i \u2208 K) \u2192 (\u2200 i, R i \u2208 K) \u2192 Function.Injective L \u2192 Function.Injective R \u2192 (\u2200 i j, L i \u2260 R j) \u2192 (\u2200 i, Disjoint (L i) (R i)) \u2192 U \u2286 K \u2192 (\u2200 A \u2208 U, \u2200 B \u2208 U, \u00ac Disjoint A B) \u2192 (\u2200 i, \u2200 A \u2208 U, \u00ac Disjoint (L i) A) \u2192 (\u2200 i, L i \u2209 U) \u2192 (\u2200 i, R i \u2209 U) \u2192 K.card = U.card+2*m \u2192 (U.card + m = n + 1) \u2192 (2 * (r - 1) < m) \u2192 (\u00ac \u2203 w : Fin n \u2192 \u211d, \u2200 A \u2208 U \u222a univ.image L, \u2211 i \u2208 A, w i = 1) \u2192 (\u2203 i j, i \u2260 j \u2227 Disjoint (L i) (L j) \u2227 \u2200 x \u2208 U, \u00ac Disjoint x (R i)) \u2192 \u2203 l r' : Fin (m+1) \u2192 Finset (Fin n), (\u2200 i, l i \u2208 K) \u2227 (\u2200 i, r' i \u2208 K) \u2227 Function.Injective l \u2227 Function.Injective r' \u2227 (\u2200 i j, l i \u2260 r' j) \u2227 \u2200 i, Disjoint (l i) (r' i)"
+ ],
+ [
+  "Erdos19.erdos_19.R1.H2.R1.H2.R1.H1.R1.H2",
+  5.0625,
+  "\u2200 (n r : \u2115) (K : Finset (Finset (Fin n))), 3 \u2264 r \u2192 r*r+r-1 \u2264 n \u2192 n \u2264 r*((n-r)/(r-1)) \u2192 (\u2203 T \u2208 K, T.card = r) \u2192 (\u2200 A \u2208 K, r \u2264 A.card) \u2192 (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 T \u2208 K, n \u2264 ((K.erase T).filter fun A => (T \u2229 A).Nonempty).card) \u2192 3 \u2264 (K.filter fun A => 3 \u2264 A.card).card \u2192 (\u00ac \u2203 e : Fin n \u2243 Fin n, \u2200 A \u2208 K.image (Finset.map e.toEmbedding), 3 \u2264 A.card \u2192 \u2203 l r : Fin n, A = Finset.Icc l r) \u2192 (\u00ac \u2203 L R : Finset (Finset (Fin n)), L \u222a R = K \u2227 Disjoint L R \u2227 (\u2200 A \u2208 L, \u2200 B \u2208 L, A \u2260 B \u2192 (A \u2229 B).Nonempty) \u2227 (\u2200 A \u2208 R, \u2200 B \u2208 R, A \u2260 B \u2192 (A \u2229 B).Nonempty)) \u2192 (\u00ac \u2203 T \u2286 K, T.card = 3 \u2227 \u2200 A \u2208 T, \u2200 B \u2208 T, A \u2260 B \u2192 Disjoint A B) \u2192 \u2200 (m : \u2115) (L R : Fin m \u2192 Finset (Fin n)) (U : Finset (Finset (Fin n))), (\u2200 i, L i \u2208 K) \u2192 (\u2200 i, R i \u2208 K) \u2192 Function.Injective L \u2192 Function.Injective R \u2192 (\u2200 i j, L i \u2260 R j) \u2192 (\u2200 i, Disjoint (L i) (R i)) \u2192 U \u2286 K \u2192 (\u2200 A \u2208 U, \u2200 B \u2208 U, \u00ac Disjoint A B) \u2192 (\u2200 i, \u2200 A \u2208 U, \u00ac Disjoint (L i) A) \u2192 (\u2200 i, L i \u2209 U) \u2192 (\u2200 i, R i \u2209 U) \u2192 K.card = U.card+2*m \u2192 (U.card + m = n + 1) \u2192 (2 * (r - 1) < m) \u2192 (\u00ac \u2203 w : Fin n \u2192 \u211d, \u2200 A \u2208 U \u222a univ.image L, \u2211 i \u2208 A, w i = 1) \u2192 (\u2203 i j, i \u2260 j \u2227 Disjoint (L i) (L j) \u2227 \u2203 x \u2208 U, \u2200 y \u2208 U, (Disjoint y (R i) \u2194 y=x) \u2227 (Disjoint y (R j) \u2194 y=x)) \u2192 \u2203 l r' : Fin (m+1) \u2192 Finset (Fin n), (\u2200 i, l i \u2208 K) \u2227 (\u2200 i, r' i \u2208 K) \u2227 Function.Injective l \u2227 Function.Injective r' \u2227 (\u2200 i j, l i \u2260 r' j) \u2227 \u2200 i, Disjoint (l i) (r' i)"
+ ],
+ [
+  "Erdos19.erdos_19.R1.H2.R1.H2.R1.H2",
+  10.125,
+  "\u2200 (n r : \u2115) (K : Finset (Finset (Fin n))), 3 \u2264 r \u2192 r*r+r-1 \u2264 n \u2192 n \u2264 r*((n-r)/(r-1)) \u2192 (\u2203 T \u2208 K, T.card = r) \u2192 (\u2200 A \u2208 K, r \u2264 A.card) \u2192 (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 T \u2208 K, n \u2264 ((K.erase T).filter fun A => (T \u2229 A).Nonempty).card) \u2192 3 \u2264 (K.filter fun A => 3 \u2264 A.card).card \u2192 (\u00ac \u2203 e : Fin n \u2243 Fin n, \u2200 A \u2208 K.image (Finset.map e.toEmbedding), 3 \u2264 A.card \u2192 \u2203 l r : Fin n, A = Finset.Icc l r) \u2192 (\u00ac \u2203 L R : Finset (Finset (Fin n)), L \u222a R = K \u2227 Disjoint L R \u2227 (\u2200 A \u2208 L, \u2200 B \u2208 L, A \u2260 B \u2192 (A \u2229 B).Nonempty) \u2227 (\u2200 A \u2208 R, \u2200 B \u2208 R, A \u2260 B \u2192 (A \u2229 B).Nonempty)) \u2192 (\u00ac \u2203 T \u2286 K, T.card = 3 \u2227 \u2200 A \u2208 T, \u2200 B \u2208 T, A \u2260 B \u2192 Disjoint A B) \u2192 \u2200 (m : \u2115) (L R : Fin m \u2192 Finset (Fin n)) (U : Finset (Finset (Fin n))), (\u2200 i, L i \u2208 K) \u2192 (\u2200 i, R i \u2208 K) \u2192 Function.Injective L \u2192 Function.Injective R \u2192 (\u2200 i j, L i \u2260 R j) \u2192 (\u2200 i, Disjoint (L i) (R i)) \u2192 U \u2286 K \u2192 (\u2200 A \u2208 U, \u2200 B \u2208 U, \u00ac Disjoint A B) \u2192 (\u2200 i, \u2200 A \u2208 U, \u00ac Disjoint (L i) A) \u2192 (\u2200 i, L i \u2209 U) \u2192 (\u2200 i, R i \u2209 U) \u2192 K.card = U.card+2*m \u2192 (n < U.card + m) \u2192 (4 * (r - 1) \u2264 m) \u2192 (\u2203 g : (U \u222a univ.image L : Finset _) \u2192 \u211d, (\u2203 A, g A \u2260 0) \u2227 (\u2211 A, g A)=0 \u2227 (\u2200 A, A.val \u2208 U \u2192 g A=0) \u2227 \u2200 i : Fin n, \u2211 B, g B * (if i \u2208 B.val then 1 else 0) = 0) \u2192 \u2203 l r' : Fin (m+1) \u2192 Finset (Fin n), (\u2200 i, l i \u2208 K) \u2227 (\u2200 i, r' i \u2208 K) \u2227 Function.Injective l \u2227 Function.Injective r' \u2227 (\u2200 i j, l i \u2260 r' j) \u2227 \u2200 i, Disjoint (l i) (r' i)"
+ ],
+ [
+  "Erdos30.erdos_30.variants.O_one.R1.H1",
+  40.5,
+  "\u2203 c : \u2115, \u2200 m : \u2115, \u00ac (m + 1).Prime \u2192 \u00ac (m + 2).Prime \u2192 \u2203 A : Finset \u2115, A \u2286 Finset.Icc 1 (m ^ 2 + c * m) \u2227 IsSidon (A : Set \u2115) \u2227 A.card = m"
+ ],
+ [
+  "Erdos30.erdos_30.variants.O_one.R1.H2",
+  40.5,
+  "\u2203 c : \u2115, \u2200 N m : \u2115, (\u2203 A : Finset \u2115, A \u2286 Finset.Icc 1 N \u2227 IsSidon (A : Set \u2115) \u2227 A.card = m) \u2192 m ^ 2 \u2264 N + c * m"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H1.R1.H1",
+  1.0833333333333333,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 5 \u2192 262 \u2264 padicValNat 2 n \u2192 (\u2200 d, 10 \u2264 d \u2192 d \u2264 257 \u2192 d \u2209 ({11, 13} : Finset \u2115) \u2192 padicValNat 2 n % (2 * d) \u2260 d) \u2192 (\u2200 d \u2208 ({512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 (padicValNat 2 n % 2 = 1 \u2192 ((padicValNat 2 n).primeFactors.filter (fun p => p % 3 = 2)).card \u2264 4) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H1.R1.H2",
+  1.0833333333333333,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 7 \u2192 262 \u2264 padicValNat 2 n \u2192 (\u2200 d, 10 \u2264 d \u2192 d \u2264 257 \u2192 d \u2209 ({11, 13} : Finset \u2115) \u2192 padicValNat 2 n % (2 * d) \u2260 d) \u2192 (\u2200 d \u2208 ({512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 (padicValNat 2 n % 2 = 1 \u2192 ((padicValNat 2 n).primeFactors.filter (fun p => p % 3 = 2)).card \u2264 4) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H2.R1.H1",
+  0.7222222222222222,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 11 \u2192 (\u2200 d \u2208 ({10, 12, 14, 18, 20, 22, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 37, 38, 39, 45, 46, 48, 51, 52, 55, 56, 57, 59, 62, 63, 64, 65, 67, 68, 69, 74, 76, 77, 80, 82, 83, 85, 86, 91, 94, 95, 97, 106, 112, 115, 116, 118, 119, 121, 122, 123, 124, 131, 133, 134, 141, 142, 143, 146, 147, 149, 152, 155, 157} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 (\u2200 d \u2208 ({4, 16} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 (\u2200 d \u2208 ({6, 15, 17, 19, 21, 41, 107, 113, 159, 166, 173, 178, 194, 200, 202, 206, 213, 214, 218, 226, 227, 232, 233, 237, 239, 241, 248, 253, 254, 263, 267, 274, 278, 279, 283, 293, 296, 298, 299, 301, 305, 309, 326, 327, 329, 331, 337, 341, 344, 365, 367, 373, 381, 382, 386, 394, 395, 397, 398} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H2.R1.H2.R1.H1",
+  0.24074074074074073,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 13 \u2192 padicValNat 2 n % 2 = 1 \u2192 262 \u2264 padicValNat 2 n \u2192 (\u2200 d, 1 \u2264 d \u2192 d \u2264 400 \u2192 d \u2209 ({1, 3, 5, 7, 8, 269, 353, 383} : Finset \u2115) \u2192 padicValNat 2 n % (2 * d) \u2260 d) \u2192 (((padicValNat 2 n).primeFactors.filter (fun p => p % 3 = 2)).card \u2264 8) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H2.R1.H2.R1.H2",
+  0.24074074074074073,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 13 \u2192 padicValNat 2 n % 16 = 8 \u2192 262 \u2264 padicValNat 2 n \u2192 (\u2200 d, 1 \u2264 d \u2192 d \u2264 400 \u2192 d \u2209 ({1, 3, 5, 7, 8, 269, 353, 383} : Finset \u2115) \u2192 padicValNat 2 n % (2 * d) \u2260 d) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H2.R1.H2.R1.H3",
+  0.24074074074074073,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 13 \u2192 padicValNat 2 n % 1048576 = 0 \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H2.R1.H3.R1.H1",
+  0.24074074074074073,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 19 \u2192 padicValNat 2 n % 2 = 1 \u2192 262 \u2264 padicValNat 2 n \u2192 (\u2200 d, 1 \u2264 d \u2192 d \u2264 400 \u2192 d \u2209 ({1, 3, 4, 269, 292, 347, 353, 383} : Finset \u2115) \u2192 padicValNat 2 n % (2 * d) \u2260 d) \u2192 (((padicValNat 2 n).primeFactors.filter (fun p => p % 3 = 2)).card \u2264 13) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H2.R1.H3.R1.H2",
+  0.24074074074074073,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 19 \u2192 padicValNat 2 n % 8 = 4 \u2192 262 \u2264 padicValNat 2 n \u2192 (\u2200 d, 1 \u2264 d \u2192 d \u2264 400 \u2192 d \u2209 ({1, 3, 4, 269, 292, 347, 353, 383} : Finset \u2115) \u2192 padicValNat 2 n % (2 * d) \u2260 d) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H2.R1.H3.R1.H3",
+  0.24074074074074073,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 19 \u2192 padicValNat 2 n % 1048576 = 0 \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H3.R1.H1.R1.H1",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 800 < n.factorization 3 \u2192 (\u2200 d \u2208 ({502, 503, 508, 509, 512, 514, 521, 523, 524, 526, 538, 541, 542, 547, 548, 554, 556, 557, 562, 563, 566, 569, 571, 586, 587, 593, 596, 599, 601, 604, 607, 613, 614, 617, 619, 622, 626, 628, 631, 634, 641, 643, 647, 652, 653, 659, 661, 662, 668, 673, 674, 677, 683, 691, 692, 694, 698, 701, 706, 709, 716, 718, 719, 724, 727, 733, 734, 739, 743, 746, 751, 757, 758, 761, 766, 769, 772, 773, 778, 787, 788, 794, 796, 797} : Finset \u2115), n.factorization 3 % (2 * d) \u2260 d) \u2192 (\u2200 d \u2208 ({10, 12, 14, 18, 20, 22, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 37, 38, 39, 45, 46, 48, 51, 52, 55, 56, 57, 59, 62, 63, 64, 65, 67, 68, 69, 74, 76, 77, 80, 82, 83, 85, 86, 91, 94, 95, 97, 106, 112, 115, 116, 118, 119, 121, 122, 123, 124, 131, 133, 134, 141, 142, 143, 146, 147, 149, 152, 155, 157} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H3.R1.H1.R1.H2",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 (n.factorization 3 = 577 \u2228 n.factorization 3 = 764) \u2192 (\u2200 d \u2208 ({10, 12, 14, 18, 20, 22, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 37, 38, 39, 45, 46, 48, 51, 52, 55, 56, 57, 59, 62, 63, 64, 65, 67, 68, 69, 74, 76, 77, 80, 82, 83, 85, 86, 91, 94, 95, 97, 106, 112, 115, 116, 118, 119, 121, 122, 123, 124, 131, 133, 134, 141, 142, 143, 146, 147, 149, 152, 155, 157} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H1.R1.H3.R1.H2.R1.H1",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 3) \u2192 n.factorization 3 = 458 \u2192 (\u2200 d \u2208 ({10, 12, 14, 18, 20, 22, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 37, 38, 39, 45, 46, 48, 51, 52, 55, 56, 57, 59, 62, 63, 64, 65, 67, 68, 69, 74, 76, 77, 80, 82, 83, 85, 86, 91, 94, 95, 97, 106, 112, 115, 116, 118, 119, 121, 122, 123, 124, 131, 133, 134, 141, 142, 143, 146, 147, 149, 152, 155, 157} : Finset \u2115), padicValNat 2 n % (2 * d) \u2260 d) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H1.R1.H1",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 5) \u2192 n.factorization 5 = 2 \u2192 43 \u2264 padicValNat 2 n \u2192 padicValNat 2 n % 2 = 1 \u2192 (\u2200 d : \u2115, d.Prime \u2192 d \u2223 padicValNat 2 n \u2192 1777 \u2264 d \u2227 d % 3 = 1) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H1.R1.H2",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 5) \u2192 n.factorization 5 = 2 \u2192 43 \u2264 padicValNat 2 n \u2192 padicValNat 2 n % 4 = 2 \u2192 (\u2200 d : \u2115, d.Prime \u2192 d \u2260 2 \u2192 d \u2223 padicValNat 2 n \u2192 971 \u2264 d) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H1.R1.H3",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 5) \u2192 n.factorization 5 = 2 \u2192 43 \u2264 padicValNat 2 n \u2192 padicValNat 2 n % 4 = 0 \u2192 (\u2200 r \u2208 ({2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 (\u2200 r \u2208 ({36, 38, 39, 42, 52, 55, 58, 62, 63, 66, 71, 73, 77, 81, 91, 93, 99, 117, 125, 144, 147, 150, 201, 207, 215, 226, 228, 250} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H2",
+  1.625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 5) \u2192 n.factorization 5 = 4 \u2192 Even (padicValNat 2 n) \u2192 128 \u2264 padicValNat 2 n \u2192 (\u2200 r \u2208 ({2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H3.R1.H1",
+  0.8125,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 5) \u2192 283 < n.factorization 5 \u2192 Odd (n.factorization 5) \u2192 (\u2200 d, d \u2223 n.factorization 5 \u2192 d % 6 = 1) \u2192 (\u2200 d, 3 \u2264 d \u2192 d \u2264 283 \u2192 \u00ac d \u2223 n.factorization 5) \u2192 Even (padicValNat 2 n) \u2192 (\u2200 r \u2208 ({2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H3.R1.H2",
+  0.8125,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = 5) \u2192 283 < n.factorization 5 \u2192 Even (n.factorization 5) \u2192 (\u2200 d, 3 \u2264 d \u2192 d \u2264 283 \u2192 d \u2260 4 \u2192 n.factorization 5 % (2 * d) \u2260 d) \u2192 (Odd (padicValNat 2 n) \u2192 \u2200 d, d \u2223 padicValNat 2 n \u2192 d % 6 = 1) \u2192 padicValNat 2 n % 14 \u2260 7 \u2192 (\u2200 r \u2208 ({2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H4.R1.H1",
+  0.40625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 z : \u2115, z.Prime \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = z) \u2192 Odd (n.factorization z) \u2192 z \u2208 ({7, 11, 13, 19, 23, 31, 37, 41, 43, 47, 61, 73, 79, 83, 103, 127, 139, 151, 157, 163, 167, 191, 223, 277, 307, 311, 313, 331, 367, 383, 433, 487, 571, 601, 607, 613, 617, 619, 631, 643, 661, 733, 743, 751, 761, 823, 853, 991, 1039, 1063, 1117, 1201, 1213, 1231, 1237, 1279, 1301, 1303, 1321, 1327, 1471, 1487, 1523, 1531, 1663, 1777, 1783, 1951, 2053} : Finset \u2115) \u2192 (z % 3 = 2 \u2192 \u2200 d, d \u2223 n.factorization z \u2192 d % 6 = 1) \u2192 (z % 3 = 2 \u2192 Even (padicValNat 2 n)) \u2192 (z = 7 \u2192 41 \u2264 n.factorization 7 \u2227 \u2200 d \u2208 ({2, 3, 4, 5, 7, 8, 11, 13, 16, 17, 19, 23, 29, 31, 32, 37} : Finset \u2115), n.factorization 7 % (2 * d) \u2260 d) \u2192 padicValNat 2 n % 6 \u2260 3 \u2192 (z \u2260 11 \u2192 padicValNat 2 n % 10 \u2260 5) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 padicValNat 2 n % 14 \u2260 7) \u2192 padicValNat 2 n % 20 \u2260 10 \u2192 (z \u2260 29 \u2192 padicValNat 2 n % 28 \u2260 14) \u2192 (z \u2260 17 \u2192 padicValNat 2 n % 8 \u2260 4) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 z \u2260 257 \u2192 padicValNat 2 n % 16 \u2260 8) \u2192 (z \u2260 743 \u2192 padicValNat 2 n % 4096 \u2260 2048) \u2192 (Odd (padicValNat 2 n) \u2192 \u2200 d, d \u2223 padicValNat 2 n \u2192 d % 6 = 1 \u2228 (z % 3 = 2 \u2227 z \u2223 2 ^ d + 1)) \u2192 (\u2200 r \u2208 ({4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H4.R1.H2",
+  0.40625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 z : \u2115, z.Prime \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = z) \u2192 n.factorization z % 4 = 2 \u2192 z \u2208 ({11, 139, 181, 199, 271} : Finset \u2115) \u2192 padicValNat 2 n % 6 \u2260 3 \u2192 (z \u2260 11 \u2192 padicValNat 2 n % 10 \u2260 5) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 padicValNat 2 n % 14 \u2260 7) \u2192 padicValNat 2 n % 20 \u2260 10 \u2192 (z \u2260 29 \u2192 padicValNat 2 n % 28 \u2260 14) \u2192 (z \u2260 17 \u2192 padicValNat 2 n % 8 \u2260 4) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 z \u2260 257 \u2192 padicValNat 2 n % 16 \u2260 8) \u2192 (z \u2260 743 \u2192 padicValNat 2 n % 4096 \u2260 2048) \u2192 (Odd (padicValNat 2 n) \u2192 \u2200 d, d \u2223 padicValNat 2 n \u2192 d % 6 = 1 \u2228 (z % 3 = 2 \u2227 z \u2223 2 ^ d + 1)) \u2192 (\u2200 r \u2208 ({4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H4.R1.H3",
+  0.40625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 z : \u2115, z.Prime \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = z) \u2192 n.factorization z % 8 = 4 \u2192 z \u2208 ({11, 419, 463, 503, 607, 883, 1019, 1327} : Finset \u2115) \u2192 padicValNat 2 n % 6 \u2260 3 \u2192 (z \u2260 11 \u2192 padicValNat 2 n % 10 \u2260 5) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 padicValNat 2 n % 14 \u2260 7) \u2192 padicValNat 2 n % 20 \u2260 10 \u2192 (z \u2260 29 \u2192 padicValNat 2 n % 28 \u2260 14) \u2192 (z \u2260 17 \u2192 padicValNat 2 n % 8 \u2260 4) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 z \u2260 257 \u2192 padicValNat 2 n % 16 \u2260 8) \u2192 (z \u2260 743 \u2192 padicValNat 2 n % 4096 \u2260 2048) \u2192 (Odd (padicValNat 2 n) \u2192 \u2200 d, d \u2223 padicValNat 2 n \u2192 d % 6 = 1 \u2228 (z % 3 = 2 \u2227 z \u2223 2 ^ d + 1)) \u2192 (\u2200 r \u2208 ({4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H2.R1.H4.R1.H4",
+  0.40625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 z : \u2115, z.Prime \u2192 7 \u2264 z \u2192 z < 2100 \u2192 (\u2200 p, p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n \u2194 p = z) \u2192 n.factorization z % 8 = 0 \u2192 (z = 7 \u2192 41 \u2264 n.factorization 7 \u2227 \u2200 d \u2208 ({2, 3, 4, 5, 7, 8, 11, 13, 16, 17, 19, 23, 29, 31, 32, 37} : Finset \u2115), n.factorization 7 % (2 * d) \u2260 d) \u2192 padicValNat 2 n % 6 \u2260 3 \u2192 (z \u2260 11 \u2192 padicValNat 2 n % 10 \u2260 5) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 padicValNat 2 n % 14 \u2260 7) \u2192 padicValNat 2 n % 20 \u2260 10 \u2192 (z \u2260 29 \u2192 padicValNat 2 n % 28 \u2260 14) \u2192 (z \u2260 17 \u2192 padicValNat 2 n % 8 \u2260 4) \u2192 (z \u2260 11 \u2192 z \u2260 43 \u2192 z \u2260 257 \u2192 padicValNat 2 n % 16 \u2260 8) \u2192 (z \u2260 743 \u2192 padicValNat 2 n % 4096 \u2260 2048) \u2192 (Odd (padicValNat 2 n) \u2192 \u2200 d, d \u2223 padicValNat 2 n \u2192 d % 6 = 1 \u2228 (z % 3 = 2 \u2227 z \u2223 2 ^ d + 1)) \u2192 (\u2200 r \u2208 ({4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32} : Finset \u2115), padicValNat 2 n % 2 ^ (r + 1) \u2260 2 ^ r) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H3.R1.H1",
+  1.625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 2 \u2264 S.card \u2192 \u00ac ((\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2227 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097) \u2192 3 \u2208 S \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H3.R1.H2",
+  1.625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 2 \u2264 S.card \u2192 \u00ac ((\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2227 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097) \u2192 n.factorization 3 = 1 \u2192 padicValNat 2 n % 2 = 1 \u2192 padicValNat 2 n % 3 \u2260 0 \u2192 (\u2200 p \u2208 n.primeFactors, p \u2260 2 \u2192 n.factorization p = 1 \u2192 p % 3 \u2260 2) \u2192 (\u2200 z \u2208 S, z % 3 = 2 \u2192 n.factorization z % 2 = 0) \u2192 (\u2200 d : \u2115, d.Prime \u2192 d \u2223 padicValNat 2 n \u2192 d % 3 = 2 \u2192 \u2203 r \u2208 S, r % 3 = 2 \u2227 r \u2223 2 ^ d + 1) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H3.R1.H3",
+  1.625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 2 \u2264 S.card \u2192 \u00ac ((\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2227 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097) \u2192 n.factorization 3 = 1 \u2192 padicValNat 2 n % 2 = 0 \u2192 (\u2203 q \u2208 n.primeFactors, q % 3 = 2 \u2227 n.factorization q % 2 = 1 \u2227 q % 9 \u2260 8 \u2227 n.factorization q % 3 \u2260 0 \u2227 (n.factorization q % 6 = 5 \u2192 \u2203 r \u2208 S, r \u2260 q \u2227 r % 3 = 2 \u2227 r \u2223 1 + q ^ n.factorization q) \u2227 \u2200 q' \u2208 n.primeFactors, q' % 3 = 2 \u2192 n.factorization q' % 2 = 1 \u2192 q' = q) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H1.R1.H3.R1.H4",
+  1.625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 2 \u2264 S.card \u2192 \u00ac ((\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2227 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097) \u2192 \u00ac 3 \u2223 n \u2192 padicValNat 2 n % 2 = 0 \u2192 2 \u2264 padicValNat 2 n \u2192 (\u2200 p \u2208 n.primeFactors, p \u2260 2 \u2192 n.factorization p = 1 \u2192 p % 3 = 1) \u2192 (\u2200 q \u2208 n.primeFactors, q % 3 = 2 \u2192 n.factorization q % 2 = 0) \u2192 (\u2203 z \u2208 S, z % 3 = 2 \u2227 z \u2223 2 ^ padicValNat 2 n + 1) \u2192 (padicValNat 2 n % 4 = 2 \u2192 5 \u2208 S) \u2192 (padicValNat 2 n % 8 = 4 \u2192 17 \u2208 S) \u2192 (padicValNat 2 n % 16 = 8 \u2192 257 \u2208 S) \u2192 (padicValNat 2 n % 32 = 16 \u2192 65537 \u2208 S) \u2192 n.primeFactors.card % 2 = 1 \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H1.R1.H1",
+  0.3611111111111111,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 2100 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 607) \u2192 223 \u2223 n \u2192 607 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 5001 / 5000 < \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2192 2 \u2264 S.card \u2192 padicValNat 2 n % 32 = 16 \u2192 65537 ^ 2 \u2223 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H1.R1.H2",
+  0.3611111111111111,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 2100 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 607) \u2192 223 \u2223 n \u2192 607 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 5001 / 5000 < \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2192 2 \u2264 S.card \u2192 padicValNat 2 n % 128 = 64 \u2192 (274177 ^ 2 \u2223 n \u2228 137089 ^ 2 \u2223 n) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H1.R1.H3",
+  0.3611111111111111,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 2100 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 607) \u2192 223 \u2223 n \u2192 607 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 5001 / 5000 < \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2192 2 \u2264 S.card \u2192 128 \u2223 padicValNat 2 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H2.R1.H1",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 5057 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 607 \u2228 q = 3967) \u2192 223 \u2223 n \u2192 607 \u2223 n \u2192 3967 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2264 5001 / 5000 \u2192 8191 \u2223 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H2.R1.H2",
+  0.5416666666666666,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 5057 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 607 \u2228 q = 3967) \u2192 223 \u2223 n \u2192 607 \u2223 n \u2192 3967 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2264 5001 / 5000 \u2192 \u00ac 8191 \u2223 n \u2192 7933 \u2223 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H3.R1.H1",
+  0.3611111111111111,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 1899 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 991 \u2228 q = 1783) \u2192 223 \u2223 n \u2192 991 \u2223 n \u2192 1783 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 2501 / 2500 < \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2192 2 \u2264 S.card \u2192 padicValNat 2 n % 32 = 16 \u2192 65537 ^ 2 \u2223 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H3.R1.H2",
+  0.3611111111111111,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 1899 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 991 \u2228 q = 1783) \u2192 223 \u2223 n \u2192 991 \u2223 n \u2192 1783 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 2501 / 2500 < \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2192 2 \u2264 S.card \u2192 padicValNat 2 n % 128 = 64 \u2192 (274177 ^ 2 \u2223 n \u2228 137089 ^ 2 \u2223 n) \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H1.R1.H3.R1.H3",
+  0.3611111111111111,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 1899 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31 \u2228 q = 223 \u2228 q = 991 \u2228 q = 1783) \u2192 223 \u2223 n \u2192 991 \u2223 n \u2192 1783 \u2223 n \u2192 48 \u2264 padicValNat 2 n \u2192 2501 / 2500 < \u220f z \u2208 S, (1 + 5 / (z : \u211a)) \u2192 2 \u2264 S.card \u2192 128 \u2223 padicValNat 2 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H3.R1.H1",
+  1.625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 152 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31) \u2192 607 \u2223 n \u2192 223 \u2223 n \u2192 \u00ac 433 \u2223 n \u2192 \u00ac 991 \u2223 n \u2192 \u00ac 1213 \u2223 n \u2192 \u00ac 1783 \u2223 n \u2192 3967 \u2223 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R1.H2.R1.H2.R1.H1.R1.H3.R1.H2",
+  1.625,
+  "\u2203 A : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 \u00ac Squarefree (n / 2 ^ padicValNat 2 n) \u2192 \u2200 S : Finset \u2115, (\u2200 p, p \u2208 S \u2194 p.Prime \u2227 p \u2260 2 \u2227 p ^ 2 \u2223 n) \u2192 (\u2200 z \u2208 S, 128 \u2264 z \u2227 S.card + 3 \u2264 z) \u2192 \u220f z \u2208 S, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (S.card : \u211a))) \u2264 2101 / 2097 \u2192 4 \u2223 padicValNat 2 n \u2192 3 \u2223 n \u2192 5 \u2223 n \u2192 7 \u2223 n \u2192 19 \u2223 n \u2192 (\u2200 N : Finset \u2115, S \u2286 N \u2192 (\u2200 z \u2208 N, z.Prime \u2227 128 \u2264 z \u2227 N.card + 3 \u2264 z) \u2192 \u220f z \u2208 N, (((z : \u211a) + 1) / ((z : \u211a) - 2 - (N.card : \u211a))) \u2264 2101 / 2097 \u2192 (\u2203 z \u2208 N, z \u2223 2 ^ padicValNat 2 n + 1 \u2227 z % 3 = 2) \u2227 \u2200 z \u2208 N, z % 3 = 2 \u2192 Even (n.factorization z)) \u2192 16 \u2223 padicValNat 2 n \u2192 padicValNat 2 n % 64 \u2260 32 \u2192 31 \u2223 n \u2192 (\u2200 q : \u2115, q.Prime \u2192 q \u2223 n \u2192 q < 152 \u2192 q = 2 \u2228 q = 3 \u2228 q = 5 \u2228 q = 7 \u2228 q = 19 \u2228 q = 31) \u2192 607 \u2223 n \u2192 223 \u2223 n \u2192 \u00ac 433 \u2223 n \u2192 \u00ac 991 \u2223 n \u2192 \u00ac 1213 \u2223 n \u2192 \u00ac 1783 \u2223 n \u2192 \u00ac 3967 \u2223 n \u2192 padicValNat 2 n \u2264 A"
+ ],
+ [
+  "Erdos1052.erdos_1052.R2.H1",
+  39.0,
+  "\u2203 B : \u2115, \u2200 n : \u2115, Erdos1052.IsUnitaryPerfect n \u2192 4 \u2264 (n.primeFactors.filter (fun p => p \u2260 2 \u2227 n.factorization p = 1)).card \u2192 (\u220f p \u2208 n.primeFactors.filter (fun p => p \u2260 2 \u2227 n.factorization p \u2260 1), p ^ n.factorization p) \u2264 B"
+ ],
+ [
+  "Erdos1052.erdos_1052.R2.H2.R1.H2",
+  13.0,
+  "\u2200 c : \u2115, Odd c \u2192 (\u2200 p \u2208 c.primeFactors, 2 \u2264 c.factorization p) \u2192 c.primeFactors.card = 1 \u2192 c \u2260 9 \u2192 {a : \u2115 | let b := 2 ^ a * c let u := \u220f q \u2208 b.primeFactors, (1 + q ^ b.factorization q) 5 \u2264 a \u2227 \u2203 S : Finset \u2115, 4 \u2264 S.card \u2227 S \u2286 Finset.Icc 3 u \u2227 (\u2200 p \u2208 S, p.Prime \u2227 \u00ac p \u2223 b) \u2227 u * (\u220f p \u2208 S, (1 + p)) = (2 * b) * \u220f p \u2208 S, p}.Finite"
+ ],
+ [
+  "Erdos1052.erdos_1052.R2.H2.R1.H3",
+  13.0,
+  "\u2200 c : \u2115, Odd c \u2192 (\u2200 p \u2208 c.primeFactors, 2 \u2264 c.factorization p) \u2192 2 \u2264 c.primeFactors.card \u2192 {a : \u2115 | let b := 2 ^ a * c let u := \u220f q \u2208 b.primeFactors, (1 + q ^ b.factorization q) 5 \u2264 a \u2227 \u2203 S : Finset \u2115, 4 \u2264 S.card \u2227 S \u2286 Finset.Icc 3 u \u2227 (\u2200 p \u2208 S, p.Prime \u2227 \u00ac p \u2223 b) \u2227 u * (\u220f p \u2208 S, (1 + p)) = (2 * b) * \u220f p \u2208 S, p}.Finite"
+ ],
+ [
+  "Erdos1052.erdos_1052.R2.H2.R2.H1",
+  19.5,
+  "\u2200 c : \u2115, Odd c \u2192 (\u2200 p \u2208 c.primeFactors, 2 \u2264 c.factorization p) \u2192 \u2203 B : \u2115, \u2200 a : \u2115, \u2200 S : Finset \u2115, let b := 2^a*c let u := \u220f p \u2208 b.primeFactors, (1+p^b.factorization p) 5 \u2264 a \u2192 4 \u2264 S.card \u2192 S \u2286 Finset.Icc 3 u \u2192 (\u2200 p \u2208 S, p.Prime \u2227 \u00acp \u2223 b) \u2192 u*(\u220f p \u2208 S, (1+p)) = (2*b)*(\u220f p \u2208 S, p) \u2192 \u2200 p r : \u2115, p.Prime \u2192 r.Prime \u2192 p*r \u2223 2^a+1 \u2192 min p r \u2264 B"
+ ],
+ [
+  "Erdos1052.erdos_1052.R2.H2.R2.H2",
+  19.5,
+  "\u2200 c : \u2115, Odd c \u2192 (\u2200 p \u2208 c.primeFactors, 2 \u2264 c.factorization p) \u2192 \u2203 B : \u2115, \u2200 a : \u2115, \u2200 S : Finset \u2115, let b := 2^a*c let u := \u220f p \u2208 b.primeFactors, (1+p^b.factorization p) 5 \u2264 a \u2192 4 \u2264 S.card \u2192 S \u2286 Finset.Icc 3 u \u2192 (\u2200 p \u2208 S, p.Prime \u2227 \u00acp \u2223 b) \u2192 u*(\u220f p \u2208 S, (1+p)) = (2*b)*(\u220f p \u2208 S, p) \u2192 \u2200 q \u2208 S, \u2200 p r : \u2115, p.Prime \u2192 r.Prime \u2192 p*r \u2223 1+q \u2192 min p r \u2264 B"
+ ],
+ [
+  "Erdos107.erdos_107.R1.H1.R1.H2.R1.H1",
+  6.5,
+  "let C := Fin 17 \u2192 Fin 17 \u2192 Fin 17 \u2192 Bool let packet (o : C) : Prop := \u2200 a b c d, a<b \u2192 b<c \u2192 c<d \u2192 (o a b c=o a b d \u2227 o a b d=o a c d) \u2228 (o a b c=o a b d \u2227 o a c d=o b c d) \u2228 (o a b d=o a c d \u2227 o a c d=o b c d) let even (o : C) (a b c d : Fin 17) : Prop := (((o a b c).xor (o a b d)).xor (o a c d)).xor (o b c d) = false let allEven (o : C) (T : Finset (Fin 17)) : Prop := \u2200 a \u2208 T, \u2200 b \u2208 T, \u2200 c \u2208 T, \u2200 d \u2208 T, a<b \u2192 b<c \u2192 c<d \u2192 even o a b c d \u2200 o : C, (\u2203 x y : Fin 17 \u2192 \u2124, StrictMono x \u2227 \u2200 a b c, a<b \u2192 b<c \u2192 let D := (x b-x a)*(y c-y a)-(y b-y a)*(x c-x a) D\u22600 \u2227 o a b c=decide (0<D)) \u2192 \u2203 g : C, \u2203 \u03c0 : Equiv.Perm (Fin 17), packet g \u2227 (\u2200 b c, 0<b \u2192 b<c \u2192 g 0 b c=true) \u2227 \u2200 S : Finset (Fin 17), allEven g S \u2192 allEven o (S.map \u03c0.toEmbedding)"
+ ],
+ [
+  "Erdos107.erdos_107.R1.H1.R1.H2.R1.H2",
+  6.5,
+  "let C := Fin 17 \u2192 Fin 17 \u2192 Fin 17 \u2192 Bool let packet (o : C) : Prop := \u2200 a b c d, a<b \u2192 b<c \u2192 c<d \u2192 (o a b c=o a b d \u2227 o a b d=o a c d) \u2228 (o a b c=o a b d \u2227 o a c d=o b c d) \u2228 (o a b d=o a c d \u2227 o a c d=o b c d) let even (o : C) (a b c d : Fin 17) : Prop := (((o a b c).xor (o a b d)).xor (o a c d)).xor (o b c d) = false \u2200 g : C, packet g \u2192 (\u2200 b c, 0<b \u2192 b<c \u2192 g 0 b c=true) \u2192 \u2203 S : Finset (Fin 17), S.card=6 \u2227 \u2203 v \u2208 S, (\u2200 a \u2208 S, v\u2264a) \u2227 \u2200 a \u2208 S, \u2200 b \u2208 S, \u2200 c \u2208 S, v<a \u2192 a<b \u2192 b<c \u2192 even g v a b c"
+ ],
+ [
+  "Erdos107.erdos_107.R1.H1.R1.H3",
+  13.0,
+  "\u2200 n : \u2115, 7 \u2264 n \u2192 let N := 2^(n-2)+1 \u2200 col : Fin N \u2192 Fin N \u2192 Fin N \u2192 Bool, let polygon (T : Finset (Fin N)) : Prop := \u2200 a \u2208 T, \u2200 b \u2208 T, \u2200 c \u2208 T, \u2200 d \u2208 T, a < b \u2192 b < c \u2192 c < d \u2192 col a b c = col a b d \u2227 col a c d = col b c d (\u2200 a b c d, a < b \u2192 b < c \u2192 c < d \u2192 ((col a b c = col a b d \u2227 col a b d = col a c d) \u2228 (col a b c = col a b d \u2227 col a c d = col b c d) \u2228 (col a b d = col a c d \u2227 col a c d = col b c d))) \u2192 (\u2203 x y : Fin N \u2192 \u2124, StrictMono x \u2227 \u2200 i j k, i < j \u2192 j < k \u2192 let det := (x j-x i)*(y k-y i) - (y j-y i)*(x k-x i) det \u2260 0 \u2227 col i j k = decide (0 < det)) \u2192 (\u2200 S : Finset (Fin N), S.card = 2^(n-3)+1 \u2192 \u2203 T \u2286 S, T.card = n-1 \u2227 polygon T) \u2192 \u2203 T, T.card = n \u2227 polygon T"
+ ],
+ [
+  "Erdos114.erdos_114.R1.H2",
+  39.0,
+  "\u2200 n : \u2115, 0 < n \u2192 \u2200 q : \u2102[X], q.Monic \u2192 q.natDegree = n \u2192 (\u2200 x : \u2102, q.derivative.IsRoot x \u2192 \u2016q.eval x\u2016 = 1) \u2192 (\u2203 x y : \u2102, q.derivative.IsRoot x \u2227 q.derivative.IsRoot y \u2227 q.eval x \u2260 q.eval y) \u2192 Erdos114.lemniscateLength q \u2264 Erdos114.lemniscateLength (X ^ n - 1)"
+ ],
+ [
+  "Erdos128.erdos_128.R1.H2.R1.H1",
+  19.5,
+  "\u2200 (V : Type) [Fintype V] (G : SimpleGraph V), G.CliqueFree 3 \u2192 Fintype.card V ^ 2 < 12 * G.edgeSet.ncard \u2192 20 * G.edgeSet.ncard \u2264 3 * Fintype.card V ^ 2 \u2192 \u2203 V' : Set V, 2 * V'.ncard + 1 \u2265 Fintype.card V \u2227 50 * (G.induce V').edgeSet.ncard \u2264 Fintype.card V ^ 2"
+ ],
+ [
+  "Erdos128.erdos_128.R1.H2.R1.H2.R1.H3",
+  6.5,
+  "\u2200 (V : Type) [Fintype V] (G : SimpleGraph V), G.CliqueFree 3 \u2192 3 * Fintype.card V ^ 2 < 20 * G.edgeSet.ncard \u2192 5 * G.edgeSet.ncard < Fintype.card V ^ 2 \u2192 (\u2203 v, 14 * (G.neighborSet v).ncard < 5 * Fintype.card V) \u2192 (\u2200 I : Set V, G.IsIndepSet I \u2192 5 * I.ncard < 2 * Fintype.card V) \u2192 \u2203 V' : Set V, 2 * V'.ncard + 1 \u2265 Fintype.card V \u2227 50 * (G.induce V').edgeSet.ncard \u2264 Fintype.card V ^ 2"
+ ],
+ [
+  "Erdos128.erdos_128.R2.H2.R1.H1",
+  13.0,
+  "\u2200 (V : Type) [Fintype V] (G : SimpleGraph V), G.CliqueFree 3 \u2192 \u00ac G.Colorable 3 \u2192 (\u2200 v : V, Fintype.card V < 3 * (G.neighborSet v).ncard) \u2192 (\u2203 v : V, 14 * (G.neighborSet v).ncard < 5 * Fintype.card V) \u2192 \u2203 (v u : Fin 5 \u2192 V) (w : V), \u2200 i : Fin 5, G.Adj (v i) (v (i + 1)) \u2227 G.Adj (u i) (v (i + 1)) \u2227 G.Adj (u i) (v (i + 4)) \u2227 G.Adj w (u i)"
+ ],
+ [
+  "Erdos128.erdos_128.R2.H2.R1.H2",
+  13.0,
+  "\u2200 (V : Type) [Fintype V] (G : SimpleGraph V), 12 \u2264 Fintype.card V \u2192 73 * Fintype.card V ^ 2 < 800 * G.edgeSet.ncard \u2192 500000 * G.edgeSet.ncard < 99999 * Fintype.card V ^ 2 \u2192 (\u2200 I : Set V, G.IsIndepSet I \u2192 5 * I.ncard < 2 * Fintype.card V) \u2192 \u00ac G.Colorable 3 \u2192 (\u2200 v : V, Fintype.card V < 3 * (G.neighborSet v).ncard) \u2192 (\u2203 v : V, 29 * (G.neighborSet v).ncard \u2264 10 * Fintype.card V) \u2192 (\u2203 (v u : Fin 5 \u2192 V) (w : V), \u2200 i : Fin 5, G.Adj (v i) (v (i + 1)) \u2227 G.Adj (u i) (v (i + 1)) \u2227 G.Adj (u i) (v (i + 4)) \u2227 G.Adj w (u i)) \u2192 (\u2203 (M : Set V) (tag : V \u2192 Fin 3) (idx : V \u2192 Fin 5), 2 * Fintype.card V < 3 * M.ncard \u2227 \u2200 x \u2208 M, \u2200 y \u2208 M, G.Adj x y \u2192 (tag x = 0 \u2227 tag y = 0 \u2227 (idx y = idx x + 1 \u2228 idx y = idx x + 4)) \u2228 (tag x = 0 \u2227 tag y = 1 \u2227 (idx y = idx x + 1 \u2228 idx y = idx x + 4)) \u2228 (tag x = 1 \u2227 tag y = 0 \u2227 (idx y = idx x + 1 \u2228 idx y = idx x + 4)) \u2228 (tag x = 1 \u2227 tag y = 2) \u2228 (tag x = 2 \u2227 tag y = 1)) \u2192 (\u2200 V' : Set V, 2 * V'.ncard + 1 \u2265 Fintype.card V \u2192 50 * (G.induce V').edgeSet.ncard > Fintype.card V ^ 2) \u2192 \u00ac G.CliqueFree 3"
+ ],
+ [
+  "Erdos128.erdos_128.R2.H2.R2.H1",
+  13.0,
+  "\u2200 (V : Type) [Fintype V] (G : SimpleGraph V), 12 \u2264 Fintype.card V \u2192 G.CliqueFree 3 \u2192 (\u2200 u v : V, u \u2260 v \u2192 \u00ac G.Adj u v \u2192 \u2203 w : V, G.Adj u w \u2227 G.Adj v w) \u2192 (\u2200 v : V, Fintype.card V < 3 * (G.neighborSet v).ncard) \u2192 (\u2203 v : V, 29 * (G.neighborSet v).ncard \u2264 10 * Fintype.card V) \u2192 (\u2203 (v u : Fin 5 \u2192 V) (w : V), \u2200 i : Fin 5, G.Adj (v i) (v (i + 1)) \u2227 G.Adj (u i) (v (i + 1)) \u2227 G.Adj (u i) (v (i + 4)) \u2227 G.Adj w (u i)) \u2192 \u2203 (i : \u2115), 2 \u2264 i \u2227 \u2203 \u03c6 : V \u2192 Fin (3 * i - 1) \u2295 Fin 8, \u2200 x y : V, G.Adj x y \u2192 match \u03c6 x, \u03c6 y with | Sum.inl p, Sum.inl q => i \u2264 (q.val + (3 * i - 1) - p.val) % (3 * i - 1) \u2227 (q.val + (3 * i - 1) - p.val) % (3 * i - 1) \u2264 2 * i - 1 | Sum.inl p, Sum.inr t => ((t.val = 0 \u2228 t.val = 3) \u2227 p.val < i) \u2228 ((t.val = 4 \u2228 t.val = 1) \u2227 i \u2264 p.val \u2227 p.val < 2 * i) \u2228 ((t.val = 2 \u2228 t.val = 5) \u2227 2 * i \u2264 p.val) | Sum.inr t, Sum.inl p => ((t.val = 0 \u2228 t.val = 3) \u2227 p.val < i) \u2228 ((t.val = 4 \u2228 t.val = 1) \u2227 i \u2264 p.val \u2227 p.val < 2 * i) \u2228 ((t.val = 2 \u2228 t.val = 5) \u2227 2 * i \u2264 p.val) | Sum.inr t\u2081, Sum.inr t\u2082 => (t\u2081.val < 6 \u2227 t\u2082.val < 6 \u2227 ((t\u2081.val + 1) % 6 = t\u2082.val \u2228 (t\u2082.val + 1) % 6 = t\u2081.val)) \u2228 (t\u2081.val = 6 \u2227 (t\u2082.val = 0 \u2228 t\u2082.val = 4 \u2228 t\u2082.val = 2 \u2228 t\u2082.val = 7)) \u2228 (t\u2082.val = 6 \u2227 (t\u2081.val = 0 \u2228 t\u2081.val = 4 \u2228 t\u2081.val = 2 \u2228 t\u2081.val = 7)) \u2228 (t\u2081.val = 7 \u2227 (t\u2082.val = 3 \u2228 t\u2082.val = 1 \u2228 t\u2082.val = 5 \u2228 t\u2082.val = 6)) \u2228 (t\u2082.val = 7 \u2227 (t\u2081.val = 3 \u2228 t\u2081.val = 1 \u2228 t\u2081.val = 5 \u2228 t\u2081.val = 6))"
+ ],
+ [
+  "Erdos128.erdos_128.R2.H2.R2.H2.R1.H1",
+  6.5,
+  "\u2200 w : Fin 5 \u2295 Fin 8 \u2192 \u211d, (\u2200 z, 0 \u2264 w z) \u2192 (\u2211 z, w z) = 1 \u2192 0 < w (Sum.inr 0) + w (Sum.inr 1) \u2192 0 < w (Sum.inr 3) + w (Sum.inr 4) \u2192 0 < w (Sum.inr 1) + w (Sum.inr 6) \u2192 0 < w (Sum.inr 4) + w (Sum.inr 7) \u2192 w (Sum.inr 0) + w (Sum.inr 2) + w (Sum.inr 4) + w (Sum.inr 7) < 2 / 5 \u2192 w (Sum.inr 1) + w (Sum.inr 3) + w (Sum.inr 5) + w (Sum.inr 6) < 2 / 5 \u2192 \u2203 s : Fin 5 \u2295 Fin 8 \u2192 \u211d, (\u2200 z, 0 \u2264 s z \u2227 s z \u2264 w z) \u2227 (\u2211 z, s z) = 1 / 2 \u2227 25 * (\u2211 x : Fin 5 \u2295 Fin 8, \u2211 y : Fin 5 \u2295 Fin 8, match x, y with | Sum.inl p, Sum.inl q => if 2 \u2264 (q.val + 5 - p.val) % 5 \u2227 (q.val + 5 - p.val) % 5 \u2264 3 then s x * s y else 0 | Sum.inl p, Sum.inr t => if ((t.val = 0 \u2228 t.val = 3) \u2227 p.val < 2) \u2228 ((t.val = 4 \u2228 t.val = 1) \u2227 2 \u2264 p.val \u2227 p.val < 4) \u2228 ((t.val = 2 \u2228 t.val = 5) \u2227 4 \u2264 p.val) then s x * s y else 0 | Sum.inr t, Sum.inl p => if ((t.val = 0 \u2228 t.val = 3) \u2227 p.val < 2) \u2228 ((t.val = 4 \u2228 t.val = 1) \u2227 2 \u2264 p.val \u2227 p.val < 4) \u2228 ((t.val = 2 \u2228 t.val = 5) \u2227 4 \u2264 p.val) then s x * s y else 0 | Sum.inr t\u2081, Sum.inr t\u2082 => if (t\u2081.val < 6 \u2227 t\u2082.val < 6 \u2227 ((t\u2081.val + 1) % 6 = t\u2082.val \u2228 (t\u2082.val + 1) % 6 = t\u2081.val)) \u2228 (t\u2081.val = 6 \u2227 (t\u2082.val = 0 \u2228 t\u2082.val = 4 \u2228 t\u2082.val = 2 \u2228 t\u2082.val = 7)) \u2228 (t\u2082.val = 6 \u2227 (t\u2081.val = 0 \u2228 t\u2081.val = 4 \u2228 t\u2081.val = 2 \u2228 t\u2081.val = 7)) \u2228 (t\u2081.val = 7 \u2227 (t\u2082.val = 3 \u2228 t\u2082.val = 1 \u2228 t\u2082.val = 5 \u2228 t\u2082.val = 6)) \u2228 (t\u2082.val = 7 \u2227 (t\u2081.val = 3 \u2228 t\u2081.val = 1 \u2228 t\u2081.val = 5 \u2228 t\u2081.val = 6)) then s x * s y else 0) \u2264 1"
+ ],
+ [
+  "Erdos128.erdos_128.R2.H2.R2.H2.R1.H2",
+  6.5,
+  "\u2200 (i : \u2115), 3 \u2264 i \u2192 \u2200 w : Fin (3 * i - 1) \u2295 Fin 8 \u2192 \u211d, (\u2200 z, 0 \u2264 w z) \u2192 (\u2211 z, w z) = 1 \u2192 0 < w (Sum.inr 0) + w (Sum.inr 1) \u2192 0 < w (Sum.inr 3) + w (Sum.inr 4) \u2192 0 < w (Sum.inr 1) + w (Sum.inr 6) \u2192 0 < w (Sum.inr 4) + w (Sum.inr 7) \u2192 w (Sum.inr 0) + w (Sum.inr 2) + w (Sum.inr 4) + w (Sum.inr 7) < 2 / 5 \u2192 w (Sum.inr 1) + w (Sum.inr 3) + w (Sum.inr 5) + w (Sum.inr 6) < 2 / 5 \u2192 \u2203 s : Fin (3 * i - 1) \u2295 Fin 8 \u2192 \u211d, (\u2200 z, 0 \u2264 s z \u2227 s z \u2264 w z) \u2227 (\u2211 z, s z) = 1 / 2 \u2227 25 * (\u2211 x : Fin (3 * i - 1) \u2295 Fin 8, \u2211 y : Fin (3 * i - 1) \u2295 Fin 8, match x, y with | Sum.inl p, Sum.inl q => if i \u2264 (q.val + (3 * i - 1) - p.val) % (3 * i - 1) \u2227 (q.val + (3 * i - 1) - p.val) % (3 * i - 1) \u2264 2 * i - 1 then s x * s y else 0 | Sum.inl p, Sum.inr t => if ((t.val = 0 \u2228 t.val = 3) \u2227 p.val < i) \u2228 ((t.val = 4 \u2228 t.val = 1) \u2227 i \u2264 p.val \u2227 p.val < 2 * i) \u2228 ((t.val = 2 \u2228 t.val = 5) \u2227 2 * i \u2264 p.val) then s x * s y else 0 | Sum.inr t, Sum.inl p => if ((t.val = 0 \u2228 t.val = 3) \u2227 p.val < i) \u2228 ((t.val = 4 \u2228 t.val = 1) \u2227 i \u2264 p.val \u2227 p.val < 2 * i) \u2228 ((t.val = 2 \u2228 t.val = 5) \u2227 2 * i \u2264 p.val) then s x * s y else 0 | Sum.inr t\u2081, Sum.inr t\u2082 => if (t\u2081.val < 6 \u2227 t\u2082.val < 6 \u2227 ((t\u2081.val + 1) % 6 = t\u2082.val \u2228 (t\u2082.val + 1) % 6 = t\u2081.val)) \u2228 (t\u2081.val = 6 \u2227 (t\u2082.val = 0 \u2228 t\u2082.val = 4 \u2228 t\u2082.val = 2 \u2228 t\u2082.val = 7)) \u2228 (t\u2082.val = 6 \u2227 (t\u2081.val = 0 \u2228 t\u2081.val = 4 \u2228 t\u2081.val = 2 \u2228 t\u2081.val = 7)) \u2228 (t\u2081.val = 7 \u2227 (t\u2082.val = 3 \u2228 t\u2082.val = 1 \u2228 t\u2082.val = 5 \u2228 t\u2082.val = 6)) \u2228 (t\u2082.val = 7 \u2227 (t\u2081.val = 3 \u2228 t\u2081.val = 1 \u2228 t\u2081.val = 5 \u2228 t\u2081.val = 6)) then s x * s y else 0) \u2264 1"
+ ],
+ [
+  "Erdos128.erdos_128.R2.H3",
+  26.0,
+  "\u2200 (V : Type) [Fintype V] (G : SimpleGraph V), 12 \u2264 Fintype.card V \u2192 73 * Fintype.card V ^ 2 < 800 * G.edgeSet.ncard \u2192 500000 * G.edgeSet.ncard < 99999 * Fintype.card V ^ 2 \u2192 (\u2200 I : Set V, G.IsIndepSet I \u2192 5 * I.ncard < 2 * Fintype.card V) \u2192 (\u2203 a b c d : V, a \u2260 c \u2227 b \u2260 d \u2227 G.Adj a b \u2227 G.Adj b c \u2227 G.Adj c d \u2227 G.Adj d a) \u2192 (\u2203 a b c d e : V, a \u2260 b \u2227 a \u2260 c \u2227 a \u2260 d \u2227 a \u2260 e \u2227 b \u2260 c \u2227 b \u2260 d \u2227 b \u2260 e \u2227 c \u2260 d \u2227 c \u2260 e \u2227 d \u2260 e \u2227 G.Adj a b \u2227 G.Adj b c \u2227 G.Adj c d \u2227 G.Adj d e \u2227 G.Adj e a) \u2192 (\u2203 a b c d : V, a \u2260 c \u2227 a \u2260 d \u2227 b \u2260 c \u2227 b \u2260 d \u2227 G.Adj a b \u2227 G.Adj c d \u2227 \u00ac G.Adj a c \u2227 \u00ac G.Adj a d \u2227 \u00ac G.Adj b c \u2227 \u00ac G.Adj b d) \u2192 (\u2203 v : V, 3 * (G.neighborSet v).ncard \u2264 Fintype.card V) \u2192 (\u2200 V' : Set V, 2 * V'.ncard + 1 \u2265 Fintype.card V \u2192 50 * (G.induce V').edgeSet.ncard > Fintype.card V ^ 2) \u2192 \u00ac G.CliqueFree 3"
+ ],
+ [
+  "Erdos470.erdos_470.parts.ii.R1.H2",
+  39.0,
+  "\u2200 N : \u2115, \u2203 k a b : \u2115, N \u2264 k \u2227 b + 3 < a \u2227 a * (a + b) < 2 ^ (k + 2) \u2227 (2 ^ (k + 2) - a).Prime \u2227 (2 ^ (k + 2) + b).Prime"
+ ],
+ [
+  "Erdos470.erdos_470.parts.ii.R2.H2",
+  39.0,
+  "\u2200 K : \u2115, \u2203 k p q : \u2115, K \u2264 k \u2227 p.Prime \u2227 q.Prime \u2227 2 ^ (k + 1) < p \u2227 2 ^ (k + 1) < q \u2227 p \u2260 q \u2227 2 ^ (k + 1) * p * q < (2 ^ (k + 1) - 1) * (p + 1) * (q + 1) \u2227 (2 ^ (k + 1) - 1) * (p + 1) * (q + 1) < 2 ^ (k + 1) * p * q + q \u2227 2 ^ (k + 1) \u2264 ((2 ^ (k + 1) - 1) * (p + 1) * (q + 1) - 2 ^ (k + 1) * p * q) % p"
+ ],
+ [
+  "Erdos470.erdos_470.parts.ii.R3.H2",
+  39.0,
+  "\u2200 K : \u2115, \u2203 k p q : \u2115, K \u2264 k \u2227 p.Prime \u2227 q.Prime \u2227 2 ^ (k + 1) < p \u2227 2 ^ (k + 1) < q \u2227 p \u2260 q \u2227 2 ^ (k + 1) * p * q < (2 ^ (k + 1) - 1) * (p + 1) * (q + 1) \u2227 (\u2200 b c : \u2115, b < 2 ^ (k + 1) \u2192 c < 2 ^ (k + 1) \u2192 \u00ac (b * p + c * q \u2264 (2 ^ (k + 1) - 1) * (p + 1) * (q + 1) - 2 ^ (k + 1) * p * q \u2227 (2 ^ (k + 1) - 1) * (p + 1) * (q + 1) - 2 ^ (k + 1) * p * q < b * p + c * q + 2 ^ (k + 1)))"
+ ],
+ [
+  "Erdos687.erdos_687.variants.maier_pomerance.R1.H1",
+  39.0,
+  "\u2203 C : \u211d, 0 \u2264 C \u2227 (fun x : \u2115 \u21a6 (Y x : \u211d)) =O[atTop] (fun x : \u2115 \u21a6 (x : \u211d) * Real.log x ^ (2 : \u211d) * Real.log (Real.log x) ^ C)"
+ ],
+ [
+  "Erdos687.erdos_687.variants.maier_pomerance.R2.H1.R1.H1",
+  19.5,
+  "\u2203 c : \u211d, 0 < c \u2227 \u2203 z\u2080 : \u211d, \u2200 z : \u211d, z\u2080 \u2264 z \u2192 \u2200 a : \u2115 \u2192 \u2115, let L := Real.log z let Y := \u230az ^ 2 / L ^ 2\u230b\u208a let w := L / Real.log L ^ 2 let B := L / Real.log w let V\u2080 := \u220f p \u2208 (Finset.range (\u230aw\u230b\u208a + 1)).filter Nat.Prime, (1 - (p : \u211d)\u207b\u00b9) c * (Y : \u211d) * V\u2080 / B ^ 2 \u2264 (((Finset.Icc 1 Y).filter fun n => \u2200 p \u2264 \u230az\u230b\u208a, p.Prime \u2192 \u00ac (n \u2261 a p [MOD p])).card : \u211d)"
+ ],
+ [
+  "Erdos687.erdos_687.variants.maier_pomerance.R2.H2",
+  39.0,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2200\u1da0 x : \u2115 in atTop, \u2200 a : \u2115 \u2192 \u2115, let y := \u230a(x : \u211d) * Real.log x ^ (2 + \u03b5)\u230b\u208a + 1 let z := min x y.sqrt let survivors := (Icc 1 y).filter fun m => \u2200 p \u2264 z, p.Prime \u2192 \u00ac (m \u2261 a p [MOD p]) let primes := (Ioc z x).filter Nat.Prime \u2200 (U : Finset \u2115) (f : \u2115 \u2192 \u2115), U.Nonempty \u2192 U \u2286 survivors \u2192 U.image f \u2286 primes \u2192 (\u2200 m \u2208 U, \u2203 n \u2208 U, n \u2260 m \u2227 f n = f m) \u2192 (\u2200 m \u2208 U, \u2200 n \u2208 U, f m = f n \u2192 m \u2261 n [MOD f m]) \u2192 U.card + (primes \\ U.image f).card < survivors.card"
+ ],
+ [
+  "Erdos147.erdos_147.variants.janzer_conjecture.R1.H3",
+  25.333333333333332,
+  "\u2200 (r : \u2115), 5 \u2264 r \u2192 Odd r \u2192 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 \u2264 2 / ((r : \u211d) * ((r : \u211d) + 1)) \u2192 \u2203 (q : \u2115) (H : SimpleGraph (Fin q)) (C : \u211d), 0 < q \u2227 H.IsRegularOfDegree r \u2227 0 \u2264 C \u2227 \u2200 (V : Type) [Fintype V] [Nonempty V] (G : SimpleGraph V), G.IsBipartite \u2192 (\u2200 v, C * (Fintype.card V : \u211d) ^ (1 - 2 / (r : \u211d) + \u03b5) < G.degree v) \u2192 H \u2291 G"
+ ],
+ [
+  "Erdos40.erdos_40.variants.weaker.R1.H1",
+  37.5,
+  "\u2200 d L : \u2115, 0 < d \u2192 \u2203 U : \u2115, \u2200 B \u2208 (Finset.range (U + 1)).powerset, (\u2200 s \u2208 Finset.range (2 * U + 1), ((_root_.Finset.HasAntidiagonal.antidiagonal s).filter (fun p \u21a6 p.1 \u2208 B \u2227 p.2 \u2208 B)).card \u2264 4) \u2192 \u2203 n \u2208 Finset.Icc L U, (d^2 * (B.filter (fun x \u21a6 1 \u2264 x \u2227 x \u2264 n)).card)^2 < n"
+ ],
+ [
+  "Erdos40.erdos_40.variants.weaker.R1.H2.R1.H2",
+  18.75,
+  "\u2200 g : \u2115, 3 \u2264 g \u2192 \u2200 A : Set \u2115, (\u2200 n, sumRep A n \u2264 2 * g) \u2192 ((fun n : \u2115 \u21a6 Real.sqrt (n : \u211d)) =O[atTop] (fun n \u21a6 ((A \u2229 Icc 1 n).ncard : \u211d))) \u2192 (\u2200 d : \u2115, 0 < d \u2192 \u00ac ((fun n : \u2115 \u21a6 Real.sqrt (n : \u211d)) =O[atTop] (fun n \u21a6 (({x : \u2115 | x \u2208 A \u2227 x + d \u2208 A} \u2229 Icc 1 n).ncard : \u211d)))) \u2192 \u2203 B : Set \u2115, B \u2286 A \u2227 (\u2200 n, sumRep B n \u2264 2 * g - 1) \u2227 ((fun n : \u2115 \u21a6 Real.sqrt (n : \u211d)) =O[atTop] (fun n \u21a6 ((B \u2229 Icc 1 n).ncard : \u211d)))"
+ ],
+ [
+  "Erdos500.erdos_500.variants.turan_conjecture.R1.H2",
+  37.5,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2200\u1da0 n : \u2115 in atTop, (Hypergraph.cliqueExtremalNumber n 3 4 : \u211d) \u2264 (5 / 9 + \u03b5) * (n.choose 3 : \u211d)"
+ ],
+ [
+  "Erdos500.erdos_500.variants.turan_conjecture.R2.H1",
+  37.5,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2200\u1da0 n : \u2115 in atTop, \u2200 H : Finset (Finset (Fin n)), (\u2200 e \u2208 H, e.card = 3) \u2192 (\u00ac \u2203 S : Finset (Fin n), S.card = 4 \u2227 S.powersetCard 3 \u2286 H) \u2192 (\u2203 x y : Fin n, x \u2260 y \u2227 2 * n < 3 * (Finset.univ.filter (fun z => ({x, y, z} : Finset (Fin n)) \u2208 H)).card) \u2192 (H.card : \u211d) \u2264 (5 / 9 + \u03b5) * (n.choose 3 : \u211d)"
+ ],
+ [
+  "Erdos500.erdos_500.variants.turan_conjecture.R2.H2",
+  37.5,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2200\u1da0 n : \u2115 in atTop, \u2200 H : Finset (Finset (Fin n)), (\u2200 e \u2208 H, e.card = 3) \u2192 (\u00ac \u2203 S : Finset (Fin n), S.card = 4 \u2227 S.powersetCard 3 \u2286 H) \u2192 (\u2200 x y : Fin n, x \u2260 y \u2192 3 * (Finset.univ.filter (fun z => ({x, y, z} : Finset (Fin n)) \u2208 H)).card \u2264 2 * n) \u2192 (H.card : \u211d) \u2264 (5 / 9 + \u03b5) * (n.choose 3 : \u211d)"
+ ],
+ [
+  "Erdos604.erdos_604.variants.average.R1.H1",
+  37.5,
+  "\u2203 K : \u211d, 0 < K \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2200 A : Finset \u211d\u00b2, A.card=n \u2192 let M := A.offDiag.sup fun p => (A.filter fun x => dist p.2 x = dist p.1 x).card (Real.log n).sqrt < (M : \u211d)+1 \u2192 M^2 \u2264 n \u2192 (n:\u211d) \u2264 K * (Real.log n).sqrt * ((A.sup (distinctDistancesFrom A) : \u2115) : \u211d)"
+ ],
+ [
+  "Erdos604.erdos_604.variants.average.R1.H2",
+  37.5,
+  "\u2203 K : \u211d, 0 < K \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2200 A : Finset \u211d\u00b2, A.card=n \u2192 let M := A.offDiag.sup fun p => (A.filter fun x => dist p.2 x = dist p.1 x).card n < M^2 \u2192 (M : \u211d)*(Real.log n).sqrt < n \u2192 (n:\u211d) \u2264 K * (Real.log n).sqrt * ((A.sup (distinctDistancesFrom A) : \u2115) : \u211d)"
+ ],
+ [
+  "Erdos604.erdos_604.variants.average.R2.H2.R1.H1.R1.H1",
+  6.25,
+  "\u2203 K : \u2115, 0 < K \u2227 \u2200 (A : Finset \u211d\u00b2) (E : Finset \u2115) (\u03b3 : \u2115 \u2192 C(unitInterval, \u211d\u00b2)), (\u2200 i \u2208 E, Function.Injective (\u03b3 i) \u2227 \u03b3 i 0 \u2208 A \u2227 \u03b3 i 1 \u2208 A \u2227 (\u2200 t, 0 < t \u2192 t < 1 \u2192 \u03b3 i t \u2209 A) \u2227 \u2203 c : \u211d\u00b2, \u2203 r : \u211d, 0 < r \u2227 \u2200 t, dist (\u03b3 i t) c = r) \u2192 Set.InjOn (fun i => ({\u03b3 i 0, \u03b3 i 1} : Finset \u211d\u00b2)) (E : Set \u2115) \u2192 (\u2200 i \u2208 E, \u2200 j \u2208 E, i \u2260 j \u2192 ((Set.range (\u03b3 i) \u2229 Set.range (\u03b3 j)) \\ (A : Set \u211d\u00b2)).Finite) \u2192 let X := \u2211 i \u2208 E, \u2211 j \u2208 E.erase i, ((Set.range (\u03b3 i) \u2229 Set.range (\u03b3 j)) \\ (A : Set \u211d\u00b2)).ncard E.card \u2264 K * A.card \u2228 E.card ^ 3 \u2264 K * A.card ^ 2 * X"
+ ],
+ [
+  "Erdos604.erdos_604.variants.average.R2.H3",
+  25.0,
+  "\u2203 c : \u211d, 0 < c \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2200 A : Finset \u211d\u00b2, #A = n \u2192 (\u2200 B \u2286 A, Collinear \u211d (B : Set \u211d\u00b2) \u2192 (#B : \u211d) * Real.log n < n) \u2192 (\u2200 B \u2286 A, (\u2200 y \u2208 A, \u2200 z \u2208 A, y \u2260 z \u2192 #(B.filter fun x => dist x y = dist x z) \u2264 2) \u2192 (#B : \u211d) * Real.log n < n) \u2192 (\u2200 x \u2208 A, ((n : \u211d) - 1) * Real.sqrt (Real.log n) < (#(A.offDiag.filter fun p => dist x p.1 = dist x p.2) : \u211d)) \u2192 \u2203 x \u2208 A, c * (n : \u211d) / Real.sqrt (Real.log n) \u2264 (distinctDistancesFrom A x : \u211d)"
+ ],
+ [
+  "Erdos604.erdos_604.variants.sqrt_log.R1.H2",
+  37.5,
+  "\u2203 C : \u211d, 0 < C \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2200 B : Finset \u211d\u00b2, B.card = n \u2192 (\u2200 b \u2208 B, \u2200 i : Fin 2, IsIntegral \u2124 (b i)) \u2192 (\u2200 x \u2208 B, 2 * ((B.erase x).filter (fun y => (((B.erase x).filter (fun z => dist z x = dist y x)).card : \u211d) \u2264 (n : \u211d).log.sqrt)).card \u2264 n) \u2192 C * (n : \u211d) ^ 2 / (n : \u211d).log.sqrt \u2264 \u2211 x \u2208 B, \u2211 y \u2208 B.erase x, (((B.erase x).filter (fun z => dist z x = dist y x)).card : \u211d)\u207b\u00b9"
+ ],
+ [
+  "Erdos165.erdos_165.variants.conjecture.R1.H1.R1.H1.R1.H1",
+  6.166666666666667,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 n0 : \u2115, \u2200 n : \u2115, n0 \u2264 n \u2192 \u2203 m : \u2115, \u2203 R S : SimpleGraph (Fin m), \u2203 f : Fin n \u21aa (Fin m \u00d7 Fin m), let q (a b : Fin m) := min a.val b.val * m + max a.val b.val let A := R.comap (fun v => (f v).1) let B := S.comap (fun v => (f v).2) let cut (X Y : SimpleGraph (Fin n)) (r : Fin n \u2192 Fin m) := let d (u v : Fin n) := (\u2203 w, X.Adj u v \u2227 X.Adj u w \u2227 X.Adj v w \u2227 q (r u) (r w) < q (r u) (r v) \u2227 q (r v) (r w) < q (r u) (r v)) \u2228 (\u2203 w, Y.Adj w u \u2227 Y.Adj w v \u2227 X.Adj u v) SimpleGraph.fromRel (fun u v => X.Adj u v \u2227 \u00ac (d u v \u2228 d v u)) let C := cut A B (fun v => (f v).1) let D := cut B A (fun v => (f v).2) let G := SimpleGraph.fromRel (fun u v => C.Adj u v \u2228 D.Adj u v) \u2200 I : Finset (Fin n), G.IsIndepSet (\u2191I : Set (Fin n)) \u2192 (I.card : \u211d) < (1 + \u03b5) * Real.sqrt ((n : \u211d) * Real.log (n : \u211d))"
+ ],
+ [
+  "Erdos165.erdos_165.variants.conjecture.R1.H3",
+  24.666666666666668,
+  "\u2200 \u03b4 > (0 : \u211d), \u2200\u1da0 k : \u2115 in atTop, \u2200 (n : \u2115) (G : SimpleGraph (Fin n)), (1 + \u03b4) * ((k : \u211d) ^ 2 / (2 * Real.log k)) < n \u2192 Maximal (fun H : SimpleGraph (Fin n) \u21a6 H.CliqueFree 3) G \u2192 (\u2200 v, (G.neighborSet v).ncard < k) \u2192 (\u2200 (m : \u2115) (e : Fin m \u21aa Fin n), (1 + \u03b4 / 2) * ((k : \u211d) ^ 2 / (2 * Real.log k)) < m \u2192 m * k < 4 * (G.comap e).edgeSet.ncard) \u2192 \u00acG.IndepSetFree k"
+ ],
+ [
+  "Erdos7.erdos_7.R1.H1",
+  36.0,
+  "\u2203 (M p h : \u2115) (u : Fin h \u2192 \u2115) (r : \u2115 \u2192 \u2124), p.Prime \u2227 3 \u2264 p \u2227 Odd M \u2227 p.Coprime M \u2227 (p - 2) * h < (M.divisors.erase 1).card \u2227 (\u2203 z : \u2124, \u2200 d \u2208 M.divisors.erase 1, \u00ac (d : \u2124) \u2223 z - r d) \u2227 \u2200 z : \u2124, (\u2203 d \u2208 M.divisors.erase 1, (d : \u2124) \u2223 z - r d) \u2228 \u2203 i, (M : \u2124) \u2223 z - (u i : \u2124)"
+ ],
+ [
+  "Erdos7.erdos_7.R2.H1",
+  24.0,
+  "\u2203 (M p q h\u2081 h\u2082 : \u2115) (u : Fin h\u2081 \u2192 \u2124) (v : Fin h\u2082 \u2192 \u2124) (r : \u2115 \u2192 \u2124), p.Prime \u2227 q.Prime \u2227 3 \u2264 p \u2227 3 \u2264 q \u2227 p \u2260 q \u2227 Odd M \u2227 p.Coprime M \u2227 q.Coprime M \u2227 (p - 2) * h\u2081 < (M.divisors.erase 1).card \u2227 (q - 2) * h\u2082 < (M.divisors.erase 1).card \u2227 (\u2203 z : \u2124, \u2200 d \u2208 M.divisors.erase 1, \u00ac (d : \u2124) \u2223 z - r d) \u2227 \u2200 z : \u2124, (\u2203 d \u2208 M.divisors.erase 1, (d : \u2124) \u2223 z - r d) \u2228 (\u2203 i : Fin h\u2081, (M : \u2124) \u2223 z - u i) \u2228 (\u2203 j : Fin h\u2082, (M : \u2124) \u2223 z - v j)"
+ ],
+ [
+  "Erdos211.erdos_211.variants.one_sixth.R1.H1",
+  23.0,
+  "\u2200 s : Finset \u211d\u00b2, 2 \u2264 s.card \u2192 (\u2200 L : AffineSubspace \u211d \u211d\u00b2, IsLine L \u2192 3 * (s.filter fun p => p \u2208 L).card \u2264 2 * s.card) \u2192 (s.card : \u211d) ^ 2 \u2264 3 * \u2211 L \u2208 determinedLines s, ((s.filter fun p => p \u2208 L).card : \u211d)"
+ ],
+ [
+  "Erdos211.erdos_211.variants.one_sixth.R1.H3",
+  23.0,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 N : \u2115, \u2200 (s : Finset \u211d\u00b2) (m : \u2115), N \u2264 s.card \u2192 4 \u2264 m \u2192 3 * m < s.card \u2192 (\u2200 L : AffineSubspace \u211d \u211d\u00b2, IsLine L \u2192 (s.filter fun p => p \u2208 L).card \u2264 m) \u2192 (\u2211 L \u2208 determinedLines s, (((s.filter fun p => p \u2208 L).card : \u211d) - 3) * (((s.filter fun p => p \u2208 L).card : \u211d) + 2)) \u2264 ((m : \u211d) - 1) * (s.card : \u211d) + \u03b4 * (s.card : \u211d) ^ 2"
+ ],
+ [
+  "Erdos647.erdos_647.R1.H2",
+  34.5,
+  "\u2203 n : \u2115, 24 < n \u2227 \u2200 k : \u2115, 0 < k \u2192 k \u2264 n \u2192 (k + 3) ^ 6 \u2264 139 ^ 6 * (n - k) \u2192 \u03c3 0 (n - k) \u2264 k + 2"
+ ],
+ [
+  "Erdos647.erdos_647.R2.H3",
+  23.0,
+  "\u2203 t : \u2115, 0 < t \u2227 (\u2200 k \u2208 ({1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 16, 18, 20, 24} : Finset \u2115), Nat.Prime ((720720 / k) * t - 1)) \u2227 (\u2200 k : \u2115, 0 < k \u2192 k \u2264 720720 * t \u2192 k \u2209 ({1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 16, 18, 20, 24} : Finset \u2115) \u2192 (k + 3) ^ 8 \u2264 45197 ^ 8 * (720720 * t - k) \u2192 \u03c3 0 (720720 * t - k) \u2264 k + 2)"
+ ],
+ [
+  "Erdos711.erdos_711.parts.i.R1.H1",
+  34.5,
+  "\u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2200\u1da0 n : \u2115 in atTop, let y := \u230a(n : \u211d) ^ (\u03b7 / 4)\u230b\u208a let B := \u2308(n : \u211d) ^ \u03b7\u2309\u208a \u2200 X : \u2115, X \u2264 n \u2192 \u2200 m : \u2115, \u2203 f : {a : \u2115 // a \u2264 X \u2227 y < a \u2227 a.Prime} \u2192 \u2115, Function.Injective f \u2227 \u2200 a, m < f a \u2227 f a \u2264 m + B * X \u2227 a.val \u2223 f a \u2227 (\u2200 p : \u2115, p.Prime \u2192 p \u2223 f a \u2192 y < p)"
+ ],
+ [
+  "Erdos711.erdos_711.parts.i.R1.H2",
+  34.5,
+  "\u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2200\u1da0 n : \u2115 in atTop, let y := \u230a(n : \u211d) ^ (\u03b7 / 4)\u230b\u208a let B := \u2308(n : \u211d) ^ \u03b7\u2309\u208a \u2200 X : \u2115, X \u2264 n \u2192 \u2200 m : \u2115, \u2203 f : {a : \u2115 // a \u2264 X \u2227 2 \u2264 a \u2227 \u00ac a.Prime \u2227 (\u2200 p : \u2115, p.Prime \u2192 p \u2223 a \u2192 y < p)} \u2192 \u2115, Function.Injective f \u2227 \u2200 a, m < f a \u2227 f a \u2264 m + B * X \u2227 a.val \u2223 f a \u2227 (\u2200 p : \u2115, p.Prime \u2192 p \u2223 f a \u2192 y < p)"
+ ],
+ [
+  "Erdos711.erdos_711.parts.i.R2.H1",
+  34.5,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2200\u1da0 n : \u2115 in atTop, \u2200 m : \u2115, \u2203 L : \u2115, (L : \u211d) \u2264 (n : \u211d) ^ (1 + \u03b5) \u2227 \u2203 a : Fin n \u2192 \u2115, Set.InjOn a {i | \u2200 p : \u2115, p.Prime \u2192 p \u2223 (i.val + 1) \u2192 p \u2264 Nat.sqrt n} \u2227 \u2200 i : Fin n, (\u2200 p : \u2115, p.Prime \u2192 p \u2223 (i.val + 1) \u2192 p \u2264 Nat.sqrt n) \u2192 m < a i \u2227 a i < m + L \u2227 (i.val + 1) \u2223 a i"
+ ],
+ [
+  "Erdos711.erdos_711.parts.i.R2.H2.R1.H2",
+  17.25,
+  "\u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 \u2264 1 / 2 \u2192 \u2200\u1da0 n : \u2115 in atTop, let q := \u230a(n : \u211d) ^ \u03b4\u230b\u208a \u2200 r : \u2115, n ^ 2 < r \u2192 r < (Finset.Icc 1 n).lcm id \u2192 \u2200 U : Finset \u2115, (\u2200 d \u2208 U, 1 \u2264 d \u2227 d \u2264 n \u2227 \u2203 p : \u2115, p.Prime \u2227 p \u2223 d \u2227 Nat.sqrt n < p) \u2192 (\u2203 y \u2208 Finset.Icc (r + 1) (r + n * q), q < (U.filter (\u00b7 \u2223 y)).card) \u2192 (\u00ac \u2203 z \u2208 Finset.Icc (r + 1) (r + n * q), \u2200 d \u2208 U, d \u2223 z) \u2192 U.card \u2264 ((Finset.Icc (r + 1) (r + n * q)).filter (fun y => \u2203 d \u2208 U, d \u2223 y)).card"
+ ],
+ [
+  "Erdos78.erdos_78.variants.strongly_explicit.R1.H1.R1.H1.R1.H1",
+  5.75,
+  "\u2203 c > (0 : \u211d), \u2200\u1da0 j : \u2115 in atTop, \u2200 S : Finset \u2115, (\u2200 u \u2208 S, u < 2 ^ 3 ^ j) \u2192 (\u2200 u \u2208 S, \u2200 v \u2208 S, u \u2260 v \u2192 IsSquare (AdjoinRoot.mk (X ^ 3 ^ j - C 2 : (ZMod 13)[X]) ((\u2211 i \u2208 Finset.range (3 ^ j), if u.testBit i then X ^ i else 0) - (\u2211 i \u2208 Finset.range (3 ^ j), if v.testBit i then X ^ i else 0)))) \u2192 (S.card : \u211d) < c * 3 ^ j"
+ ],
+ [
+  "Erdos78.erdos_78.variants.strongly_explicit.R1.H1.R2.H1",
+  7.666666666666667,
+  "\u2200 f : \u2115 \u00d7 \u2115 \u2192 \u2115, IsPolyTime f \u2192 \u2200 p : Polynomial \u2115, \u2203 g : \u2115 \u2192 \u2115, IsPolyTime g \u2227 \u2200\u1da0 n : \u2115 in atTop, g (2 ^ n) < 2 ^ ((p.eval n + 1) ^ 3) \u2227 \u2200 x : \u2115, x < 2 ^ ((p.eval n + 1) ^ 3 - (p.eval n + 1)) \u2192 f (2 ^ n, x) \u2260 g (2 ^ n)"
+ ],
+ [
+  "Erdos13.erdos_13.variants.general.R1.H1.R1.H3.R1.H2.R1.H3.R1.H2",
+  0.9444444444444445,
+  "\u2200 r : \u2115, 3 \u2264 r \u2192 r < 2^(2^102 : \u2115) \u2192 \u2200 V C W D : \u2115, 0 < V \u2192 0 < W \u2192 \u2203 K : \u2115, \u2200 (m : \u2115) (A : Finset \u2115), A \u2286 Icc 1 ((r+1)*m) \u2192 m+K < A.card \u2192 (\u2200 j < m, m-j < (A.filter fun a => (r+1)*j < a).card) \u2192 2*(Ioc (r*m) ((r+1)*m) \u2229 A).card \u2264 m \u2192 (r+1)*(Ioc (r*m) ((r+1)*m) \u2229 A).card \u2264 2*m \u2192 m < (24*r*r*(r+1)+1)*(A.filter (fun a => r*a < (r+1)*m)).card \u2192 m < (3*r+4)*(A.filter (fun a => 3 \u2223 a)).card \u2192 m < (r+2)*(A.filter (fun a => 2 \u2223 a)).card \u2192 m \u2264 V*(A.filter (fun a => if r=3 then 4*m < 377916808*a \u2227 (5*a \u2264 4*m \u2228 (217*a < 200*m \u2227 5 \u2223 a)) else if 11 \u2264 r then (r+2)*a \u2264 (r+1)*m else ((4*r-1)*(r+1)+1)*a \u2264 (4*r-1)*((r+1)*m))).card+C \u2192 m \u2264 W*(A.filter (fun a => a%4=2)).card+D \u2192 \u2203 a \u2208 A, \u2203 b : Fin r \u2192 \u2115, (\u2200 i, b i \u2208 A \u2227 a < b i) \u2227 a \u2223 \u2211 i, b i"
+ ],
+ [
+  "Erdos241.erdos_241.variants.generalization.R1.H2",
+  34.0,
+  "\u2200 r : \u2115, 2 \u2264 r \u2192 \u2203 \u03b5 : \u2115 \u2192 \u211d, \u03b5 =o[atTop] (fun _ \u21a6 (1 : \u211d)) \u2227 \u2200\u1da0 N in atTop, (Erdos241.f N r : \u211d) \u2264 (1 + \u03b5 N) * (N : \u211d) ^ ((1 : \u211d) / r)"
+ ],
+ [
+  "Erdos94.erdos_94.variants.regular_ngon.R1.H3",
+  22.0,
+  "\u2200\u1da0 n : \u2115 in atTop, \u2200 P : Finset \u211d\u00b2, P.card = n \u2192 ConvexIndep (P : Set \u211d\u00b2) \u2192 (\u2203 u \u2208 distanceSet P, n < distanceMultiplicity P u) \u2192 \u2211 u \u2208 distanceSet P, (distanceMultiplicity P u : \u211d) ^ 2 \u2264 (if n % 2 = 1 then (n : \u211d) ^ 2 * ((n : \u211d) - 1) / 2 else (n : \u211d) ^ 3 / 2 - 3 * (n : \u211d) ^ 2 / 4)"
+ ],
+ [
+  "Erdos647.erdos_647.variants.infinite.R1.H1",
+  25.5,
+  "\u2200 K : \u2115, \u2203 t : \u2115, K < t \u2227 (\u2200 j \u2208 ({1, 2, 3, 4, 6, 12} : Finset \u2115), ((2520 / j) * t - 1).Prime) \u2227 \u2200 j : \u2115, 0 < j \u2192 j < K \u2192 j \u2209 ({1, 2, 3, 4, 6, 12} : Finset \u2115) \u2192 (2520 * t - j).divisors.card \u2264 j + 2"
+ ],
+ [
+  "Erdos143.erdos_143.parts.i.R1.H2",
+  22.5,
+  "\u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 M\u2080 : \u2115, \u2200 M : \u2115, M\u2080 \u2264 M \u2192 \u2200 Q : Finset \u211a, (\u2200 q \u2208 Q, (2 : \u211a) \u2264 q \u2227 q \u2264 (M : \u211a) \u2227 1 < q.den) \u2192 (\u2200 p \u2208 Q, \u2200 q \u2208 Q, p \u2260 q \u2192 \u2200 k : \u2115, 1 \u2264 k \u2192 (1 : \u211a) \u2264 |(k : \u211a) * p - q|) \u2192 \u2211 q \u2208 Q, (1 : \u211d) / (q : \u211d) \u2264 \u03b5 * Real.log M"
+ ],
+ [
+  "Erdos3.erdos_3.variants.gowers.R1.H1",
+  13.0,
+  "\u2200 l : \u2115, 5 \u2264 l \u2192 \u2203 c > (0 : \u211d), (fun N \u21a6 (r l N : \u211d)) =O[atTop] fun N : \u2115 \u21a6 (N : \u211d) * exp (-(log (log N) ^ c))"
+ ],
+ [
+  "Erdos3.erdos_3.variants.green_tao.R1.H1",
+  19.5,
+  "\u2203 C B : \u211d, 0 < C \u2227 0 < B \u2227 \u2200 (p : \u2115) [Fact p.Prime] (\u03b5 : \u211d), 0 < \u03b5 \u2192 \u03b5 \u2264 1 / 10 \u2192 \u2200 A : Finset (ZMod p), \u2203 w : ZMod p \u00d7 ZMod p \u2192 \u211d, (\u2200 z, 0 \u2264 w z) \u2227 (\u2211 z, w z) = 1 \u2227 ((A.card : \u211d) / p) ^ 4 \u2264 C * \u03b5 + (\u2211 z, if z.1 \u2208 A \u2227 z.1 + z.2 \u2208 A \u2227 z.1 + 2 * z.2 \u2208 A \u2227 z.1 + 3 * z.2 \u2208 A then w z else 0) \u2227 (\u2211 z, if z.2 = 0 then w z else 0) \u2264 C * Real.exp (\u03b5 ^ (-B)) / p"
+ ],
+ [
+  "Erdos3.erdos_3.variants.green_tao.R2.H2",
+  19.5,
+  "\u2200 K : \u2115, \u2200 \u03ba : \u211d, 0 < \u03ba \u2192 \u2203 c : \u211d, 0 < c \u2227 \u2203 C : \u211d, 0 < C \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N\u2080 \u2264 N \u2192 \u2200 S : Finset \u2115, S \u2286 Finset.Icc 1 N \u2192 (\u2200 a d : \u2115, 0 < d \u2192 a \u2208 S \u2192 a + d \u2208 S \u2192 a + 2 * d \u2208 S \u2192 a + 3 * d \u2208 S \u2192 False) \u2192 \u00ac (let f : \u2124 \u2192 \u211d := fun x => (if 0 < x \u2227 x.toNat \u2208 S then (1 : \u211d) else 0) - (if 0 < x \u2227 x \u2264 (N : \u2124) then (S.card : \u211d) / N else 0) \u2211 x \u2208 Finset.Icc (1 : \u2124) N, \u2211 a \u2208 Finset.Icc (-(N : \u2124)) N, \u2211 b \u2208 Finset.Icc (-(N : \u2124)) N, \u2211 e \u2208 Finset.Icc (-(N : \u2124)) N, f x * f (x + a) * f (x + b) * f (x + e) * f (x + a + b) * f (x + a + e) * f (x + b + e) * f (x + a + b + e) < \u03ba * ((S.card : \u211d) / N) ^ K * (N : \u211d) ^ 4) \u2192 (S.card : \u211d) \u2264 C * ((N : \u211d) * Real.log N ^ (-c))"
+ ],
+ [
+  "Erdos3.erdos_3.variants.leng_sah_sawhney.R1.H1.R1.H1",
+  9.75,
+  "\u2200 k : \u2115, 5 \u2264 k \u2192 \u2203 gain C : \u211d, 1 < gain \u2227 0 < C \u2227 \u2203 D : \u2115, \u2200 (N : \u2115) (A : Finset \u2115), 3 \u2264 N \u2192 0 < A.card \u2192 A \u2286 Icc 1 N \u2192 let count (B : Finset \u2115) := ((range (N + 1) \u00d7\u02e2 range (N + 1)).filter (fun p => \u2200 i < k, p.1 + i * p.2 \u2208 B)).card let \u03b4 := (A.card : \u211d) / N let loss := C * (1 + Real.log ((N : \u211d) / A.card)) ^ D let total := ((N : \u211d) + 1) ^ 2 (N : \u211d) \u2264 Real.exp (Real.exp loss) \u2228 |(count A : \u211d) / total - \u03b4 ^ k * count (Icc 1 N) / total| \u2264 \u03b4 ^ k / (256 * k) \u2228 \u2203 a d M : \u2115, 0 < d \u2227 (\u2200 i \u2208 Icc 1 M, a + (i - 1) * d \u2208 Icc 1 N) \u2227 (N : \u211d) ^ Real.exp (-loss) \u2264 (M : \u211d) \u2227 gain * \u03b4 \u2264 (((Icc 1 M).filter (fun i => a + (i - 1) * d \u2208 A)).card : \u211d) / M"
+ ],
+ [
+  "Erdos3.erdos_3.variants.leng_sah_sawhney.R1.H1.R1.H2",
+  9.75,
+  "\u2200 (N k : \u2115) (A : Finset \u2115), 2 \u2264 k \u2192 2 * k \u2264 N \u2192 A \u2286 Icc 1 N \u2192 (A : Set \u2115).IsAPOfLengthFree k \u2192 let count (B : Finset \u2115) := ((range (N + 1) \u00d7\u02e2 range (N + 1)).filter (fun p => \u2200 i < k, p.1 + i * p.2 \u2208 B)).card let \u03b4 := (A.card : \u211d) / N let total := ((N : \u211d) + 1) ^ 2 128 * (k : \u211d) \u2264 N * \u03b4 ^ (k - 1) \u2192 \u03b4 ^ k / (128 * (k : \u211d)) \u2264 |(count A : \u211d) / total - \u03b4 ^ k * count (Icc 1 N) / total|"
+ ],
+ [
+  "Erdos90.erdos_90.variants.sawin_explicit.R1.H2.R1.H1",
+  4.5,
+  "let S : Finset \u2115 := {2,3,5,7,11,13,17,19,23,29,47,71,79,97,101,107,109,139,151,163,167,179} let e (p : \u2115) : \u2115 := if p \u2264 29 then 2 else 1 \u2200 N : \u2115, \u2203 (F K : Type) (_ : Field F) (_ : CharZero F) (_ : NumberField F) (_ : IsTotallyReal F) (_ : Field K) (_ : CharZero K) (_ : NumberField K) (_ : IsTotallyComplex K) (_ : Algebra F K) (_ : Algebra.IsQuadraticExtension F K), N \u2264 Module.finrank \u211a F \u2227 |(NumberField.discr K : \u211d)| / |(NumberField.discr F : \u211d)| \u2264 (Real.sqrt 26165522663340060) ^ (Module.finrank \u211a F) \u2227 \u2200 p \u2208 S, \u2200 \ud835\udd2d \u2208 (Ideal.span {(p : \u2124)}).primesOver (\ud835\udcde F), \ud835\udd2d.ramificationIdx \u2124 = e p \u2227 \ud835\udd2d.inertiaDeg \u2124 \u2264 2 \u2227 Nat.card (\ud835\udd2d.primesOver (\ud835\udcde K)) = 2"
+ ],
+ [
+  "Erdos90.erdos_90.variants.sawin_explicit.R1.H3",
+  9.0,
+  "\u2200 (F K : Type) [Field F] [CharZero F] [NumberField F] [IsTotallyReal F] [Field K] [CharZero K] [NumberField K] [IsTotallyComplex K] [Algebra F K] [Algebra.IsQuadraticExtension F K] (lam : \u211d), 1 < lam \u2192 |(NumberField.discr K : \u211d)| / |(NumberField.discr F : \u211d)| \u2264 lam ^ (Module.finrank \u211a F) \u2192 \u2200 (L : Finset (Ideal (\ud835\udcde K))), L.Nonempty \u2192 (\u2200 J \u2208 L, J \u2260 \u22a5) \u2192 (\u2200 J\u2081 \u2208 L, \u2200 J\u2082 \u2208 L, Ideal.relNorm (\ud835\udcde F) J\u2081 = Ideal.relNorm (\ud835\udcde F) J\u2082) \u2192 \u2203 J\u2080 \u2208 L, \u2203 B : Finset K, (\u2200 \u03b2 \u2208 B, (\u2200 a \u2208 J\u2080, \u2203 b : \ud835\udcde K, algebraMap (\ud835\udcde K) K b = \u03b2 * algebraMap (\ud835\udcde K) K a) \u2227 Algebra.norm F \u03b2 = 1) \u2227 (L.card : \u211d) \u2264 (B.card : \u211d) * (2 ^ (Module.finrank \u211a F) * (8 * lam ^ 2 * (Real.sqrt lam * Real.log lam * (Real.exp 1 / (4 * Real.pi))) ^ (Module.finrank \u211a F)))"
+ ],
+ [
+  "Erdos687.erdos_687.variants.fgkmt.R1.H1",
+  11.333333333333334,
+  "\u2203 c : \u211d, 0 < c \u2227 \u2203 C\u2081 : \u211d, 0 < C\u2081 \u2227 \u2200\u1da0 x : \u2115 in atTop, \u2203 a b : \u2115 \u2192 \u2115, let y := c * x * Real.log x * Real.log (Real.log (Real.log x)) / Real.log (Real.log x) let z := (x : \u211d) ^ (Real.log (Real.log (Real.log x)) / (4 * Real.log (Real.log x))) (((Finset.Ioc x \u230ay\u230b\u208a).filter fun q => q.Prime \u2227 (\u2200 s \u2264 \u230az\u230b\u208a, s.Prime \u2192 Real.log x ^ 20 < s \u2192 \u00ac (q \u2261 a s [MOD s])) \u2227 (\u2200 p \u2264 x, p.Prime \u2192 (x : \u211d) / 2 < p \u2192 \u00ac (q \u2261 b p [MOD p]))).card : \u211d) \u2264 C\u2081 * x / Real.log x"
+ ],
+ [
+  "Erdos687.erdos_687.variants.iwaniec.R1.H1.R1.H1",
+  8.5,
+  "\u2203 c > 0, Asymptotics.IsBigO Filter.atTop (Chebyshev.psi - id) (fun x : \u211d \u21a6 x * Real.exp (-c * (Real.log x) ^ ((1 : \u211d) / 2)))"
+ ],
+ [
+  "Erdos687.erdos_687.variants.iwaniec.R1.H1.R1.H2",
+  8.5,
+  "(\u2203 c > 0, Asymptotics.IsBigO Filter.atTop (Chebyshev.psi - id) (fun x : \u211d \u21a6 x * Real.exp (-c * (Real.log x) ^ ((1 : \u211d) / 2)))) \u2192 \u2203 C : \u211d, \u2200 S : Finset \u2115, (\u2200 p \u2208 S, p.Prime) \u2192 2 \u2264 S.card \u2192 \u2200 (x : \u2124) (m : \u2115), (\u2200 k < m, \u2203 p \u2208 S, (p : \u2124) \u2223 x + k) \u2192 (m : \u211d) \u2264 C * ((S.card : \u211d) * Real.log S.card) ^ 2"
+ ],
+ [
+  "Erdos687.erdos_687.variants.iwaniec.R2.H1",
+  17.0,
+  "\u2200\u1da0 x : \u2115 in atTop, \u2200 a : \u2115 \u2192 \u2115, let small := (x / 2).primesLE let S := (Finset.Icc 1 (x^2)).filter fun n => \u2200 p \u2208 small, n % p \u2260 a p % p 1000 * (x / (x.log2 + 1))^2 < S.card"
+ ],
+ [
+  "Erdos1.erdos_1.variants.least_N_9.R1.H2",
+  16.5,
+  "\u2200 (N : \u2115) (A : Finset \u2115), IsSumDistinctSet A N \u2192 A.card = 9 \u2192 161 \u2264 N"
+ ],
+ [
+  "Erdos1.erdos_1.variants.least_N_9.R2.H1",
+  16.5,
+  "\u2200 A : Finset \u2115, A \u2286 Icc 1 151 \u2192 (\u2203 x \u2208 A, 103 \u2264 x) \u2192 A.card = 9 \u2192 87381 \u2264 (\u2211 x \u2208 A, x ^ 2) \u2192 511 \u2264 A.sum id \u2192 \u2203 S \u2286 A, \u2203 T \u2286 A, S \u2260 T \u2227 S.sum id = T.sum id"
+ ],
+ [
+  "Erdos1.erdos_1.variants.least_N_9.R2.H2",
+  16.5,
+  "\u2200 A : Finset \u2115, A \u2286 Icc 1 160 \u2192 (\u2203 x \u2208 A, 152 \u2264 x) \u2192 A.card = 9 \u2192 87381 \u2264 (\u2211 x \u2208 A, x ^ 2) \u2192 511 \u2264 A.sum id \u2192 \u2203 S \u2286 A, \u2203 T \u2286 A, S \u2260 T \u2227 S.sum id = T.sum id"
+ ],
+ [
+  "Erdos92.erdos_92.variants.weak.R1.H1",
+  16.5,
+  "\u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, \u2203 P : Finset (EuclideanSpace \u211d (Fin 2)), N \u2264 P.card \u2227 (P.card : \u211d) ^ (1 + c) \u2264 (unitDistNum P : \u211d)"
+ ],
+ [
+  "Erdos89.erdos_89.variants.n_dvd_log_n.R1.H1",
+  16.0,
+  "\u2203 C : \u211d, 0 < C \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2200 S : Finset \u211d\u00b2, S.card = n \u2192 let P := S.offDiag (((P \u00d7\u02e2 P).filter fun z \u21a6 dist z.1.1 z.1.2 = dist z.2.1 z.2.2).card : \u211d) \u2264 C * (n : \u211d)^3 * Real.log n"
+ ],
+ [
+  "Erdos78.erdos_78.variants.cohen.R1.H1",
+  14.5,
+  "\u2203 D > (0 : \u211d), \u2203 f : \u2115 \u00d7 \u2115 \u00d7 \u2115 \u2192 Bool, IsPolyTime f \u2227 \u2200\u1da0 n : \u2115 in atTop, \u2200 A B : Finset (Fin n), \u2308(2 : \u211d) ^ (log (log n)) ^ D\u2309\u208a \u2264 A.card \u2192 \u2308(2 : \u211d) ^ (log (log n)) ^ D\u2309\u208a \u2264 B.card \u2192 \u2200 b : Bool, \u2203 u \u2208 A, \u2203 v \u2208 B, f (n, u.val, v.val) = b"
+ ],
+ [
+  "Erdos78.erdos_78.variants.li.R2.H1",
+  14.5,
+  "\u2203 D : \u2115, \u2203 f : List Bool \u00d7 \u2115 \u2192 Bool, IsPolyTime f \u2227 \u2200\u1da0 w : \u2115 in atTop, \u2200 S : Finset \u2115, (\u2200 a \u2208 S, a < 2^w) \u2192 w^D \u2264 S.card \u2192 \u2200 c : Bool, S.card^2 \u2264 4*((S \u00d7\u02e2 S).filter (fun z => f (List.replicate w true,z.1 ^^^ z.2) = c)).card"
+ ],
+ [
+  "Erdos6.erdos_6.variants.decreasing.R1.H1.R1.H2.R1.H1.R1.H1",
+  1.1666666666666667,
+  "\u2203 c C : \u211d, 0<c \u2227 0<C \u2227 \u2200\u1da0 x : \u211d in atTop, \u2200 q : \u2115, [NeZero q] \u2192 (q:\u211d)\u2264exp (sqrt (log x)/2) \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q, \u03c7.IsPrimitive \u2192 \u03c7\u22601 \u2192 let S := \u2016\u2211 n \u2208 range (\u230ax\u230b\u208a+1), \u03c7 (n:ZMod q)*(\u039b n:\u2102)\u2016 S \u2264 C*x*exp (-c*sqrt (log x)) \u2228 \u2203 \u03b2 : \u211d, \u03c7^2=1 \u2227 \u03c7.LFunction (\u03b2:\u2102)=0 \u2227 S \u2264 C*x*exp (-c*sqrt (log x)) + 2*x^\u03b2"
+ ],
+ [
+  "Erdos6.erdos_6.variants.increasing.R1.H1.R1.H2.R1.H1",
+  2.3333333333333335,
+  "\u2203 c : \u211d, 0<c \u2227 \u2200 D : \u211d, 0<D \u2192 \u2203 C : \u211d, 0<C \u2227 \u2200 x : \u211d, 4\u2264x \u2192 \u2200 (q : \u2115) [NeZero q], (q:\u211d) \u2264 (Real.log x)^D \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q, \u03c7.IsPrimitive \u2192 \u03c7\u22601 \u2192 \u2016\u2211 n \u2208 range (\u230ax\u230b\u208a+1), \u03c7 (n:ZMod q)*(\u039b n:\u2102)\u2016 \u2264 C*x*Real.exp (-c*Real.sqrt (Real.log x))"
+ ],
+ [
+  "Erdos6.erdos_6.variants.increasing.R1.H1.R1.H2.R2.H1",
+  2.3333333333333335,
+  "\u2200 A B : \u211d, 0 < A \u2192 0 < B \u2192 \u2203 C > (0:\u211d), \u2200\u1da0 x : \u2115 in atTop, \u2200 d : \u2115, 1 \u2264 d \u2192 (d:\u211d) \u2264 (Real.log x)^B \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 d, \u03c7.IsPrimitive \u2192 \u03c7 \u2260 1 \u2192 \u2200 y \u2264 x, \u2016\u2211 n \u2208 Icc 1 y, (\u039b n : \u2102) * \u03c7 (n : ZMod d)\u2016 \u2264 C*x/(Real.log x)^A"
+ ],
+ [
+  "Erdos19.erdos_19.variants.kahn.R1.H1.R1.H1",
+  5.75,
+  "\u2200 q : \u2115, 2 \u2264 q \u2192 \u2203 s : \u2115, 0 < s \u2227 \u2200 k : \u2115, 0 < k \u2192 \u2203 D\u2080 : \u2115, \u2200 n D m : \u2115, D\u2080 \u2264 D \u2192 \u2200 (H : Finset (Finset (Fin n))) (L : Finset (Fin n) \u2192 Finset (Fin m)), (\u2200 A \u2208 H, \u2200 B \u2208 H, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 A \u2208 H, 2 \u2264 A.card \u2227 A.card \u2264 2 * q) \u2192 (\u2200 i, (H.filter (fun A => i \u2208 A)).card = D) \u2192 (\u2200 A \u2208 H, D + D / q \u2264 (L A).card) \u2192 \u2203 K \u2286 H, \u2203 c : Finset (Fin n) \u2192 Fin m, (\u2200 A \u2208 H \\ K, \u2200 B \u2208 H \\ K, A \u2260 B \u2192 (A \u2229 B).Nonempty \u2192 c A \u2260 c B) \u2227 (\u2200 A \u2208 H \\ K, c A \u2208 L A) \u2227 (\u2200 i, k * (K.filter (fun A => i \u2208 A)).card \u2264 D) \u2227 \u2200 A \u2208 K, D \u2264 s * ((L A).filter (fun x => \u2200 B \u2208 H \\ K, (A \u2229 B).Nonempty \u2192 c B \u2260 x)).card"
+ ],
+ [
+  "Erdos19.erdos_19.variants.kahn.R1.H1.R2.H1",
+  5.75,
+  "\u2203 D\u2080 : \u2115, \u2200 n D m : \u2115, D\u2080 \u2264 D \u2192 0 < D \u2192 0 < m \u2192 \u2200 (K : Finset (Finset (Fin n))) (L : Finset (Fin n) \u2192 Finset (Fin m)), (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 A \u2208 K, A.card = 4) \u2192 (\u2200 i, (K.filter (fun A => i \u2208 A)).card = D) \u2192 (\u2200 A \u2208 K, D + D / 2 \u2264 (L A).card) \u2192 \u2203 c : Finset (Fin n) \u2192 Fin m, (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).Nonempty \u2192 c A \u2260 c B) \u2227 \u2200 A \u2208 K, c A \u2208 L A"
+ ],
+ [
+  "Erdos19.erdos_19.variants.kahn.R1.H1.R2.H2",
+  5.75,
+  "\u2200 q : \u2115, 3 \u2264 q \u2192 \u2203 D\u2080 : \u2115, \u2200 n D m : \u2115, D\u2080 \u2264 D \u2192 0 < D \u2192 0 < m \u2192 \u2200 (K : Finset (Finset (Fin n))) (L : Finset (Fin n) \u2192 Finset (Fin m)), (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 A \u2208 K, A.card = 2 * q) \u2192 (\u2200 i, (K.filter (fun A => i \u2208 A)).card = D) \u2192 (\u2200 A \u2208 K, D + D / q \u2264 (L A).card) \u2192 \u2203 c : Finset (Fin n) \u2192 Fin m, (\u2200 A \u2208 K, \u2200 B \u2208 K, A \u2260 B \u2192 (A \u2229 B).Nonempty \u2192 c A \u2260 c B) \u2227 \u2200 A \u2208 K, c A \u2208 L A"
+ ],
+ [
+  "Erdos19.erdos_19.variants.kahn.R1.H2.R1.H1",
+  5.75,
+  "\u2200 s : \u2115, 3 \u2264 s \u2192 s % 2 = 1 \u2192 \u2203 D\u2080 : \u2115, \u2200 (\u03b1 : Type) [Fintype \u03b1] [DecidableEq \u03b1] (D : \u2115), D\u2080 \u2264 D \u2192 \u2200 (G T : Finset (Finset \u03b1)), (\u2200 A \u2208 G, \u2200 B \u2208 G, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 E \u2208 G, E.card = s + 1) \u2192 (\u2200 x, (G.filter fun E => x \u2208 E).card = D) \u2192 (\u2200 U \u2208 T, U.card \u2264 D) \u2192 (\u2200 x, (T.filter fun U => x \u2208 U).card \u2264 s + 1) \u2192 \u2203 M : Finset (Finset \u03b1), M \u2286 G \u2227 (\u2200 E \u2208 M, \u2200 F \u2208 M, E \u2260 F \u2192 Disjoint E F) \u2227 \u2200 U \u2208 T, (U \\ M.biUnion id).card \u2264 D / s"
+ ],
+ [
+  "Erdos19.erdos_19.variants.kahn.R1.H2.R1.H2",
+  5.75,
+  "\u2200 s : \u2115, 3 \u2264 s \u2192 s % 2 = 0 \u2192 \u2203 D\u2080 : \u2115, \u2200 (\u03b1 : Type) [Fintype \u03b1] [DecidableEq \u03b1] (D : \u2115), D\u2080 \u2264 D \u2192 \u2200 (G T : Finset (Finset \u03b1)), (\u2200 A \u2208 G, \u2200 B \u2208 G, A \u2260 B \u2192 (A \u2229 B).card \u2264 1) \u2192 (\u2200 E \u2208 G, E.card = s + 1) \u2192 (\u2200 x, (G.filter fun E => x \u2208 E).card = D) \u2192 (\u2200 U \u2208 T, U.card \u2264 D) \u2192 (\u2200 x, (T.filter fun U => x \u2208 U).card \u2264 s + 1) \u2192 \u2203 M : Finset (Finset \u03b1), M \u2286 G \u2227 (\u2200 E \u2208 M, \u2200 F \u2208 M, E \u2260 F \u2192 Disjoint E F) \u2227 \u2200 U \u2208 T, (U \\ M.biUnion id).card \u2264 D / s"
+ ],
+ [
+  "Erdos19.erdos_19.variants.large_n.R1.H1.R1.H1",
+  5.75,
+  "\u2200 R : \u2115, \u2200\u1da0 n in Filter.atTop, \u2200 K L : Finset (Finset (Fin n)), (\u2200 A \u2208 K, 2 \u2264 A.card \u2227 A.card * A.card \u2264 n) \u2192 (\u2200 i j : Fin n, i \u2260 j \u2192 \u2203! B, B \u2208 K \u2227 i \u2208 B \u2227 j \u2208 B) \u2192 L \u2286 K \u2192 (\u2200 A \u2208 L, A.card \u2264 R) \u2192 (\u00ac \u2203 c : Finset (Fin n) \u2192 Fin n, (\u2200 X \u2208 L, \u2200 Y \u2208 L, X \u2260 Y \u2192 (X \u2229 Y).Nonempty \u2192 c X \u2260 c Y)) \u2192 (\u2200 A \u2208 L, (\u2203 c : Finset (Fin n) \u2192 Fin n, (\u2200 X \u2208 (L.erase A), \u2200 Y \u2208 (L.erase A), X \u2260 Y \u2192 (X \u2229 Y).Nonempty \u2192 c X \u2260 c Y)) \u2227 n \u2264 ((L.erase A).filter fun B => (A \u2229 B).Nonempty).card) \u2192 (\u2200 A \u2208 L, \u2200 c : Finset (Fin n) \u2192 Fin n, (\u2200 X \u2208 (L.erase A), \u2200 Y \u2208 (L.erase A), X \u2260 Y \u2192 (X \u2229 Y).Nonempty \u2192 c X \u2260 c Y) \u2192 ((L.erase A).filter (fun B => (A \u2229 B).Nonempty)).image c = Finset.univ) \u2192 (\u2203 A \u2208 L, 3 \u2264 A.card) \u2192 (\u2203 A \u2208 L, A.card * A.card < n) \u2192 (\u2200 A \u2208 L, A.card = 2 \u2192 4 \u2264 ((L.erase A).filter fun B => (A \u2229 B).Nonempty \u2227 B.card = 2).card) \u2192 False"
+ ],
+ [
+  "Erdos19.erdos_19.variants.large_n.R1.H1.R1.H2",
+  5.75,
+  "\u2203 R : \u2115, \u2200\u1da0 n in Filter.atTop, \u2200 K L : Finset (Finset (Fin n)), (\u2200 A \u2208 K, 2 \u2264 A.card \u2227 A.card * A.card \u2264 n) \u2192 (\u2200 i j : Fin n, i \u2260 j \u2192 \u2203! B, B \u2208 K \u2227 i \u2208 B \u2227 j \u2208 B) \u2192 L \u2286 K \u2192 (\u2203 A \u2208 L, R < A.card) \u2192 (\u00ac \u2203 c : Finset (Fin n) \u2192 Fin n, (\u2200 X \u2208 L, \u2200 Y \u2208 L, X \u2260 Y \u2192 (X \u2229 Y).Nonempty \u2192 c X \u2260 c Y)) \u2192 (\u2200 A \u2208 L, (\u2203 c : Finset (Fin n) \u2192 Fin n, (\u2200 X \u2208 (L.erase A), \u2200 Y \u2208 (L.erase A), X \u2260 Y \u2192 (X \u2229 Y).Nonempty \u2192 c X \u2260 c Y)) \u2227 n \u2264 ((L.erase A).filter fun B => (A \u2229 B).Nonempty).card) \u2192 (\u2200 A \u2208 L, \u2200 c : Finset (Fin n) \u2192 Fin n, (\u2200 X \u2208 (L.erase A), \u2200 Y \u2208 (L.erase A), X \u2260 Y \u2192 (X \u2229 Y).Nonempty \u2192 c X \u2260 c Y) \u2192 ((L.erase A).filter (fun B => (A \u2229 B).Nonempty)).image c = Finset.univ) \u2192 (\u2203 A \u2208 L, 3 \u2264 A.card) \u2192 (\u2203 A \u2208 L, A.card * A.card < n) \u2192 (\u2200 A \u2208 L, A.card = 2 \u2192 4 \u2264 ((L.erase A).filter fun B => (A \u2229 B).Nonempty \u2227 B.card = 2).card) \u2192 False"
+ ],
+ [
+  "Erdos19.erdos_19.variants.large_n.R1.H2.R1.H1",
+  5.75,
+  "\u2200\u1da0 n : \u2115 in Filter.atTop, \u2200 K : Finset (Finset (Fin n)), (\u2200 A \u2208 K, 2 \u2264 A.card) \u2192 (\u2203 L \u2208 K, n < L.card * L.card \u2227 n \u2264 2 * L.card) \u2192 (\u2200 i j : Fin n, i \u2260 j \u2192 \u2203! A, A \u2208 K \u2227 i \u2208 A \u2227 j \u2208 A) \u2192 \u2200 S \u2286 K, (\u2203 A \u2208 S, A.card * A.card < n) \u2192 (\u2200 A \u2208 S, n \u2264 ((S.erase A).filter (fun B => (A \u2229 B).Nonempty)).card) \u2192 \u2203 c : Finset (Fin n) \u2192 Fin n, \u2200 A \u2208 S, \u2200 B \u2208 S, A \u2260 B \u2192 (A \u2229 B).Nonempty \u2192 c A \u2260 c B"
+ ],
+ [
+  "Erdos19.erdos_19.variants.large_n.R1.H2.R1.H2",
+  5.75,
+  "\u2200\u1da0 n : \u2115 in Filter.atTop, \u2200 K : Finset (Finset (Fin n)), (\u2200 A \u2208 K, 2 \u2264 A.card) \u2192 (\u2203 L \u2208 K, n < L.card * L.card) \u2192 (\u2200 L \u2208 K, 2 * L.card < n) \u2192 (\u2200 i j : Fin n, i \u2260 j \u2192 \u2203! A, A \u2208 K \u2227 i \u2208 A \u2227 j \u2208 A) \u2192 \u2200 S \u2286 K, (\u2203 A \u2208 S, A.card * A.card < n) \u2192 (\u2200 A \u2208 S, n \u2264 ((S.erase A).filter (fun B => (A \u2229 B).Nonempty)).card) \u2192 \u2203 c : Finset (Fin n) \u2192 Fin n, \u2200 A \u2208 S, \u2200 B \u2208 S, A \u2260 B \u2192 (A \u2229 B).Nonempty \u2192 c A \u2260 c B"
+ ],
+ [
+  "Erdos470.erdos_470.variants.odd_weird_10_pow_21.R1.H1.R1.H1",
+  5.75,
+  "\u2200 b q : \u2115, 1 < b \u2192 q.Prime \u2192 3 \u2264 q \u2192 b.Coprime q \u2192 (\u2200 p \u2208 b.primeFactors, p < q) \u2192 let n := b*q n < 10^21 \u2192 Odd n \u2192 n.Abundant \u2192 (\u2200 d \u2208 n.properDivisors, d.Deficient) \u2192 3 \u2223 n \u2192 let E : \u2124 := (sigma 1 n : \u2124) - 2*(n : \u2124) let P := \u2211 d \u2208 b.properDivisors, (d : \u2124) let R := fun x : \u2124 => \u2203 s \u2286 b.properDivisors, (\u2211 d \u2208 s, (d : \u2124)) = x let G : \u2124 := Nat.gcd (sigma 1 b) (2*b) (\u00ac \u2203 s \u2286 b.divisors, (\u2211 d \u2208 s, (d : \u2124)) = E) \u2192 G \u2223 E \u2192 0 < E \u2192 (\u2200 L g : \u2124, 1 \u2264 L \u2192 1 \u2264 g \u2192 (2*g+1)*(2*L+8*g+8) \u2264 P \u2192 2 \u2264 (b : \u2124)-P \u2192 (\u2200 y : \u2124, L \u2264 y \u2192 y \u2264 P-L \u2192 R y) \u2192 (\u2200 k : \u2124, 0 \u2264 k \u2192 k < P \u2192 \u2203 i : \u2124, R i \u2227 k-g < i \u2227 i \u2264 k) \u2192 E < L \u2227 G < L) \u2192 \u2203 s \u2286 n.properDivisors.filter (fun d : \u2115 => (d : \u2124) \u2264 E), (\u2211 d \u2208 s, (d : \u2124)) = E"
+ ],
+ [
+  "Erdos470.erdos_470.variants.odd_weird_10_pow_21.R1.H1.R1.H2",
+  5.75,
+  "\u2200 b q j : \u2115, 1 < b \u2192 q.Prime \u2192 3 \u2264 q \u2192 b.Coprime q \u2192 (\u2200 p \u2208 b.primeFactors, p < q) \u2192 let n := b*q^(j+2) n < 10^21 \u2192 Odd n \u2192 n.Abundant \u2192 (\u2200 d \u2208 n.properDivisors, d.Deficient) \u2192 3 \u2223 n \u2192 let E : \u2124 := (sigma 1 n : \u2124) - 2*(n : \u2124) let P := \u2211 d \u2208 b.properDivisors, (d : \u2124) let R := fun x : \u2124 => \u2203 s \u2286 b.properDivisors, (\u2211 d \u2208 s, (d : \u2124)) = x let G : \u2124 := Nat.gcd (sigma 1 b) (2*b) (\u00ac \u2203 s \u2286 b.divisors, (\u2211 d \u2208 s, (d : \u2124)) = E) \u2192 G \u2223 E \u2192 0 < E \u2192 (\u2200 L g : \u2124, 1 \u2264 L \u2192 1 \u2264 g \u2192 (2*g+1)*(2*L+8*g+8) \u2264 P \u2192 (\u2200 y : \u2124, L \u2264 y \u2192 y \u2264 P-L \u2192 R y) \u2192 (\u2200 k : \u2124, 0 \u2264 k \u2192 k < P \u2192 \u2203 i : \u2124, R i \u2227 k-g < i \u2227 i \u2264 k) \u2192 E < L \u2227 G < L) \u2192 \u2203 s \u2286 n.properDivisors.filter (fun d : \u2115 => (d : \u2124) \u2264 E), (\u2211 d \u2208 s, (d : \u2124)) = E"
+ ],
+ [
+  "Erdos470.erdos_470.variants.odd_weird_10_pow_21.R1.H2",
+  11.5,
+  "\u2200 n < 10 ^ 21, Odd n \u2192 n.Abundant \u2192 (\u2200 d \u2208 n.properDivisors, d.Deficient) \u2192 \u00ac 3 \u2223 n \u2192 n.Pseudoperfect"
+ ],
+ [
+  "Erdos470.erdos_470.variants.odd_weird_prime_div.R2.H2",
+  11.5,
+  "\u2200 m : \u2115, Odd m \u2192 m.Abundant \u2192 m.primeFactors.card \u2264 5 \u2192 (\u2200 d \u2208 m.properDivisors, d.Deficient) \u2192 9 \u2223 m \u2192 m.Pseudoperfect"
+ ]
+]

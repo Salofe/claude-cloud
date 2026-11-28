@@ -1,0 +1,6 @@
+[22s] graphs 2000 connected 2000 capped 7 counterexamples 0 nodes 32366247 maxnodes 3000001 (152|3|GrphUnd) last=180|23|GrphUnd
+[133s] graphs 4000 connected 4000 capped 36 counterexamples 0 nodes 144215249 maxnodes 3000001 (152|3|GrphUnd) last=252|89|GrphUnd
+[321s] graphs 6000 connected 6000 capped 72 counterexamples 0 nodes 290754978 maxnodes 3000001 (152|3|GrphUnd) last=310|26|GrphUnd
+[607s] graphs 8000 connected 8000 capped 121 counterexamples 0 nodes 468804659 maxnodes 3000001 (152|3|GrphUnd) last=360|24|GrphUnd
+[918s] graphs 10000 connected 10000 capped 157 counterexamples 0 nodes 612644099 maxnodes 3000001 (152|3|GrphUnd) last=390|9|GrphUnd
+done

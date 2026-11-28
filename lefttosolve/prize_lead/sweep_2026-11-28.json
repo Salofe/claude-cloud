@@ -1,0 +1,565 @@
+{
+ "merged": [
+  {
+   "id": "Erdos28.erdos_28",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "This is the Erdős–Turán conjecture on additive bases. It needs a lower bound on the maximum of the representation function for every basis of order 2, and no known method rules out a bounded representation function. Best known: Dirac showed r(n) cannot be eventually constant, and Erdős–Fuchs showed the average cannot be nearly constant. The conjecture itself is fully open (erdosproblems.com/28 has 0 proof claims; Tao noted on 5 Apr 2026 that at least one of #28 and #749 holds). No formalization gap: sumRep counts ordered pairs in the antidiagonal, (A+A)^c.Finite matches 'all but finitely many', and limsup is taken in ENat.",
+   "evidence": [
+    "Lean: theorem erdos_28 (A : Set ℕ) (h : (A + A)ᶜ.Finite) : limsup (fun n => (sumRep A n : ℕ∞)) atTop = ⊤; sumRep = 1_A ∗ 1_A over the antidiagonal (FormalConjecturesForMathlib/Combinatorics/Additive/Convolution.lean:56)",
+    "erdosproblems.com/28 and its forum thread (fetched 28 Nov 2026): open, 5 comments, 0 proof claims",
+    "Agama arXiv:2010.11857 v3 (Mar 2026) only claims density/energy variants, not the conjecture"
+   ]
+  },
+  {
+   "id": "Erdos30.erdos_30",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "As formalized, |h(N) - sqrt N| = O(N^eps) has two halves, and both are open. The upper half needs to beat the N^{1/4} barrier of every known counting method. The lower half, h(N) >= sqrt N - O(N^eps) for all N, needs Singer-type moduli (primes near sqrt N) with gaps N^eps, which is beyond Baker–Harman–Pintz. Best known: h(N) <= sqrt N + 0.98183 N^{1/4} + O(1) (Carter–Hunter–O'Bryant 2025) and the unrefereed Hou–Zhao arXiv:2607.01169 with 0.9435. A forum post (johnakwei, 5 Oct 2026) proves that the Hou–Zhao smoothing framework cannot go below 2sqrt2/3 and cannot improve the exponent 1/4. The only 'proof claims' in the thread are constant improvements, not solutions.",
+   "evidence": [
+    "Lean: ∀ ε>0, (fun N => h N - sqrt N) =O[atTop] (N^ε), with h = Finset.maxSidonSubsetCard (Icc 1 N); the two-sided O also requires the lower bound",
+    "Forum thread 30: claims by Stoltz (0.98173, Feb 2026), Madeiros (0.94325, Aug 2026) and johnakwei (0.9428096, Oct 2026); all are N^{1/4}-constant tweaks",
+    "Forum: exact h(N) known for N<=586 via OGR-28, and h(N) - sqrt N still grows like N^{1/4} there"
+   ]
+  },
+  {
+   "id": "Erdos39.erdos_39",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "A solution needs an explicit infinite Sidon set of density N^{1/2-eps}, but all known infinite constructions lose a polynomial factor. Best known: Ruzsa 1998, N^{sqrt2-1+o(1)}; O'Bryant arXiv:2606.28651 (Jul 2026) confirms this is still the record. No formalization gap: the exponent 1/2-eps is real-valued and the statement is trivial only for eps>=1/2, not for all eps.",
+   "evidence": [
+    "Lean: ∃ A infinite Sidon, ∀ ε>0, (N^(1/2-ε)) =O[atTop] |Icc 1 N ∩ A|",
+    "erdosproblems.com/39: 0 comments, 0 proof claims; record still Ruzsa [Ru98]",
+    "O'Bryant, On the Thickness of Infinite Generalized Sidon Sets I, arXiv:2606.28651: Ruzsa's construction remains the record"
+   ]
+  },
+  {
+   "id": "Erdos41.erdos_41",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The liminf argument of Erdős (h=2), Nash (h=4) and Chen (all even h) uses the h/2-fold difference structure, which has no analogue for odd h=3. O'Bryant arXiv:2607.23795 (Nov 2026) again covers only even h. No junk-value gap: for a B_3 set, |A ∩ [1,N]| <= C N^{1/3} by counting 3-multisets, so the ratio is bounded and the real liminf is not the junk 0 of an unbounded sequence.",
+   "evidence": [
+    "Lean: NtupleCondition A 3 (multiset sums of card 3 determine the multiset), A infinite ⊢ liminf |A∩Icc 1 N|/N^{1/3} = 0",
+    "erdosproblems.com/41: 0 comments, 0 proof claims; even h done by Chen [Ch96b]",
+    "arXiv:2607.23795 abstract states the result only for h even"
+   ]
+  },
+  {
+   "id": "Erdos52.erdos_52",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "This is the Erdős–Szemerédi sum-product conjecture over Z. The integer case is open in both directions. Best known: max(|A+A|,|AA|) >> |A|^{1962/1469-o(1)} (Cushman 2025). Possible contradiction to watch: Bloom–Sawin–Schildkraut–Zhelezov (2026) disproved the conjecture over R and for small subsets of F_p, using units of number fields of large degree. That construction does not transfer to Z, where the only units are ±1. The erdosproblems page (edited 28 May 2026) and forum still list the integer case as open, and no integer counterexample has been claimed. No gap: the empty set and small sets are handled, since 0^(2-eps)=0.",
+   "evidence": [
+    "Lean: ∀ ε∈(0,1), ∃ C>0, ∀ A : Finset ℤ, max |A+A| |A*A| ≥ C |A|^(2-ε)",
+    "erdosproblems.com/52 (fetched): BSSZ26 disproof for A⊂R only; Cushman 1962/1469 record",
+    "Forum thread 52: all 2026 activity concerns the real case (AI re-derivations, constant optimisation)"
+   ]
+  },
+  {
+   "id": "Erdos66.erdos_66",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Random constructions give 1_A*1_A(n) ~ c log n only off an exceptional set of density zero. Removing every exception at the log n threshold is exactly the open difficulty, and Erdős expected the answer to be no. Best known: Erdős–Sárközy and Horváth 2007 show that |r(n) - log n| <= (1-eps) sqrt(log n) cannot hold for all large n. Táfula arXiv:2405.01530 (rev. May 2026) attains any regularly varying F with F/log n -> infinity, but not the threshold itself. No formalization gap.",
+   "evidence": [
+    "Lean: ∃ A c, c≠0 ∧ Tendsto (sumRep A n / log n) atTop (𝓝 c)",
+    "Forum thread 66: Táfula's 2026 preprint gives a heuristic that a limit below 1 is impossible; Horváth 2007 cited",
+    "0 proof claims"
+   ]
+  },
+  {
+   "id": "Erdos241.erdos_241",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Proving f(N) ~ N^{1/3} needs an upper-bound constant of 1, but Fourier/autoconvolution methods are limited by the L^2 autoconvolution constant mu_2^2 ≈ 0.5746, which gives about 1.5155. Best known: Bose–Chowla lower bound (1+o(1))N^{1/3}; upper bound ((2/0.574636)^{1/3}+o(1))N^{1/3} (Green 2001, White 2024). The forum holds only exact values for N<=320. No gap: f N 3 is the max card over subsets of Icc 1 N whose multisets of card 3 have distinct sums.",
+   "evidence": [
+    "Lean: (fun N => (f N 3 : ℝ)) ~[atTop] N^(1/3)",
+    "Forum thread 241: computations of f(N) up to N=320 (Oliveira e Silva) and OEIS A387704; no proof claims"
+   ]
+  },
+  {
+   "id": "Erdos1191.erdos_1191.parts.i",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Showing that the liminf is 0 means improving Erdős's interval/difference-counting argument by a function tending to infinity. That argument only gives a constant. Best known: liminf |A∩[1,x]| sqrt(log x / x) <= 2/sqrt(log 2) ≈ 2.40 (O'Bryant arXiv:2606.28651, 2026, sharpening Erdős and Cilleruelo). A disproof would need a Sidon set far denser than Ruzsa's x^{0.414}. No gap: the parse is (ncard/x^{1/2})·(log x)^{1/2}, and the liminf in ENNReal is the intended value.",
+   "evidence": [
+    "Lean: ∀ A infinite Sidon, liminf ofReal(|A∩Icc 1 x|/x^{1/2} * (log x)^{1/2}) = 0",
+    "erdosproblems.com/1191 and its forum: 0 comments, 0 proof claims",
+    "arXiv:2606.28651 abstract: liminf <= 2 sqrt(g)/sqrt(log 2) for g-Golomb rulers (g=1 is Sidon)"
+   ]
+  },
+  {
+   "id": "Erdos1191.erdos_1191.parts.ii",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "This part is strictly stronger than Erdős 39: it needs an infinite Sidon set with count >= x^{1/2}/(log x)^c along all x, which is far beyond any known construction. Best known: Ruzsa 1998, x^{sqrt2-1+o(1)}, still the record per O'Bryant 2026. No gap: c may be large, but any c still needs density x^{1/2-o(1)}.",
+   "evidence": [
+    "Lean: ∃ A infinite Sidon, ∃ c>0, 0 < liminf ofReal(|A∩Icc 1 x|/x^{1/2} * (log x)^c)",
+    "erdosproblems.com/1191: 'The second question is a stronger form of [39]'"
+   ]
+  },
+  {
+   "id": "Erdos142.erdos_142",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "An asymptotic formula for r_k(N) (k>=3) would need matching upper and lower bounds to within 1+o(1), but even the order of magnitude is unknown. Best known for k=3: Kelley–Meka / Bloom–Sisask upper bound N exp(-c(log N)^{1/9}) versus a Behrend-type lower bound N exp(-c' sqrt(log N)). No gap: the lint rules for value problems (LEARNINGS L5) forbid an answer built from r itself, sSup or limits, so the trivial answer := r k is not allowed. The cases k=0,1,2 are trivial (maxCard 0 = maxCard 1 = N), but the theorem quantifies over all k.",
+   "evidence": [
+    "Lean: theorem erdos_142 (k : ℕ) : (r k N) ~[atTop] erdos_142.answer k, where answer is sorry (a value problem)",
+    "erdosproblems.com/142 (edited 27 Nov 2026): 'An asymptotic formula is still far out of reach, even for k=3'; 0 proof claims; one forum comment doubts an asymptotic even exists",
+    "lefttosolve/LEARNINGS.md L5: an answer may not use choice, sInf/sSup, limits or the problem's own namespace"
+   ]
+  },
+  {
+   "id": "Erdos7.erdos_7",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "A covering needs exact control of how residue classes with distinct odd moduli overlap. Every known method (the distortion method, sieve products) only gives necessary conditions, and current constructions do not come close to producing an odd covering. Best known results: no odd squarefree covering exists (BBMST 2022). Any odd covering has lcm divisible by 45 and minimum modulus at most 9 (Dai-Li-Li-Yi, arXiv:2611.15110, Nov 2026). The lcm exceeds 10000 (kernel-checked, Mian-Siddique, arXiv:2607.25628) and, by an unverified preprint, exceeds 11,486,475. The Lean statement is faithful: StrictCoveringSystem Z requires distinct ideal moduli, and 'not <= span{2}' means the modulus is odd.",
+   "evidence": [
+    "Forum thread 7: jinooklee's May 2026 claimed proof was refuted by Nat Sothanaphan (its Lean axiom bbmst_sf_lt_one is provably false). The author conceded and Bloom treats the proof as flawed.",
+    "MichaelSchroeder (Sep 2026) proved partial results only: omega(lcm) >= 9, and noncoverage when every modulus has at most 3 prime factors. He states the unrestricted conjecture remains open.",
+    "The proof-claims page for 7 lists 0 claims."
+   ],
+   "could_not_verify": "MichaelSchroeder's papers (website only); not checked."
+  },
+  {
+   "id": "Erdos32.erdos_32",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Representing EVERY large n (not almost every n) costs about (log N)^2 elements of A under any union-bound or greedy method, because each a covers only about a 1/log N fraction of a block. Beating that needs control of the primes in shifted sets with no exceptions, which nobody has. Best known: O((log N)^2) for all n (Erdős 1954); for almost all n, O(omega(N) log N) for any omega tending to infinity (Ruzsa 1998); lower bound liminf >= e^gamma. The earlier audit agrees, and the forum and proof-claims pages (1 comment, 0 claims) contain nothing newer.",
+   "evidence": [
+    "erdosproblems.com/32 (fetched 2026-11-28): open, $50, page last edited Jan 2026, 0 proof claims.",
+    "The Lean statement is faithful: eventually every n = p + a, and the count of A in [1,N] is o((log N)^2)."
+   ]
+  },
+  {
+   "id": "Erdos50.erdos_50",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "Deciding whether the singular distribution function F of phi(n)/n has a positive finite derivative at some point needs fine multi-scale control of how F's mass sits near badly approximable points. No known technique gives this. Best known: F is continuous and purely singular (Erdős; Schoenberg for existence). There is no 2025-2026 work and the forum thread is empty (0 comments, 0 claims). I checked the Lean statement for gaps: the quantifier ranges over all f with the density property on [0,1], which is not vacuous since Schoenberg gives one. HasDerivWithinAt on Icc 0 1 only sees values on [0,1]. At x=0 the derivative is 0, since the density of phi(n)/n < c decays doubly exponentially. At x=1 there is no finite derivative, since 1-F(1-eps) is about 1/log(1/eps). So the endpoints do not settle the statement, and there is no junk-value gap.",
+   "evidence": [
+    "erdosproblems.com/50 and forum/thread/50 (fetched): $250, open, no comments or claims."
+   ]
+  },
+  {
+   "id": "Erdos470.erdos_470.parts.i",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "An odd weird number must be abundant yet not pseudoperfect, with at least 6 prime factors and above 10^21. A finite search is hopeless, and a nonexistence proof would need a structural theorem that odd abundant numbers are always pseudoperfect, which nobody has. Best known: none below 10^21 (Fang 2022); at least 6 distinct prime divisors (Liddy-Riedl 2018). The statement asks for existence (∃ n, Weird ∧ Odd), so the expected answer is no and the Lean statement would then be false. Mathlib's Nat.Weird = Abundant ∧ ¬Pseudoperfect is faithful.",
+   "evidence": [
+    "forum/thread/470: 2 comments, both about the prize amount; 0 proof claims.",
+    "A web search found no 2026 paper."
+   ]
+  },
+  {
+   "id": "Erdos470.erdos_470.parts.ii",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "Every known infinite family of primitive weird numbers (2^k p q and variants) needs a prime in a short interval of length about sqrt(x) at a prescribed location (Melfi's condition). That is beyond current prime-gap results (Baker-Harman-Pintz gives x^0.525). Best known: infinitely many follow conditionally on p_{n+1} - p_n < sqrt(p_n)/10 (Melfi 2015). I found no unconditional family and no 2025-2026 work. This agrees with the earlier audit.",
+   "evidence": [
+    "erdosproblems.com/470 (fetched): open.",
+    "The Lean file records the Melfi conditional as a solved variant."
+   ]
+  },
+  {
+   "id": "Erdos647.erdos_647",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The statement asks for existence of a witness n > 24, but heuristics give about 1/n chance per n. Any n would also need about 14 simultaneous prime values (a prime-tuples condition), so the answer is almost surely no, and proving no is beyond the prime-tuples barrier. Best known: no solution up to 10^22 (veljjanoski, uncertified GPU search, forum Sep 2026); kernel-checked up to 10^9 (decanus, arXiv:2608.17880) and to 10^13 (eerot, Oct 2026). eerot's writeup also argues that no finite table of sieve stages can prove nonexistence. The Lean statement is faithful (Mathlib's sigma 0 0 = 0 does no harm). This agrees with the earlier audit.",
+   "evidence": [
+    "forum/thread/647 (fetched): IbbyMian, eerot and veljjanoski posts as summarized; 0 proof claims."
+   ]
+  },
+  {
+   "id": "Erdos687.erdos_687.parts.i",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Determining Y(x) up to constant factors would settle the Jacobsthal/prime-gap problem: the known bounds differ by a factor of about x/(log x)^3, and Maier-Pomerance conjecture x(log x)^{2+o(1)}. Best known: lower bound x log x / log log log x (attributed to GPT 5.6 Pro on erdosproblems.com/687, improving FGKMT 2018); upper bound x^2/(log x)^2 from the OpenAI quadratic Jacobsthal bound (Sep 2026). No tautological answer is available, since the answer may not use sSup or the problem's own namespace (LEARNINGS L5), so there is no gap.",
+   "evidence": [
+    "erdosproblems.com/687 (fetched, edited 31 Aug 2026): $1000, open.",
+    "forum/thread/687: 1 comment; 0 proof claims."
+   ]
+  },
+  {
+   "id": "Erdos687.erdos_687.parts.iii",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Showing Y(x) = O(x^{1+eps}) requires that sieving by one residue class per prime p <= x cannot cover intervals much longer than x. That is a strong form of the Maier-Pomerance conjecture on Jacobsthal's function, and no current sieve gets near it. Best known: Y(x) << x^2/(log x)^2 (OpenAI preprint, Sep 2026, Lean-formalized as part ii); Iwaniec's x^2 before that.",
+   "evidence": [
+    "The Lean file pins the OpenAI preprint (OAI26a) as the solution of part ii only.",
+    "erdosproblems.com/687 lists the upper bound as still essentially quadratic."
+   ]
+  },
+  {
+   "id": "Erdos710.erdos_710",
+   "cls": "SOLVED_CLAIM",
+   "confidence": 4,
+   "reason": "This contradicts the earlier REPORT.md ('value problem whose true asymptotic is unknown'). On 23 Sep 2026 David Turturean submitted a full proof claim (claim #344 on erdosproblems.com/forum/thread/710/proof-claims; manuscript on Overleaf, produced with a GPT-6-Astra Pro harness). It claims f(n) ~ (sqrt(2)/e) n sqrt(log n). The lower bound uses multiplicative weights making each right vertex at least as heavy as its neighbours (2 and 3 get weight one). The upper bound uses fractional weights from prime-factor data plus the prime number theorem, then Hall's theorem. The constant sqrt(2)/e ≈ 0.520 lies between the Erdős-Pomerance bounds: their lower bound has order n sqrt(log n / log log n), and their upper constant is 1.7398. The f in the Lean file uses the open interval (n, n+L), which matches. The answer fun n => Real.sqrt 2 / Real.exp 1 * n * Real.sqrt (Real.log n) is explicit and allowed. Expert reception is positive but informal. Korsky: 'very cool to see a full resolution'. Kominers and Cambie are preparing shortened 5-8 page versions. On thread 711, Woett edited his post on 2026-09-23 to say f(n,n) >> n sqrt(log n) is 'now' known. The site still lists 710 as open and the claim is not refereed or on arXiv. The low confidence reflects Lean achievability: a full asymptotic with a sharp constant needs the prime number theorem, Mertens-type estimates and a measure-theoretic weighting argument, which is a large formalization.",
+   "route": "Source: erdosproblems.com/forum/thread/710/proof-claims, claim by DavidTurturean, 2026-09-23. Manuscript: https://www.overleaf.com/read/jvdyzbbmbvcf. GPT audits: chatgpt.com/share/6ab31112-c388-83e8-9a36-d6c7fcb8f847 and chatgpt.com/share/6ab311df-dd98-83e8-8088-d19d57086800. Comments: /forum/proof-claims/344/comments. Shorter versions by Kominers and Cambie were in preparation (Sep 2026); look for an arXiv or 8-page version first. Lean plan: set answer := sqrt 2 / exp 1 * n * sqrt(log n). Lower bound: a weight/Hall-deficiency argument plus Mertens' product formula. Upper bound: a fractional matching plus Hall's theorem (Mathlib has Hall's marriage theorem), plus PNT-type prime counting. Check whether Mathlib's prime counting suffices, or whether only Chebyshev/Mertens with the sharp constants is needed.",
+   "evidence": [
+    "The claim text was fetched from erdosproblems.com/forum/thread/710/proof-claims on 2026-11-28.",
+    "The 4 comments were fetched from /forum/proof-claims/344/comments (skominers, StijnC, SamKorsky); none points to an error.",
+    "Woett's post on forum/thread/711 carries the edit 'Edit 2026-09-23 and we do now!' about f(n,n) >> n sqrt(log n).",
+    "An arXiv author search for Turturean shows no paper on this problem (only 2611.09773, 2607.23381 and 2603.00886 on other topics).",
+    "OEIS A390246 gives a(10000) = 20626. That is not inconsistent with the claim but is too small to test the constant, since the o(1) terms are large."
+   ],
+   "could_not_verify": "I could not read the manuscript itself: the Overleaf read link needs JavaScript and returned only the shell page, and the ChatGPT audit links were not opened. Its correctness is unverified by me. The claim is not refereed and not on arXiv, and erdosproblems.com still marks 710 open."
+  },
+  {
+   "id": "Erdos711.erdos_711.parts.i",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "Proving max_m f(n,m) <= n^{1+o(1)} contains an arithmetic-Kakeya statement. Tao (forum, Sep 2025) notes it morally implies Kakeya in all dimensions. Best known upper bound: n^{1.4031} (Kaizhe Chen's claim on thread 860, with h(n) << n^{1.4}); the earlier audit cites Chen-Korsky n^{4/3+o(1)}, arXiv:2607.26450. Lower bounds are n exp(c log n / log log n) (Korsky/Chen, thread 860) and (1/e) n log n (Kominers). Both are n^{1+o(1)}, so they disprove nothing. Forum thread 711 has no proof claim for part i. This agrees with the earlier audit.",
+   "evidence": [
+    "forum/thread/711 (fetched): Kominers, Woett and Tao posts; 0 proof claims.",
+    "forum/thread/860/proof-claims: the Chen and Korsky claims, bounds as above."
+   ]
+  },
+  {
+   "id": "Erdos1052.erdos_1052",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Finiteness would require bounding the number of odd prime factors of a unitary perfect number, but there is no known mechanism, like the one behind Nielsen-type bounds for odd perfect numbers, that bounds that number. Best known: finiteness for each fixed number of odd prime factors (Subbarao-Warren type results). Only 5 examples are known, the largest about 1.46×10^23. arXiv:2605.20475 (May 2026) gives computational 'bounded-box reductions' only. The Lean statement is faithful (proper unitary divisors in [1,n), with n > 0).",
+   "evidence": [
+    "erdosproblems.com/1052 (edited Sep 2026): open; forum has 0 comments and 0 claims."
+   ]
+  },
+  {
+   "id": "Erdos1135.erdos_1135",
+   "cls": "HARD",
+   "confidence": 10,
+   "reason": "Collatz needs control of every orbit, while all known methods are statistical and give only almost-all results. Best known: almost all orbits attain almost bounded values (Tao 2019); verified to about 2^71. The Lean statement is faithful: collatzStep n = n/2 if even else 3n+1, and every n > 0 reaches 1. That is equivalent to the site's version with the shortcut map, and n = 1 is fine since m = 0 is allowed.",
+   "evidence": [
+    "forum/thread/1135 (fetched): history comments only; 0 proof claims; Tao's moderation note."
+   ]
+  },
+  {
+   "id": "Erdos19.erdos_19",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The Lean statement is the full Erdős–Faber–Lovász conjecture for every n, with no formalization gap: n=0 forces V to be empty, and the cover field makes V finite. Kang–Kelly–Kühn–Methuku–Osthus (Ann. Math. 2023, arXiv:2101.04698) prove it only for n >= n0, where n0 is huge and not made explicit. Hindman (1981) covers n<10. The cases 10 <= n < n0 are decidable in principle (the teorth database gives the status 'decidable') but far out of reach computationally, and no explicit n0 exists. Tao and Bloom (forum, Sep 2025) agree it is not fully resolved. I found no 2025-2026 claim that covers all n, and the forum lists 0 proof claims.",
+   "evidence": [
+    "19.lean: erdos_19 : ∀ V n (C : EFLConfig V n), C.graph.chromaticNumber = n (all n)",
+    "erdosproblems.com/19 and forum thread: KKKMO only for sufficiently large n; Tao 01 Sep 2025: 'reduced to a decidable problem of checking a large number of finite cases'",
+    "problems.yaml: state decidable"
+   ],
+   "could_not_verify": "Whether anyone has extracted an explicit n0 from KKKMO. I found none, and it would be astronomically large anyway."
+  },
+  {
+   "id": "Erdos20.erdos_20",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "This is the Erdős–Rado sunflower conjecture for fixed k and all n, already open at k=3, and the definitions are sound. ncard=n with n>0 forces finite sets, an infinite F has ncard 0 so it cannot meet m <= ncard for m >= 1, and k=0,1,2 are trivial. Best known: f(n,k) < (Ck log n)^n (ALWZ20, then Rao, FKNP, BCW). The 2026 work does not prove it: Ge–Wang–Xu–Zhao (arXiv:2609.18995) handles bounded VC-dimension only, arXiv:2606.02667 handles shifted families only, and Bucić–He–Lee (arXiv:2610.26686, Oct 2026) proves the non-uniform Erdős–Szemerédi version, which is implied by Erdős–Rado, not the other way round. A self-published Zenodo 'proof' (Jan 2026) is not credible. The forum lists 0 proof claims.",
+   "evidence": [
+    "20.lean: f n k := sInf {m | ∀ α F, (∀ f∈F, f.ncard=n) ∧ m ≤ F.ncard → ∃ S⊆F, S.ncard=k ∧ IsSunflower S}; theorem ∃ c : ℕ→ℕ, ∀ n k, n>0 → f n k < c k ^ n",
+    "IsSunflower = ∃ S, F.Pairwise (A ∩ B = S) (FormalConjecturesForMathlib/Combinatorics/SetFamily/Sunflower.lean)",
+    "arXiv:2610.26686 abstract checked: only the Erdős–Szemerédi version"
+   ],
+   "could_not_verify": "I did not read the Zenodo record 18256089 'Proof of the Sunflower Conjecture'. It is self-published, unreviewed and has no expert endorsement."
+  },
+  {
+   "id": "Erdos64.erdos_64",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The only full claim is G. Duran-Ballester (claim #212, 2026-08-19): a 250+ page minimal-counterexample case analysis with 180 nodes, 135 of which the author says are formalized. It is not credible as a solution. A forum user (mesa, 21 Aug 2026) found a concrete counterexample to Lemma 7.37(a), where reducing modulo the odd part of g loses the congruence L+r = 0 mod 2^a. The author admits further errors may hide in nodes 168-180 and has only sketched a repair. The other two claims are partial: Temeller (#383) covers min degree >= 4 with diameter <= 3, and Bisch (#206) shows minimal counterexamples are at least 2/3 cubic. The best published results are Liu-Montgomery (min degree at least a large constant) and arXiv:2608.02675 (a cubic bipartite counterexample needs at least 60 vertices). The structural barrier: min degree exactly 3 is outside the reach of the sublinear-expander method.",
+   "evidence": [
+    "https://www.erdosproblems.com/forum/thread/64/proof-claims",
+    "/forum/proof-claims/212/comments (mesa counterexample to Lemma 7.37(a), author reply 24 Aug 2026)",
+    "https://arxiv.org/pdf/2608.02675"
+   ],
+   "could_not_verify": "Did not read the 250-page manuscript itself or the author's partial Lean development."
+  },
+  {
+   "id": "Erdos77.erdos_77",
+   "cls": "HARD",
+   "confidence": 10,
+   "reason": "This is a value problem with erdos_77.answer := sorry, so the answer itself must be found. Even proving that lim R(k)^{1/k} exists is a famous open problem. Best known: sqrt2 <= liminf <= limsup <= 3.7992 (Gupta–Ndiaye–Norin–Wei 2024, after CGMS23). The forum lists no 2025-2026 claims.",
+   "evidence": [
+    "77.lean: Tendsto (diagonalRamsey k)^(1/k) atTop (𝓝 erdos_77.answer), with answer := sorry",
+    "erdosproblems.com/77: limsup <= 3.7992..."
+   ]
+  },
+  {
+   "id": "Erdos78.erdos_78",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "Formalized as weakly explicit: an adjacency oracle with n given in unary, IsPolyTime in the TM2 model, and no clique or independent set of size ceil(c log n). The definitions look sound, and the file itself says even this weakest version is open. Conditional expectations (forum, May 2026) runs in time n^{O(log n)}, which is quasi-polynomial and fails IsPolyTime. Brute force on m = 2^{sqrt(log n)} vertices followed by lexicographic products gives homogeneous sets of size 2^{Θ(sqrt(log n) log log n)}, not O(log n). The structural obstacle is that explicit Ramsey graphs only reach (log n)^C (Li 2023). Any Lean proof would in addition need a TM2 polynomial-time certificate, which is very costly.",
+   "evidence": [
+    "78.lean: ∃ c>0, ∃ adj, IsPolyTime adj ∧ ∀ᶠ n, NoHomogeneousSet (explicitGraph adj n) ⌈c*log n⌉₊",
+    "Complexity.lean: IsPolyTime = Nonempty (TM2ComputableInPolyTime ...)",
+    "forum 78: Bloom (4 May 2026) says derandomization is not explicit"
+   ],
+   "could_not_verify": "The exact BitstringEncoding of ℕ (unary or binary). It does not change the conclusion, because the unary n prefix already allows poly(n) time."
+  },
+  {
+   "id": "Erdos86.erdos_86",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "This is the conjecture that ex(Q_n, C4) <= (1/2+o(1)) n 2^{n-1}, formalized correctly (hypercube Adj = exactly one coordinate differs; cycleGraph 4 ⊑ H). Flag-algebra upper bounds are stuck near 0.603 (Baber 2012; BHLL14 0.6068), while the lower bound is (1/2 + c/sqrt n) (Brass–Harborth–Nienborg). The 2026 activity is small-n constructions only (Minamoto arXiv:2603.29127, forum certificates for Q9-Q15), which are lower bounds and irrelevant to the asymptotic upper bound. No proof claims.",
+   "evidence": [
+    "86.lean: ∀ ε>0, ∀ᶠ n, ∀ H ≤ hypercube n, (1/2+ε)·n·2^(n-1) ≤ |E(H)| → cycleGraph 4 ⊑ H",
+    "forum 86: 304 <= f(7) <= 308, constructions only"
+   ]
+  },
+  {
+   "id": "Erdos128.erdos_128",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "The condition 2|V'|+1 >= n is the same as |V'| >= floor(n/2), which matches the site after the Oct 2025 correction, and 'induced' matches too, so there is no gap. This is the sparse-halves problem. It is proved with 1/16 (EFRS94), with 27/1024 (Razborov 2022), for e <= n^2/12 or e >= n^2/5 (Keevash–Sudakov), and for e >= (1/5-c)n^2 (Norin–Yepremyan). The middle density range needs exactly the 1/50 constant, attained by C5 blow-ups, and flag algebras plateau above it. The only forum proof claim (Sarid, Aug 2026) is partial: an improved constant 0.0262 instead of 0.02. I found nothing that contradicts the earlier report.",
+   "evidence": [
+    "128.lean: (∀ V', 2·|V'|+1 ≥ n → 50·e(G[V']) > n^2) → ¬ G.CliqueFree 3",
+    "proof claim by aimir (7 Aug 2026): 0.0262 n^2 only",
+    "forum: a computational search to n<=26 found no counterexample"
+   ]
+  },
+  {
+   "id": "Erdos159.erdos_159",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Proving R(C4,K_n) <= C n^{2-c} amounts to showing every C4-free graph on N vertices has an independent set of size N^{1/2+δ}, a central open problem tied to the polarity-graph and pseudorandom barrier. Best known: n^{3/2}/(log n)^{3/2} << R(C4,K_n) << n^2/(log n)^2 (Spencer 1977; Szemerédi). There are no forum posts or proof claims, and a late-2025 paper (arXiv:2511.21351) still calls it central and open. The formalization is a direct graphRamsey statement with no gap.",
+   "evidence": [
+    "159.lean: ∃ c>0, C, ∀ n ≥ 1, graphRamsey (cycleGraph 4) (completeGraph (Fin n)) ≤ C·n^(2-c)",
+    "graphRamsey = sInf {N | ∀ C, G.IsContained C ∨ H.IsContained Cᶜ}"
+   ]
+  },
+  {
+   "id": "Erdos165.erdos_165",
+   "cls": "HARD",
+   "confidence": 10,
+   "reason": "This is a value problem with erdos_165.answer := sorry, so it needs the true asymptotic of R(3,k). The bounds are (1/2+o(1))k^2/log k (Hefty–Horn–King–Pfender, arXiv:2510.19718) and (1+o(1))k^2/log k (Shearer 1983). Closing the factor 2 needs either a Shearer improvement, which is notoriously open, or a better construction. I found no 2026 upper-bound improvement. No proof claims.",
+   "evidence": [
+    "165.lean: (R(3,k)) ~[atTop] erdos_165.answer with answer := sorry"
+   ]
+  },
+  {
+   "id": "Erdos552.erdos_552.parts.i",
+   "cls": "HARD",
+   "confidence": 10,
+   "reason": "This is a value problem (answer := sorry) asking for R(C4,K_{1,n}) for every n. It is known only for special n = q^2 ± t with q a prime power (Parsons 1975, WSZR15, ZCC17), and in general only within n+sqrt n-6n^{11/40} <= R <= n+ceil(sqrt n)+1. A closed form for all n would need the existence or non-existence of near-polarity C4-free graphs at every order.",
+   "evidence": [
+    "552.lean: graphRamsey (cycleGraph 4) (completeBipartiteGraph (Fin 1) (Fin n)) = erdos_552.parts.i.answer n, with answer := sorry"
+   ]
+  },
+  {
+   "id": "Erdos552.erdos_552.parts.ii",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "I agree with the earlier report. Proving yes needs, for infinitely many n, the non-existence of C4-free graphs on about n+sqrt n vertices with minimum degree near n... (in the complement form) beating Parsons' bound by an unbounded amount. Every known exact value is n+ceil(sqrt n)+{0,1}, and Zhang–Chen–Cheng (2017) speculate this holds for all n >= 2, which would make the answer no. A disproof would need R >= n+sqrt n-O(1) for all large n, which is beyond the prime-gap-limited lower bound n+sqrt n-6n^{11/40} (BEFRS89). The formalization is faithful. The forum has 1 post and no claims.",
+   "evidence": [
+    "552.lean parts.ii: ∀ c>0, Set.Infinite {n | R(C4,S_n) ≤ n + sqrt n - c}",
+    "erdosproblems.com/552: in every known case R = n+ceil(sqrt n)+{0,1}"
+   ]
+  },
+  {
+   "id": "Erdos564.erdos_564",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The 2-colour 3-uniform stepping-up barrier: in two colours the bounds 2^{cn^2} < R_3(n) < 2^{2^n} (Erdős–Hajnal–Rado 1965) have not moved. The doubly exponential lower bound is known only with 4 colours (Erdős–Hajnal), and 3 colours give 2^{n^{c log n}} (Conlon–Fox–Sudakov). The hypergraphRamsey definition is the standard sInf one, so there is no gap. I found no 2025-2026 claim, and the forum has no posts.",
+   "evidence": [
+    "564.lean: ∃ c>0, ∀ᶠ n, 2^(2^(c·n)) ≤ hypergraphRamsey 3 n",
+    "Ramsey.lean hypergraphRamsey definition checked"
+   ]
+  },
+  {
+   "id": "Erdos1029.erdos_1029",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Proving R(k)/(k 2^{k/2}) -> infinity needs a superconstant-factor improvement over Spencer's local-lemma bound (sqrt2/e+o(1)) k 2^{k/2}, unchanged since 1975. The 2025-2026 exponential improvements (Ma–Shen–Xie arXiv:2507.12926, Lin 2026) are off-diagonal R(l,Cl) with C>1, and their gain vanishes at C=1. Sason (arXiv:2603.07245, 2026) gives only a constant-factor tightening of the diagonal bound, which by itself cannot give divergence. The formalization (diagonalRamsey k / (k·2^{k/2}) → atTop) is faithful.",
+   "evidence": [
+    "1029.lean: Tendsto (diagonalRamsey k / (k·2^(k/2))) atTop atTop",
+    "forum 1029: StijnC 'We are not there yet', citing arXiv:2507.12926"
+   ],
+   "could_not_verify": "The exact constant in Sason's 2026 diagonal tightening. A constant factor cannot settle a divergence statement."
+  },
+  {
+   "id": "Erdos89.erdos_89",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Getting from the Guth-Katz bound n/log n to n/sqrt(log n) needs the missing sqrt(log n) factor in the Elekes-Sharir/Guth-Katz incidence framework, and no known method gives it. Best known: f(n) >> n/log n (Guth-Katz, Ann. Math. 2015); the grid gives the matching O(n/sqrt(log n)) upper bound. The May 2026 number-field disproof of the unit-distance conjecture (OpenAI; Alon-Bloom-Gowers et al.) is about unit distances, not distinct distances. A CM field of degree 2d with d>1 gives about n distinct squared distances, so it beats the grid only when d=1. I found no 2026 claim on distinct distances.",
+   "evidence": [
+    "Lean file read: minimalDistinctDistances = sInf over n-point Finsets of #(offDiag image dist); the statement asks n/sqrt(log n) =O min. No junk-value issue for large n.",
+    "erdosproblems.com/89 and its forum thread: 0 comments, 0 proof claims (fetched 28 Nov 2026).",
+    "blog.computationalcomplexity.org 24 May 2026: the OpenAI result is a unit-distance counterexample only."
+   ],
+   "could_not_verify": "Whether any unindexed 2026 preprint touches the sqrt(log n) gap."
+  },
+  {
+   "id": "Erdos99.erdos_99",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "Structural obstacle: the problem is a statement about exact minimisers of diameter for every large n. Proving it needs exact control of optimal packings, known only for n <= 8 (Bateman-Erdős up to 7, Bezdek-Fodor 1999 for 8). A disproof needs infinitely many n, since the n=4 square counterexample is irrelevant to the eventually-quantified statement. Best known: Thue says optimal sets are asymptotically triangular-lattice discs, which is far from forcing even one unit equilateral triangle.",
+   "evidence": [
+    "Lean file read: HasMinDist1 (all distances >= 1, and some pair at exactly 1); IsMinOn diam over {B | card n, HasMinDist1}; minimisers exist by compactness, so the statement is not vacuous. The formalization matches erdosproblems.com/99.",
+    "Forum: 0 comments and 0 proof claims. The page says Erdős offered $100 for a counterexample and $50 for a proof.",
+    "No 2026 paper found (web search); arXiv:2611.03088 covers small-n diameter values only."
+   ],
+   "could_not_verify": "Full text of arXiv:2611.03088; I saw only search snippets."
+  },
+  {
+   "id": "Erdos101.erdos_101",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Structural obstacle: no incidence or polynomial method distinguishes 4-rich lines from 3-rich lines, and 3-rich lines can number Theta(n^2) (cubic curves). An o(n^2) bound needs a structure theorem saying that near-extremal configurations lie on cubics, extended to the 4-rich setting. Best known: lower bound n^{2-O(1/sqrt(log n))} (Solymosi-Stojaković 2013); the only upper bound is the trivial n(n-1)/12.",
+   "evidence": [
+    "Lean file read: numLinesWithFourPointMax = sSup of ncard(linesWithPointsFor 4 S) over finite S with NonCollinearFor 5. linesWithPointsFor uses exact count k among lines spanned by pairs. The set is bounded and nonempty, so there is no junk value.",
+    "Forum: 0 comments and 0 proof claims. It is Green's open problem 71.",
+    "arXiv:2604.06609 (OpenAI short proofs II) is about ordinary lines, a different problem."
+   ]
+  },
+  {
+   "id": "Erdos104.erdos_104",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "The problem is equivalent to bounding the 3-rich points of a family of n unit circles (the centres of the circles). Szemerédi-Trotter-type bounds I << n^{2/3}m^{2/3}+n+m give nothing at richness 3. Raz-Sharir-Solymosi (DCG 2015, O(n^{11/6})) needs three pencils of circles through fixed points, so it does not apply. Best known: the trivial n(n-1)/3 upper bound (Harborth-Mengersen) and the Elekes n^{3/2} lower bound.",
+   "evidence": [
+    "Lean file read: unitCircleCount counts Sphere with radius 1 containing at least 3 points of P. The set is finite, since each pair lies on at most 2 unit circles. maxUnitCircleCount = sSup is bounded, so there is no gap.",
+    "Forum (4 comments): only about prize currency ($100 for o(n^2), £100 for O(n^{3/2})). 0 proof claims.",
+    "I checked that a random 3-colouring would reduce the problem to Raz-Sharir-Solymosi only if their families were general; they are pencils, so the reduction fails."
+   ]
+  },
+  {
+   "id": "Erdos107.erdos_107",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The exact value 2^{n-2}+1 for all n needs a matching upper bound. The best known is 2^{n+O(sqrt(n log n))} (Holmsen-Mojarrad-Pach-Tardos, JEMS 2020), and exact values are known only for n <= 6 (Szekeres-Peters 2006). Balko-Valtr (2017) refuted the stronger hypergraph form used for the n=6 computer proof, and even n=7 (33 points) is still computational research (arXiv:2512.24061).",
+   "evidence": [
+    "Lean file read: f n = sInf cardSet; HasConvexNGon uses ConvexIndep on a Finset subset; NonTrilinear is Triplewise non-collinear. f 3 = 3 is proved in the file. The formalization is faithful.",
+    "Forum: 2 comments, both on related problem 216. 0 proof claims.",
+    "No 2026 proof claim found."
+   ]
+  },
+  {
+   "id": "Erdos114.erdos_114",
+   "cls": "SOLVED_CLAIM",
+   "confidence": 2,
+   "reason": "The earlier audit does not mention 114 at all. A specific full claim exists: Teng Zhang, 'A proof of the Erdős-Herzog-Piranian lemniscate conjecture', arXiv:2611.12830 (9 Nov 2026), proves L(p) <= L(z^n-1) for every monic p of every degree n >= 1, with equality exactly for translates and rotations of z^n-1. This is exactly the formal statement (Hausdorff 1-measure of the level set |p|=1). Pieces: n=1 trivial (proved in the Lean file); n=2 Eremenko-Hayman 1999; n=3 Dahlke 2026 (Zenodo 10.5281/zenodo.20318611); 4 <= n <= 255 by rational and interval arithmetic; n >= 256 by uniform analytic estimates building on Tao arXiv:2512.12455. It is unrefereed and about 3 weeks old. The low confidence reflects Lean feasibility, not the claim: formalizing it would need arc-length = mu_H^1 for analytic level curves, univalent-function and inverse-branch estimates, Möbius variation of critical values, and certified interval computations for 252 degrees. That is far beyond Mathlib and the 30-minute kernel limit.",
+   "route": "Cite arXiv:2611.12830 (Zhang) together with Tao arXiv:2512.12455 and Eremenko-Hayman 1999 (arXiv:0805.2295). Any Lean formalization is a multi-month project and is not realistic here.",
+   "evidence": [
+    "Abstract and HTML of arXiv:2611.12830 fetched: 'We prove this conjecture in every degree ... supplemented by rigorous computer-assisted estimates in a finite range of degrees'. The text names the finite range 4 <= n <= 255 and says the estimates are uniform for n >= 256.",
+    "Forum thread 114: Mendoza interval certificates for 3 <= n <= 14 (Zenodo), with a reported bug at n=13 that was later patched and open GitHub issues (bchatelet, Sep 2026). A partial cubic claim by bchatelet is conditional.",
+    "teorth database: state 'falsifiable' since 2025-12-28, $250 prize (Borwein 1995). Lean file read: the statement is for all n >= 1 with <= in ENNReal, which matches."
+   ],
+   "could_not_verify": "I did not check the correctness of Zhang's proof or its computer-assisted part, and I found no expert endorsement. The erdosproblems.com page (last edited 23 Jan 2026) does not yet list it."
+  },
+  {
+   "id": "Erdos120.erdos_120",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "Structural obstacle: after the 2026 progress the open core is null sequences with liminf a_{n+1}/a_n = 0 (super-exponentially decaying, e.g. 1/n!). Passing to a subsequence only speeds up the decay, so no reduction to the known cases exists. Best known: Falconer/Eigen (ratio -> 1); OpenAI's geometric case (Oct 2026, exposition by Iosevich-Yavicoli arXiv:2611.02454); Jiang-Xi arXiv:2610.11449 for every null sequence with liminf ratio > 0; Rajchman-measure supports (arXiv:2609.04456); Yip's resolution 'in the large' (arXiv:2611.14056, a variant, not the problem). arXiv:2611.15734 (11 Nov 2026) still treats {1/n!} as unresolved.",
+   "evidence": [
+    "Lean file read: Erdos120For requires MeasurableSet E and 0 < volume E. The non-measurable loophole (de Reyna 1983, the Hamel basis trick) is closed, so there is no GAP.",
+    "Forum thread: 3 comments (measurability bug in a sibling formalization, de Reyna). 0 proof claims. Page edited 16 Oct 2026, still open.",
+    "arXiv abstracts fetched for 2610.11449, 2611.02454, 2611.14056, 2611.15734, 2609.04456."
+   ],
+   "could_not_verify": "Full text of Jiang-Xi; it is unrefereed. If correct it narrows the problem to fast-decaying sequences but does not finish it."
+  },
+  {
+   "id": "Erdos588.erdos_588",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The statement contains Erdős 101 (k=4) as a special case, so it is at least as hard. No method bounds k-rich lines for k >= 4 below the trivial n^2/(k(k-1)) when (k+1)-rich lines are forbidden. Best known: f_k(n) >> n^{2-O_k(1/sqrt(log n))} (Solymosi-Stojaković 2013), and only the trivial upper bound.",
+   "evidence": [
+    "Lean file read: numLinesWithPointsMax k n = sSup of ncard(linesWithPointsFor k S) with NonCollinearFor (k+1). The statement is for all k >= 4. No gap; the trivial upper bound is already formalized upstream.",
+    "Forum: 0 comments and 0 proof claims."
+   ]
+  },
+  {
+   "id": "Erdos661.erdos_661",
+   "cls": "HARD",
+   "confidence": 8,
+   "reason": "Beating the grid by more than a constant needs a planar configuration whose cross distances avoid the Landau sqrt(log) count of sums of two squares. Lattice and number-field constructions do not do this: a CM field of degree 2d with d>1 gives about n squared distances. No lower-bound method is known either, since the Guth-Katz bipartite analogue gives only n/log n. Best known: F(n) = O(n/sqrt(log n)) (the grid) and F(n) >> n/log n via bipartite Guth-Katz (e.g. arXiv:2002.00502).",
+   "evidence": [
+    "Lean file read: minimalCrossDistances = sInf over disjoint A,B of size n of #(A x B image dist). Disjointness rules out the all-equal degenerate case. Asymptotic o-statement, no gap.",
+    "Forum: 1 comment (typo fix). 0 proof claims.",
+    "The prior report's remark about lattice constructions is consistent with my independent heuristic for number fields."
+   ]
+  },
+  {
+   "id": "Erdos161.erdos_161.parts.i",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The answer set has to say, for every t, which pairs (alpha,beta) in [0,1/2)^2 give Theta-equivalent thresholds. For t=3 alone, deciding whether (0,alpha) with alpha>0 is in the set means deciding whether F^(3)(n,0) is of order sqrt(log n), which is equivalent to the open Erdos-Hajnal-Rado question r_3(k)=2^{Theta(k^2)} versus 2^{2^{Theta(k)}} (problem 562). For t>=4, whether all alpha>0 are equivalent is open (that is part ii). Best known: Conlon-Fox-Sudakov 2011 give F^(3)(n,alpha) of order sqrt(log n) for every fixed alpha>0; for general t only F^(t)(n,alpha) >> (log n)^{c_alpha} is known. The cases t=1 and t=2 are easy (all alpha equivalent: order n and order log n), but the answer must cover every t.",
+   "evidence": [
+    "Lean: 161.lean parts.i; balancedColoringThreshold in FormalConjecturesForMathlib/Combinatorics/Hypergraph/Extremal.lean:105 (sInf over m; requires 0<count, which encodes the Ramsey convention at alpha=0). No junk-value issue: the sInf is at most n+1.",
+    "erdosproblems.com/161 page and thread: 3 comments (typo fix; zach hunter 18 Oct 2025 notes the problem would follow from a hypergraph Nikiforov conjecture); 0 proof claims."
+   ],
+   "could_not_verify": "No full-text check of arXiv for 2025-2026 progress on r_3(k); no claim of one turned up."
+  },
+  {
+   "id": "Erdos592.erdos_592",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "A full characterization of countable partition ordinals omega^beta needs the case beta=omega^gamma with gamma a sum of exactly three indecomposable ordinals, which is still open. Known: Specker (beta=2 holds; 3<=beta<omega fails); Chang (beta=omega); Galvin-Larson (beta>=3 must be additively indecomposable); Schipperus 2010, APAL 'Countable partition ordinals' (holds for 1 or 2 summands, fails for 4 or more). Darby gives only the arrow with 4, not with 3, for three summands. The page (edited 23 Jan 2026) still calls the three-summand case open. I checked the definition and found no formalization gap: OrdinalCardinalRamsey asks for a red clique of order type omega^beta or a blue clique of cardinality 3.",
+   "evidence": [
+    "erdosproblems.com/592 page text, fetched 2026-11-28: 'The remaining open case appears to be when gamma is the sum of three indecomposable ordinals.' 1 comment (a typo note), 0 proof claims.",
+    "FormalConjecturesForMathlib/SetTheory/Cardinal/SimpleGraph.lean:36, definition of OrdinalCardinalRamsey."
+   ],
+   "could_not_verify": "I did not read the Schipperus or Darby papers directly. A third-party wiki (sinapsi.wiki) also calls the three-summand case the remaining frontier."
+  },
+  {
+   "id": "Erdos595.erdos_595",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Proving existence in ZFC would need a transfinite Folkman-type construction, a K4-free graph G such that every coloring of its edges with omega colors has a monochromatic triangle. Only the finite version (Folkman 1970, Nesetril-Rodl 1975) and consistency are known: Shelah 1987 ('Consistency of positive partition theorems for graphs and models') shows such a graph exists consistently. That is why the database state is 'not disprovable', defined in the teorth CONTRIBUTING.md as 'open in general, but there exist models where the result is true'. Nobody has shown that it is consistent for no such graph to exist, so a ZFC proof is not ruled out, but none is known. This agrees with the earlier audit. No formalization gap: the IsCountableUnionOfTriangleFree definition is faithful.",
+   "evidence": [
+    "teorth CONTRIBUTING.md definitions of 'not provable' and 'not disprovable'.",
+    "erdosproblems.com/595: 0 comments, 0 proof claims.",
+    "Web search: Shelah's consistency result, cited via the UCSD Erdos problems page InfiniteTriangleFreeCovering."
+   ],
+   "could_not_verify": "I did not read Shelah's paper; the attribution comes from secondary sources."
+  },
+  {
+   "id": "Erdos601.erdos_601",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "The earlier audit only says 'state not provable'. The obstacle is stronger and specific: at alpha=omega_1^{omega+2} the property is independent of ZFC. Baumgartner-Larson (APAL 47 (1990) 1-10), assuming diamond, build graphs with no infinite path and no independent set of full type on every alpha with omega_1^{omega+2} <= alpha < omega_2. Larson (APAL 1990), assuming MA, proves the property for all alpha < 2^{aleph_0}, which covers omega_1^{omega+2} under MA + not-CH. So no explicit, ZFC-decidable predicate erdos_601.answer can be proved to match HasPathOrIndepSetOfType at every limit ordinal. Lean's logic is about ZFC plus universes and does not settle diamond or MA. Best ZFC result: Erdos-Hajnal-Milner 1970, true for all alpha < omega_1^{omega+2}.",
+   "evidence": [
+    "teorth problems.yaml: 601 state 'not provable' (updated 2026-10-26), meaning there are models where the result fails.",
+    "erdosproblems.com/601: 0 comments, 0 proof claims.",
+    "Search result summarizing Baumgartner-Larson, 'A diamond example of an ordinal graph with no infinite paths' (APAL 1990).",
+    "Unverified GitHub items: an issue in 1337isnot1337/solved-conjectures and open-math-agents PR #4501, which proves only an EHM-style step; I did not read the proof file, per the rules."
+   ],
+   "could_not_verify": "I could not read the original Baumgartner-Larson abstract; the exact range comes from a search-engine summary."
+  },
+  {
+   "id": "Erdos712.erdos_712",
+   "cls": "HARD",
+   "confidence": 10,
+   "reason": "The statement needs the exact hypergraph Turan density pi(K_k^r) for every k>r>2, and not one of these values is known. The smallest case, K_4^3 (Turan's 5/9 conjecture, problem 500), is still open. Best known for K_4^3: lower bound 5/9 (Turan's construction); upper bound about 0.5578 (arXiv:2609.27495, 2026, flag algebras with a Lean certificate), improving Razborov/Baber at about 0.5617. arXiv:2610.11757 still calls the tetrahedron conjecture open. The 2026 claims arXiv:2609.11802 and arXiv:2609.08336 concern the uniform Turan density, which is a different problem. The cliqueExtremalNumber and ContainsCompleteHypergraph definitions are faithful. The only formal oddity is that answer is a sorry function (it could be defined as the limit itself), which is a convention issue, not a solution.",
+   "evidence": [
+    "FormalConjecturesForMathlib/Combinatorics/Hypergraph/Finite.lean:112 and :188.",
+    "erdosproblems.com/712: 0 comments, 0 proof claims, last edited 5 Oct 2025."
+   ],
+   "could_not_verify": ""
+  },
+  {
+   "id": "Erdos713.erdos_713.parts.i",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Proving ex(n;G) ~ c n^alpha for every bipartite G needs exact asymptotics, and even the order of growth is unknown for most bipartite graphs, for example C_8, K_{4,4} and the cube Q_3. The Erdos-Simonovits conjecture is open. Asymptotics with a constant are known only in special families: trees (by superadditivity and Fekete), C_4, K_{3,3}, and some K_{s,t} with t large compared with s, where only the order is known. Füredi-Gerbner 2021 show the hypergraph analogue is false for uniformity >= 5. No formalization gap: G may have isolated vertices, the condition of at least 2 edges excludes degenerate cases, and alpha must lie in [1,2). Side remark: for disconnected forests, existence of lim ex(n,F)/n is not given by superadditivity either, so even alpha=1 is not trivial in general.",
+   "evidence": [
+    "erdosproblems.com/713 thread: 3 comments (corrections to the Frankl-Füredi exponent statement), 0 proof claims; page last edited 7 Mar 2026.",
+    "Lean uses Mathlib SimpleGraph.extremalNumber with IsEquivalent atTop."
+   ],
+   "could_not_verify": "No 2025-2026 paper claiming the conjecture turned up in a search."
+  },
+  {
+   "id": "Erdos713.erdos_713.parts.ii",
+   "cls": "HARD",
+   "confidence": 9,
+   "reason": "Proving every realized exponent rational needs control over all bipartite G whose extremal number has the form c n^alpha. No structural theory of that kind exists, and refuting the statement would need an explicit G with an irrational exponent and exact asymptotics, also unknown. Best known goes the other way: Bukh-Conlon 2018 realize every rational in [1,2) as the exponent of a finite family of graphs, and later work (Jiang-Qiu, Conlon-Janzer-Lee and others) realizes many rationals with single graphs, but none of this constrains irrational exponents. The statement is not vacuous: C_4 has ex ~ n^{3/2}/2, so the hypothesis does hold for some G.",
+   "evidence": [
+    "Same Lean file, parts.ii; same erdosproblems.com/713 page."
+   ],
+   "could_not_verify": "I did not check the exact citations for the single-graph rational realizations."
+  }
+ ],
+ "candidates": [],
+ "verdicts": [],
+ "notes": [
+  "I classified all 10 ids as HARD. None is SOLVED_CLAIM, NEAR or GAP, which agrees with the earlier audit's conclusion. REPORT.md does not discuss these ids individually, and nothing I found contradicts it.\n\nWhat I checked:\n- **Statements:** I read each Lean statement in /root/oma/.oma/formal-conjectures/FormalConjectures/ErdosProblems/{28,30,39,41,52,66,241,1191,142}.lean, plus the definitions it uses: sumRep in FormalConjecturesForMathlib/Combinatorics/Additive/Convolution.lean, maxSidonSubsetCard in Combinatorics/Basic.lean, and IsAPOfLengthFree.maxCard in Combinatorics/AP/Basic.lean. Gap checks covered real-liminf junk values (ruled out for 41 because a B_3 set has count <= C N^{1/3}), the two-sided O in 30 (the lower half is also open), parse order in 1191, the empty set in 52, and trivial answers in 142 (forbidden by lint rule L5).\n- **Web:** WebFetch got 403 from erdosproblems.com, but curl with a browser user-agent worked. I read every problem page and forum thread, and the 860/proof-claims page; it lists no claim for these ids.\n\nNew since the database snapshot (all partial results, none a full solution):\n- **Erdős 30:** Hou–Zhao arXiv:2607.01169 (0.9435), then unrefereed forum certificates down to 0.9428096. A no-go result says this method cannot go below 2sqrt2/3 and cannot improve the exponent 1/4.\n- **Erdős 1191 (i):** O'Bryant arXiv:2606.28651 gives an explicit liminf constant of about 2.40, not 0. O'Bryant arXiv:2607.23795 covers even h only, so it does not help 41.\n- **Erdős 52:** the 2026 disproof by Bloom–Sawin–Schildkraut–Zhelezov holds over R and small F_p only. The integer statement stays open.\n\nNot accessed: full texts of the 2026 arXiv papers (I read abstracts only) and the GitHub PDFs linked from the forum. My arXiv search for 2025-2026 was shallow, a few web searches.",
+  "The main finding contradicts REPORT.md on Erdős 710 (2000 rupees, about $78). A full proof claim was filed on 23 Sep 2026 by David Turturean, produced with GPT-6-Astra Pro: f(n) ~ (sqrt 2/e) n sqrt(log n). Experts responded positively but informally (Korsky, Kominers, Cambie, and Woett's edit on thread 711). It is not on arXiv, not refereed, and the site still lists 710 as open. I could not read the Overleaf manuscript. Formalizing it would be a large job (PNT/Mertens plus a Hall-weighting argument), but it is the only item in this cluster with a credible full solution. Next steps: check whether the shortened Kominers/Cambie version has appeared, then get a skeptical read of the manuscript before any Lean investment. The per-problem proof-claims pages are at /forum/thread/<n>/proof-claims and their comments at /forum/proof-claims/<id>/comments. I found no formalization gaps in the 12 statements (endpoints checked for 50, quantifiers for 7 and 647); value-problem answers cannot be tautological under the L5 rules. All other items agree with the earlier audit, with updated best-known results: Erdős 7 now has lcm divisible by 45 (arXiv:2611.15110); Erdős 647 has been searched to 10^22 and kernel-checked to 10^13. Raw downloaded pages are in /tmp/claude-0/-home-user-claude-cloud/4f778c91-3c22-566e-a5d1-dc6957726f84/scratchpad/web7/.",
+  "I found nothing that contradicts /home/user/claude-cloud/lefttosolve/prize_lead/REPORT.md for this cluster, and I found no NEAR route and no formalization GAP. I read every Lean statement and the definitions it uses: EFLConfig and graph in 19.lean; f and IsSunflower for 20; explicitGraph, NoHomogeneousSet and IsPolyTime (TM2ComputableInPolyTime) for 78; and hypercube, graphRamsey, classicalRamsey, diagonalRamsey and hypergraphRamsey from FormalConjecturesForMathlib. All are faithful, and the small or degenerate cases (n=0, k=0..2, empty V, infinite sets via ncard=0) are harmless.\n\nOne thing the earlier audit did not mention: problem 64 (Erdős–Gyárfás, $1000) has an AI-generated full proof claim. It is by Duran-Ballester, submitted 19 Aug 2026 as proof claim 212: a 250+ page case analysis with 180 nodes, of which the author reports 135 formalized. A reviewer found a concrete error in Lemma 7.37(a) on 21 Aug 2026. The author patched it and says nodes 168-180 are barely checked. I rate this not credible, so 64 stays HARD. The other two claims on 64 and Sarid's claim on 128 (constant 0.0262) are partial.\n\nAccess: erdosproblems.com blocks WebFetch (403) but returns pages to curl with a browser User-Agent. Per-claim comments load from /forum/proof-claims/<id>/comments. My copies of the pages are in /tmp/claude-0/-home-user-claude-cloud/4f778c91-3c22-566e-a5d1-dc6957726f84/scratchpad/ep/. The 860 proof-claims page holds only problem 860's own claims; none concern this cluster.\n\nSeveral of the formal statements are value problems with answer := sorry: 77, 165 and 552.i. These cannot be closed without determining the true value.",
+  "The main contradiction of the earlier audit (lefttosolve/prize_lead/REPORT.md) is Erdős 114 ($250). The audit never examined it. A full proof was posted on arXiv on 9 Nov 2026: Teng Zhang, arXiv:2611.12830. It combines Tao's large-n method with interval arithmetic for 4 <= n <= 255, Dahlke for n=3 and Eremenko-Hayman for n=2. The audit's conclusion still holds for our purposes: formalizing that proof in Lean is not realistic, since it needs Hausdorff measure and arc length of analytic curves, univalent-function estimates, and a large certified computation. So 114 is solved in the literature but not reachable for us; anyone else who formalizes it faces the same barrier.\n\nErdős 120 moved a lot in Sep-Nov 2026: OpenAI's geometric case, Jiang-Xi on liminf ratio > 0, Rajchman supports, and Yip's large-scale variant. It remains open only for super-exponentially decaying sequences such as 1/n!, which is worth watching.\n\nThe May 2026 OpenAI disproof of the unit-distance conjecture (problem 90) does not affect 89 or 661, as far as I can tell.\n\nAccess: erdosproblems.com blocks WebFetch (403) but curl works. Pages and threads are saved in /tmp/claude-0/-home-user-claude-cloud/4f778c91-3c22-566e-a5d1-dc6957726f84/scratchpad/ep_geo/. The thread-860 proof-claims page lists only claims for 860 itself, not a global list. I found no GAP in any of the 9 Lean statements.",
+  "I find no reachable full solution in this cluster, which agrees with the earlier audit. There is one strengthening and no contradiction. For 601 the audit's 'state not provable' can be made precise: by Baumgartner-Larson (diamond) together with Larson (MA), the case omega_1^{omega+2} (the $250 sub-question) is independent of ZFC. So no explicit answer predicate can be proved in Lean. The 2026-10-26 'not provable' state in the teorth database matches this. For 595, the 'not disprovable' state matches Shelah 1987 (existence is consistent); provability in ZFC is still open. None of the six problem pages has a proof claim, and comment posting is frozen. Proof claims in the 860 thread at /forum/thread/860/proof-claims concern only problem 860. I found no formalization gaps. The answer-valued statements (161 i, 592, 601, 712) use sorry answer definitions, which is the convention and not a loophole. WebFetch to erdosproblems.com returned 403; I read the pages with curl and a browser user-agent. Local copies are in /tmp/claude-0/-home-user-claude-cloud/4f778c91-3c22-566e-a5d1-dc6957726f84/scratchpad/c7/.",
+  "The global proof-claims URL does not exist as described. https://www.erdosproblems.com/forum/thread/860/proof-claims is only problem 860's own claims page: Kaizhe Chen 2026-07-29 and Samuel Korsky 2026-07-26, both lower and upper BOUNDS for h(n), plus bounds for #711 (F(n) << n^1.4031). Those are partial and do not resolve 711(i). Claims are actually collected on the forum index (https://www.erdosproblems.com/forum, reached via a 308 redirect). It links /forum/thread/N/proof-claims#proof-claim-K for 212 threads. WebFetch got HTTP 403 from erdosproblems.com, but curl with a browser User-Agent worked. Among the 51 listed ids, only 30, 64, 114, 128 and 710 have proof claims, which matches the yaml proof_claims > 0 set exactly. What each claim says:\n(1) #30: Haoyu Chen (#386, 2026-10-02) proves h(N) <= sqrt N + (2sqrt2/3) N^{1/4} + 1 for N >= 120^4. It is explicitly partial ('the conjecture itself is untouched').\n(2) #114: b. chatelet (#280, 2026-09-07) covers only the cubic case and is conditional by its own statement. Background: Tao arXiv:2512.12455 proves the conjecture for all sufficiently large n. A finite remaining range would be a genuine NEAR-type lead only if Tao's threshold is effective. That is outside this sweep, and the prior REPORT does not discuss 114; it is worth a separate look.\n(3) #128: Amir Sarid (#197, 2026-08-07) improves the bound to 0.0262 n^2, which is weaker than the needed n^2/50. It is partial.\n(4) #64 and #710: see the items.\nProblems whose state or last_update changed in 2026: 52, 1191, 1135, 595, 601. I opened all five threads and found no full-resolution claim. For 52, Bloom-Sawin-Schildkraut-Zhelezov [BSSZ26] disprove the REAL version, but erdos_52 is stated over Finset Z and the integer case is still open per the site. For 595 and 601, the 2026-10-26 changes are the 'not disprovable' and 'not provable' independence states that REPORT.md already covers. 1191 and 1135 have no claims.\nI searched arXiv and the web. The arXiv API returned 503s and empty pages after the first query (rate-limited), so coverage there is partial. Web search found 2026 resolutions only of problems NOT on our list: unit distances (OpenAI, May 2026), the Erdos-Szemeredi sunflower conjecture (arXiv:2610.26686, not #20, which is the Erdos-Rado sunflower conjecture and is still open as formalized), 108, 443, 593/1177, 306, 550, 728/729/401, 1196, Erdos-Sos, and Erdos-Mahler. For 20, 77, 86, 89, 107 and 142 no 2026 resolution turned up. One partial result: arXiv:2605.22844, minimal Erdos-Gyarfas counterexamples are predominantly cubic.\nNothing found contradicts REPORT.md for the problems it covers. The one item it does not mention that deserves attention is the 710 claim, which is credible-looking but unverified.\nSources I could not access: the Overleaf manuscript for 710 (https://www.overleaf.com/read/jvdyzbbmbvcf); the ChatGPT share links holding the 710 audits; most arXiv API queries (503 or empty); the full 250-page Duran-Ballester manuscript for 64 (not attempted)."
+ ]
+}

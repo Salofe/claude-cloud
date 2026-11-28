@@ -1,0 +1,3 @@
+BADGRAPH #1791851 n=4778
+depthhist: 0:1788669 1:3181
+total 1791851 connected 1791850 capped 0 counterexamples 0 nodes 7176154 maxnodes 10 (#2) nonregular_or_asymmetric 1
