@@ -347,6 +347,10 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a276752.lean` | proof (statement pending in #15723 by KoaOkano) | [PR #17506](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17506) (opened automatically) |
 | `oeis-a345003.lean` | proof (statement pending in #15730 by jleguina) | [PR #17248](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17248) (opened automatically) |
 | `oeis-a355414.lean` | proof (statement pending in #15734 by Volkopat) | [PR #17415](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17415) (opened automatically) |
+| `oeis-a079278.lean` | proof (statement pending in #15488 by Dugongue) | [PR #18153](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18153) (opened automatically) |
+| `oeis-a081669.lean` | proof (statement pending in #15485 by Dugongue) | [PR #18371](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18371) (opened automatically) |
+| `oeis-a154150.lean` | proof (statement pending in #15487 by jleguina) | [PR #18486](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18486) (opened automatically) |
+| `oeis-a284540.lean` | proof (statement pending in #15491 by clementtrecourt) | [PR #18773](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18773) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 | `oeis-a074882.lean` | proof (statement pending in #15570 by jleguina) | [PR #16625](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16625) |
 | `oeis-a267539.lean` | proof (statement pending in #15747 by alkrssve) | [PR #16663](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16663) |
