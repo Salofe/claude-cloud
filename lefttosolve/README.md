@@ -326,6 +326,11 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a085928.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a222139.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `oeis-a267210.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
+| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.R1.H1.lean` | proof accepted locally | not submitted yet |
+| `PudlakFiniteDomain.sat_no_p_optimal_proof_system.variants.exists_of_P_eq_NP.lean` | proof accepted locally | not submitted yet |
+| `mo-81816.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
+| `oeis-a094076.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
+| `oeis-a267604.lean` | proof queued | PR waits until GitHub Actions is re-enabled on the fork |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
