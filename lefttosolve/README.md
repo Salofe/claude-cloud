@@ -595,6 +595,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a384350.lean` | proof of esracummings31-blip's pending statement #24884 | [PR #26523](https://github.com/lefttosolve2/open-math-agents/pull/26523) |
 | `oeis-a251269.lean` | proof of jleguina's pending statement #24904 | [PR #27106](https://github.com/lefttosolve2/open-math-agents/pull/27106) |
 | `oeis-a251130.lean` | proof of Dariusthedoggie's pending statement #24838 | [PR #27251](https://github.com/lefttosolve2/open-math-agents/pull/27251) |
+| `oeis-a183982.lean` | proof of Volkopat's pending statement #24783 (transfer recursion over 64 row codes per block sum s; the recurrence defect vanishes at m = 1 and propagates linearly, giving the closed forms, g.f.) | [PR #27694](https://github.com/lefttosolve2/open-math-agents/pull/27694) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
