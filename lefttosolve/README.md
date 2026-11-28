@@ -451,6 +451,33 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a034863.lean` | proof (statement pending in #19895 by vivanpoddar; with n = k + 6 the three terms share the factor (k+4)!, after which the recurrence is a polynomial identity closed by ring) | [PR #20998](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20998) |
 | `oeis-a282653.lean` | **disproof** (statement pending in #19912 by longling12; the order-6 recurrence is stated for n > 5 but the g.f. numerator has x^7 and x^11 terms, and at n = 7 a 7 = 100010 while 100 a 5 + a 3 - 100 a 1 = 10, checked by kernel evaluation of Rule 491) | [PR #21101](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21101) |
 | `oeis-a283356.lean` | **disproof** (statement pending in #19911 by longling12; the order-3 recurrence is stated for n > 5 but fails at n = 7, where it reaches back to a 4 = 10001 before the closed forms apply: a 7 = 1111101 while 10 a 6 + a 5 - 10 a 4 = 1011101, checked by kernel evaluation of Rule 621) | [PR #21102](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21102) |
+| `oeis-a267905.lean` | proof (statement pending in #15612 by jleguina) | [PR #20006](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20006) |
+| `oeis-a267524.lean` | proof (statement pending in #15428 by jleguina) | [PR #20096](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20096) |
+| `oeis-a076552.lean` | proof (statement pending in #15439 by Dugongue) | [PR #20124](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20124) |
+| `oeis-a100691.lean` | proof (statement pending in #19976 by KoaOkano) | [PR #20151](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20151) |
+| `oeis-a262231.lean` | proof (statement pending in #19973 by etaubman) | [PR #20159](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20159) |
+| `mo-252065.lean` | proof (statement pending in #19980 by caa1982) | [PR #20263](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20263) |
+| `oeis-a216440.lean` | proof (statement pending in #19967 by bnb9001) | [PR #20281](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20281) |
+| `oeis-a049980.lean` | proof (statement pending in #15607 by Dugongue) | [PR #20307](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20307) |
+| `oeis-a198717.lean` | proof (statement pending in #19970 by KoaOkano) | [PR #20425](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20425) |
+| `oeis-a279960.lean` | proof (statement pending in #15416 by jleguina) | [PR #20477](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20477) |
+| `oeis-a365498.lean` | proof (statement pending in #19984 by esracummings31-blip) | [PR #20580](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20580) |
+| `oeis-a075885.lean` | proof (statement pending in #15418 by Dugongue) | [PR #20716](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20716) |
+| `oeis-a072061.lean` | proof (statement pending in #15415 by Dugongue) | [PR #20836](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20836) |
+| `oeis-a285648.lean` | proof (statement pending in #15398 by jleguina) | [PR #20856](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20856) |
+| `oeis-a199899.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #20946](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20946); proof [PR #20955](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20955) |
+| `oeis-a282796.lean` | proof (statement pending in #15390 by clementtrecourt) | [PR #20983](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20983) |
+| `oeis-a199531.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #20999](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20999); proof [PR #21008](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21008) |
+| `oeis-a200840.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #21043](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21043); proof [PR #21057](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21057) |
+| `oeis-a074915.lean` | proof (statement pending in #15389 by Dugongue) | [PR #21068](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21068) |
+| `oeis-a069429.lean` | proof (statement pending in #15713 by Dugongue) | [PR #21085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21085) |
+| `oeis-a154145.lean` | proof (statement pending in #15781 by jleguina) | [PR #21104](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21104) |
+| `oeis-a222139.lean` | proof (statement pending in #15774 by jleguina) | [PR #21107](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21107) |
+| `oeis-a226839.lean` | proof (statement pending in #15772 by Volkopat) | [PR #21108](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21108) |
+| `oeis-a094076.lean` | **disproof** (statement pending in #15762 by Dugongue) | [PR #21109](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21109) |
+| `mo-81816.lean` | proof (statement pending in #15755 by AkiRA-COM-FP) | [PR #21110](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21110) |
+| `oeis-a207656.lean` | proof (statement pending in #19882 by sntntHb) | [PR #21111](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21111) |
+| `oeis-a200786.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #21098](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21098); proof [PR #21113](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/21113) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
