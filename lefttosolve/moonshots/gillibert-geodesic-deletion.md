@@ -34,3 +34,25 @@ FILES (all under lefttosolve/moonshots/gillibert-geodesic-deletion/ (copied from
 - src/test_lemmas.py: numeric tests of L1-L3
 - logs/: per-order results (hr*.log, cub3*.out, cubcay*.out)
 The census downloads were deleted after use.
+
+
+## Attempt 2 (28 Nov, Opus, ~78 min): partial, no full proof, no counterexample
+Full write-up: `gillibert-geodesic-deletion/proof_attempt2.md`. New results (pen and paper, numerically checked):
+- **Twins:** a connected vertex-transitive graph with open or closed twins has no separating geodesic; all 8 known
+  2-orbit counterexamples are "twin shadows" of this kind.
+- **Isometric halves:** a separating geodesic splits G into two isometric pieces glued along P.
+- **Transmission-domination lemma** (generalises T7) and local sufficient criteria (neighbourhood graphs 2-connected,
+  >= 4 common neighbours at distance 2); abelian Cayley graphs of degree >= 7 are done.
+- **Atoms:** in twin-free graphs with connectivity < degree, every component touches >= kappa+1 path vertices, so a
+  separating geodesic of length 3 forces degree 3 or 4.
+- **Cubic graphs:** no geodesic of length <= 4 separates; girth 3 reduces to truncations of cubic arc-transitive graphs
+  (a counterexample would give one on n/3 vertices); girth >= 5 forces length >= 2g-3.
+- **Degree 4, length 3:** the only open length-3 case; its local structure is pinned down.
+- **New counterexamples to stronger statements:** twin-free, regular, 3- and 4-connected non-transitive graphs, and cubic
+  transmission-regular "prism-gadget necklaces" (18-66 vertices) with separating geodesics of length 3, so any proof
+  must use more of vertex-transitivity than transmission regularity plus twin-freeness.
+- Computation: the two-step law holds on all 18,969 local census graphs; two simple certificates (Uc, Wadj) always
+  connect the neighbours of v0 on twin-free vertex-transitive graphs with <= 23 vertices (proving that would prove the
+  conjecture).
+Remaining: twin-free vertex-transitive graphs of degree >= 4 with minimal separating length >= 3 (for length 3 only a
+rigid degree-4 structure), and cubic girth-4 length >= 5 / girth >= 5 length >= max(5, 2g-3).
