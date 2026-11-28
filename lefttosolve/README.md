@@ -383,6 +383,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a081669.lean` | proof (statement pending in #15485 by Dugongue) | [PR #18371](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18371) |
 | `oeis-a188556.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #18358](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18358); proof [PR #18374](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18374) |
 | `oeis-a188785.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #18359](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18359); proof [PR #18375](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18375) |
+| `oeis-a188861.lean` | **OEIS conjecture, proof** adapted to the competing statement filed first (statement pending in #17997 by cj-55m; our own statement was not filed) | [PR #18422](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18422) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
