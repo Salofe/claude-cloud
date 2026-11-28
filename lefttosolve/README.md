@@ -655,6 +655,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `mo-66493.lean` | proof (statement #24577 by connoranderson, merged) | [PR #29311](https://github.com/lefttosolve2/open-math-agents/pull/29311) |
 | `mo-385518.lean` | proof (statement #24598 by connoranderson, merged) | [PR #29486](https://github.com/lefttosolve2/open-math-agents/pull/29486) |
 | `mo-472881.lean` | proof (statement #24543 by connoranderson, merged; Lagrange interpolation on the orbit, then no polynomial family by restricting to the line through v and continuity at 0) | [PR #29430](https://github.com/lefttosolve2/open-math-agents/pull/29430) |
+| `oeis-a340061.lean` | proof of esracummings31-blip's pending statement #24568 (divisors of row terms = parts of all partitions; count of d on both sides = sum over k of p(n-kd) via removing k copies of d) | [PR #29613](https://github.com/lefttosolve2/open-math-agents/pull/29613) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
