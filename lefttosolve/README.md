@@ -348,6 +348,41 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a345003.lean` | proof (statement pending in #15730 by jleguina) | [PR #17248](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17248) (opened automatically) |
 | `oeis-a355414.lean` | proof (statement pending in #15734 by Volkopat) | [PR #17415](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17415) (opened automatically) |
 | `opg-distribution-and-upper-bound-of-mimic-numbers.lean` | **open problem** (Open Problem Garden, proved by Fable 5.2; no published proof of this formalization found) | [PR #9085](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/9085) |
+| `oeis-a074882.lean` | proof (statement pending in #15570 by jleguina) | [PR #16625](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16625) |
+| `oeis-a267539.lean` | proof (statement pending in #15747 by alkrssve) | [PR #16663](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16663) |
+| `oeis-a071713.lean` | proof (statement pending in #15744 by Dugongue) | [PR #16678](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16678) |
+| `mo-428070.lean` | proof (statement pending in #15738 by dwilfand-sys) | [PR #16752](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16752) |
+| `opg-a-gold-grabbing-game.lean` | proof (statement pending in #15740 by AkiRA-COM-FP) | [PR #16875](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16875) |
+| `oeis-a290834.lean` | proof (statement pending in #15545 by jleguina) | [PR #16936](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16936) |
+| `oeis-a222276.lean` | proof (statement pending in #15751 by jleguina) | [PR #16949](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16949) |
+| `oeis-a267604.lean` | proof (statement pending in #15753 by alkrssve) | [PR #16983](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16983) |
+| `oeis-a290681.lean` | proof (statement pending in #15537 by jleguina) | [PR #16992](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/16992) |
+| `oeis-a345051.lean` | proof (statement pending in #15742 by jleguina) | [PR #17007](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17007) |
+| `oeis-a377112.lean` | proof (statement pending in #15543 by jleguina) | [PR #17011](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17011) |
+| `oeis-a084611.lean` | proof (statement pending in #15550 by Dugongue) | [PR #17134](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17134) |
+| `mo-134513.lean` | proof (statement pending in #15519 by chuyeow) | [PR #17269](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17269) |
+| `oeis-a265428.lean` | proof (statement pending in #15523 by jleguina) | [PR #17433](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17433) |
+| `oeis-a130091.lean` | proof (statement pending in #15709 by xor2k) | [PR #17598](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17598) |
+| `oeis-a078522.lean` | proof (statement pending in #15511 by Dugongue) | [PR #17600](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17600) |
+| `oeis-a079491.lean` | proof (statement pending in #15492 by Dugongue) | [PR #17663](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17663) |
+| `oeis-a082207.lean` | proof (statement pending in #15503 by Dugongue) | [PR #17685](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17685) |
+| `oeis-a266791.lean` | proof (statement pending in #15500 by jleguina) | [PR #17762](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17762) |
+| `oeis-a396102.lean` | proof (statement pending in #15502 by Volkopat) | [PR #17859](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17859) |
+| `oeis-a355407.lean` | proof (statement pending in #15704 by Volkopat) | [PR #17861](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17861) |
+| `oeis-a228254.lean` | proof (statement pending in #15714 by jleguina) | [PR #17927](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17927) |
+| `oeis-a078128.lean` | proof (statement pending in #15496 by Dugongue) | [PR #17969](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/17969) |
+| `oeis-a267526.lean` | proof (statement pending in #15699 by jleguina) | [PR #18030](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18030) |
+| `oeis-a187608.lean` | proof (statement pending in #15510 by jleguina) | [PR #18044](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18044) |
+| `opg-funcolidal-products-inside-an-inward-reloid.lean` | proof (statement pending in #15695 by Dugongue) | [PR #18065](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18065) |
+| `oeis-a154154.lean` | proof (statement pending in #15493 by jleguina) | [PR #18080](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18080) |
+| `oeis-a079278.lean` | proof (statement pending in #15488 by Dugongue) | [PR #18153](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18153) |
+| `oeis-a154140.lean` | proof (statement pending in #15707 by jleguina) | [PR #18191](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18191) |
+| `oeis-a068129.lean` | **disproof** (statement pending in #15693 by Dugongue; counterexample T = 1: the only triangular numbers with digit sum 1 are 1 and 10) | [PR #18215](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18215) |
+| `Erdos713.erdos_713.parts.i.R3.H2.lean` | **Step of an open $500 Erdős problem (713), proved by Fable** — for a forest F with no isolated vertices and at least 2 edges, ex(n,F)/n converges; elementary argument written from scratch (robust patterns, layered blow-up over a bounded hub set, degree cascade, amplification) | [PR #18340](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18340) |
+| `oeis-a283641.lean` | proof (statement pending in #15499 by clementtrecourt) | [PR #18360](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18360) |
+| `oeis-a081669.lean` | proof (statement pending in #15485 by Dugongue) | [PR #18371](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18371) |
+| `oeis-a188556.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #18358](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18358); proof [PR #18374](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18374) |
+| `oeis-a188785.lean` | **OEIS conjecture, first Lean statement + proof** | statement [PR #18359](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18359); proof [PR #18375](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/18375) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
