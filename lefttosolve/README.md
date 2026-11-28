@@ -427,6 +427,9 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a207390.lean` | proof (statement pending in #15624 by clementtrecourt; transfer on row pairs over the 31 allowed rows, each of the 961 pair counts is a degree-7 polynomial in the binomial basis, checked by the kernel in 31 chunks; closed form, recurrence and g.f.) | [PR #20104](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20104) |
 | `oeis-a154143.lean` | proof (statement pending in #15628 by jleguina; Pell-type descent for (2k+1)^2 + 79 = 8m^2: solutions (3,4), (5,5) and (k, m) -> (3k+4m+1, 2k+3m+1), Nat.nth identification, recurrence and both g.f.s) | [PR #20186](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20186) |
 | `oeis-a309291.lean` | proof (statement pending in #15405 by xor2k; for k > 4 a composite p = k! - q in [k, k^2] has a prime factor at most k, which divides k! and hence the prime q > k) | [PR #20377](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20377) |
+| `oeis-a187288.lean` | **OEIS conjecture, proof** adapted to the competing statement filed first (statement pending in #16364 by jleguina; our own statement was not filed) | [PR #20088](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20088) |
+| `oeis-a187298.lean` | **OEIS conjecture, proof** adapted to the competing statement filed first (statement pending in #16372 by jleguina; our own statement was not filed) | [PR #20054](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20054) |
+| `oeis-a187853.lean` | **OEIS conjecture, proof** adapted to the competing statement filed first (statement pending in #17883 by jleguina; our own statement was not filed) | [PR #20582](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20582) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
