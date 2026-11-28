@@ -152,6 +152,7 @@ none". All durable work lives in `lefttosolve/`: README.md (PR table), proofs `*
   647 has no expected witness (searched to 1e22). Do not re-audit; status of all Erdős problems in one fetch: R27.
 - Fable: deep mathematics only, short audits, more attempts; its weekly quota runs out (hit twice). Use the default
   model for computation, Lean engineering, literature and reviews; tell the user when Fable is exhausted.
+- If a site refuses automated fetches (e.g. erdosproblems.com), do not spoof a browser user-agent; use other sources (teorth/erdosproblems data on GitHub, arXiv, OEIS).
 
 ## Operations
 - Machine: 4 shared CPUs, 15 GB (cgroup ~13.4 GB). Mathlib import maps 6-7 GB RSS (judge by anonymous memory).
