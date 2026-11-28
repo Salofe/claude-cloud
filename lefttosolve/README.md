@@ -687,3 +687,4 @@ has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-t
 - **Lifting:** shifting `t` by `M` or `2M` leaves the multiples of 3 alone and selects every other element exactly once.
 - **Induction:** divide the multiples of 3 by 3 and apply the statement to them.
 - **Hard case:** two multiples of 3 of the form `{3v, 6v}`. A carefully chosen pair of nearby ratios makes the split uneven.
+| `mo-66493.lean` | proof (statement #24577 by connoranderson, merged) | [PR #29311](https://github.com/lefttosolve2/open-math-agents/pull/29311) |
