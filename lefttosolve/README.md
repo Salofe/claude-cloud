@@ -653,6 +653,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `opg-decomposition-of-completions-of-reloids.lean` | disproof of pmaster's pending statement #24813 (clause 1 of Porton's conjecture fails for f = full relation, g = cofinite-rows reloid) | [PR #28173](https://github.com/lefttosolve2/open-math-agents/pull/28173) |
 | `oeis-a218981.lean` | proof of maaaakks' statement #24633 (merged 12:08 UTC; infinitely many n with sigma(n) = sum of sigma over 4 parts: n = 5p, parts p,p,p,2p for primes p > 5) | [PR #29174](https://github.com/lefttosolve2/open-math-agents/pull/29174) |
 | `mo-66493.lean` | proof (statement #24577 by connoranderson, merged) | [PR #29311](https://github.com/lefttosolve2/open-math-agents/pull/29311) |
+| `mo-385518.lean` | proof (statement #24598 by connoranderson, merged) | [PR #29486](https://github.com/lefttosolve2/open-math-agents/pull/29486) |
 | `mo-472881.lean` | proof (statement #24543 by connoranderson, merged; Lagrange interpolation on the orbit, then no polynomial family by restricting to the line through v and continuity at 0) | [PR #29430](https://github.com/lefttosolve2/open-math-agents/pull/29430) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
