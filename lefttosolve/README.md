@@ -461,3 +461,4 @@ has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-t
 - **Lifting:** shifting `t` by `M` or `2M` leaves the multiples of 3 alone and selects every other element exactly once.
 - **Induction:** divide the multiples of 3 by 3 and apply the statement to them.
 - **Hard case:** two multiples of 3 of the form `{3v, 6v}`. A carefully chosen pair of nearby ratios makes the split uneven.
+| `oeis-a309291.lean` | proof (statement pending in #15405 by xor2k; for k > 4 a composite p = k! - q in [k, k^2] has a prime factor at most k, which divides k! and hence the prime q > k) | [PR #20377](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/20377) |
