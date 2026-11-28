@@ -652,6 +652,7 @@ All accepted by `tools/check.sh` (axioms: propext, Classical.choice, Quot.sound)
 | `oeis-a201975.lean` | proof of jleguina's pending statement #24718 (n X 2 lex arrays over 0..3; transfer recursion, cubic closed form, g.f. and recurrence) | [PR #28879](https://github.com/lefttosolve2/open-math-agents/pull/28879) |
 | `opg-decomposition-of-completions-of-reloids.lean` | disproof of pmaster's pending statement #24813 (clause 1 of Porton's conjecture fails for f = full relation, g = cofinite-rows reloid) | [PR #28173](https://github.com/lefttosolve2/open-math-agents/pull/28173) |
 | `oeis-a218981.lean` | proof of maaaakks' statement #24633 (merged 12:08 UTC; infinitely many n with sigma(n) = sum of sigma over 4 parts: n = 5p, parts p,p,p,2p for primes p > 5) | [PR #29174](https://github.com/lefttosolve2/open-math-agents/pull/29174) |
+| `mo-66493.lean` | proof (statement #24577 by connoranderson, merged) | [PR #29311](https://github.com/lefttosolve2/open-math-agents/pull/29311) |
 
 **Erdős 1100, Erdős–Tenenbaum bound** `g k ≤ 3·(3/2^(2/3))^k`. Take squarefree `n` with
 `ω(n) = k` and `y = 2^(1/3)`. Every coprime pair of consecutive divisors `(d, d')` with
@@ -687,4 +688,3 @@ has a sum-free subset of size at least `(n+2)/3`. The proof uses only dilation-t
 - **Lifting:** shifting `t` by `M` or `2M` leaves the multiples of 3 alone and selects every other element exactly once.
 - **Induction:** divide the multiples of 3 by 3 and apply the statement to them.
 - **Hard case:** two multiples of 3 of the form `{3v, 6v}`. A carefully chosen pair of nearby ratios makes the split uneven.
-| `mo-66493.lean` | proof (statement #24577 by connoranderson, merged) | [PR #29311](https://github.com/lefttosolve2/open-math-agents/pull/29311) |
